@@ -75,6 +75,32 @@ class Title extends Model
         return $query->where('title_type', $type);
     }
 
+    public function scopeRatedAtLeast(Builder $query, int $minimumVotes = 1): Builder
+    {
+        return $query->whereHas(
+            'statistic',
+            fn (Builder $statisticQuery) => $statisticQuery->where('rating_count', '>=', $minimumVotes),
+        );
+    }
+
+    public function scopeOrderByTopRated(Builder $query, int $minimumVotes = 1): Builder
+    {
+        return $query->ratedAtLeast($minimumVotes)
+            ->orderByDesc(self::statisticColumnSubquery('average_rating'))
+            ->orderByDesc(self::statisticColumnSubquery('rating_count'))
+            ->orderBy('name');
+    }
+
+    public function scopeOrderByTrending(Builder $query): Builder
+    {
+        return $query->whereHas('statistic')
+            ->orderByDesc(self::statisticColumnSubquery('watchlist_count'))
+            ->orderByDesc(self::statisticColumnSubquery('review_count'))
+            ->orderByDesc(self::statisticColumnSubquery('rating_count'))
+            ->orderBy('popularity_rank')
+            ->orderBy('name');
+    }
+
     public function canonicalTitle(): BelongsTo
     {
         return $this->belongsTo(self::class, 'canonical_title_id');
@@ -190,5 +216,13 @@ class Title extends Model
     public function contributions(): MorphMany
     {
         return $this->morphMany(Contribution::class, 'contributable');
+    }
+
+    private static function statisticColumnSubquery(string $column): Builder
+    {
+        return TitleStatistic::query()
+            ->select($column)
+            ->whereColumn('title_statistics.title_id', 'titles.id')
+            ->limit(1);
     }
 }

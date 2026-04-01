@@ -18,10 +18,26 @@ class TitleStatisticFactory extends Factory
      */
     public function definition(): array
     {
+        $ratingDistribution = TitleStatistic::normalizeRatingDistribution(
+            collect(range(10, 1))
+                ->mapWithKeys(fn (int $score): array => [
+                    (string) $score => fake()->boolean(35) ? fake()->numberBetween(0, 40) : 0,
+                ])
+                ->all(),
+        );
+        $ratingCount = array_sum($ratingDistribution);
+        $weightedScoreTotal = collect($ratingDistribution)->reduce(
+            fn (int $carry, int $count, string $score): int => $carry + ((int) $score * $count),
+            0,
+        );
+
         return [
             'title_id' => Title::factory(),
-            'rating_count' => fake()->numberBetween(1, 5000),
-            'average_rating' => fake()->randomFloat(2, 5.5, 9.8),
+            'rating_count' => $ratingCount,
+            'average_rating' => $ratingCount > 0
+                ? round($weightedScoreTotal / $ratingCount, 2)
+                : 0,
+            'rating_distribution' => $ratingDistribution,
             'review_count' => fake()->numberBetween(0, 200),
             'watchlist_count' => fake()->numberBetween(0, 1000),
             'episodes_count' => fake()->numberBetween(0, 40),

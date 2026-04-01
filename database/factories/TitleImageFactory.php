@@ -18,20 +18,19 @@ class TitleImageFactory extends Factory
      */
     public function definition(): array
     {
+        $kind = fake()->randomElement([
+            MediaKind::Poster,
+            MediaKind::Backdrop,
+            MediaKind::Gallery,
+            MediaKind::Still,
+        ]);
+        $image = ImdbImageCatalog::titleImage($kind, fake()->numberBetween(0, 7));
+
         return [
-            'kind' => fake()->randomElement([
-                MediaKind::Poster,
-                MediaKind::Backdrop,
-                MediaKind::Gallery,
-                MediaKind::Still,
-            ]),
-            'url' => fake()->imageUrl(1200, 1800),
+            'kind' => $kind,
+            ...$image,
             'alt_text' => fake()->sentence(4),
             'caption' => fake()->optional()->sentence(),
-            'width' => 1200,
-            'height' => 1800,
-            'provider' => null,
-            'provider_key' => null,
             'language' => fake()->randomElement(['en', 'lt', 'fr']),
             'duration_seconds' => null,
             'metadata' => null,

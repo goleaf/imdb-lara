@@ -6,7 +6,6 @@ use App\Enums\MediaKind;
 use App\Enums\ReviewStatus;
 use App\Enums\TitleType;
 use App\Models\Title;
-use App\Models\TitleStatistic;
 use Illuminate\Database\Eloquent\Builder;
 
 class BuildPublicTitleIndexQueryAction
@@ -121,37 +120,8 @@ class BuildPublicTitleIndexQueryAction
             'name' => $query->orderBy('name'),
             'latest' => $query->orderByDesc('release_date')->orderByDesc('release_year')->orderBy('name'),
             'year' => $query->orderByDesc('release_year')->orderBy('name'),
-            'rating' => $query
-                ->whereHas('statistic')
-                ->orderByDesc(
-                    TitleStatistic::query()
-                        ->select('average_rating')
-                        ->whereColumn('title_statistics.title_id', 'titles.id')
-                        ->limit(1),
-                )
-                ->orderByDesc(
-                    TitleStatistic::query()
-                        ->select('rating_count')
-                        ->whereColumn('title_statistics.title_id', 'titles.id')
-                        ->limit(1),
-                )
-                ->orderBy('name'),
-            'trending' => $query
-                ->whereHas('statistic')
-                ->orderByDesc(
-                    TitleStatistic::query()
-                        ->select('watchlist_count')
-                        ->whereColumn('title_statistics.title_id', 'titles.id')
-                        ->limit(1),
-                )
-                ->orderByDesc(
-                    TitleStatistic::query()
-                        ->select('review_count')
-                        ->whereColumn('title_statistics.title_id', 'titles.id')
-                        ->limit(1),
-                )
-                ->orderBy('popularity_rank')
-                ->orderBy('name'),
+            'rating' => $query->orderByTopRated(),
+            'trending' => $query->orderByTrending(),
             default => $query->orderBy('popularity_rank')->orderBy('name'),
         };
     }

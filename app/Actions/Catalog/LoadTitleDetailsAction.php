@@ -13,6 +13,7 @@ use App\Models\Review;
 use App\Models\Season;
 use App\Models\Title;
 use App\Models\TitleRelationship;
+use App\Models\TitleStatistic;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 
@@ -59,7 +60,7 @@ class LoadTitleDetailsAction
                 ->with('person:id,name,slug')
                 ->orderBy('billing_order')
                 ->orderBy('job'),
-            'statistic:id,title_id,average_rating,rating_count,review_count,watchlist_count,episodes_count,awards_nominated_count,awards_won_count',
+            'statistic:id,title_id,average_rating,rating_count,rating_distribution,review_count,watchlist_count,episodes_count,awards_nominated_count,awards_won_count',
             'mediaAssets' => fn ($query) => $query
                 ->select([
                     'id',
@@ -228,23 +229,20 @@ class LoadTitleDetailsAction
             ->take(6)
             ->values();
 
-        $ratings = $title->ratings()
-            ->select(['score'])
-            ->get();
-        $ratingsTotal = $ratings->count();
-        $ratingsByScore = $ratings->countBy('score');
-        $ratingsBreakdown = collect(range(10, 1))
-            ->map(function (int $score) use ($ratingsByScore, $ratingsTotal): array {
-                $count = (int) ($ratingsByScore[$score] ?? 0);
-
+        $ratingDistribution = $title->statistic?->normalizedRatingDistribution()
+            ?? TitleStatistic::normalizeRatingDistribution();
+        $ratingsTotal = array_sum($ratingDistribution);
+        $ratingsBreakdown = collect($ratingDistribution)
+            ->map(function (int $count, string $score) use ($ratingsTotal): array {
                 return [
-                    'score' => $score,
+                    'score' => (int) $score,
                     'count' => $count,
                     'percentage' => $ratingsTotal > 0
                         ? (int) round(($count / $ratingsTotal) * 100)
                         : 0,
                 ];
-            });
+            })
+            ->values();
 
         $detailItems = collect([
             ['label' => 'Original title', 'value' => $title->original_name !== $title->name ? $title->original_name : null],

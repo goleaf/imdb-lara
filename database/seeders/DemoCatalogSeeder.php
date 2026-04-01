@@ -35,6 +35,7 @@ use App\Models\TitleRelationship;
 use App\Models\TitleTranslation;
 use App\Models\User;
 use App\Models\UserList;
+use Database\Factories\ImdbImageCatalog;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
@@ -693,9 +694,15 @@ class DemoCatalogSeeder extends Seeder
             ],
         ]);
 
-        foreach ($titles as $title) {
-            MediaAsset::factory()->for($title, 'mediable')->poster()->create();
-            MediaAsset::factory()->for($title, 'mediable')->backdrop()->create();
+        foreach ($titles->values() as $index => $title) {
+            MediaAsset::factory()->for($title, 'mediable')->poster()->create([
+                ...ImdbImageCatalog::titlePoster($index),
+                'alt_text' => sprintf('%s poster', $title->name),
+            ]);
+            MediaAsset::factory()->for($title, 'mediable')->backdrop()->create([
+                ...ImdbImageCatalog::titleBackdrop($index),
+                'alt_text' => sprintf('%s backdrop', $title->name),
+            ]);
         }
 
         MediaAsset::factory()->for($titles['northern_signal'], 'mediable')->trailer()->create([
@@ -710,30 +717,33 @@ class DemoCatalogSeeder extends Seeder
         ]);
 
         MediaAsset::factory()->for($episodeTitles['pilot'], 'mediable')->create([
+            ...ImdbImageCatalog::titleStill(0),
             'kind' => MediaKind::Still,
-            'width' => 1600,
-            'height' => 900,
+            'alt_text' => 'Static Bloom: Pilot still',
             'caption' => 'Tess Mora reconnects the exchange under blackout conditions.',
         ]);
         MediaAsset::factory()->for($episodeTitles['deep_end'], 'mediable')->create([
+            ...ImdbImageCatalog::titleStill(3),
             'kind' => MediaKind::Still,
-            'width' => 1600,
-            'height' => 900,
+            'alt_text' => 'Harbor Nine: The Deep End still',
             'caption' => 'Harbor divers surface with the first real clue.',
         ]);
 
-        $people->each(fn (Person $person) => MediaAsset::factory()->for($person, 'mediable')->headshot()->create());
+        $people->values()->each(fn (Person $person, int $index) => MediaAsset::factory()->for($person, 'mediable')->headshot()->create([
+            ...ImdbImageCatalog::personHeadshot($index),
+            'alt_text' => $person->name,
+        ]));
 
         MediaAsset::factory()->for($people[0], 'mediable')->create([
+            ...ImdbImageCatalog::personGallery(0),
             'kind' => MediaKind::Gallery,
-            'width' => 1600,
-            'height' => 1200,
+            'alt_text' => sprintf('%s gallery image', $people[0]->name),
             'caption' => 'Ava Mercer on the Northern Signal press tour.',
         ]);
         MediaAsset::factory()->for($people[2], 'mediable')->create([
+            ...ImdbImageCatalog::personGallery(2),
             'kind' => MediaKind::Still,
-            'width' => 1600,
-            'height' => 900,
+            'alt_text' => sprintf('%s on set', $people[2]->name),
             'caption' => 'Talia Rowe on set during a location shoot.',
         ]);
 

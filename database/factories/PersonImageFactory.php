@@ -18,19 +18,18 @@ class PersonImageFactory extends Factory
      */
     public function definition(): array
     {
+        $kind = fake()->randomElement([
+            MediaKind::Headshot,
+            MediaKind::Gallery,
+            MediaKind::Still,
+        ]);
+        $image = ImdbImageCatalog::personImage($kind, fake()->numberBetween(0, 7));
+
         return [
-            'kind' => fake()->randomElement([
-                MediaKind::Headshot,
-                MediaKind::Gallery,
-                MediaKind::Still,
-            ]),
-            'url' => fake()->imageUrl(900, 1200),
+            'kind' => $kind,
+            ...$image,
             'alt_text' => fake()->sentence(4),
             'caption' => fake()->optional()->sentence(),
-            'width' => 900,
-            'height' => 1200,
-            'provider' => null,
-            'provider_key' => null,
             'language' => fake()->randomElement(['en', 'lt', 'fr']),
             'duration_seconds' => null,
             'metadata' => null,

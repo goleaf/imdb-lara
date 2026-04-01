@@ -105,6 +105,10 @@ class ImdbCatalogSchemaTest extends TestCase
             'published_at',
             'deleted_at',
         ]));
+
+        $this->assertTrue(Schema::hasColumns('title_statistics', [
+            'rating_distribution',
+        ]));
     }
 
     public function test_catalog_relationships_support_translations_media_seasons_awards_and_contributions(): void

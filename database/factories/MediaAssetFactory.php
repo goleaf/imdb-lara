@@ -18,15 +18,13 @@ class MediaAssetFactory extends Factory
      */
     public function definition(): array
     {
+        $galleryImage = ImdbImageCatalog::titleGallery(fake()->numberBetween(0, 7));
+
         return [
             'kind' => MediaKind::Gallery,
-            'url' => fake()->imageUrl(1200, 1800),
+            ...$galleryImage,
             'alt_text' => fake()->sentence(4),
             'caption' => fake()->optional()->sentence(),
-            'width' => 1200,
-            'height' => 1800,
-            'provider' => null,
-            'provider_key' => null,
             'language' => fake()->randomElement(['en', 'lt', 'fr']),
             'duration_seconds' => null,
             'metadata' => null,
@@ -38,7 +36,10 @@ class MediaAssetFactory extends Factory
 
     public function poster(): static
     {
+        $posterImage = ImdbImageCatalog::titlePoster(fake()->numberBetween(0, 7));
+
         return $this->state(fn (): array => [
+            ...$posterImage,
             'kind' => MediaKind::Poster,
             'is_primary' => true,
             'position' => 0,
@@ -47,17 +48,21 @@ class MediaAssetFactory extends Factory
 
     public function backdrop(): static
     {
+        $backdropImage = ImdbImageCatalog::titleBackdrop(fake()->numberBetween(0, 7));
+
         return $this->state(fn (): array => [
+            ...$backdropImage,
             'kind' => MediaKind::Backdrop,
         ]);
     }
 
     public function headshot(): static
     {
+        $headshotImage = ImdbImageCatalog::personHeadshot(fake()->numberBetween(0, 7));
+
         return $this->state(fn (): array => [
+            ...$headshotImage,
             'kind' => MediaKind::Headshot,
-            'width' => 900,
-            'height' => 1200,
         ]);
     }
 

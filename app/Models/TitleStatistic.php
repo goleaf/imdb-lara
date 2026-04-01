@@ -19,6 +19,7 @@ class TitleStatistic extends Model
         'title_id',
         'rating_count',
         'average_rating',
+        'rating_distribution',
         'review_count',
         'watchlist_count',
         'episodes_count',
@@ -30,7 +31,36 @@ class TitleStatistic extends Model
     {
         return [
             'average_rating' => 'decimal:2',
+            'rating_distribution' => 'array',
         ];
+    }
+
+    /**
+     * @param  array<int|string, mixed>|null  $distribution
+     * @return array<string, int>
+     */
+    public static function normalizeRatingDistribution(?array $distribution = null): array
+    {
+        $distribution ??= [];
+
+        return collect(range(10, 1))
+            ->mapWithKeys(function (int $score) use ($distribution): array {
+                return [
+                    (string) $score => max(0, (int) ($distribution[(string) $score] ?? $distribution[$score] ?? 0)),
+                ];
+            })
+            ->all();
+    }
+
+    /**
+     * @return array<string, int>
+     */
+    public function normalizedRatingDistribution(): array
+    {
+        /** @var array<int|string, mixed>|null $distribution */
+        $distribution = $this->rating_distribution;
+
+        return self::normalizeRatingDistribution($distribution);
     }
 
     public function title(): BelongsTo
