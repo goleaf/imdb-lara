@@ -91,4 +91,9 @@ class User extends Authenticatable
     {
         return in_array($this->role, [UserRole::Admin, UserRole::Moderator], true);
     }
+
+    public function isActive(): bool
+    {
+        return $this->status === UserStatus::Active;
+    }
 }

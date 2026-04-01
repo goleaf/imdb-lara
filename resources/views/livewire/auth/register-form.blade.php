@@ -1,3 +1,57 @@
-<div>
-    {{-- People find pleasure in different ways. I find it in keeping my mind clear. - Marcus Aurelius --}}
-</div>
+<form wire:submit="register" class="space-y-4">
+    <div class="grid gap-4 sm:grid-cols-2">
+        <x-ui.field>
+            <x-ui.label>Name</x-ui.label>
+            <x-ui.input wire:model.live="name" name="name" autocomplete="name" />
+            <x-ui.error name="name" />
+        </x-ui.field>
+
+        <x-ui.field>
+            <x-ui.label>Username</x-ui.label>
+            <x-ui.input wire:model.live="username" name="username" autocomplete="username" />
+            <x-ui.error name="username" />
+        </x-ui.field>
+    </div>
+
+    <x-ui.field>
+        <x-ui.label>Email</x-ui.label>
+        <x-ui.input wire:model.live="email" name="email" type="email" autocomplete="email" />
+        <x-ui.error name="email" />
+    </x-ui.field>
+
+    <div class="grid gap-4 sm:grid-cols-2">
+        <x-ui.field>
+            <x-ui.label>Password</x-ui.label>
+            <x-ui.input
+                wire:model.live="password"
+                name="password"
+                type="password"
+                autocomplete="new-password"
+                revealable
+            />
+            <x-ui.error name="password" />
+        </x-ui.field>
+
+        <x-ui.field>
+            <x-ui.label>Confirm password</x-ui.label>
+            <x-ui.input
+                wire:model.live="password_confirmation"
+                name="password_confirmation"
+                type="password"
+                autocomplete="new-password"
+                revealable
+            />
+            <x-ui.error name="password_confirmation" />
+        </x-ui.field>
+    </div>
+
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <x-ui.button type="submit" icon="user-plus">
+            Create account
+        </x-ui.button>
+
+        <x-ui.link :href="route('login')" variant="ghost">
+            Already registered?
+        </x-ui.link>
+    </div>
+</form>
