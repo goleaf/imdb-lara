@@ -41,7 +41,7 @@ class RoleAuthorizationTest extends TestCase
         $this->assertTrue($contributor->can('submit-contribution'));
         $this->assertFalse($regularUser->can('submit-contribution'));
         $this->assertTrue($editor->can('review-contribution'));
-        $this->assertFalse($moderator->can('review-contribution'));
+        $this->assertTrue($moderator->can('review-contribution'));
     }
 
     public function test_policies_distinguish_catalog_moderation_and_contribution_access(): void
@@ -75,6 +75,7 @@ class RoleAuthorizationTest extends TestCase
         $this->assertTrue($contributor->can('create', Contribution::class));
         $this->assertTrue($contributor->can('view', $contribution));
         $this->assertTrue($editor->can('view', $contribution));
+        $this->assertTrue($moderator->can('view', $contribution));
         $this->assertFalse($regularUser->can('view', $contribution));
 
         $this->assertTrue($editor->can('create', MediaAsset::class));

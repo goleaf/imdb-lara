@@ -7,6 +7,7 @@ use App\Enums\ReviewStatus;
 use App\Models\Review;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class GetLatestReviewFeedAction
 {
@@ -49,8 +50,12 @@ class GetLatestReviewFeedAction
      */
     public function handle(int $limit = 4): Collection
     {
-        return $this->query()
-            ->limit($limit)
-            ->get();
+        return Cache::remember(
+            "home:latest-reviews:{$limit}",
+            now()->addMinutes(10),
+            fn (): Collection => $this->query()
+                ->limit($limit)
+                ->get(),
+        );
     }
 }

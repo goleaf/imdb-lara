@@ -27,15 +27,15 @@
                     <div class="space-y-4">
                         <div class="flex flex-wrap items-center gap-2">
                             @if ($person->known_for_department)
-                                <x-ui.badge variant="outline">{{ $person->known_for_department }}</x-ui.badge>
+                                <x-ui.badge variant="outline" icon="briefcase">{{ $person->known_for_department }}</x-ui.badge>
                             @endif
 
                             @if ($person->nationality)
-                                <x-ui.badge variant="outline" color="slate">{{ $person->nationality }}</x-ui.badge>
+                                <x-ui.badge variant="outline" color="slate" icon="globe-alt">{{ $person->nationality }}</x-ui.badge>
                             @endif
 
                             @if ($person->birth_place)
-                                <x-ui.badge variant="outline" color="neutral">{{ $person->birth_place }}</x-ui.badge>
+                                <x-ui.badge variant="outline" color="neutral" icon="map-pin">{{ $person->birth_place }}</x-ui.badge>
                             @endif
                         </div>
 
@@ -45,7 +45,7 @@
                             @if ($alternateNames->isNotEmpty())
                                 <div class="flex flex-wrap gap-2">
                                     @foreach ($alternateNames as $alternateName)
-                                        <x-ui.badge variant="outline" color="neutral">{{ $alternateName }}</x-ui.badge>
+                                        <x-ui.badge variant="outline" color="neutral" icon="identification">{{ $alternateName }}</x-ui.badge>
                                     @endforeach
                                 </div>
                             @endif
@@ -53,7 +53,7 @@
                             @if ($professionLabels->isNotEmpty())
                                 <div class="flex flex-wrap gap-2">
                                     @foreach ($professionLabels as $professionLabel)
-                                        <x-ui.badge variant="outline" color="slate">{{ $professionLabel }}</x-ui.badge>
+                                        <x-ui.badge variant="outline" color="slate" icon="sparkles">{{ $professionLabel }}</x-ui.badge>
                                     @endforeach
                                 </div>
                             @endif
@@ -87,12 +87,17 @@
                 <div class="space-y-3">
                     <div class="flex items-center justify-between gap-4">
                         <x-ui.heading level="h2" size="lg">Profile notes</x-ui.heading>
-                        <x-ui.badge variant="outline" color="neutral">{{ number_format($professionLabels->count()) }} professions</x-ui.badge>
+                        <x-ui.badge variant="outline" color="neutral" icon="sparkles">{{ number_format($professionLabels->count()) }} professions</x-ui.badge>
                     </div>
 
                     <x-ui.accordion class="rounded-box border border-black/5 dark:border-white/10">
                         <x-ui.accordion.item expanded>
-                            <x-ui.accordion.trigger>Biography</x-ui.accordion.trigger>
+                            <x-ui.accordion.trigger>
+                                <span class="inline-flex items-center gap-2">
+                                    <x-ui.icon name="document-text" class="size-4" />
+                                    Biography
+                                </span>
+                            </x-ui.accordion.trigger>
                             <x-ui.accordion.content>
                                 @if ($person->biography)
                                     <x-ui.text class="text-sm leading-7 text-neutral-600 dark:text-neutral-300">
@@ -100,6 +105,9 @@
                                     </x-ui.text>
                                 @else
                                     <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                        <x-ui.empty.media>
+                                            <x-ui.icon name="document-text" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                                        </x-ui.empty.media>
                                         <x-ui.heading level="h3">No biography has been published yet.</x-ui.heading>
                                     </x-ui.empty>
                                 @endif
@@ -113,7 +121,7 @@
                 <div class="space-y-4">
                     <div class="flex items-center justify-between gap-4">
                         <x-ui.heading level="h2" size="lg">Known for</x-ui.heading>
-                        <x-ui.badge variant="outline" color="neutral">{{ number_format($knownForTitles->count()) }} titles</x-ui.badge>
+                        <x-ui.badge variant="outline" color="neutral" icon="film">{{ number_format($knownForTitles->count()) }} titles</x-ui.badge>
                     </div>
 
                     @if ($knownForTitles->isNotEmpty())
@@ -124,6 +132,9 @@
                         </div>
                     @else
                         <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                            <x-ui.empty.media>
+                                <x-ui.icon name="film" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                            </x-ui.empty.media>
                             <x-ui.heading level="h3">Known-for titles are still being ranked.</x-ui.heading>
                         </x-ui.empty>
                     @endif
@@ -131,12 +142,19 @@
             </x-ui.card>
         </section>
 
+        <livewire:contributions.suggestion-form
+            contributableType="person"
+            :contributableId="$person->id"
+            :contributableLabel="$person->name"
+            :key="'person-contribution-'.$person->id"
+        />
+
         <section class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
             <x-ui.card class="!max-w-none">
                 <div class="space-y-4">
                     <div class="flex items-center justify-between gap-4">
                         <x-ui.heading level="h2" size="lg">Photo gallery</x-ui.heading>
-                        <x-ui.badge variant="outline" color="neutral">{{ number_format($photoGallery->count()) }} assets</x-ui.badge>
+                        <x-ui.badge variant="outline" color="neutral" icon="photo">{{ number_format($photoGallery->count()) }} assets</x-ui.badge>
                     </div>
 
                     @if ($photoGallery->isNotEmpty())
@@ -159,6 +177,9 @@
                         </div>
                     @else
                         <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                            <x-ui.empty.media>
+                                <x-ui.icon name="photo" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                            </x-ui.empty.media>
                             <x-ui.heading level="h3">No gallery images are published yet.</x-ui.heading>
                         </x-ui.empty>
                     @endif
@@ -169,12 +190,17 @@
                 <div class="space-y-3">
                     <div class="flex items-center justify-between gap-4">
                         <x-ui.heading level="h2" size="lg">Career context</x-ui.heading>
-                        <x-ui.badge variant="outline" color="neutral">{{ number_format($awardHighlights->count()) }} highlights</x-ui.badge>
+                        <x-ui.badge variant="outline" color="neutral" icon="trophy">{{ number_format($awardHighlights->count()) }} highlights</x-ui.badge>
                     </div>
 
                     <x-ui.accordion class="rounded-box border border-black/5 dark:border-white/10">
                         <x-ui.accordion.item expanded>
-                            <x-ui.accordion.trigger>Awards</x-ui.accordion.trigger>
+                            <x-ui.accordion.trigger>
+                                <span class="inline-flex items-center gap-2">
+                                    <x-ui.icon name="trophy" class="size-4" />
+                                    Awards
+                                </span>
+                            </x-ui.accordion.trigger>
                             <x-ui.accordion.content>
                                 @if ($awardHighlights->isNotEmpty())
                                     <div class="grid gap-3">
@@ -195,18 +221,18 @@
 
                                                     <div class="flex flex-wrap gap-2">
                                                         @if ($awardNomination->is_winner)
-                                                            <x-ui.badge color="amber">Winner</x-ui.badge>
+                                                            <x-ui.badge color="amber" icon="trophy">Winner</x-ui.badge>
                                                         @else
-                                                            <x-ui.badge variant="outline" color="neutral">Nominee</x-ui.badge>
+                                                            <x-ui.badge variant="outline" color="neutral" icon="bookmark">Nominee</x-ui.badge>
                                                         @endif
 
                                                         @if ($awardNomination->title)
                                                             <a href="{{ route('public.titles.show', $awardNomination->title) }}">
-                                                                <x-ui.badge variant="outline" color="slate">{{ $awardNomination->title->name }}</x-ui.badge>
+                                                                <x-ui.badge variant="outline" color="slate" icon="film">{{ $awardNomination->title->name }}</x-ui.badge>
                                                             </a>
                                                         @elseif ($awardNomination->episode?->title)
                                                             <a href="{{ route('public.titles.show', $awardNomination->episode->title) }}">
-                                                                <x-ui.badge variant="outline" color="slate">{{ $awardNomination->episode->title->name }}</x-ui.badge>
+                                                                <x-ui.badge variant="outline" color="slate" icon="rectangle-stack">{{ $awardNomination->episode->title->name }}</x-ui.badge>
                                                             </a>
                                                         @endif
                                                     </div>
@@ -216,6 +242,9 @@
                                     </div>
                                 @else
                                     <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                        <x-ui.empty.media>
+                                            <x-ui.icon name="trophy" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                                        </x-ui.empty.media>
                                         <x-ui.heading level="h3">No awards have been published yet.</x-ui.heading>
                                     </x-ui.empty>
                                 @endif
@@ -233,14 +262,19 @@
                 <div class="space-y-3">
                     <div class="flex items-center justify-between gap-4">
                         <x-ui.heading level="h2" size="lg">Connections</x-ui.heading>
-                        <x-ui.badge variant="outline" color="neutral">
+                        <x-ui.badge variant="outline" color="neutral" icon="share">
                             {{ number_format($relatedTitles->count() + $collaborators->count()) }} linked records
                         </x-ui.badge>
                     </div>
 
                     <x-ui.accordion class="rounded-box border border-black/5 dark:border-white/10">
                         <x-ui.accordion.item expanded>
-                            <x-ui.accordion.trigger>Related titles</x-ui.accordion.trigger>
+                            <x-ui.accordion.trigger>
+                                <span class="inline-flex items-center gap-2">
+                                    <x-ui.icon name="film" class="size-4" />
+                                    Related titles
+                                </span>
+                            </x-ui.accordion.trigger>
                             <x-ui.accordion.content>
                                 @if ($relatedTitles->isNotEmpty())
                                     <div class="grid gap-4 md:grid-cols-2">
@@ -250,6 +284,9 @@
                                     </div>
                                 @else
                                     <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                        <x-ui.empty.media>
+                                            <x-ui.icon name="film" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                                        </x-ui.empty.media>
                                         <x-ui.heading level="h3">Additional related titles are still being curated.</x-ui.heading>
                                     </x-ui.empty>
                                 @endif
@@ -257,13 +294,23 @@
                         </x-ui.accordion.item>
 
                         <x-ui.accordion.item>
-                            <x-ui.accordion.trigger>Frequent collaborators</x-ui.accordion.trigger>
+                            <x-ui.accordion.trigger>
+                                <span class="inline-flex items-center gap-2">
+                                    <x-ui.icon name="users" class="size-4" />
+                                    Frequent collaborators
+                                </span>
+                            </x-ui.accordion.trigger>
                             <x-ui.accordion.content>
                                 @if ($collaborators->isNotEmpty())
                                     <div class="grid gap-3">
                                         @foreach ($collaborators as $collaborator)
                                             @php
-                                                $collaboratorHeadshot = $collaborator['person']->mediaAssets->first();
+                                                $collaboratorHeadshot = \App\Models\MediaAsset::preferredFrom(
+                                                    $collaborator['person']->mediaAssets,
+                                                    \App\Enums\MediaKind::Headshot,
+                                                    \App\Enums\MediaKind::Gallery,
+                                                    \App\Enums\MediaKind::Still,
+                                                );
                                             @endphp
 
                                             <div class="rounded-box border border-black/5 px-4 py-3 dark:border-white/10">
@@ -292,7 +339,7 @@
                                                             </div>
 
                                                             @if ($collaborator['person']->known_for_department)
-                                                                <x-ui.badge variant="outline" color="neutral">
+                                                                <x-ui.badge variant="outline" color="neutral" icon="briefcase">
                                                                     {{ $collaborator['person']->known_for_department }}
                                                                 </x-ui.badge>
                                                             @endif
@@ -301,7 +348,7 @@
                                                         <div class="flex flex-wrap gap-2">
                                                             @foreach ($collaborator['sharedTitles'] as $sharedTitle)
                                                                 <a href="{{ route('public.titles.show', $sharedTitle) }}">
-                                                                    <x-ui.badge variant="outline" color="slate">{{ $sharedTitle->name }}</x-ui.badge>
+                                                                    <x-ui.badge variant="outline" color="slate" icon="film">{{ $sharedTitle->name }}</x-ui.badge>
                                                                 </a>
                                                             @endforeach
                                                         </div>
@@ -312,6 +359,9 @@
                                     </div>
                                 @else
                                     <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                        <x-ui.empty.media>
+                                            <x-ui.icon name="users" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                                        </x-ui.empty.media>
                                         <x-ui.heading level="h3">No collaborator graph has been published yet.</x-ui.heading>
                                     </x-ui.empty>
                                 @endif

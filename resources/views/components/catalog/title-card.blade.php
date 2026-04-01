@@ -8,11 +8,29 @@
 
 @php
     $poster = $title->relationLoaded('mediaAssets')
-        ? ($title->mediaAssets->firstWhere('kind', \App\Enums\MediaKind::Poster) ?? $title->mediaAssets->first())
+        ? \App\Models\MediaAsset::preferredFrom(
+            $title->mediaAssets,
+            \App\Enums\MediaKind::Poster,
+            \App\Enums\MediaKind::Backdrop,
+        )
         : null;
     $genres = $title->relationLoaded('genres') ? $title->genres->take(3) : collect();
     $statistic = $title->relationLoaded('statistic') ? $title->statistic : null;
     $hasActions = trim((string) $slot) !== '';
+    $titleTypeIcon = match ($title->title_type) {
+        \App\Enums\TitleType::Series, \App\Enums\TitleType::MiniSeries => 'tv',
+        \App\Enums\TitleType::Documentary => 'camera',
+        \App\Enums\TitleType::Special => 'sparkles',
+        \App\Enums\TitleType::Episode => 'rectangle-stack',
+        default => 'film',
+    };
+    $trackingStateIcon = $trackingState instanceof \App\Enums\WatchState ? match ($trackingState) {
+        \App\Enums\WatchState::Planned => 'bookmark',
+        \App\Enums\WatchState::Watching => 'play-circle',
+        \App\Enums\WatchState::Completed => 'check-circle',
+        \App\Enums\WatchState::Paused => 'pause-circle',
+        \App\Enums\WatchState::Dropped => 'x-circle',
+    } : null;
 @endphp
 
 <x-ui.card class="!max-w-none h-full overflow-hidden">
@@ -37,11 +55,11 @@
 
         <div class="flex flex-1 flex-col gap-3">
             <div class="flex flex-wrap items-center gap-2">
-                <x-ui.badge variant="outline">{{ str($title->title_type->value)->headline() }}</x-ui.badge>
+                <x-ui.badge variant="outline" :icon="$titleTypeIcon">{{ str($title->title_type->value)->headline() }}</x-ui.badge>
 
                 @if ($title->release_year)
                     <a href="{{ route('public.years.show', ['year' => $title->release_year]) }}">
-                        <x-ui.badge variant="outline" color="slate">{{ $title->release_year }}</x-ui.badge>
+                        <x-ui.badge variant="outline" color="slate" icon="calendar-days">{{ $title->release_year }}</x-ui.badge>
                     </a>
                 @endif
 
@@ -70,7 +88,7 @@
                 <div class="flex flex-wrap gap-2">
                     @foreach ($genres as $genre)
                         <a href="{{ route('public.genres.show', $genre) }}">
-                            <x-ui.badge variant="outline" color="neutral">{{ $genre->name }}</x-ui.badge>
+                            <x-ui.badge variant="outline" color="neutral" icon="tag">{{ $genre->name }}</x-ui.badge>
                         </a>
                     @endforeach
                 </div>
@@ -82,19 +100,20 @@
                         <x-ui.badge
                             variant="outline"
                             :color="$trackingState === \App\Enums\WatchState::Completed ? 'green' : 'neutral'"
+                            :icon="$trackingStateIcon"
                         >
                             {{ str($trackingState->value)->headline() }}
                         </x-ui.badge>
                     @endif
 
                     @if ($trackingAddedAt)
-                        <x-ui.badge variant="outline" color="slate">
+                        <x-ui.badge variant="outline" color="slate" icon="calendar-days">
                             Added {{ $trackingAddedAt->format('M j, Y') }}
                         </x-ui.badge>
                     @endif
 
                     @if ($trackingWatchedAt)
-                        <x-ui.badge variant="outline" color="green">
+                        <x-ui.badge variant="outline" color="green" icon="check-circle">
                             Watched {{ $trackingWatchedAt->format('M j, Y') }}
                         </x-ui.badge>
                     @endif
@@ -103,7 +122,7 @@
 
             <div class="mt-auto flex items-center justify-between gap-3 text-sm text-neutral-500 dark:text-neutral-400">
                 <span>{{ number_format((int) ($statistic?->review_count ?? 0)) }} reviews</span>
-                <x-ui.link :href="route('public.titles.show', $title)" variant="ghost">
+                <x-ui.link :href="route('public.titles.show', $title)" variant="ghost" iconAfter="arrow-right">
                     View title
                 </x-ui.link>
             </div>

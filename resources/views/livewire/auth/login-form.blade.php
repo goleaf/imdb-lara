@@ -1,7 +1,7 @@
 <form wire:submit="login" class="space-y-4">
     <x-ui.field>
         <x-ui.label>Email</x-ui.label>
-        <x-ui.input wire:model.live="form.email" name="email" type="email" autocomplete="email" />
+        <x-ui.input wire:model.live="form.email" name="email" type="email" autocomplete="email" left-icon="envelope" />
         <x-ui.error name="form.email" />
     </x-ui.field>
 
@@ -12,6 +12,7 @@
             name="password"
             type="password"
             autocomplete="current-password"
+            left-icon="lock-closed"
             revealable
         />
         <x-ui.error name="form.password" />
@@ -27,7 +28,7 @@
             Sign in
         </x-ui.button>
 
-        <x-ui.link :href="route('register')" variant="ghost">
+        <x-ui.link :href="route('register')" variant="ghost" iconAfter="arrow-right">
             Need an account?
         </x-ui.link>
     </div>

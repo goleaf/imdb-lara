@@ -2,6 +2,7 @@
 
 namespace App\Actions\Catalog;
 
+use App\Actions\Seo\PageSeoData;
 use App\Enums\MediaKind;
 use App\Models\AwardNomination;
 use App\Models\Credit;
@@ -46,7 +47,7 @@ class LoadPersonDetailsAction
                     'position',
                     'published_at',
                 ])
-                ->orderBy('position'),
+                ->ordered(),
             'professions:id,person_id,department,profession,is_primary,sort_order',
             'credits' => fn ($query) => $query
                 ->select([
@@ -77,7 +78,7 @@ class LoadPersonDetailsAction
                         ])
                         ->published()
                         ->with([
-                            'mediaAssets:id,mediable_type,mediable_id,kind,url,alt_text,position',
+                            'mediaAssets:id,mediable_type,mediable_id,kind,url,alt_text,position,is_primary',
                             'genres:id,name,slug',
                             'statistic:id,title_id,average_rating,rating_count,review_count,watchlist_count',
                         ]),
@@ -108,7 +109,7 @@ class LoadPersonDetailsAction
                 ->orderBy('sort_order'),
         ]);
 
-        $headshot = $person->mediaAssets->firstWhere('kind', MediaKind::Headshot) ?? $person->mediaAssets->first();
+        $headshot = MediaAsset::preferredFrom($person->mediaAssets, MediaKind::Headshot, MediaKind::Gallery, MediaKind::Still);
         $photoGallery = $person->mediaAssets
             ->filter(fn (MediaAsset $mediaAsset): bool => in_array($mediaAsset->kind, [
                 MediaKind::Headshot,
@@ -213,6 +214,7 @@ class LoadPersonDetailsAction
                             'mediaAssets' => fn ($mediaQuery) => $mediaQuery
                                 ->select(['id', 'mediable_type', 'mediable_id', 'kind', 'url', 'alt_text', 'position'])
                                 ->where('kind', MediaKind::Headshot)
+                                ->ordered()
                                 ->limit(1),
                             'professions:id,person_id,department,profession,is_primary,sort_order',
                         ]),
@@ -246,6 +248,12 @@ class LoadPersonDetailsAction
                 ->values();
         }
 
+        $breadcrumbs = [
+            ['label' => 'Home', 'href' => route('public.home')],
+            ['label' => 'Browse People', 'href' => route('public.people.index')],
+            ['label' => $person->name],
+        ];
+
         return [
             'person' => $person,
             'headshot' => $headshot,
@@ -258,6 +266,15 @@ class LoadPersonDetailsAction
             'relatedTitles' => $relatedTitles,
             'awardHighlights' => $awardHighlights,
             'collaborators' => $collaborators,
+            'seo' => new PageSeoData(
+                title: $person->meta_title ?: $person->name,
+                description: $person->meta_description ?: ($biographyIntro ?: 'Browse credits and biography for '.$person->name.'.'),
+                canonical: route('public.people.show', $person),
+                openGraphType: 'profile',
+                openGraphImage: $headshot?->url,
+                openGraphImageAlt: $headshot?->alt_text ?: $person->name,
+                breadcrumbs: $breadcrumbs,
+            ),
         ];
     }
 

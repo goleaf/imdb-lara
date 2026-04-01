@@ -58,7 +58,10 @@ new class extends Component
     <div class="space-y-4">
         <div class="flex items-start justify-between gap-4">
             <div class="space-y-1">
-                <x-ui.heading level="h2" size="lg">Latest Reviews</x-ui.heading>
+                <x-ui.heading level="h2" size="lg" class="inline-flex items-center gap-2">
+                    <x-ui.icon name="chat-bubble-left-right" class="size-5 text-neutral-500 dark:text-neutral-400" />
+                    <span>Latest Reviews</span>
+                </x-ui.heading>
                 <x-ui.text class="max-w-3xl text-sm text-neutral-600 dark:text-neutral-300">
                     Freshly published audience reviews across movies, TV, and documentaries.
                 </x-ui.text>
@@ -80,6 +83,9 @@ new class extends Component
             </x-ui.card>
         @elseif ($reviews->isEmpty())
             <x-ui.empty class="rounded-box border border-dashed border-black/10 bg-white dark:border-white/10 dark:bg-neutral-900">
+                <x-ui.empty.media>
+                    <x-ui.icon name="chat-bubble-left-right" class="size-10 text-neutral-400 dark:text-neutral-500" />
+                </x-ui.empty.media>
                 <x-ui.heading level="h3">No published reviews are available yet.</x-ui.heading>
                 <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
                     Reviews will appear here once they pass moderation and go public.
@@ -89,7 +95,11 @@ new class extends Component
             <div class="grid gap-4 xl:grid-cols-2">
                 @foreach ($reviews as $review)
                     @php
-                        $poster = $review->title->mediaAssets->first();
+                        $poster = \App\Models\MediaAsset::preferredFrom(
+                            $review->title->mediaAssets,
+                            \App\Enums\MediaKind::Poster,
+                            \App\Enums\MediaKind::Backdrop,
+                        );
                     @endphp
 
                     <x-ui.card class="!max-w-none" wire:key="home-review-{{ $review->id }}">
@@ -110,12 +120,12 @@ new class extends Component
 
                             <div class="space-y-3">
                                 <div class="flex flex-wrap items-center gap-2">
-                                    <x-ui.badge variant="outline">{{ str($review->title->title_type->value)->headline() }}</x-ui.badge>
+                                    <x-ui.badge variant="outline" icon="film">{{ str($review->title->title_type->value)->headline() }}</x-ui.badge>
                                     @if ($review->contains_spoilers)
-                                        <x-ui.badge variant="outline" color="red">Spoilers</x-ui.badge>
+                                        <x-ui.badge variant="outline" color="red" icon="eye-slash">Spoilers</x-ui.badge>
                                     @endif
                                     @if ($review->published_at)
-                                        <x-ui.badge variant="outline" color="slate">{{ $review->published_at->format('M j, Y') }}</x-ui.badge>
+                                        <x-ui.badge variant="outline" color="slate" icon="calendar-days">{{ $review->published_at->format('M j, Y') }}</x-ui.badge>
                                     @endif
                                 </div>
 

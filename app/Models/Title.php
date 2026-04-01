@@ -70,6 +70,16 @@ class Title extends Model
         return $query->where('is_published', true);
     }
 
+    public function scopeWithoutEpisodes(Builder $query): Builder
+    {
+        return $query->where('title_type', '!=', TitleType::Episode);
+    }
+
+    public function scopePublishedCatalog(Builder $query): Builder
+    {
+        return $query->published()->withoutEpisodes();
+    }
+
     public function scopeMatchingSearch(Builder $query, string $search): Builder
     {
         $search = trim($search);
@@ -82,9 +92,18 @@ class Title extends Model
             $titleQuery
                 ->where('name', 'like', "%{$search}%")
                 ->orWhere('original_name', 'like', "%{$search}%")
+                ->orWhere('slug', 'like', "%{$search}%")
+                ->orWhere('sort_title', 'like', "%{$search}%")
                 ->orWhere('plot_outline', 'like', "%{$search}%")
                 ->orWhere('synopsis', 'like', "%{$search}%")
-                ->orWhere('search_keywords', 'like', "%{$search}%");
+                ->orWhere('search_keywords', 'like', "%{$search}%")
+                ->orWhereHas('translations', function (Builder $translationQuery) use ($search): void {
+                    $translationQuery
+                        ->where('localized_title', 'like', "%{$search}%")
+                        ->orWhere('localized_slug', 'like', "%{$search}%")
+                        ->orWhere('localized_plot_outline', 'like', "%{$search}%")
+                        ->orWhere('localized_synopsis', 'like', "%{$search}%");
+                });
         });
     }
 
@@ -170,7 +189,7 @@ class Title extends Model
 
     public function mediaAssets(): MorphMany
     {
-        return $this->morphMany(MediaAsset::class, 'mediable')->orderBy('position');
+        return $this->morphMany(MediaAsset::class, 'mediable')->ordered();
     }
 
     public function titleImages(): MorphMany
@@ -182,7 +201,7 @@ class Title extends Model
                 MediaKind::Gallery,
                 MediaKind::Still,
             ])
-            ->orderBy('position');
+            ->ordered();
     }
 
     public function titleVideos(): MorphMany
@@ -193,7 +212,7 @@ class Title extends Model
                 MediaKind::Clip,
                 MediaKind::Featurette,
             ])
-            ->orderBy('position');
+            ->ordered();
     }
 
     public function statistic(): HasOne

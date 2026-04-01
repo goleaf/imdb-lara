@@ -3,7 +3,14 @@
 ])
 
 @php
-    $headshot = $person->relationLoaded('mediaAssets') ? $person->mediaAssets->first() : null;
+    $headshot = $person->relationLoaded('mediaAssets')
+        ? \App\Models\MediaAsset::preferredFrom(
+            $person->mediaAssets,
+            \App\Enums\MediaKind::Headshot,
+            \App\Enums\MediaKind::Gallery,
+            \App\Enums\MediaKind::Still,
+        )
+        : null;
     $creditsCount = isset($person->credits_count)
         ? (int) $person->credits_count
         : ($person->relationLoaded('credits') ? $person->credits->count() : 0);
@@ -36,15 +43,15 @@
 
                     <div class="flex flex-wrap gap-2">
                         @if ($person->known_for_department)
-                            <x-ui.badge variant="outline">{{ $person->known_for_department }}</x-ui.badge>
+                            <x-ui.badge variant="outline" icon="briefcase">{{ $person->known_for_department }}</x-ui.badge>
                         @endif
 
                         @foreach ($professionLabels as $professionLabel)
-                            <x-ui.badge variant="outline" color="neutral">{{ $professionLabel }}</x-ui.badge>
+                            <x-ui.badge variant="outline" color="neutral" icon="sparkles">{{ $professionLabel }}</x-ui.badge>
                         @endforeach
 
                         @if ($person->nationality)
-                            <x-ui.badge variant="outline" color="slate">{{ $person->nationality }}</x-ui.badge>
+                            <x-ui.badge variant="outline" color="slate" icon="globe-alt">{{ $person->nationality }}</x-ui.badge>
                         @endif
                     </div>
                 </div>
@@ -59,7 +66,7 @@
 
         <div class="mt-auto flex items-center justify-between gap-3 text-sm text-neutral-500 dark:text-neutral-400">
             <span>{{ number_format($creditsCount) }} credits</span>
-            <x-ui.link :href="route('public.people.show', $person)" variant="ghost">
+            <x-ui.link :href="route('public.people.show', $person)" variant="ghost" iconAfter="arrow-right">
                 View profile
             </x-ui.link>
         </div>

@@ -2,6 +2,7 @@
 
 namespace App\Actions\Catalog;
 
+use App\Actions\Seo\PageSeoData;
 use App\Enums\MediaKind;
 use App\Models\Episode;
 use App\Models\MediaAsset;
@@ -36,7 +37,7 @@ class LoadSeasonDetailsAction
                 ->orderBy('season_number'),
             'mediaAssets' => fn ($query) => $query
                 ->select(['id', 'mediable_type', 'mediable_id', 'kind', 'url', 'alt_text', 'position'])
-                ->orderBy('position'),
+                ->ordered(),
             'statistic:id,title_id,average_rating,rating_count,review_count,watchlist_count,episodes_count',
         ]);
 
@@ -132,6 +133,15 @@ class LoadSeasonDetailsAction
                 : null;
         }
 
+        $poster = MediaAsset::preferredFrom($series->mediaAssets, MediaKind::Poster, MediaKind::Backdrop);
+        $backdrop = MediaAsset::preferredFrom($series->mediaAssets, MediaKind::Backdrop, MediaKind::Poster);
+        $breadcrumbs = [
+            ['label' => 'Home', 'href' => route('public.home')],
+            ['label' => 'TV Shows', 'href' => route('public.series.index')],
+            ['label' => $series->name, 'href' => route('public.titles.show', $series)],
+            ['label' => $season->name],
+        ];
+
         return [
             'series' => $series,
             'season' => $season,
@@ -141,9 +151,18 @@ class LoadSeasonDetailsAction
             'watchStatesByTitle' => $watchStatesByTitle,
             'previousSeason' => $previousSeason,
             'nextSeason' => $nextSeason,
-            'poster' => $series->mediaAssets->first(),
-            'backdrop' => $series->mediaAssets->firstWhere('kind', MediaKind::Backdrop),
+            'poster' => $poster,
+            'backdrop' => $backdrop,
             'airedRangeLabel' => $airedRangeLabel,
+            'seo' => new PageSeoData(
+                title: $season->meta_title ?: ($season->name.' · '.$series->name),
+                description: $season->meta_description ?: ($season->summary ?: 'Browse episode records for '.$season->name.' of '.$series->name.'.'),
+                canonical: route('public.seasons.show', ['series' => $series, 'season' => $season]),
+                openGraphType: 'video.tv_show',
+                openGraphImage: ($backdrop ?? $poster)?->url,
+                openGraphImageAlt: ($backdrop ?? $poster)?->alt_text ?: $season->name,
+                breadcrumbs: $breadcrumbs,
+            ),
         ];
     }
 }

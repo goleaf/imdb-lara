@@ -8,6 +8,14 @@
 @endsection
 
 @section('content')
+    @php
+        $visibilityIcons = [
+            'public' => 'globe-alt',
+            'private' => 'lock-closed',
+            'unlisted' => 'eye-slash',
+        ];
+    @endphp
+
     <section class="space-y-4">
         <div>
             <x-ui.heading level="h1" size="xl">Your Lists</x-ui.heading>
@@ -33,8 +41,8 @@
                             </div>
 
                             <div class="flex flex-wrap gap-2">
-                                <x-ui.badge variant="outline" color="neutral">{{ str($list->visibility->value)->headline() }}</x-ui.badge>
-                                <x-ui.badge variant="outline" color="slate">{{ number_format($list->items_count) }} titles</x-ui.badge>
+                                <x-ui.badge variant="outline" color="neutral" :icon="$visibilityIcons[$list->visibility->value] ?? 'globe-alt'">{{ str($list->visibility->value)->headline() }}</x-ui.badge>
+                                <x-ui.badge variant="outline" color="slate" icon="queue-list">{{ number_format($list->items_count) }} titles</x-ui.badge>
                             </div>
                         </div>
 
@@ -46,17 +54,24 @@
                             </div>
                         @endif
 
-                        @if ($list->isPublic())
-                            <div class="flex justify-end">
-                                <x-ui.link :href="route('public.lists.show', [auth()->user(), $list])" variant="ghost">
-                                    View public page
+                        <div class="flex flex-wrap justify-end gap-3">
+                            <x-ui.link :href="route('account.lists.show', $list)" variant="ghost">
+                                Manage list
+                            </x-ui.link>
+
+                            @if ($list->isShareable())
+                                <x-ui.link :href="route('public.lists.show', [auth()->user(), $list])" variant="ghost" iconAfter="arrow-right">
+                                    {{ $list->isPublic() ? 'View public page' : 'Open share page' }}
                                 </x-ui.link>
-                            </div>
-                        @endif
+                            @endif
+                        </div>
                     </div>
                 </x-ui.card>
             @empty
                 <x-ui.empty class="rounded-box border border-dashed border-black/10 bg-white dark:border-white/10 dark:bg-neutral-900 lg:col-span-2">
+                    <x-ui.empty.media>
+                        <x-ui.icon name="queue-list" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                    </x-ui.empty.media>
                     <x-ui.heading level="h3">No custom lists yet.</x-ui.heading>
                     <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
                         Create a list above, then add titles from any title page.

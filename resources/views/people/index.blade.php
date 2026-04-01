@@ -13,10 +13,10 @@
         <x-ui.card class="!max-w-none">
             <div class="space-y-3">
                 <div class="flex flex-wrap items-center gap-2">
-                    <x-ui.badge variant="outline">Actors</x-ui.badge>
-                    <x-ui.badge variant="outline" color="neutral">Directors</x-ui.badge>
-                    <x-ui.badge variant="outline" color="slate">Writers</x-ui.badge>
-                    <x-ui.badge variant="outline" color="neutral">Producers</x-ui.badge>
+                    <x-ui.badge variant="outline" icon="users">Actors</x-ui.badge>
+                    <x-ui.badge variant="outline" color="neutral" icon="video-camera">Directors</x-ui.badge>
+                    <x-ui.badge variant="outline" color="slate" icon="pencil-square">Writers</x-ui.badge>
+                    <x-ui.badge variant="outline" color="neutral" icon="briefcase">Producers</x-ui.badge>
                 </div>
 
                 <div>

@@ -1,3 +1,11 @@
+@php
+    $visibilityIcons = [
+        'private' => 'lock-closed',
+        'unlisted' => 'eye-slash',
+        'public' => 'globe-alt',
+    ];
+@endphp
+
 <x-ui.card class="!max-w-none" id="title-lists">
     <form wire:submit="save" class="space-y-4">
         <div class="space-y-2">
@@ -102,6 +110,7 @@
                                     <x-ui.combobox.option
                                         wire:key="inline-list-visibility-{{ $visibilityOption['value'] }}"
                                         value="{{ $visibilityOption['value'] }}"
+                                        :icon="$visibilityIcons[$visibilityOption['value']] ?? 'globe-alt'"
                                     >
                                         {{ $visibilityOption['label'] }}
                                     </x-ui.combobox.option>
@@ -112,7 +121,7 @@
                     </div>
 
                     <div class="mt-4 flex justify-end gap-3">
-                        <x-ui.button type="button" variant="ghost" wire:click="cancelCreatingList">
+                        <x-ui.button type="button" variant="ghost" icon="x-mark" wire:click="cancelCreatingList">
                             Cancel
                         </x-ui.button>
                         <x-ui.button type="button" icon="plus" wire:click="createList">

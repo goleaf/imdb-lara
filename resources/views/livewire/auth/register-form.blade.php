@@ -2,20 +2,20 @@
     <div class="grid gap-4 sm:grid-cols-2">
         <x-ui.field>
             <x-ui.label>Name</x-ui.label>
-            <x-ui.input wire:model.live="form.name" name="name" autocomplete="name" />
+            <x-ui.input wire:model.live="form.name" name="name" autocomplete="name" left-icon="user" />
             <x-ui.error name="form.name" />
         </x-ui.field>
 
         <x-ui.field>
             <x-ui.label>Username</x-ui.label>
-            <x-ui.input wire:model.live="form.username" name="username" autocomplete="username" />
+            <x-ui.input wire:model.live="form.username" name="username" autocomplete="username" left-icon="at-symbol" />
             <x-ui.error name="form.username" />
         </x-ui.field>
     </div>
 
     <x-ui.field>
         <x-ui.label>Email</x-ui.label>
-        <x-ui.input wire:model.live="form.email" name="email" type="email" autocomplete="email" />
+        <x-ui.input wire:model.live="form.email" name="email" type="email" autocomplete="email" left-icon="envelope" />
         <x-ui.error name="form.email" />
     </x-ui.field>
 
@@ -27,6 +27,7 @@
                 name="password"
                 type="password"
                 autocomplete="new-password"
+                left-icon="lock-closed"
                 revealable
             />
             <x-ui.error name="form.password" />
@@ -39,6 +40,7 @@
                 name="password_confirmation"
                 type="password"
                 autocomplete="new-password"
+                left-icon="shield-check"
                 revealable
             />
             <x-ui.error name="form.password_confirmation" />
@@ -50,7 +52,7 @@
             Create account
         </x-ui.button>
 
-        <x-ui.link :href="route('login')" variant="ghost">
+        <x-ui.link :href="route('login')" variant="ghost" iconAfter="arrow-right-end-on-rectangle">
             Already registered?
         </x-ui.link>
     </div>

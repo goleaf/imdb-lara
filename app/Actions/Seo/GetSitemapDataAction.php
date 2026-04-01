@@ -3,13 +3,16 @@
 namespace App\Actions\Seo;
 
 use App\Enums\ListVisibility;
+use App\Enums\ProfileVisibility;
 use App\Enums\TitleType;
+use App\Models\Genre;
 use App\Models\Person;
 use App\Models\Season;
 use App\Models\Title;
 use App\Models\User;
 use App\Models\UserList;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Route;
 
 class GetSitemapDataAction
@@ -17,6 +20,8 @@ class GetSitemapDataAction
     /**
      * @return array{
      *     staticRoutes: list<string>,
+     *     genres: EloquentCollection<int, Genre>,
+     *     years: Collection<int, int>,
      *     titles: EloquentCollection<int, Title>,
      *     episodes: EloquentCollection<int, Title>,
      *     seasons: EloquentCollection<int, Season>,
@@ -48,10 +53,21 @@ class GetSitemapDataAction
 
         return [
             'staticRoutes' => $staticRoutes,
+            'genres' => Genre::query()
+                ->select(['id', 'slug', 'updated_at'])
+                ->whereHas('titles', fn ($query) => $query->publishedCatalog())
+                ->orderBy('slug')
+                ->get(),
+            'years' => Title::query()
+                ->select(['release_year'])
+                ->publishedCatalog()
+                ->whereNotNull('release_year')
+                ->distinct()
+                ->orderByDesc('release_year')
+                ->pluck('release_year'),
             'titles' => Title::query()
                 ->select(['id', 'slug', 'updated_at'])
-                ->published()
-                ->where('title_type', '!=', TitleType::Episode)
+                ->publishedCatalog()
                 ->latest('updated_at')
                 ->get(),
             'episodes' => Route::has('public.episodes.show')
@@ -78,7 +94,18 @@ class GetSitemapDataAction
             'profiles' => Route::has('public.users.show')
                 ? User::query()
                     ->select(['id', 'username', 'updated_at'])
-                    ->whereHas('publicLists')
+                    ->where('profile_visibility', ProfileVisibility::Public)
+                    ->where(function ($query): void {
+                        $query
+                            ->whereHas('publicLists')
+                            ->orWhereHas('publicWatchlist')
+                            ->orWhereHas('reviews', fn ($reviewQuery) => $reviewQuery->published())
+                            ->orWhere(function ($ratingsQuery): void {
+                                $ratingsQuery
+                                    ->where('show_ratings_on_profile', true)
+                                    ->whereHas('ratings');
+                            });
+                    })
                     ->latest('updated_at')
                     ->get()
                 : new EloquentCollection,

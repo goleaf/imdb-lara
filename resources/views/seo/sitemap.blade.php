@@ -6,6 +6,21 @@
         </url>
     @endforeach
 
+    @foreach ($genres as $genre)
+        <url>
+            <loc>{{ route('public.genres.show', $genre) }}</loc>
+            @if ($genre->updated_at)
+                <lastmod>{{ $genre->updated_at->toAtomString() }}</lastmod>
+            @endif
+        </url>
+    @endforeach
+
+    @foreach ($years as $year)
+        <url>
+            <loc>{{ route('public.years.show', ['year' => $year]) }}</loc>
+        </url>
+    @endforeach
+
     @foreach ($titles as $title)
         <url>
             <loc>{{ route('public.titles.show', $title) }}</loc>

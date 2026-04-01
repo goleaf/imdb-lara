@@ -13,6 +13,7 @@ use App\Observers\ListItemObserver;
 use App\Observers\RatingObserver;
 use App\Observers\ReviewObserver;
 use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
@@ -33,6 +34,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         RedirectIfAuthenticated::redirectUsing(static fn () => route('public.discover'));
+        Model::preventLazyLoading(! $this->app->isProduction());
 
         Gate::before(static fn (User $user, string $ability): ?bool => $user->isSuperAdmin() ? true : null);
 

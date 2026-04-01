@@ -9,7 +9,7 @@ class ContributionPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->canSubmitContributions();
+        return $user->canReviewContributions();
     }
 
     public function view(User $user, Contribution $contribution): bool

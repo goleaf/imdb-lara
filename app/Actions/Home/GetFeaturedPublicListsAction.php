@@ -4,10 +4,10 @@ namespace App\Actions\Home;
 
 use App\Enums\ListVisibility;
 use App\Enums\MediaKind;
-use App\Enums\TitleType;
 use App\Models\UserList;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class GetFeaturedPublicListsAction
 {
@@ -26,14 +26,10 @@ class GetFeaturedPublicListsAction
             ])
             ->custom()
             ->where('visibility', ListVisibility::Public)
-            ->whereHas('items.title', fn (Builder $titleQuery) => $titleQuery
-                ->published()
-                ->where('title_type', '!=', TitleType::Episode))
+            ->whereHas('items.title', fn (Builder $titleQuery) => $titleQuery->publishedCatalog())
             ->withCount([
                 'items as published_items_count' => fn (Builder $itemQuery) => $itemQuery
-                    ->whereHas('title', fn (Builder $titleQuery) => $titleQuery
-                        ->published()
-                        ->where('title_type', '!=', TitleType::Episode)),
+                    ->whereHas('title', fn (Builder $titleQuery) => $titleQuery->publishedCatalog()),
             ])
             ->with([
                 'user:id,name,username',
@@ -51,8 +47,7 @@ class GetFeaturedPublicListsAction
                                 'plot_outline',
                                 'is_published',
                             ])
-                            ->published()
-                            ->where('title_type', '!=', TitleType::Episode)
+                            ->publishedCatalog()
                             ->with([
                                 'mediaAssets' => fn ($mediaQuery) => $mediaQuery
                                     ->select([
@@ -81,8 +76,12 @@ class GetFeaturedPublicListsAction
      */
     public function handle(int $limit = 6): Collection
     {
-        return $this->query()
-            ->limit($limit)
-            ->get();
+        return Cache::remember(
+            "home:featured-public-lists:{$limit}",
+            now()->addMinutes(10),
+            fn (): Collection => $this->query()
+                ->limit($limit)
+                ->get(),
+        );
     }
 }

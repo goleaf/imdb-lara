@@ -2,8 +2,6 @@
 
 namespace App\Actions\Moderation;
 
-use App\Enums\ReportReason;
-use App\Enums\ReportStatus;
 use App\Enums\ReviewStatus;
 use App\Models\Report;
 use App\Models\Review;
@@ -11,6 +9,8 @@ use App\Models\User;
 
 class ReportReviewAction
 {
+    public function __construct(private UpsertReportAction $upsertReport) {}
+
     /**
      * @param  array{reason: string, details?: string|null}  $attributes
      */
@@ -18,19 +18,6 @@ class ReportReviewAction
     {
         abort_unless($review->status === ReviewStatus::Published, 404);
 
-        return Report::query()->updateOrCreate(
-            [
-                'user_id' => $user->id,
-                'reportable_type' => Review::class,
-                'reportable_id' => $review->id,
-            ],
-            [
-                'reason' => ReportReason::from($attributes['reason']),
-                'details' => $attributes['details'] ?? null,
-                'status' => ReportStatus::Open,
-                'reviewed_by' => null,
-                'reviewed_at' => null,
-            ],
-        );
+        return $this->upsertReport->handle($user, $review, $attributes);
     }
 }

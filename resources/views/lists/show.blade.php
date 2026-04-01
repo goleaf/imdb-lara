@@ -11,6 +11,8 @@
 
 @section('content')
     <section class="space-y-4">
+        <x-seo.pagination-links :paginator="$items" />
+
         <x-ui.card class="!max-w-none">
             <div class="space-y-4">
                 <div class="flex flex-wrap items-start justify-between gap-4">
@@ -23,24 +25,38 @@
 
                     <div class="flex flex-wrap gap-2">
                         <a href="{{ route('public.users.show', $owner) }}">
-                            <x-ui.badge variant="outline" color="neutral">{{ $owner->name }}</x-ui.badge>
+                            <x-ui.badge variant="outline" color="neutral" icon="user">{{ $owner->name }}</x-ui.badge>
                         </a>
-                        <x-ui.badge variant="outline" color="slate">{{ number_format($list->items_count) }} titles</x-ui.badge>
+                        @if ($list->isUnlisted())
+                            <x-ui.badge variant="outline" color="slate" icon="eye-slash">Unlisted</x-ui.badge>
+                        @endif
+                        <x-ui.badge variant="outline" color="slate" icon="queue-list">{{ number_format($list->items_count) }} titles</x-ui.badge>
                     </div>
                 </div>
             </div>
         </x-ui.card>
 
+        @if ($list->isShareable() && (! auth()->check() || auth()->id() !== $owner->id))
+            <livewire:lists.report-list-form :list="$list" :key="'list-report-'.$list->id" />
+        @endif
+
         <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            @forelse ($list->items as $item)
+            @forelse ($items as $item)
                 <x-catalog.title-card :title="$item->title" />
             @empty
                 <div class="md:col-span-2 xl:col-span-3">
                     <x-ui.empty class="rounded-box border border-dashed border-black/10 bg-white dark:border-white/10 dark:bg-neutral-900">
+                        <x-ui.empty.media>
+                            <x-ui.icon name="queue-list" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                        </x-ui.empty.media>
                         <x-ui.heading level="h3">This list does not have any published titles yet.</x-ui.heading>
                     </x-ui.empty>
                 </div>
             @endforelse
+        </div>
+
+        <div>
+            {{ $items->links() }}
         </div>
     </section>
 @endsection

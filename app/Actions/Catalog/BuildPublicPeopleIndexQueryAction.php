@@ -47,14 +47,7 @@ class BuildPublicPeopleIndexQueryAction
                     ->orderBy('sort_order'),
             ]);
 
-        if ($search !== '') {
-            $query->where(function (Builder $builder) use ($search): void {
-                $builder
-                    ->where('name', 'like', '%'.$search.'%')
-                    ->orWhere('alternate_names', 'like', '%'.$search.'%')
-                    ->orWhere('search_keywords', 'like', '%'.$search.'%');
-            });
-        }
+        $query->matchingSearch($search);
 
         if ($profession) {
             $query->whereHas('professions', fn (Builder $builder) => $builder->where('profession', $profession));

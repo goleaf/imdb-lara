@@ -21,6 +21,9 @@
             @empty
                 <div class="md:col-span-2 xl:col-span-3">
                     <x-ui.empty class="rounded-box border border-dashed border-black/10 bg-white dark:border-white/10 dark:bg-neutral-900">
+                        <x-ui.empty.media>
+                            <x-ui.icon name="film" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                        </x-ui.empty.media>
                         <x-ui.heading level="h3">{{ $emptyHeading }}</x-ui.heading>
                         <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
                             {{ $emptyText }}

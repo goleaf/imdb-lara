@@ -1,3 +1,10 @@
+@php
+    $seo = $seo ?? null;
+    $sectionTitle = $sectionTitle ?? null;
+    $sectionMetaDescription = $sectionMetaDescription ?? null;
+    $sectionBreadcrumbs = $sectionBreadcrumbs ?? null;
+@endphp
+
 @extends('layouts.app')
 
 @section('navbar')

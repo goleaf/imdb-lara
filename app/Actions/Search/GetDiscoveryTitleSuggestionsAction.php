@@ -2,7 +2,6 @@
 
 namespace App\Actions\Search;
 
-use App\Enums\TitleType;
 use App\Models\Title;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -28,9 +27,8 @@ class GetDiscoveryTitleSuggestionsAction
                 'release_year',
                 'popularity_rank',
             ])
-            ->published()
+            ->publishedCatalog()
             ->matchingSearch($search)
-            ->where('title_type', '!=', TitleType::Episode)
             ->orderBy('popularity_rank')
             ->orderBy('name')
             ->limit(max(1, min($limit, 8)))

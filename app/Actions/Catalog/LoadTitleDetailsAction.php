@@ -2,6 +2,7 @@
 
 namespace App\Actions\Catalog;
 
+use App\Actions\Seo\PageSeoData;
 use App\Enums\MediaKind;
 use App\Enums\ReviewStatus;
 use App\Enums\TitleType;
@@ -45,6 +46,7 @@ class LoadTitleDetailsAction
         $title->load([
             'genres:id,name,slug',
             'companies:id,name,slug,kind,country_code',
+            'canonicalTitle:id,slug,is_published',
             'credits' => fn ($query) => $query
                 ->select([
                     'id',
@@ -80,8 +82,7 @@ class LoadTitleDetailsAction
                     'position',
                     'published_at',
                 ])
-                ->orderBy('position')
-                ->orderByDesc('published_at'),
+                ->ordered(),
             'titleVideos' => fn ($query) => $query
                 ->select([
                     'id',
@@ -96,7 +97,7 @@ class LoadTitleDetailsAction
                     'published_at',
                 ])
                 ->whereIn('kind', [MediaKind::Trailer, MediaKind::Clip, MediaKind::Featurette])
-                ->orderByDesc('published_at')
+                ->ordered()
                 ->limit(4),
             'seasons' => fn ($query) => $query
                 ->select(['id', 'series_id', 'name', 'slug', 'season_number', 'summary', 'release_year', 'meta_title', 'meta_description'])
@@ -160,7 +161,7 @@ class LoadTitleDetailsAction
                         ])
                         ->published()
                         ->with([
-                            'mediaAssets:id,mediable_type,mediable_id,kind,url,alt_text,position',
+                            'mediaAssets:id,mediable_type,mediable_id,kind,url,alt_text,position,is_primary',
                             'genres:id,name,slug',
                             'statistic:id,title_id,average_rating,review_count',
                         ]),
@@ -181,7 +182,7 @@ class LoadTitleDetailsAction
                         ])
                         ->published()
                         ->with([
-                            'mediaAssets:id,mediable_type,mediable_id,kind,url,alt_text,position',
+                            'mediaAssets:id,mediable_type,mediable_id,kind,url,alt_text,position,is_primary',
                             'genres:id,name,slug',
                             'statistic:id,title_id,average_rating,review_count',
                         ]),
@@ -189,8 +190,8 @@ class LoadTitleDetailsAction
                 ->orderByDesc('weight'),
         ]);
 
-        $poster = $title->mediaAssets->firstWhere('kind', MediaKind::Poster);
-        $backdrop = $title->mediaAssets->firstWhere('kind', MediaKind::Backdrop);
+        $poster = MediaAsset::preferredFrom($title->mediaAssets, MediaKind::Poster, MediaKind::Backdrop);
+        $backdrop = MediaAsset::preferredFrom($title->mediaAssets, MediaKind::Backdrop, MediaKind::Poster);
         $galleryAssets = $title->mediaAssets
             ->filter(fn (MediaAsset $mediaAsset): bool => in_array($mediaAsset->kind, [
                 MediaKind::Poster,
@@ -322,7 +323,7 @@ class LoadTitleDetailsAction
                                 ->published()
                                 ->with([
                                     'statistic:id,title_id,average_rating,rating_count,review_count,watchlist_count',
-                                    'mediaAssets:id,mediable_type,mediable_id,kind,url,alt_text,position',
+                                    'mediaAssets:id,mediable_type,mediable_id,kind,url,alt_text,position,is_primary',
                                 ]),
                         ])
                         ->orderBy('episode_number')
@@ -376,6 +377,19 @@ class LoadTitleDetailsAction
                 ->values();
         }
 
+        $canonicalTitle = $title->canonicalTitle;
+        $canonicalUrl = $canonicalTitle instanceof Title && $canonicalTitle->is_published
+            ? route('public.titles.show', $canonicalTitle)
+            : route('public.titles.show', $title);
+        $breadcrumbs = [
+            ['label' => 'Home', 'href' => route('public.home')],
+            ['label' => 'Titles', 'href' => route('public.titles.index')],
+            ['label' => $title->name],
+        ];
+        $openGraphType = in_array($title->title_type, [TitleType::Series, TitleType::MiniSeries], true)
+            ? 'video.tv_show'
+            : 'video.movie';
+
         return [
             'title' => $title,
             'poster' => $poster,
@@ -394,6 +408,15 @@ class LoadTitleDetailsAction
             'latestSeason' => $latestSeason,
             'latestSeasonEpisodes' => $latestSeasonEpisodes,
             'topRatedEpisodes' => $topRatedEpisodes,
+            'seo' => new PageSeoData(
+                title: $title->meta_title ?: $title->name,
+                description: $title->meta_description ?: ($title->plot_outline ?: 'Read credits, ratings, and reviews for '.$title->name.'.'),
+                canonical: $canonicalUrl,
+                openGraphType: $openGraphType,
+                openGraphImage: ($backdrop ?? $poster)?->url,
+                openGraphImageAlt: ($backdrop ?? $poster)?->alt_text ?: $title->name,
+                breadcrumbs: $breadcrumbs,
+            ),
         ];
     }
 

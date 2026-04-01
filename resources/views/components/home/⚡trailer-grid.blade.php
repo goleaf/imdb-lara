@@ -58,7 +58,10 @@ new class extends Component
     <div class="space-y-4">
         <div class="flex items-start justify-between gap-4">
             <div class="space-y-1">
-                <x-ui.heading level="h2" size="lg">Latest Trailers</x-ui.heading>
+                <x-ui.heading level="h2" size="lg" class="inline-flex items-center gap-2">
+                    <x-ui.icon name="play" class="size-5 text-neutral-500 dark:text-neutral-400" />
+                    <span>Latest Trailers</span>
+                </x-ui.heading>
                 <x-ui.text class="max-w-3xl text-sm text-neutral-600 dark:text-neutral-300">
                     Trailer, clip, and featurette uploads from the public catalog, ordered by publish time.
                 </x-ui.text>
@@ -80,6 +83,9 @@ new class extends Component
             </x-ui.card>
         @elseif ($titles->isEmpty())
             <x-ui.empty class="rounded-box border border-dashed border-black/10 bg-white dark:border-white/10 dark:bg-neutral-900">
+                <x-ui.empty.media>
+                    <x-ui.icon name="play-circle" class="size-10 text-neutral-400 dark:text-neutral-500" />
+                </x-ui.empty.media>
                 <x-ui.heading level="h3">No public trailers are available yet.</x-ui.heading>
                 <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
                     This rail will populate as trailers, clips, and featurettes are attached to titles.
@@ -89,7 +95,11 @@ new class extends Component
             <div class="grid gap-4 xl:grid-cols-2">
                 @foreach ($titles as $title)
                     @php
-                        $poster = $title->mediaAssets->first();
+                        $poster = \App\Models\MediaAsset::preferredFrom(
+                            $title->mediaAssets,
+                            \App\Enums\MediaKind::Poster,
+                            \App\Enums\MediaKind::Backdrop,
+                        );
                         $trailer = $title->titleVideos->first();
                     @endphp
 
@@ -133,10 +143,16 @@ new class extends Component
 
                                 <div class="flex flex-wrap gap-2 text-sm text-neutral-500 dark:text-neutral-400">
                                     @if ($trailer?->provider)
-                                        <span>{{ str($trailer->provider)->headline() }}</span>
+                                        <span class="inline-flex items-center gap-1.5">
+                                            <x-ui.icon name="video-camera" class="size-4 text-neutral-400 dark:text-neutral-500" />
+                                            <span>{{ str($trailer->provider)->headline() }}</span>
+                                        </span>
                                     @endif
                                     @if ($trailer?->published_at)
-                                        <span>{{ $trailer->published_at->format('M j, Y') }}</span>
+                                        <span class="inline-flex items-center gap-1.5">
+                                            <x-ui.icon name="calendar-days" class="size-4 text-neutral-400 dark:text-neutral-500" />
+                                            <span>{{ $trailer->published_at->format('M j, Y') }}</span>
+                                        </span>
                                     @endif
                                 </div>
 

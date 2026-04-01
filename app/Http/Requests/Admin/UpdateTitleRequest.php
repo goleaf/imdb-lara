@@ -2,9 +2,11 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Enums\TitleType;
 use App\Models\Title;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateTitleRequest extends FormRequest
 {
@@ -26,6 +28,8 @@ class UpdateTitleRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'original_name' => ['nullable', 'string', 'max:255'],
+            'slug' => ['nullable', 'string', 'max:255', Rule::unique('titles', 'slug')->ignore($this->title()->id)],
+            'title_type' => ['nullable', Rule::enum(TitleType::class)],
             'release_year' => ['nullable', 'integer', 'min:1888', 'max:2100'],
             'end_year' => ['nullable', 'integer', 'min:1888', 'max:2100', 'gte:release_year'],
             'release_date' => ['nullable', 'date'],
@@ -40,6 +44,14 @@ class UpdateTitleRequest extends FormRequest
             'meta_description' => ['nullable', 'string', 'max:500'],
             'search_keywords' => ['nullable', 'string', 'max:1000'],
             'is_published' => ['required', 'boolean'],
+            'genre_ids' => ['nullable', 'array'],
+            'genre_ids.*' => ['integer', 'exists:genres,id'],
         ];
+    }
+
+    public function title(): Title
+    {
+        /** @var Title */
+        return $this->route('title');
     }
 }

@@ -15,7 +15,7 @@ class UserListPolicy
 
     public function view(?User $user, UserList $userList): bool
     {
-        if ($userList->visibility === ListVisibility::Public) {
+        if (in_array($userList->visibility, [ListVisibility::Public, ListVisibility::Unlisted], true)) {
             return true;
         }
 
@@ -31,14 +31,21 @@ class UserListPolicy
         return $user->isActive();
     }
 
+    public function report(User $user, UserList $userList): bool
+    {
+        return $user->isActive()
+            && $userList->isShareable()
+            && $userList->user_id !== $user->id;
+    }
+
     public function update(User $user, UserList $userList): bool
     {
-        return ($user->canModerateContent() || $userList->user_id === $user->id) && ! $userList->is_watchlist;
+        return $userList->user_id === $user->id && ! $userList->is_watchlist;
     }
 
     public function delete(User $user, UserList $userList): bool
     {
-        return ($user->canModerateContent() || $userList->user_id === $user->id) && ! $userList->is_watchlist;
+        return $userList->user_id === $user->id && ! $userList->is_watchlist;
     }
 
     public function restore(User $user, UserList $userList): bool

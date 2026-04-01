@@ -12,7 +12,18 @@
 
 @section('content')
     @php
-        $poster = $title->mediaAssets->first();
+        $poster = \App\Models\MediaAsset::preferredFrom(
+            $title->mediaAssets,
+            \App\Enums\MediaKind::Poster,
+            \App\Enums\MediaKind::Backdrop,
+        );
+        $titleTypeIcon = match ($title->title_type) {
+            \App\Enums\TitleType::Series, \App\Enums\TitleType::MiniSeries => 'tv',
+            \App\Enums\TitleType::Documentary => 'camera',
+            \App\Enums\TitleType::Special => 'sparkles',
+            \App\Enums\TitleType::Episode => 'rectangle-stack',
+            default => 'film',
+        };
     @endphp
 
     <section class="space-y-6">
@@ -34,10 +45,10 @@
 
                 <div class="space-y-4">
                     <div class="flex flex-wrap items-center gap-2">
-                        <x-ui.badge variant="outline">{{ str($title->title_type->value)->headline() }}</x-ui.badge>
+                        <x-ui.badge variant="outline" :icon="$titleTypeIcon">{{ str($title->title_type->value)->headline() }}</x-ui.badge>
                         @if ($title->release_year)
                             <a href="{{ route('public.years.show', ['year' => $title->release_year]) }}">
-                                <x-ui.badge variant="outline" color="slate">{{ $title->release_year }}</x-ui.badge>
+                                <x-ui.badge variant="outline" color="slate" icon="calendar-days">{{ $title->release_year }}</x-ui.badge>
                             </a>
                         @endif
                         @if ($title->statistic?->average_rating)
@@ -79,7 +90,7 @@
                 <div class="space-y-4">
                     <div class="flex items-center justify-between gap-4">
                         <x-ui.heading level="h2" size="lg">Cast</x-ui.heading>
-                        <x-ui.badge variant="outline" color="neutral">{{ number_format($castCount) }} total</x-ui.badge>
+                        <x-ui.badge variant="outline" color="neutral" icon="users">{{ number_format($castCount) }} total</x-ui.badge>
                     </div>
 
                     <div class="grid gap-3">
@@ -98,7 +109,7 @@
                                     </div>
 
                                     @if ($credit->billing_order)
-                                        <x-ui.badge variant="outline" color="neutral">
+                                        <x-ui.badge variant="outline" color="neutral" icon="hashtag">
                                             #{{ $credit->billing_order }}
                                         </x-ui.badge>
                                     @endif
@@ -106,6 +117,9 @@
                             </div>
                         @empty
                             <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                <x-ui.empty.media>
+                                    <x-ui.icon name="users" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                                </x-ui.empty.media>
                                 <x-ui.heading level="h3">No cast credits are published yet.</x-ui.heading>
                             </x-ui.empty>
                         @endforelse
@@ -121,7 +135,7 @@
                 <div class="space-y-4">
                     <div class="flex items-center justify-between gap-4">
                         <x-ui.heading level="h2" size="lg">Crew</x-ui.heading>
-                        <x-ui.badge variant="outline" color="neutral">{{ number_format($crewCount) }} total</x-ui.badge>
+                        <x-ui.badge variant="outline" color="neutral" icon="briefcase">{{ number_format($crewCount) }} total</x-ui.badge>
                     </div>
 
                     <div class="grid gap-3">
@@ -152,7 +166,7 @@
                                     </div>
 
                                     @if ($credit->billing_order)
-                                        <x-ui.badge variant="outline" color="slate">
+                                        <x-ui.badge variant="outline" color="slate" icon="hashtag">
                                             #{{ $credit->billing_order }}
                                         </x-ui.badge>
                                     @endif
@@ -160,6 +174,9 @@
                             </div>
                         @empty
                             <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                <x-ui.empty.media>
+                                    <x-ui.icon name="briefcase" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                                </x-ui.empty.media>
                                 <x-ui.heading level="h3">No crew credits are published yet.</x-ui.heading>
                             </x-ui.empty>
                         @endforelse

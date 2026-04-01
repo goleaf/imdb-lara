@@ -19,12 +19,17 @@ class HomepageTest extends TestCase
         $this->get(route('public.home'))
             ->assertOk()
             ->assertSee('Hero Spotlight')
+            ->assertSeeHtml('data-slot="home-hero"')
+            ->assertDontSeeHtml('bg-[linear-gradient(140deg,rgba(15,23,42,0.98),rgba(23,23,23,0.96))]')
+            ->assertSeeHtml('data-slot="site-footer"')
+            ->assertSee('Screenbase')
             ->assertSee('Trending Now')
             ->assertSee('Top Rated Movies')
             ->assertSee('Top Rated TV Shows')
             ->assertSee('Coming Soon')
             ->assertSee('Recently Added Titles')
             ->assertSee('Popular People')
+            ->assertSee('Featured talent')
             ->assertSee('Latest Trailers')
             ->assertSee('Latest Reviews')
             ->assertSee('Featured Public Lists')
@@ -35,7 +40,8 @@ class HomepageTest extends TestCase
             ->assertSee('Aurora Run')
             ->assertSee('Ava Mercer')
             ->assertSee('Weekend Marathon')
-            ->assertSee('2026');
+            ->assertSee('2026')
+            ->assertSeeHtml('data-slot="link-icon:after"');
     }
 
     public function test_homepage_renders_clean_empty_states_without_catalog_data(): void
@@ -50,6 +56,7 @@ class HomepageTest extends TestCase
             ->assertSee('No public trailers are available yet.')
             ->assertSee('No public lists are featured right now.')
             ->assertSee('No genres are ready to browse yet.')
-            ->assertSee('No release years are available yet.');
+            ->assertSee('No release years are available yet.')
+            ->assertSeeHtml('data-slot="empty-media"');
     }
 }

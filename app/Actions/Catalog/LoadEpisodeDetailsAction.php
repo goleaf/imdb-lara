@@ -2,6 +2,7 @@
 
 namespace App\Actions\Catalog;
 
+use App\Actions\Seo\PageSeoData;
 use App\Enums\MediaKind;
 use App\Enums\ReviewStatus;
 use App\Models\Credit;
@@ -40,7 +41,7 @@ class LoadEpisodeDetailsAction
                 ->orderBy('season_number'),
             'mediaAssets' => fn ($query) => $query
                 ->select(['id', 'mediable_type', 'mediable_id', 'kind', 'url', 'alt_text', 'position'])
-                ->orderBy('position'),
+                ->ordered(),
         ]);
 
         $season->load([
@@ -85,8 +86,7 @@ class LoadEpisodeDetailsAction
                     'position',
                     'published_at',
                 ])
-                ->orderBy('position')
-                ->orderByDesc('published_at'),
+                ->ordered(),
             'reviews' => fn ($query) => $query
                 ->select([
                     'id',
@@ -174,15 +174,22 @@ class LoadEpisodeDetailsAction
             ['label' => 'Absolute number', 'value' => $episode->episodeMeta?->absolute_number ? (string) $episode->episodeMeta->absolute_number : null],
             ['label' => 'Season / episode', 'value' => $episode->episodeMeta ? sprintf('S%02dE%02d', $episode->episodeMeta->season_number, $episode->episodeMeta->episode_number) : null],
         ])->filter(fn (array $item): bool => filled($item['value']))->values();
+        $still = MediaAsset::preferredFrom($episode->mediaAssets, MediaKind::Still, MediaKind::Backdrop)
+            ?? MediaAsset::preferredFrom($series->mediaAssets, MediaKind::Backdrop, MediaKind::Poster)
+            ?? MediaAsset::preferredFrom($episode->mediaAssets);
+        $breadcrumbs = [
+            ['label' => 'Home', 'href' => route('public.home')],
+            ['label' => 'TV Shows', 'href' => route('public.series.index')],
+            ['label' => $series->name, 'href' => route('public.titles.show', $series)],
+            ['label' => $season->name, 'href' => route('public.seasons.show', ['series' => $series, 'season' => $season])],
+            ['label' => $episode->name],
+        ];
 
         return [
             'series' => $series,
             'season' => $season,
             'episode' => $episode,
-            'still' => $episode->mediaAssets->firstWhere('kind', MediaKind::Still)
-                ?? $episode->mediaAssets->firstWhere('kind', MediaKind::Backdrop)
-                ?? $series->mediaAssets->firstWhere('kind', MediaKind::Backdrop)
-                ?? $episode->mediaAssets->first(),
+            'still' => $still,
             'seasonNavigation' => $seasonNavigation,
             'seasonEpisodes' => $seasonEpisodes,
             'previousEpisode' => $previousEpisode,
@@ -191,6 +198,15 @@ class LoadEpisodeDetailsAction
             'keyCrew' => $keyCrew,
             'reviews' => $episode->reviews,
             'detailItems' => $detailItems,
+            'seo' => new PageSeoData(
+                title: $episode->meta_title ?: $episode->name,
+                description: $episode->meta_description ?: ($episode->plot_outline ?: 'Browse credits, reviews, and metadata for '.$episode->name.'.'),
+                canonical: route('public.episodes.show', ['series' => $series, 'season' => $season, 'episode' => $episode]),
+                openGraphType: 'video.tv_show',
+                openGraphImage: $still?->url,
+                openGraphImageAlt: $still?->alt_text ?: $episode->name,
+                breadcrumbs: $breadcrumbs,
+            ),
         ];
     }
 }

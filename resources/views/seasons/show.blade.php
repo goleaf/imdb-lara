@@ -47,16 +47,16 @@
                     <div class="space-y-6">
                         <div class="space-y-4">
                             <div class="flex flex-wrap items-center gap-2">
-                                <x-ui.badge variant="outline">{{ $series->name }}</x-ui.badge>
-                                <x-ui.badge variant="outline" color="slate">Season {{ $season->season_number }}</x-ui.badge>
-                                <x-ui.badge variant="outline" color="neutral">{{ number_format($episodeCount) }} episodes</x-ui.badge>
+                                <x-ui.badge variant="outline" icon="tv">{{ $series->name }}</x-ui.badge>
+                                <x-ui.badge variant="outline" color="slate" icon="rectangle-stack">Season {{ $season->season_number }}</x-ui.badge>
+                                <x-ui.badge variant="outline" color="neutral" icon="rectangle-stack">{{ number_format($episodeCount) }} episodes</x-ui.badge>
                                 @if ($season->release_year)
                                     <a href="{{ route('public.years.show', ['year' => $season->release_year]) }}">
-                                        <x-ui.badge variant="outline" color="neutral">{{ $season->release_year }}</x-ui.badge>
+                                        <x-ui.badge variant="outline" color="neutral" icon="calendar-days">{{ $season->release_year }}</x-ui.badge>
                                     </a>
                                 @endif
                                 @if ($airedRangeLabel)
-                                    <x-ui.badge variant="outline" color="neutral">{{ $airedRangeLabel }}</x-ui.badge>
+                                    <x-ui.badge variant="outline" color="neutral" icon="calendar-days">{{ $airedRangeLabel }}</x-ui.badge>
                                 @endif
                             </div>
 
@@ -86,12 +86,18 @@
 
                         <div class="grid gap-3 sm:grid-cols-3">
                             <div class="rounded-box border border-black/5 bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
-                                <div class="text-xs uppercase tracking-[0.2em] text-neutral-500 dark:text-neutral-400">Season episodes</div>
+                                <div class="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-neutral-500 dark:text-neutral-400">
+                                    <x-ui.icon name="rectangle-stack" class="size-4" />
+                                    <span>Season episodes</span>
+                                </div>
                                 <div class="mt-2 text-2xl font-semibold">{{ number_format($episodeCount) }}</div>
                                 <div class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">Published in the public guide</div>
                             </div>
                             <div class="rounded-box border border-black/5 bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
-                                <div class="text-xs uppercase tracking-[0.2em] text-neutral-500 dark:text-neutral-400">Series audience score</div>
+                                <div class="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-neutral-500 dark:text-neutral-400">
+                                    <x-ui.icon name="star" class="size-4" />
+                                    <span>Series audience score</span>
+                                </div>
                                 <div class="mt-2 text-2xl font-semibold">
                                     {{ $series->statistic?->average_rating ? number_format((float) $series->statistic->average_rating, 1) : 'N/A' }}
                                 </div>
@@ -100,7 +106,10 @@
                                 </div>
                             </div>
                             <div class="rounded-box border border-black/5 bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
-                                <div class="text-xs uppercase tracking-[0.2em] text-neutral-500 dark:text-neutral-400">Season navigation</div>
+                                <div class="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-neutral-500 dark:text-neutral-400">
+                                    <x-ui.icon name="list-bullet" class="size-4" />
+                                    <span>Season navigation</span>
+                                </div>
                                 <div class="mt-2 text-2xl font-semibold">{{ number_format($seasonNavigation->count()) }}</div>
                                 <div class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">Published seasons in this run</div>
                             </div>
@@ -114,13 +123,16 @@
             <div class="space-y-4">
                 <div class="flex flex-wrap items-center justify-between gap-4">
                     <div>
-                        <x-ui.heading level="h2" size="lg">Season navigation</x-ui.heading>
+                        <x-ui.heading level="h2" size="lg" class="inline-flex items-center gap-2">
+                            <x-ui.icon name="list-bullet" class="size-5 text-neutral-500 dark:text-neutral-400" />
+                            <span>Season navigation</span>
+                        </x-ui.heading>
                         <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
                             Jump between seasons without losing the current series context.
                         </x-ui.text>
                     </div>
 
-                    <x-ui.badge variant="outline" color="neutral">{{ number_format($seasonNavigation->count()) }} seasons</x-ui.badge>
+                    <x-ui.badge variant="outline" color="neutral" icon="rectangle-stack">{{ number_format($seasonNavigation->count()) }} seasons</x-ui.badge>
                 </div>
 
                 <div class="flex flex-wrap gap-2">
@@ -128,6 +140,7 @@
                         <a href="{{ route('public.seasons.show', ['series' => $series, 'season' => $navigationSeason]) }}">
                             <x-ui.badge
                                 variant="outline"
+                                icon="rectangle-stack"
                                 :color="$navigationSeason->is($season) ? 'green' : 'neutral'"
                             >
                                 Season {{ $navigationSeason->season_number }}
@@ -146,13 +159,16 @@
                     <div class="space-y-4">
                         <div class="flex items-center justify-between gap-4">
                             <div>
-                                <x-ui.heading level="h2" size="lg">Episode guide</x-ui.heading>
+                                <x-ui.heading level="h2" size="lg" class="inline-flex items-center gap-2">
+                                    <x-ui.icon name="list-bullet" class="size-5 text-neutral-500 dark:text-neutral-400" />
+                                    <span>Episode guide</span>
+                                </x-ui.heading>
                                 <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
                                     Ratings, summaries, release timing, and quick access for every published episode in this season.
                                 </x-ui.text>
                             </div>
 
-                            <x-ui.badge variant="outline" color="neutral">{{ number_format($episodeCount) }} episodes</x-ui.badge>
+                            <x-ui.badge variant="outline" color="neutral" icon="rectangle-stack">{{ number_format($episodeCount) }} episodes</x-ui.badge>
                         </div>
 
                         <div class="grid gap-3">
@@ -173,16 +189,16 @@
                                         <div class="flex flex-wrap items-start justify-between gap-4">
                                             <div class="space-y-3">
                                                 <div class="flex flex-wrap items-center gap-2">
-                                                    <x-ui.badge variant="outline" color="slate">
+                                                    <x-ui.badge variant="outline" color="slate" icon="rectangle-stack">
                                                         S{{ str_pad((string) $episodeMeta->season_number, 2, '0', STR_PAD_LEFT) }}E{{ str_pad((string) $episodeMeta->episode_number, 2, '0', STR_PAD_LEFT) }}
                                                     </x-ui.badge>
                                                     @if ($episodeMeta->aired_at)
-                                                        <x-ui.badge variant="outline" color="neutral">
+                                                        <x-ui.badge variant="outline" color="neutral" icon="calendar-days">
                                                             {{ $episodeMeta->aired_at->format('M j, Y') }}
                                                         </x-ui.badge>
                                                     @endif
                                                     @if ($episodeTitle->runtime_minutes)
-                                                        <x-ui.badge variant="outline" color="neutral">{{ $episodeTitle->runtime_minutes }} min</x-ui.badge>
+                                                        <x-ui.badge variant="outline" color="neutral" icon="clock">{{ $episodeTitle->runtime_minutes }} min</x-ui.badge>
                                                     @endif
                                                     @if ($episodeTitle->statistic?->average_rating)
                                                         <x-ui.badge icon="star" color="amber">
@@ -191,7 +207,17 @@
                                                     @endif
                                                     @auth
                                                         @if ($watchState)
-                                                            <x-ui.badge variant="outline" :color="$watchStateColor">
+                                                            <x-ui.badge
+                                                                variant="outline"
+                                                                :color="$watchStateColor"
+                                                                :icon="match ($watchState) {
+                                                                    'completed' => 'check-circle',
+                                                                    'watching' => 'play-circle',
+                                                                    'paused' => 'pause-circle',
+                                                                    'dropped' => 'x-circle',
+                                                                    default => 'bookmark',
+                                                                }"
+                                                            >
                                                                 {{ str($watchState)->headline() }}
                                                             </x-ui.badge>
                                                         @endif
@@ -211,7 +237,10 @@
 
                                                 @if ($episodeTitle->credits->isNotEmpty())
                                                     <div class="flex flex-wrap gap-2 text-sm text-neutral-500 dark:text-neutral-400">
-                                                        <span class="font-medium text-neutral-700 dark:text-neutral-200">Guest cast:</span>
+                                                        <span class="inline-flex items-center gap-1.5 font-medium text-neutral-700 dark:text-neutral-200">
+                                                            <x-ui.icon name="users" class="size-4 text-neutral-500 dark:text-neutral-400" />
+                                                            <span>Guest cast:</span>
+                                                        </span>
                                                         @foreach ($episodeTitle->credits->take(3) as $credit)
                                                             <a href="{{ route('public.people.show', $credit->person) }}" class="hover:opacity-80">
                                                                 {{ $credit->person->name }}
@@ -221,20 +250,32 @@
                                                 @endif
                                             </div>
 
-                                            <x-ui.link :href="route('public.episodes.show', ['series' => $series, 'season' => $season, 'episode' => $episodeTitle])" variant="ghost">
+                                            <x-ui.link :href="route('public.episodes.show', ['series' => $series, 'season' => $season, 'episode' => $episodeTitle])" variant="ghost" iconAfter="arrow-right">
                                                 View episode
                                             </x-ui.link>
                                         </div>
 
                                         <div class="grid gap-3 sm:grid-cols-3 text-sm text-neutral-500 dark:text-neutral-400">
-                                            <div>{{ number_format((int) ($episodeTitle->statistic?->rating_count ?? 0)) }} ratings</div>
-                                            <div>{{ number_format((int) ($episodeTitle->statistic?->review_count ?? 0)) }} reviews</div>
-                                            <div>{{ number_format((int) ($episodeTitle->statistic?->watchlist_count ?? 0)) }} watchlists</div>
+                                            <div class="inline-flex items-center gap-1.5">
+                                                <x-ui.icon name="star" class="size-4" />
+                                                <span>{{ number_format((int) ($episodeTitle->statistic?->rating_count ?? 0)) }} ratings</span>
+                                            </div>
+                                            <div class="inline-flex items-center gap-1.5">
+                                                <x-ui.icon name="chat-bubble-left-right" class="size-4" />
+                                                <span>{{ number_format((int) ($episodeTitle->statistic?->review_count ?? 0)) }} reviews</span>
+                                            </div>
+                                            <div class="inline-flex items-center gap-1.5">
+                                                <x-ui.icon name="bookmark" class="size-4" />
+                                                <span>{{ number_format((int) ($episodeTitle->statistic?->watchlist_count ?? 0)) }} watchlists</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </x-ui.card>
                             @empty
                                 <x-ui.empty class="rounded-box border border-dashed border-black/10 bg-white dark:border-white/10 dark:bg-neutral-900">
+                                    <x-ui.empty.media>
+                                        <x-ui.icon name="rectangle-stack" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                                    </x-ui.empty.media>
                                     <x-ui.heading level="h3">No published episodes are attached to this season yet.</x-ui.heading>
                                     <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
                                         The season shell exists, but episode records have not been published.
@@ -250,8 +291,11 @@
                 <x-ui.card class="!max-w-none">
                     <div class="space-y-4">
                         <div class="flex items-center justify-between gap-4">
-                            <x-ui.heading level="h2" size="lg">Top-rated episodes this season</x-ui.heading>
-                            <x-ui.badge variant="outline" color="neutral">{{ number_format($topRatedEpisodes->count()) }} ranked</x-ui.badge>
+                            <x-ui.heading level="h2" size="lg" class="inline-flex items-center gap-2">
+                                <x-ui.icon name="star" class="size-5 text-neutral-500 dark:text-neutral-400" />
+                                <span>Top-rated episodes this season</span>
+                            </x-ui.heading>
+                            <x-ui.badge variant="outline" color="neutral" icon="star">{{ number_format($topRatedEpisodes->count()) }} ranked</x-ui.badge>
                         </div>
 
                         @if ($topRatedEpisodes->isNotEmpty())
@@ -282,6 +326,9 @@
                             </div>
                         @else
                             <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                <x-ui.empty.media>
+                                    <x-ui.icon name="star" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                                </x-ui.empty.media>
                                 <x-ui.heading level="h3">Episode scores are still building.</x-ui.heading>
                                 <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
                                     Top-rated episode rankings appear as soon as members start scoring the season.
@@ -293,7 +340,10 @@
 
                 <x-ui.card class="!max-w-none">
                     <div class="space-y-4">
-                        <x-ui.heading level="h2" size="lg">Season context</x-ui.heading>
+                        <x-ui.heading level="h2" size="lg" class="inline-flex items-center gap-2">
+                            <x-ui.icon name="information-circle" class="size-5 text-neutral-500 dark:text-neutral-400" />
+                            <span>Season context</span>
+                        </x-ui.heading>
 
                         <div class="grid gap-3">
                             <div class="flex items-start justify-between gap-4 rounded-box border border-black/5 px-4 py-3 dark:border-white/10">

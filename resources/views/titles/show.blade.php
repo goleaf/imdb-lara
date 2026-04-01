@@ -16,6 +16,13 @@
         $isSeriesLike = in_array($title->title_type, [\App\Enums\TitleType::Series, \App\Enums\TitleType::MiniSeries], true);
         $ratingCount = (int) ($title->statistic?->rating_count ?? 0);
         $maxBreakdownCount = max(1, (int) $ratingsBreakdown->max('count'));
+        $titleTypeIcon = match ($title->title_type) {
+            \App\Enums\TitleType::Series, \App\Enums\TitleType::MiniSeries => 'tv',
+            \App\Enums\TitleType::Documentary => 'camera',
+            \App\Enums\TitleType::Special => 'sparkles',
+            \App\Enums\TitleType::Episode => 'rectangle-stack',
+            default => 'film',
+        };
     @endphp
 
     <section class="space-y-6">
@@ -50,20 +57,20 @@
                     <div class="space-y-6">
                         <div class="space-y-4">
                             <div class="flex flex-wrap items-center gap-2">
-                                <x-ui.badge variant="outline">{{ str($title->title_type->value)->headline() }}</x-ui.badge>
+                                <x-ui.badge variant="outline" :icon="$titleTypeIcon">{{ str($title->title_type->value)->headline() }}</x-ui.badge>
 
                                 @if ($title->release_year)
                                     <a href="{{ route('public.years.show', ['year' => $title->release_year]) }}">
-                                        <x-ui.badge variant="outline" color="slate">{{ $title->release_year }}</x-ui.badge>
+                                        <x-ui.badge variant="outline" color="slate" icon="calendar-days">{{ $title->release_year }}</x-ui.badge>
                                     </a>
                                 @endif
 
                                 @if ($title->runtime_minutes)
-                                    <x-ui.badge variant="outline" color="neutral">{{ $title->runtime_minutes }} min</x-ui.badge>
+                                    <x-ui.badge variant="outline" color="neutral" icon="clock">{{ $title->runtime_minutes }} min</x-ui.badge>
                                 @endif
 
                                 @if ($title->age_rating)
-                                    <x-ui.badge variant="outline" color="neutral">{{ $title->age_rating }}</x-ui.badge>
+                                    <x-ui.badge variant="outline" color="neutral" icon="shield-check">{{ $title->age_rating }}</x-ui.badge>
                                 @endif
 
                                 @if ($title->statistic?->average_rating)
@@ -97,7 +104,7 @@
                                 <div class="flex flex-wrap gap-2">
                                     @foreach ($title->genres as $genre)
                                         <a href="{{ route('public.genres.show', $genre) }}">
-                                            <x-ui.badge variant="outline" color="neutral">{{ $genre->name }}</x-ui.badge>
+                                            <x-ui.badge variant="outline" color="neutral" icon="tag">{{ $genre->name }}</x-ui.badge>
                                         </a>
                                     @endforeach
                                 </div>
@@ -106,11 +113,17 @@
                             @if ($countries->isNotEmpty() || $languages->isNotEmpty())
                                 <div class="flex flex-wrap gap-2">
                                     @foreach ($countries as $country)
-                                        <x-ui.badge variant="outline" color="slate">{{ $country }}</x-ui.badge>
+                                        <x-ui.badge variant="outline" color="slate">
+                                            <x-ui.flag type="country" :code="$country" class="size-4" />
+                                            {{ $country }}
+                                        </x-ui.badge>
                                     @endforeach
 
                                     @foreach ($languages as $language)
-                                        <x-ui.badge variant="outline" color="neutral">{{ $language }}</x-ui.badge>
+                                        <x-ui.badge variant="outline" color="neutral">
+                                            <x-ui.flag type="language" :code="$language" class="size-4" />
+                                            {{ $language }}
+                                        </x-ui.badge>
                                     @endforeach
                                 </div>
                             @endif
@@ -190,7 +203,7 @@
                     <div class="flex items-center justify-between gap-4">
                         <x-ui.heading level="h2" size="lg">Storyline</x-ui.heading>
                         @if ($title->synopsis)
-                            <x-ui.badge variant="outline" color="neutral">Long plot available</x-ui.badge>
+                            <x-ui.badge variant="outline" color="neutral" icon="document-text">Long plot available</x-ui.badge>
                         @endif
                     </div>
 
@@ -216,7 +229,7 @@
                             </x-ui.text>
                         </div>
 
-                        <x-ui.link :href="route('public.titles.cast', $title)" variant="ghost">
+                        <x-ui.link :href="route('public.titles.cast', $title)" variant="ghost" iconAfter="arrow-right">
                             View full cast
                         </x-ui.link>
                     </div>
@@ -236,13 +249,16 @@
                                 </div>
 
                                 @if ($credit->billing_order)
-                                    <x-ui.badge variant="outline" color="neutral">
+                                    <x-ui.badge variant="outline" color="neutral" icon="hashtag">
                                         #{{ $credit->billing_order }}
                                     </x-ui.badge>
                                 @endif
                             </div>
                         @empty
                             <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                <x-ui.empty.media>
+                                    <x-ui.icon name="users" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                                </x-ui.empty.media>
                                 <x-ui.heading level="h3">No cast has been published yet.</x-ui.heading>
                             </x-ui.empty>
                         @endforelse
@@ -251,7 +267,7 @@
                     <div class="space-y-3">
                         <div class="flex items-center justify-between gap-4">
                             <x-ui.heading level="h3" size="md">Key crew</x-ui.heading>
-                            <x-ui.badge variant="outline" color="neutral">{{ number_format($crewPreview->count()) }} role groups</x-ui.badge>
+                            <x-ui.badge variant="outline" color="neutral" icon="rectangle-group">{{ number_format($crewPreview->count()) }} role groups</x-ui.badge>
                         </div>
 
                         <div class="grid gap-3 md:grid-cols-2">
@@ -260,7 +276,7 @@
                                     <div class="flex items-center justify-between gap-3">
                                         <div class="font-medium">{{ $group['role'] }}</div>
                                         @if ($group['department'])
-                                            <x-ui.badge variant="outline" color="slate">{{ $group['department'] }}</x-ui.badge>
+                                            <x-ui.badge variant="outline" color="slate" icon="briefcase">{{ $group['department'] }}</x-ui.badge>
                                         @endif
                                     </div>
 
@@ -276,6 +292,9 @@
                                 </div>
                             @empty
                                 <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10 md:col-span-2">
+                                    <x-ui.empty.media>
+                                        <x-ui.icon name="briefcase" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                                    </x-ui.empty.media>
                                     <x-ui.heading level="h3">No crew credits are available yet.</x-ui.heading>
                                 </x-ui.empty>
                             @endforelse
@@ -295,7 +314,7 @@
                                 </x-ui.text>
                             </div>
 
-                            <x-ui.badge variant="outline" color="neutral">
+                            <x-ui.badge variant="outline" color="neutral" icon="tv">
                                 {{ number_format($title->seasons->count()) }} published seasons
                             </x-ui.badge>
                         </div>
@@ -304,7 +323,7 @@
                             <div class="flex flex-wrap gap-2">
                                 @foreach ($title->seasons as $season)
                                     <a href="{{ route('public.seasons.show', ['series' => $title, 'season' => $season]) }}">
-                                        <x-ui.badge variant="outline" color="neutral">
+                                        <x-ui.badge variant="outline" color="neutral" icon="queue-list">
                                             Season {{ $season->season_number }}
                                         </x-ui.badge>
                                     </a>
@@ -335,7 +354,7 @@
                                         @endif
                                     </div>
 
-                                    <x-ui.link :href="route('public.seasons.show', ['series' => $title, 'season' => $latestSeason])" variant="ghost">
+                                    <x-ui.link :href="route('public.seasons.show', ['series' => $title, 'season' => $latestSeason])" variant="ghost" iconAfter="arrow-right">
                                         View season
                                     </x-ui.link>
                                 </div>
@@ -395,12 +414,15 @@
                                         </div>
                                     </div>
 
-                                    <x-ui.link :href="route('public.seasons.show', ['series' => $title, 'season' => $season])" variant="ghost">
+                                    <x-ui.link :href="route('public.seasons.show', ['series' => $title, 'season' => $season])" variant="ghost" iconAfter="arrow-right">
                                         View season
                                     </x-ui.link>
                                 </div>
                             @empty
                                 <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                    <x-ui.empty.media>
+                                        <x-ui.icon name="tv" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                                    </x-ui.empty.media>
                                     <x-ui.heading level="h3">No seasons are available yet.</x-ui.heading>
                                 </x-ui.empty>
                             @endforelse
@@ -412,7 +434,7 @@
                     <div class="space-y-4">
                         <div class="flex items-center justify-between gap-4">
                             <x-ui.heading level="h2" size="lg">Top-rated episodes</x-ui.heading>
-                            <x-ui.badge variant="outline" color="neutral">
+                            <x-ui.badge variant="outline" color="neutral" icon="star">
                                 {{ number_format($topRatedEpisodes->count()) }} ranked
                             </x-ui.badge>
                         </div>
@@ -445,6 +467,9 @@
                             </div>
                         @else
                             <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                <x-ui.empty.media>
+                                    <x-ui.icon name="star" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                                </x-ui.empty.media>
                                 <x-ui.heading level="h3">Episode rankings are still coming together.</x-ui.heading>
                                 <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
                                     Scores will appear here once members start rating individual episodes.
@@ -459,7 +484,7 @@
                 <div class="space-y-4">
                     <div class="flex items-center justify-between gap-4">
                         <x-ui.heading level="h2" size="lg">Media gallery</x-ui.heading>
-                        <x-ui.badge variant="outline" color="neutral">{{ number_format($galleryAssets->count()) }} assets</x-ui.badge>
+                        <x-ui.badge variant="outline" color="neutral" icon="photo">{{ number_format($galleryAssets->count()) }} assets</x-ui.badge>
                     </div>
 
                     @if ($galleryAssets->isNotEmpty())
@@ -482,6 +507,9 @@
                         </div>
                     @else
                         <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                            <x-ui.empty.media>
+                                <x-ui.icon name="photo" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                            </x-ui.empty.media>
                             <x-ui.heading level="h3">No gallery images are published yet.</x-ui.heading>
                         </x-ui.empty>
                     @endif
@@ -498,7 +526,7 @@
                             </x-ui.text>
                         </div>
 
-                        <x-ui.link :href="route('public.trailers.latest')" variant="ghost">
+                        <x-ui.link :href="route('public.trailers.latest')" variant="ghost" iconAfter="arrow-right">
                             Latest trailers
                         </x-ui.link>
                     </div>
@@ -527,6 +555,9 @@
                             </div>
                         @empty
                             <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                <x-ui.empty.media>
+                                    <x-ui.icon name="play-circle" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                                </x-ui.empty.media>
                                 <x-ui.heading level="h3">No videos are published yet.</x-ui.heading>
                                 <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
                                     Trailer links can appear here as soon as the media feed is connected.
@@ -543,6 +574,13 @@
 
             <livewire:titles.custom-list-picker :title="$title" :key="'custom-lists-'.$title->id" />
 
+            <livewire:contributions.suggestion-form
+                contributableType="title"
+                :contributableId="$title->id"
+                :contributableLabel="$title->name"
+                :key="'title-contribution-'.$title->id"
+            />
+
             <x-ui.card class="!max-w-none">
                 <div class="space-y-3">
                     <div class="flex items-center justify-between gap-4">
@@ -552,12 +590,17 @@
                                 Secondary metadata, score distribution, related catalog links, and future extension points.
                             </x-ui.text>
                         </div>
-                        <x-ui.badge variant="outline" color="neutral">7 panels</x-ui.badge>
+                        <x-ui.badge variant="outline" color="neutral" icon="squares-2x2">7 panels</x-ui.badge>
                     </div>
 
                     <x-ui.accordion class="rounded-box border border-black/5 dark:border-white/10">
                         <x-ui.accordion.item expanded>
-                            <x-ui.accordion.trigger>Details</x-ui.accordion.trigger>
+                            <x-ui.accordion.trigger>
+                                <span class="inline-flex items-center gap-2">
+                                    <x-ui.icon name="information-circle" class="size-4" />
+                                    Details
+                                </span>
+                            </x-ui.accordion.trigger>
                             <x-ui.accordion.content>
                                 <div class="grid gap-3">
                                     @forelse ($detailItems as $item)
@@ -567,6 +610,9 @@
                                         </div>
                                     @empty
                                         <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                            <x-ui.empty.media>
+                                                <x-ui.icon name="information-circle" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                                            </x-ui.empty.media>
                                             <x-ui.heading level="h3">Detailed metadata is still being curated.</x-ui.heading>
                                         </x-ui.empty>
                                     @endforelse
@@ -575,7 +621,12 @@
                         </x-ui.accordion.item>
 
                         <x-ui.accordion.item>
-                            <x-ui.accordion.trigger>Technical specs</x-ui.accordion.trigger>
+                            <x-ui.accordion.trigger>
+                                <span class="inline-flex items-center gap-2">
+                                    <x-ui.icon name="cog-6-tooth" class="size-4" />
+                                    Technical specs
+                                </span>
+                            </x-ui.accordion.trigger>
                             <x-ui.accordion.content>
                                 <div class="grid gap-3">
                                     @forelse ($technicalSpecItems as $item)
@@ -585,6 +636,9 @@
                                         </div>
                                     @empty
                                         <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                            <x-ui.empty.media>
+                                                <x-ui.icon name="cog-6-tooth" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                                            </x-ui.empty.media>
                                             <x-ui.heading level="h3">Technical specs are not available yet.</x-ui.heading>
                                         </x-ui.empty>
                                     @endforelse
@@ -593,7 +647,12 @@
                         </x-ui.accordion.item>
 
                         <x-ui.accordion.item>
-                            <x-ui.accordion.trigger>Ratings breakdown</x-ui.accordion.trigger>
+                            <x-ui.accordion.trigger>
+                                <span class="inline-flex items-center gap-2">
+                                    <x-ui.icon name="chart-bar" class="size-4" />
+                                    Ratings breakdown
+                                </span>
+                            </x-ui.accordion.trigger>
                             <x-ui.accordion.content>
                                 @if ($ratingCount > 0)
                                     <div class="space-y-3">
@@ -602,7 +661,7 @@
                                                 <div class="text-sm font-medium text-neutral-700 dark:text-neutral-200">{{ $bucket['score'] }}</div>
                                                 <div class="h-2 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-800">
                                                     <div
-                                                        class="h-full rounded-full bg-amber-400"
+                                                        class="h-full rounded-full bg-amber-500 dark:bg-amber-400"
                                                         style="width: {{ $bucket['count'] > 0 ? max(8, (int) round(($bucket['count'] / $maxBreakdownCount) * 100)) : 0 }}%;"
                                                     ></div>
                                                 </div>
@@ -612,6 +671,9 @@
                                     </div>
                                 @else
                                     <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                        <x-ui.empty.media>
+                                            <x-ui.icon name="chart-bar" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                                        </x-ui.empty.media>
                                         <x-ui.heading level="h3">Not enough ratings yet.</x-ui.heading>
                                         <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
                                             The score distribution will appear once audience ratings start arriving.
@@ -622,7 +684,12 @@
                         </x-ui.accordion.item>
 
                         <x-ui.accordion.item>
-                            <x-ui.accordion.trigger>Related titles</x-ui.accordion.trigger>
+                            <x-ui.accordion.trigger>
+                                <span class="inline-flex items-center gap-2">
+                                    <x-ui.icon name="film" class="size-4" />
+                                    Related titles
+                                </span>
+                            </x-ui.accordion.trigger>
                             <x-ui.accordion.content>
                                 @if ($relatedTitles->isNotEmpty())
                                     <div class="grid gap-4">
@@ -633,7 +700,7 @@
                                                         {{ $relatedItem['label'] }}
                                                     </div>
                                                     @if ($relatedItem['relationship']->weight)
-                                                        <x-ui.badge variant="outline" color="slate">
+                                                        <x-ui.badge variant="outline" color="slate" icon="scale">
                                                             Weight {{ $relatedItem['relationship']->weight }}
                                                         </x-ui.badge>
                                                     @endif
@@ -645,6 +712,9 @@
                                     </div>
                                 @else
                                     <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                        <x-ui.empty.media>
+                                            <x-ui.icon name="film" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                                        </x-ui.empty.media>
                                         <x-ui.heading level="h3">No related titles are linked yet.</x-ui.heading>
                                     </x-ui.empty>
                                 @endif
@@ -652,7 +722,12 @@
                         </x-ui.accordion.item>
 
                         <x-ui.accordion.item>
-                            <x-ui.accordion.trigger>Awards</x-ui.accordion.trigger>
+                            <x-ui.accordion.trigger>
+                                <span class="inline-flex items-center gap-2">
+                                    <x-ui.icon name="trophy" class="size-4" />
+                                    Awards
+                                </span>
+                            </x-ui.accordion.trigger>
                             <x-ui.accordion.content>
                                 <div class="grid gap-3">
                                     @forelse ($awardHighlights as $awardNomination)
@@ -677,7 +752,7 @@
                                                     </div>
                                                 </div>
 
-                                                <x-ui.badge :color="$awardNomination->is_winner ? 'green' : 'neutral'" variant="outline">
+                                                <x-ui.badge :color="$awardNomination->is_winner ? 'green' : 'neutral'" variant="outline" :icon="$awardNomination->is_winner ? 'trophy' : 'bookmark'">
                                                     {{ $awardNomination->is_winner ? 'Winner' : 'Nominee' }}
                                                 </x-ui.badge>
                                             </div>
@@ -690,6 +765,9 @@
                                         </div>
                                     @empty
                                         <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                            <x-ui.empty.media>
+                                                <x-ui.icon name="trophy" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                                            </x-ui.empty.media>
                                             <x-ui.heading level="h3">No awards have been linked yet.</x-ui.heading>
                                         </x-ui.empty>
                                     @endforelse
@@ -698,19 +776,32 @@
                         </x-ui.accordion.item>
 
                         <x-ui.accordion.item>
-                            <x-ui.accordion.trigger>Where to watch</x-ui.accordion.trigger>
+                            <x-ui.accordion.trigger>
+                                <span class="inline-flex items-center gap-2">
+                                    <x-ui.icon name="play" class="size-4" />
+                                    Where to watch
+                                </span>
+                            </x-ui.accordion.trigger>
                             <x-ui.accordion.content>
                                 <x-ui.text class="text-sm text-neutral-600 dark:text-neutral-300">
                                     Streaming and purchase availability can slot into this block once provider feeds are connected to the catalog.
                                 </x-ui.text>
                                 <x-ui.empty class="mt-3 rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                    <x-ui.empty.media>
+                                        <x-ui.icon name="play" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                                    </x-ui.empty.media>
                                     <x-ui.heading level="h3">Availability is not published yet.</x-ui.heading>
                                 </x-ui.empty>
                             </x-ui.accordion.content>
                         </x-ui.accordion.item>
 
                         <x-ui.accordion.item>
-                            <x-ui.accordion.trigger>Editorial extensions</x-ui.accordion.trigger>
+                            <x-ui.accordion.trigger>
+                                <span class="inline-flex items-center gap-2">
+                                    <x-ui.icon name="sparkles" class="size-4" />
+                                    Editorial extensions
+                                </span>
+                            </x-ui.accordion.trigger>
                             <x-ui.accordion.content>
                                 <x-ui.text class="text-sm text-neutral-600 dark:text-neutral-300">
                                     Trivia, goofs, quotes, and soundtrack modules are not in the current domain model yet. This page keeps a reserved extension point so those datasets can slot in without changing the surrounding layout.
@@ -732,7 +823,7 @@
                 </x-ui.text>
             </div>
 
-            <x-ui.link :href="route('public.reviews.latest')" variant="ghost">
+            <x-ui.link :href="route('public.reviews.latest')" variant="ghost" iconAfter="arrow-right">
                 Latest reviews
             </x-ui.link>
         </div>
@@ -760,7 +851,7 @@
                             </div>
 
                             @if ($review->contains_spoilers)
-                                <x-ui.badge color="red" variant="outline">Spoilers</x-ui.badge>
+                                <x-ui.badge color="red" variant="outline" icon="exclamation-triangle">Spoilers</x-ui.badge>
                             @endif
                         </div>
 
@@ -775,6 +866,9 @@
                 </x-ui.card>
             @empty
                 <x-ui.empty class="rounded-box border border-dashed border-black/10 bg-white dark:border-white/10 dark:bg-neutral-900">
+                    <x-ui.empty.media>
+                        <x-ui.icon name="chat-bubble-left-right" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                    </x-ui.empty.media>
                     <x-ui.heading level="h3">No published reviews yet.</x-ui.heading>
                     <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
                         Be the first member to publish a review for this title.

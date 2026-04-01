@@ -54,7 +54,7 @@ enum UserRole: string
     public function canReviewContributions(): bool
     {
         return match ($this) {
-            self::SuperAdmin, self::Admin, self::Editor => true,
+            self::SuperAdmin, self::Admin, self::Editor, self::Moderator => true,
             default => false,
         };
     }

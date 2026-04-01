@@ -1,83 +1,85 @@
 @php
-    $screenbaseTitle = trim($__env->yieldContent('title'));
-    $pageTitle = $screenbaseTitle !== ''
-        ? $screenbaseTitle.' · Screenbase'
-        : 'Screenbase';
+    /** @var \App\Actions\Seo\PageSeoData|null $pageSeo */
+    $pageSeo = $seo ?? null;
+    $defaultDescription = 'Screenbase is a Livewire-driven IMDb-style platform for discovery, ratings, reviews, and curation.';
+    $sectionPageTitleOverride = trim((string) $__env->yieldContent('page_title_override'));
+    $sectionPageDescriptionOverride = trim((string) $__env->yieldContent('page_description_override'));
+    $sectionPageRobots = trim((string) $__env->yieldContent('page_robots'));
+    $sectionCanonicalUrl = trim((string) $__env->yieldContent('canonical_url'));
+    $sectionOpenGraphTitle = trim((string) $__env->yieldContent('open_graph_title'));
+    $sectionOpenGraphDescription = trim((string) $__env->yieldContent('open_graph_description'));
+    $sectionOpenGraphType = trim((string) $__env->yieldContent('open_graph_type'));
+    $sectionOpenGraphImage = trim((string) $__env->yieldContent('open_graph_image'));
+    $sectionOpenGraphImageAlt = trim((string) $__env->yieldContent('open_graph_image_alt'));
+    $sectionTwitterCard = trim((string) $__env->yieldContent('twitter_card'));
+    $sectionBreadcrumbSchema = trim((string) $__env->yieldContent('breadcrumb_schema'));
+    $renderedTitle = trim((string) ($sectionTitle ?? $__env->yieldContent('title')));
+    $pageTitle = $pageTitleOverride
+        ?? ($sectionPageTitleOverride !== '' ? $sectionPageTitleOverride : null)
+        ?? $pageSeo?->documentTitle(request())
+        ?? ($renderedTitle !== ''
+            ? $renderedTitle.' · Screenbase'
+            : 'Screenbase');
 
-    $metaDescription = trim($__env->yieldContent('meta_description'));
-    $pageDescription = $metaDescription !== ''
-        ? $metaDescription
-        : 'Screenbase is a Livewire-driven IMDb-style platform for discovery, ratings, reviews, and curation.';
+    $renderedMetaDescription = trim((string) ($sectionMetaDescription ?? $__env->yieldContent('meta_description')));
+    $pageDescription = $pageDescriptionOverride
+        ?? ($sectionPageDescriptionOverride !== '' ? $sectionPageDescriptionOverride : null)
+        ?? $pageSeo?->pageDescription($defaultDescription)
+        ?? ($renderedMetaDescription !== ''
+            ? $renderedMetaDescription
+            : $defaultDescription);
 
-    $hasBreadcrumbs = trim($__env->yieldContent('breadcrumbs')) !== '';
+    $slotBreadcrumbs = isset($breadcrumbs) && ! is_array($breadcrumbs) ? $breadcrumbs : null;
+    $slotNavbar = isset($navbar) && ! is_array($navbar) ? $navbar : null;
+    $slotSidebar = isset($sidebar) && ! is_array($sidebar) ? $sidebar : null;
+    $renderedBreadcrumbs = $slotBreadcrumbs ?? ($sectionBreadcrumbs ?? $__env->yieldContent('breadcrumbs'));
+    $renderedNavbar = $slotNavbar ?? ($sectionNavbar ?? $__env->yieldContent('navbar'));
+    $renderedSidebar = $slotSidebar ?? ($sectionSidebar ?? $__env->yieldContent('sidebar'));
+    $renderedNavbarText = strip_tags((string) $renderedNavbar);
+    $hasBreadcrumbs = trim((string) $renderedBreadcrumbs) !== '';
+    $pageRobots = $pageRobotsOverride
+        ?? ($sectionPageRobots !== '' ? $sectionPageRobots : null)
+        ?? $pageSeo?->robots
+        ?? 'index,follow';
+    $canonicalUrl = $canonicalUrlOverride
+        ?? ($sectionCanonicalUrl !== '' ? $sectionCanonicalUrl : null)
+        ?? $pageSeo?->canonicalUrl(request())
+        ?? url()->current();
+    $openGraphTitle = $openGraphTitleOverride
+        ?? ($sectionOpenGraphTitle !== '' ? $sectionOpenGraphTitle : null)
+        ?? $pageSeo?->openGraphTitle()
+        ?? ($renderedTitle !== '' ? $renderedTitle : 'Screenbase');
+    $openGraphDescription = $openGraphDescriptionOverride
+        ?? ($sectionOpenGraphDescription !== '' ? $sectionOpenGraphDescription : null)
+        ?? $pageSeo?->openGraphDescription($defaultDescription)
+        ?? $pageDescription;
+    $openGraphType = $openGraphTypeOverride
+        ?? ($sectionOpenGraphType !== '' ? $sectionOpenGraphType : null)
+        ?? $pageSeo?->openGraphType
+        ?? 'website';
+    $openGraphImage = $openGraphImageOverride
+        ?? ($sectionOpenGraphImage !== '' ? $sectionOpenGraphImage : null)
+        ?? $pageSeo?->openGraphImage;
+    $openGraphImageAlt = $openGraphImageAltOverride
+        ?? ($sectionOpenGraphImageAlt !== '' ? $sectionOpenGraphImageAlt : null)
+        ?? $pageSeo?->openGraphImageAlt;
+    $twitterCard = $twitterCardOverride
+        ?? ($sectionTwitterCard !== '' ? $sectionTwitterCard : null)
+        ?? $pageSeo?->twitterCard()
+        ?? 'summary';
+    $breadcrumbSchema = $breadcrumbSchemaOverride
+        ?? ($sectionBreadcrumbSchema !== '' ? $sectionBreadcrumbSchema : null)
+        ?? $pageSeo?->breadcrumbSchema(request());
+    $shouldRenderAdminShortcut = auth()->user()?->can('access-admin-area')
+        && ! request()->routeIs('admin.*')
+        && ! str_contains($renderedNavbarText, 'Admin');
+    $shouldRenderWatchlistShortcut = auth()->check()
+        && ! str_contains($renderedNavbarText, 'Watchlist');
+    $shouldRenderSignOutShortcut = auth()->check()
+        && ! str_contains($renderedNavbarText, 'Sign out');
+    $shouldRenderGuestAuthShortcuts = ! auth()->check()
+        && ! str_contains($renderedNavbarText, 'Sign in')
+        && ! str_contains($renderedNavbarText, 'Create account');
 @endphp
 
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full scroll-smooth">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>{{ $pageTitle }}</title>
-        <meta name="description" content="{{ $pageDescription }}">
-        <meta name="robots" content="index,follow">
-        <link rel="canonical" href="{{ url()->current() }}">
-
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-        @livewireStyles
-        @stack('head')
-    </head>
-    <body class="min-h-full bg-neutral-50 text-neutral-950 antialiased dark:bg-neutral-950 dark:text-neutral-50">
-        <x-ui.layout variant="header-sidebar">
-            <x-ui.layout.header>
-                <x-slot:brand>
-                    <x-ui.brand
-                        :href="route('public.home')"
-                        name="Screenbase"
-                        class="font-semibold"
-                    />
-                </x-slot:brand>
-
-                <x-ui.navbar class="ml-auto">
-                    @yield('navbar')
-                </x-ui.navbar>
-            </x-ui.layout.header>
-
-            <x-ui.sidebar>
-                <x-slot:brand>
-                    <x-ui.brand
-                        :href="route('public.home')"
-                        name="Screenbase"
-                        class="font-semibold"
-                    />
-                </x-slot:brand>
-
-                @yield('sidebar')
-
-                <x-ui.sidebar.push />
-
-                <div class="px-3 pb-4 pt-2 text-xs text-neutral-500 dark:text-neutral-400">
-                    Built with Laravel 12 and Livewire 4.
-                </div>
-            </x-ui.sidebar>
-
-            <x-ui.layout.main>
-                <div class="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(15,23,42,0.08),_transparent_38%),linear-gradient(to_bottom,_rgba(255,255,255,0.96),_rgba(248,250,252,1))] dark:bg-[radial-gradient(circle_at_top,_rgba(148,163,184,0.18),_transparent_30%),linear-gradient(to_bottom,_rgba(10,10,10,1),_rgba(23,23,23,1))]">
-                    <div class="mx-auto flex w-full max-w-7xl flex-col gap-6 p-4 md:p-6">
-                        @if ($hasBreadcrumbs)
-                            <x-ui.breadcrumbs class="pt-1">
-                                @yield('breadcrumbs')
-                            </x-ui.breadcrumbs>
-                        @endif
-
-                        @yield('content')
-                    </div>
-                </div>
-            </x-ui.layout.main>
-        </x-ui.layout>
-
-        <x-ui.toast />
-
-        @stack('modals')
-        @livewireScriptConfig
-    </body>
-</html>
+@include('layouts.partials.app-shell')

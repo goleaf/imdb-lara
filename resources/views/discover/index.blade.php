@@ -22,7 +22,7 @@
                 <div class="flex flex-wrap gap-2">
                     @foreach ($featuredGenres->take(8) as $genre)
                         <a href="{{ route('public.genres.show', $genre) }}">
-                            <x-ui.badge variant="outline">{{ $genre->name }}</x-ui.badge>
+                            <x-ui.badge variant="outline" icon="tag">{{ $genre->name }}</x-ui.badge>
                         </a>
                     @endforeach
                 </div>

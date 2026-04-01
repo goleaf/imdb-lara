@@ -10,6 +10,8 @@
 
 @section('content')
     <section class="space-y-4">
+        <x-seo.pagination-links :paginator="$reviews" />
+
         <x-ui.card class="!max-w-none">
             <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                 <div class="space-y-3">
@@ -20,8 +22,8 @@
                 </div>
 
                 <div class="flex flex-wrap gap-2">
-                    <x-ui.badge variant="outline">Community writing</x-ui.badge>
-                    <x-ui.badge variant="outline" color="neutral">Published only</x-ui.badge>
+                    <x-ui.badge variant="outline" icon="chat-bubble-left-right">Community writing</x-ui.badge>
+                    <x-ui.badge variant="outline" color="neutral" icon="check-circle">Published only</x-ui.badge>
                 </div>
             </div>
         </x-ui.card>
@@ -29,7 +31,11 @@
         <div class="grid gap-4 xl:grid-cols-2">
             @forelse ($reviews as $review)
                 @php
-                    $poster = $review->title->mediaAssets->first();
+                    $poster = \App\Models\MediaAsset::preferredFrom(
+                        $review->title->mediaAssets,
+                        \App\Enums\MediaKind::Poster,
+                        \App\Enums\MediaKind::Backdrop,
+                    );
                 @endphp
 
                 <x-ui.card class="!max-w-none">
@@ -50,12 +56,12 @@
 
                         <div class="space-y-3">
                             <div class="flex flex-wrap items-center gap-2">
-                                <x-ui.badge variant="outline">{{ str($review->title->title_type->value)->headline() }}</x-ui.badge>
+                                <x-ui.badge variant="outline" icon="film">{{ str($review->title->title_type->value)->headline() }}</x-ui.badge>
                                 @if ($review->contains_spoilers)
-                                    <x-ui.badge variant="outline" color="red">Spoilers</x-ui.badge>
+                                    <x-ui.badge variant="outline" color="red" icon="exclamation-triangle">Spoilers</x-ui.badge>
                                 @endif
                                 @if ($review->published_at)
-                                    <x-ui.badge variant="outline" color="slate">{{ $review->published_at->format('M j, Y') }}</x-ui.badge>
+                                    <x-ui.badge variant="outline" color="slate" icon="calendar-days">{{ $review->published_at->format('M j, Y') }}</x-ui.badge>
                                 @endif
                             </div>
 
@@ -74,7 +80,7 @@
                                 {{ str($review->body)->limit(260) }}
                             </x-ui.text>
 
-                            <x-ui.link :href="route('public.titles.show', $review->title)" variant="ghost">
+                            <x-ui.link :href="route('public.titles.show', $review->title)" variant="ghost" iconAfter="arrow-right">
                                 View title page
                             </x-ui.link>
                         </div>
@@ -82,6 +88,9 @@
                 </x-ui.card>
             @empty
                 <x-ui.empty class="rounded-box border border-dashed border-black/10 bg-white dark:border-white/10 dark:bg-neutral-900">
+                    <x-ui.empty.media>
+                        <x-ui.icon name="chat-bubble-left-right" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                    </x-ui.empty.media>
                     <x-ui.heading level="h3">No published reviews are available yet.</x-ui.heading>
                     <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
                         Reviews will appear here once they pass moderation and become public.

@@ -51,7 +51,10 @@ new class extends Component
     <div class="space-y-4">
         <div class="flex items-start justify-between gap-4">
             <div class="space-y-1">
-                <x-ui.heading level="h2" size="lg">Browse by Year</x-ui.heading>
+                <x-ui.heading level="h2" size="lg" class="inline-flex items-center gap-2">
+                    <x-ui.icon name="calendar-days" class="size-5 text-neutral-500 dark:text-neutral-400" />
+                    <span>Browse by Year</span>
+                </x-ui.heading>
                 <x-ui.text class="max-w-3xl text-sm text-neutral-600 dark:text-neutral-300">
                     Fast entry points into the busiest release years currently represented on Screenbase.
                 </x-ui.text>
@@ -73,6 +76,9 @@ new class extends Component
             </x-ui.card>
         @elseif ($years->isEmpty())
             <x-ui.empty class="rounded-box border border-dashed border-black/10 bg-white dark:border-white/10 dark:bg-neutral-900">
+                <x-ui.empty.media>
+                    <x-ui.icon name="calendar-days" class="size-10 text-neutral-400 dark:text-neutral-500" />
+                </x-ui.empty.media>
                 <x-ui.heading level="h3">No release years are available yet.</x-ui.heading>
                 <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
                     Year shortcuts will populate as published titles enter the catalog.
@@ -89,7 +95,7 @@ new class extends Component
                                         {{ $year['year'] }}
                                     </a>
                                 </x-ui.heading>
-                                <x-ui.badge variant="outline" color="neutral">
+                                <x-ui.badge variant="outline" color="neutral" icon="film">
                                     {{ number_format($year['titles_count']) }} titles
                                 </x-ui.badge>
                             </div>

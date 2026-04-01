@@ -1,3 +1,10 @@
+@php
+    $seo = $seo ?? null;
+    $sectionTitle = $sectionTitle ?? null;
+    $sectionMetaDescription = $sectionMetaDescription ?? null;
+    $sectionBreadcrumbs = $sectionBreadcrumbs ?? null;
+@endphp
+
 @extends('layouts.app')
 
 @section('navbar')
@@ -44,6 +51,38 @@
                 label="Titles"
                 icon="film"
                 :active="request()->routeIs('admin.titles.*')"
+            />
+        @endif
+        @if ($canViewAdminPeople)
+            <x-ui.navlist.item
+                :href="route('admin.people.index')"
+                label="People"
+                icon="users"
+                :active="request()->routeIs('admin.people.*') || request()->routeIs('admin.professions.*')"
+            />
+        @endif
+        @if ($canViewAdminGenres)
+            <x-ui.navlist.item
+                :href="route('admin.genres.index')"
+                label="Genres"
+                icon="tag"
+                :active="request()->routeIs('admin.genres.*')"
+            />
+        @endif
+        @if ($canViewAdminMediaAssets)
+            <x-ui.navlist.item
+                :href="route('admin.media-assets.index')"
+                label="Media"
+                icon="photo"
+                :active="request()->routeIs('admin.media-assets.*')"
+            />
+        @endif
+        @if ($canViewAdminContributions)
+            <x-ui.navlist.item
+                :href="route('admin.contributions.index')"
+                label="Contributions"
+                icon="clipboard-document-check"
+                :active="request()->routeIs('admin.contributions.*')"
             />
         @endif
         @if ($canViewAdminReviews)

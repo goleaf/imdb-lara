@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\Contribution;
+use App\Models\Genre;
+use App\Models\MediaAsset;
+use App\Models\Person;
 use App\Models\Report;
 use App\Models\Review;
 use App\Models\Title;
@@ -34,6 +38,10 @@ class ViewServiceProvider extends ServiceProvider
 
             $view->with([
                 'canViewAdminTitles' => $user?->can('viewAny', Title::class) ?? false,
+                'canViewAdminPeople' => $user?->can('viewAny', Person::class) ?? false,
+                'canViewAdminGenres' => $user?->can('viewAny', Genre::class) ?? false,
+                'canViewAdminMediaAssets' => $user?->can('viewAny', MediaAsset::class) ?? false,
+                'canViewAdminContributions' => $user?->can('viewAny', Contribution::class) ?? false,
                 'canViewAdminReviews' => $user?->can('viewAny', Review::class) ?? false,
                 'canViewAdminReports' => $user?->can('viewAny', Report::class) ?? false,
             ]);

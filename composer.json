@@ -9,6 +9,7 @@
         "php": "^8.2",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
+        "outhebox/blade-flags": "^1.7",
         "wireui/heroicons": "^2.10",
         "wireui/phosphoricons": "^2.4"
     },

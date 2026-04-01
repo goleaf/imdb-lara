@@ -27,7 +27,8 @@ class PublicBrowsePagesTest extends TestCase
             ->assertOk()
             ->assertSee('Hero Spotlight')
             ->assertSee('Trending Now')
-            ->assertSee('Northern Signal');
+            ->assertSee('Northern Signal')
+            ->assertSeeHtml('data-slot="badge-icon"');
 
         $this->get(route('public.discover'))
             ->assertOk()
@@ -61,6 +62,7 @@ class PublicBrowsePagesTest extends TestCase
         $this->get(route('public.users.show', $user))
             ->assertOk()
             ->assertSeeHtml('data-slot="avatar"')
+            ->assertSeeHtml('data-slot="badge-icon"')
             ->assertSee($user->name);
 
         $this->get(route('public.search', ['q' => 'Signal']))

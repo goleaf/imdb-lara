@@ -1,0 +1,260 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - link "Screenbase" [ref=e5] [cursor=pointer]:
+        - /url: https://imdb-lara.test
+        - generic [ref=e6]: Screenbase
+      - generic [ref=e7]:
+        - link "Discover" [ref=e8] [cursor=pointer]:
+          - /url: https://imdb-lara.test/discover
+          - img [ref=e9]
+          - generic [ref=e13]: Discover
+        - link "Movies" [ref=e14] [cursor=pointer]:
+          - /url: https://imdb-lara.test/movies
+          - img [ref=e15]
+          - generic [ref=e17]: Movies
+        - link "TV Shows" [ref=e18] [cursor=pointer]:
+          - /url: https://imdb-lara.test/tv-shows
+          - img [ref=e19]
+          - generic [ref=e21]: TV Shows
+        - link "People" [ref=e22] [cursor=pointer]:
+          - /url: https://imdb-lara.test/people
+          - img [ref=e23]
+          - generic [ref=e25]: People
+        - link "Search" [ref=e26] [cursor=pointer]:
+          - /url: https://imdb-lara.test/search
+          - img [ref=e27]
+          - generic [ref=e29]: Search
+        - generic [ref=e31]:
+          - generic [ref=e32]: Theme
+          - button [ref=e36] [cursor=pointer]:
+            - img [ref=e37]
+        - link "Sign in" [ref=e39] [cursor=pointer]:
+          - /url: https://imdb-lara.test/login
+          - img [ref=e40]
+          - generic [ref=e43]: Sign in
+        - link "Create account" [ref=e44] [cursor=pointer]:
+          - /url: https://imdb-lara.test/register
+          - img [ref=e45]
+          - generic [ref=e49]: Create account
+    - generic [ref=e50]:
+      - generic [ref=e51]:
+        - link "Screenbase" [ref=e53] [cursor=pointer]:
+          - /url: https://imdb-lara.test
+          - generic [ref=e54]: Screenbase
+        - button [ref=e56] [cursor=pointer]:
+          - img [ref=e57]
+      - generic [ref=e59]:
+        - generic [ref=e60]:
+          - link "Home" [ref=e61] [cursor=pointer]:
+            - /url: https://imdb-lara.test
+            - img [ref=e63]
+            - generic [ref=e65]: Home
+          - link "Discovery" [ref=e66] [cursor=pointer]:
+            - /url: https://imdb-lara.test/discover
+            - img [ref=e68]
+            - generic [ref=e72]: Discovery
+          - link "All Titles" [ref=e73] [cursor=pointer]:
+            - /url: https://imdb-lara.test/titles
+            - img [ref=e75]
+            - generic [ref=e77]: All Titles
+          - link "Movies" [ref=e78] [cursor=pointer]:
+            - /url: https://imdb-lara.test/movies
+            - img [ref=e80]
+            - generic [ref=e82]: Movies
+          - link "TV Shows" [ref=e83] [cursor=pointer]:
+            - /url: https://imdb-lara.test/tv-shows
+            - img [ref=e85]
+            - generic [ref=e87]: TV Shows
+          - link "Browse People" [ref=e88] [cursor=pointer]:
+            - /url: https://imdb-lara.test/people
+            - img [ref=e90]
+            - generic [ref=e92]: Browse People
+          - link "Trending" [ref=e93] [cursor=pointer]:
+            - /url: https://imdb-lara.test/trending
+            - img [ref=e95]
+            - generic [ref=e97]: Trending
+          - link "Latest Trailers" [ref=e98] [cursor=pointer]:
+            - /url: https://imdb-lara.test/trailers/latest
+            - img [ref=e100]
+            - generic [ref=e102]: Latest Trailers
+          - link "Latest Reviews" [ref=e103] [cursor=pointer]:
+            - /url: https://imdb-lara.test/reviews/latest
+            - img [ref=e105]
+            - generic [ref=e107]: Latest Reviews
+          - link "Advanced Search" [ref=e108] [cursor=pointer]:
+            - /url: https://imdb-lara.test/search
+            - img [ref=e110]
+            - generic [ref=e112]: Advanced Search
+        - generic [ref=e113]: Built with Laravel 12 and Livewire 4.
+    - generic [ref=e116]:
+      - generic [ref=e117]:
+        - generic [ref=e118]:
+          - img "Northern Signal backdrop" [ref=e120]
+          - generic [ref=e122]:
+            - generic [ref=e123]:
+              - button "Hero Spotlight" [ref=e124]:
+                - img [ref=e125]
+                - text: Hero Spotlight
+              - generic [ref=e129]:
+                - button "Movie" [ref=e130]:
+                  - img [ref=e131]
+                  - text: Movie
+                - link "2024" [ref=e133] [cursor=pointer]:
+                  - /url: https://imdb-lara.test/years/2024
+                  - button "2024" [ref=e134]:
+                    - img [ref=e135]
+                    - text: "2024"
+                - button "7.3" [ref=e142]:
+                  - img [ref=e143]
+                  - text: "7.3"
+              - generic [ref=e145]:
+                - heading "Northern Signal" [level=1] [ref=e146]:
+                  - link "Northern Signal" [ref=e147] [cursor=pointer]:
+                    - /url: https://imdb-lara.test/titles/northern-signal
+                - generic [ref=e148]: The ice was listening first.
+                - generic [ref=e149]: When a glaciology mission goes dark, a linguist and a systems engineer uncover a decades-old station and a signal nobody can explain.
+              - generic [ref=e150]:
+                - link "Sci-Fi" [ref=e151] [cursor=pointer]:
+                  - /url: https://imdb-lara.test/genres/sci-fi
+                  - button "Sci-Fi" [ref=e152]:
+                    - img [ref=e153]
+                    - text: Sci-Fi
+                - link "Mystery" [ref=e155] [cursor=pointer]:
+                  - /url: https://imdb-lara.test/genres/mystery
+                  - button "Mystery" [ref=e156]:
+                    - img [ref=e157]
+                    - text: Mystery
+                - link "Thriller" [ref=e159] [cursor=pointer]:
+                  - /url: https://imdb-lara.test/genres/thriller
+                  - button "Thriller" [ref=e160]:
+                    - img [ref=e161]
+                    - text: Thriller
+              - generic [ref=e163]:
+                - generic [ref=e164]: Principal Cast & Crew
+                - generic [ref=e165]:
+                  - link "Ava Mercer" [ref=e166] [cursor=pointer]:
+                    - /url: https://imdb-lara.test/people/ava-mercer
+                    - button "Ava Mercer" [ref=e167]:
+                      - img [ref=e168]
+                      - text: Ava Mercer
+                  - link "Jonah Vale" [ref=e171] [cursor=pointer]:
+                    - /url: https://imdb-lara.test/people/jonah-vale
+                    - button "Jonah Vale" [ref=e172]:
+                      - img [ref=e173]
+                      - text: Jonah Vale
+                  - link "Talia Rowe" [ref=e176] [cursor=pointer]:
+                    - /url: https://imdb-lara.test/people/talia-rowe
+                    - button "Talia Rowe" [ref=e177]:
+                      - img [ref=e178]
+                      - text: Talia Rowe
+              - generic [ref=e181]:
+                - link "View Title Page" [ref=e182] [cursor=pointer]:
+                  - /url: https://imdb-lara.test/titles/northern-signal
+                  - img [ref=e183]
+                  - generic [ref=e185]: View Title Page
+                - link "Watch Trailer" [ref=e186] [cursor=pointer]:
+                  - /url: https://videos.example.test/cb270049-4800-370a-b43b-a8cec8d65cf8
+                  - img [ref=e187]
+                  - generic [ref=e189]: Watch Trailer
+                - link "Open Discovery" [ref=e190] [cursor=pointer]:
+                  - /url: https://imdb-lara.test/discover
+                  - img [ref=e191]
+                  - generic [ref=e195]: Open Discovery
+            - generic [ref=e196]:
+              - img "Northern Signal poster" [ref=e198]
+              - generic [ref=e199]:
+                - generic [ref=e200]:
+                  - generic [ref=e201]:
+                    - img [ref=e202]
+                    - generic [ref=e204]: Ratings
+                  - generic [ref=e205]: "3"
+                - generic [ref=e206]:
+                  - generic [ref=e207]:
+                    - img [ref=e208]
+                    - generic [ref=e210]: Reviews
+                  - generic [ref=e211]: "1"
+                - generic [ref=e212]:
+                  - generic [ref=e213]:
+                    - img [ref=e214]
+                    - generic [ref=e216]: Watchlists
+                  - generic [ref=e217]: "1"
+        - generic [ref=e218]:
+          - generic [ref=e220]:
+            - generic [ref=e221]:
+              - heading "Start Anywhere" [level=2] [ref=e222]:
+                - img [ref=e223]
+                - generic [ref=e228]: Start Anywhere
+              - generic [ref=e229]: The public surface is split into focused browse routes, not one overloaded index.
+            - generic [ref=e230]:
+              - link "Browse Movies" [ref=e231] [cursor=pointer]:
+                - /url: https://imdb-lara.test/movies
+                - img [ref=e232]
+                - generic [ref=e234]: Browse Movies
+              - link "Browse TV Shows" [ref=e235] [cursor=pointer]:
+                - /url: https://imdb-lara.test/tv-shows
+                - img [ref=e236]
+                - generic [ref=e239]: Browse TV Shows
+              - link "Browse People" [ref=e240] [cursor=pointer]:
+                - /url: https://imdb-lara.test/people
+                - img [ref=e241]
+                - generic [ref=e246]: Browse People
+              - link "Search Everything" [ref=e247] [cursor=pointer]:
+                - /url: https://imdb-lara.test/search
+                - img [ref=e248]
+                - generic [ref=e250]: Search Everything
+          - generic [ref=e252]:
+            - heading "Live Signals" [level=2] [ref=e253]:
+              - img [ref=e254]
+              - generic [ref=e258]: Live Signals
+            - generic [ref=e259]:
+              - generic [ref=e260]:
+                - generic [ref=e261]:
+                  - img [ref=e262]
+                  - generic [ref=e265]: Trending, not static
+                - generic [ref=e266]: Watchlists and review volume already influence the homepage ranking rails.
+              - generic [ref=e267]:
+                - generic [ref=e268]:
+                  - img [ref=e269]
+                  - generic [ref=e271]: People and lists matter
+                - generic [ref=e272]: Public profiles, curated lists, and latest writing sit beside the title catalog.
+              - generic [ref=e273]:
+                - generic [ref=e274]:
+                  - img [ref=e275]
+                  - generic [ref=e277]: SEO-friendly routes
+                - generic [ref=e278]: Every card routes into slug-based title, person, year, genre, and list pages.
+      - generic [ref=e279]:
+        - generic [ref=e282]:
+          - heading "Trending Now" [level=2] [ref=e283]
+          - generic [ref=e284]: Audience momentum, watchlist activity, and review volume from the public catalog.
+        - generic [ref=e324]:
+          - heading "Trending Now" [level=2] [ref=e325]
+          - generic [ref=e326]: Audience momentum, watchlist activity, and review volume from the public catalog.
+        - generic [ref=e366]:
+          - heading "Trending Now" [level=2] [ref=e367]
+          - generic [ref=e368]: Audience momentum, watchlist activity, and review volume from the public catalog.
+        - generic [ref=e408]:
+          - heading "Trending Now" [level=2] [ref=e409]
+          - generic [ref=e410]: Audience momentum, watchlist activity, and review volume from the public catalog.
+        - generic [ref=e450]:
+          - heading "Trending Now" [level=2] [ref=e451]
+          - generic [ref=e452]: Audience momentum, watchlist activity, and review volume from the public catalog.
+        - generic [ref=e492]:
+          - heading "Popular People" [level=2] [ref=e493]
+          - generic [ref=e494]: Loading cast and crew profiles from the public catalog.
+        - generic [ref=e528]:
+          - heading "Latest Trailers" [level=2] [ref=e529]
+          - generic [ref=e530]: Loading the freshest trailer and featurette uploads.
+        - generic [ref=e566]:
+          - heading "Latest Reviews" [level=2] [ref=e567]
+          - generic [ref=e568]: Loading the freshest published community writing.
+        - generic [ref=e603]:
+          - heading "Featured Public Lists" [level=2] [ref=e604]
+          - generic [ref=e605]: Loading member-curated public lists.
+        - generic [ref=e635]:
+          - heading "Browse by Genre" [level=2] [ref=e636]
+          - generic [ref=e637]: Loading popular genre routes from the catalog.
+        - generic [ref=e672]:
+          - heading "Browse by Year" [level=2] [ref=e673]
+          - generic [ref=e674]: Loading recent release-year routes from the title catalog.
+  - status [ref=e700]

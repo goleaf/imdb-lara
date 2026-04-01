@@ -5,16 +5,23 @@ namespace App\Actions\Lists;
 use App\Models\Title;
 use App\Models\User;
 use App\Models\UserList;
+use Illuminate\Database\Eloquent\Collection;
 
 class SyncTitleInUserListsAction
 {
+    public function __construct(
+        protected AttachTitleToUserListAction $attachTitleToUserList,
+        protected DetachTitleFromUserListAction $detachTitleFromUserList,
+    ) {}
+
     /**
      * @param  list<int>  $selectedListIds
      */
     public function handle(User $user, Title $title, array $selectedListIds): void
     {
+        /** @var Collection<int, UserList> $lists */
         $lists = UserList::query()
-            ->select(['id'])
+            ->select(['id', 'user_id', 'name', 'slug', 'visibility', 'is_watchlist'])
             ->whereBelongsTo($user)
             ->where('is_watchlist', false)
             ->get();
@@ -26,22 +33,20 @@ class SyncTitleInUserListsAction
             ->values()
             ->all();
 
-        $title->listItems()
-            ->whereIn('user_list_id', $ownedListIds)
-            ->whereNotIn('user_list_id', $allowedSelectedListIds)
-            ->delete();
+        $lists->each(function (UserList $list) use ($allowedSelectedListIds, $title): void {
+            if (! in_array($list->id, $allowedSelectedListIds, true)) {
+                $this->detachTitleFromUserList->handle($list, $title->id);
+            }
+        });
 
         foreach ($allowedSelectedListIds as $listId) {
             $list = $lists->firstWhere('id', $listId);
 
-            if (! $list || $title->listItems()->where('user_list_id', $listId)->exists()) {
+            if (! $list) {
                 continue;
             }
 
-            $list->items()->create([
-                'title_id' => $title->id,
-                'position' => (int) $list->items()->max('position') + 1,
-            ]);
+            $this->attachTitleToUserList->handle($list, $title);
         }
     }
 }

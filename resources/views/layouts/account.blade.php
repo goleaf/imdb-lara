@@ -1,3 +1,10 @@
+@php
+    $seo = $seo ?? null;
+    $sectionTitle = $sectionTitle ?? null;
+    $sectionMetaDescription = $sectionMetaDescription ?? null;
+    $sectionBreadcrumbs = $sectionBreadcrumbs ?? null;
+@endphp
+
 @extends('layouts.app')
 
 @section('navbar')
@@ -5,6 +12,12 @@
         :href="route('public.discover')"
         label="Discover"
         icon="sparkles"
+    />
+    <x-ui.navbar.item
+        :href="route('account.dashboard')"
+        label="Dashboard"
+        icon="home"
+        :active="request()->routeIs('account.dashboard')"
     />
     <x-ui.navbar.item
         :href="route('account.watchlist')"
@@ -17,6 +30,12 @@
         label="Lists"
         icon="queue-list"
         :active="request()->routeIs('account.lists.*')"
+    />
+    <x-ui.navbar.item
+        :href="route('public.search')"
+        label="Search"
+        icon="magnifying-glass"
+        :active="request()->routeIs('public.search')"
     />
 
     @can('access-admin-area')
@@ -48,6 +67,12 @@
 @section('sidebar')
     <x-ui.navlist>
         <x-ui.navlist.item
+            :href="route('account.dashboard')"
+            label="Dashboard"
+            icon="home"
+            :active="request()->routeIs('account.dashboard')"
+        />
+        <x-ui.navlist.item
             :href="route('account.watchlist')"
             label="Watchlist"
             icon="bookmark"
@@ -73,6 +98,12 @@
             :href="route('public.people.index')"
             label="Browse People"
             icon="users"
+        />
+        <x-ui.navlist.item
+            :href="route('public.search')"
+            label="Search"
+            icon="magnifying-glass"
+            :active="request()->routeIs('public.search')"
         />
     </x-ui.navlist>
 @endsection

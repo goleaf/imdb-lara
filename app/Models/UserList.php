@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class UserList extends Model
@@ -62,6 +63,16 @@ class UserList extends Model
         return $this->visibility === ListVisibility::Public;
     }
 
+    public function isUnlisted(): bool
+    {
+        return $this->visibility === ListVisibility::Unlisted;
+    }
+
+    public function isShareable(): bool
+    {
+        return $this->isPublic() || $this->isUnlisted();
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -70,5 +81,15 @@ class UserList extends Model
     public function items(): HasMany
     {
         return $this->hasMany(ListItem::class)->orderBy('position');
+    }
+
+    public function reports(): MorphMany
+    {
+        return $this->morphMany(Report::class, 'reportable');
+    }
+
+    public function moderationActions(): MorphMany
+    {
+        return $this->morphMany(ModerationAction::class, 'actionable');
     }
 }

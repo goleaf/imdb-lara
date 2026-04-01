@@ -108,6 +108,16 @@ new class extends Component
 ?>
 
 <div>
+    @php
+        $railIcon = match ($rail) {
+            'top-rated-movies' => 'star',
+            'top-rated-series' => 'tv',
+            'coming-soon' => 'calendar-days',
+            'recently-added' => 'plus-circle',
+            default => 'fire',
+        };
+    @endphp
+
     @placeholder
         <div class="space-y-4">
             <div class="flex items-start justify-between gap-4">
@@ -137,7 +147,10 @@ new class extends Component
     <div class="space-y-4">
         <div class="flex items-start justify-between gap-4">
             <div class="space-y-1">
-                <x-ui.heading level="h2" size="lg">{{ $heading }}</x-ui.heading>
+                <x-ui.heading level="h2" size="lg" class="inline-flex items-center gap-2">
+                    <x-ui.icon :name="$railIcon" class="size-5 text-neutral-500 dark:text-neutral-400" />
+                    <span>{{ $heading }}</span>
+                </x-ui.heading>
                 <x-ui.text class="max-w-3xl text-sm text-neutral-600 dark:text-neutral-300">
                     {{ $description }}
                 </x-ui.text>
@@ -161,6 +174,9 @@ new class extends Component
             </x-ui.card>
         @elseif ($titles->isEmpty())
             <x-ui.empty class="rounded-box border border-dashed border-black/10 bg-white dark:border-white/10 dark:bg-neutral-900">
+                <x-ui.empty.media>
+                    <x-ui.icon :name="$railIcon" class="size-10 text-neutral-400 dark:text-neutral-500" />
+                </x-ui.empty.media>
                 <x-ui.heading level="h3">{{ $emptyHeading }}</x-ui.heading>
                 <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
                     {{ $emptyText }}

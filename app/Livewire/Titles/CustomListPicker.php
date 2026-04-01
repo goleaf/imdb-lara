@@ -120,6 +120,7 @@ class CustomListPicker extends Component
                 : collect(),
             'visibilityOptions' => [
                 ['value' => ListVisibility::Private->value, 'label' => 'Private'],
+                ['value' => ListVisibility::Unlisted->value, 'label' => 'Unlisted'],
                 ['value' => ListVisibility::Public->value, 'label' => 'Public'],
             ],
         ]);

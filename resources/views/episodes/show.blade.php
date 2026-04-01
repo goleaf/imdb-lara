@@ -50,19 +50,19 @@
                     <div class="space-y-6">
                         <div class="space-y-4">
                             <div class="flex flex-wrap items-center gap-2">
-                                <x-ui.badge variant="outline">{{ $series->name }}</x-ui.badge>
+                                <x-ui.badge variant="outline" icon="tv">{{ $series->name }}</x-ui.badge>
                                 @if ($episodeMeta)
-                                    <x-ui.badge variant="outline" color="slate">
+                                    <x-ui.badge variant="outline" color="slate" icon="rectangle-stack">
                                         S{{ str_pad((string) $episodeMeta->season_number, 2, '0', STR_PAD_LEFT) }}E{{ str_pad((string) $episodeMeta->episode_number, 2, '0', STR_PAD_LEFT) }}
                                     </x-ui.badge>
                                 @endif
                                 @if ($episodeMeta?->aired_at)
-                                    <x-ui.badge variant="outline" color="neutral">
+                                    <x-ui.badge variant="outline" color="neutral" icon="calendar-days">
                                         {{ $episodeMeta->aired_at->format('M j, Y') }}
                                     </x-ui.badge>
                                 @endif
                                 @if ($episode->runtime_minutes)
-                                    <x-ui.badge variant="outline" color="neutral">{{ $episode->runtime_minutes }} min</x-ui.badge>
+                                    <x-ui.badge variant="outline" color="neutral" icon="clock">{{ $episode->runtime_minutes }} min</x-ui.badge>
                                 @endif
                                 @if ($episode->statistic?->average_rating)
                                     <x-ui.badge icon="star" color="amber">
@@ -87,7 +87,7 @@
                                 <div class="flex flex-wrap gap-2">
                                     @foreach ($episode->genres as $genre)
                                         <a href="{{ route('public.genres.show', $genre) }}">
-                                            <x-ui.badge variant="outline" color="neutral">{{ $genre->name }}</x-ui.badge>
+                                            <x-ui.badge variant="outline" color="neutral" icon="tag">{{ $genre->name }}</x-ui.badge>
                                         </a>
                                     @endforeach
                                 </div>
@@ -111,7 +111,10 @@
 
                         <div class="grid gap-3 sm:grid-cols-3">
                             <div class="rounded-box border border-black/5 bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
-                                <div class="text-xs uppercase tracking-[0.2em] text-neutral-500 dark:text-neutral-400">Audience rating</div>
+                                <div class="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-neutral-500 dark:text-neutral-400">
+                                    <x-ui.icon name="star" class="size-4" />
+                                    <span>Audience rating</span>
+                                </div>
                                 <div class="mt-2 text-2xl font-semibold">
                                     {{ $episode->statistic?->average_rating ? number_format((float) $episode->statistic->average_rating, 1) : 'N/A' }}
                                 </div>
@@ -120,12 +123,18 @@
                                 </div>
                             </div>
                             <div class="rounded-box border border-black/5 bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
-                                <div class="text-xs uppercase tracking-[0.2em] text-neutral-500 dark:text-neutral-400">Reviews</div>
+                                <div class="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-neutral-500 dark:text-neutral-400">
+                                    <x-ui.icon name="chat-bubble-left-right" class="size-4" />
+                                    <span>Reviews</span>
+                                </div>
                                 <div class="mt-2 text-2xl font-semibold">{{ number_format((int) ($episode->statistic?->review_count ?? 0)) }}</div>
                                 <div class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">Published audience responses</div>
                             </div>
                             <div class="rounded-box border border-black/5 bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
-                                <div class="text-xs uppercase tracking-[0.2em] text-neutral-500 dark:text-neutral-400">Watchlists</div>
+                                <div class="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-neutral-500 dark:text-neutral-400">
+                                    <x-ui.icon name="bookmark" class="size-4" />
+                                    <span>Watchlists</span>
+                                </div>
                                 <div class="mt-2 text-2xl font-semibold">{{ number_format((int) ($episode->statistic?->watchlist_count ?? 0)) }}</div>
                                 <div class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">Members tracking this episode</div>
                             </div>
@@ -184,8 +193,11 @@
                 <x-ui.card class="!max-w-none">
                     <div class="space-y-4">
                         <div class="flex items-center justify-between gap-4">
-                            <x-ui.heading level="h2" size="lg">Guest cast</x-ui.heading>
-                            <x-ui.badge variant="outline" color="neutral">{{ number_format($guestCast->count()) }} credits</x-ui.badge>
+                            <x-ui.heading level="h2" size="lg" class="inline-flex items-center gap-2">
+                                <x-ui.icon name="users" class="size-5 text-neutral-500 dark:text-neutral-400" />
+                                <span>Guest cast</span>
+                            </x-ui.heading>
+                            <x-ui.badge variant="outline" color="neutral" icon="users">{{ number_format($guestCast->count()) }} credits</x-ui.badge>
                         </div>
 
                         @if ($guestCast->isNotEmpty())
@@ -205,6 +217,9 @@
                             </div>
                         @else
                             <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                <x-ui.empty.media>
+                                    <x-ui.icon name="users" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                                </x-ui.empty.media>
                                 <x-ui.heading level="h3">No guest cast has been published yet.</x-ui.heading>
                             </x-ui.empty>
                         @endif
@@ -214,8 +229,11 @@
                 <x-ui.card class="!max-w-none">
                     <div class="space-y-4">
                         <div class="flex items-center justify-between gap-4">
-                            <x-ui.heading level="h2" size="lg">Key crew</x-ui.heading>
-                            <x-ui.badge variant="outline" color="neutral">{{ number_format($keyCrew->count()) }} role groups</x-ui.badge>
+                            <x-ui.heading level="h2" size="lg" class="inline-flex items-center gap-2">
+                                <x-ui.icon name="briefcase" class="size-5 text-neutral-500 dark:text-neutral-400" />
+                                <span>Key crew</span>
+                            </x-ui.heading>
+                            <x-ui.badge variant="outline" color="neutral" icon="rectangle-group">{{ number_format($keyCrew->count()) }} role groups</x-ui.badge>
                         </div>
 
                         @if ($keyCrew->isNotEmpty())
@@ -240,6 +258,9 @@
                             </div>
                         @else
                             <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                <x-ui.empty.media>
+                                    <x-ui.icon name="briefcase" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                                </x-ui.empty.media>
                                 <x-ui.heading level="h3">No crew credits are available yet.</x-ui.heading>
                             </x-ui.empty>
                         @endif
@@ -255,8 +276,11 @@
                 <x-ui.card class="!max-w-none">
                     <div class="space-y-4">
                         <div class="flex items-center justify-between gap-4">
-                            <x-ui.heading level="h2" size="lg">Latest reviews</x-ui.heading>
-                            <x-ui.badge variant="outline" color="neutral">{{ number_format($reviews->count()) }} published</x-ui.badge>
+                            <x-ui.heading level="h2" size="lg" class="inline-flex items-center gap-2">
+                                <x-ui.icon name="chat-bubble-left-right" class="size-5 text-neutral-500 dark:text-neutral-400" />
+                                <span>Latest reviews</span>
+                            </x-ui.heading>
+                            <x-ui.badge variant="outline" color="neutral" icon="check-circle">{{ number_format($reviews->count()) }} published</x-ui.badge>
                         </div>
 
                         <div class="grid gap-3">
@@ -268,14 +292,23 @@
                                             {{ $review->author->name }}
                                         </div>
                                     </div>
-                                    <div class="mt-2 flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.2em] text-neutral-500 dark:text-neutral-400">
+                                    <div class="mt-2 flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.2em] text-neutral-500 dark:text-neutral-400">
                                         @if ($review->contains_spoilers)
-                                            <span>Spoilers</span>
+                                            <span class="inline-flex items-center gap-1.5">
+                                                <x-ui.icon name="eye-slash" class="size-4" />
+                                                <span>Spoilers</span>
+                                            </span>
                                         @endif
                                         @if ($review->published_at)
-                                            <span>{{ $review->published_at->format('M j, Y') }}</span>
+                                            <span class="inline-flex items-center gap-1.5">
+                                                <x-ui.icon name="calendar-days" class="size-4" />
+                                                <span>{{ $review->published_at->format('M j, Y') }}</span>
+                                            </span>
                                         @endif
-                                        <span>{{ number_format((int) $review->helpful_votes_count) }} helpful</span>
+                                        <span class="inline-flex items-center gap-1.5">
+                                            <x-ui.icon name="hand-thumb-up" class="size-4" />
+                                            <span>{{ number_format((int) $review->helpful_votes_count) }} helpful</span>
+                                        </span>
                                     </div>
                                     <x-ui.text class="mt-2 text-sm text-neutral-600 dark:text-neutral-300">
                                         {{ str($review->body)->limit(260) }}
@@ -283,6 +316,9 @@
                                 </div>
                             @empty
                                 <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                    <x-ui.empty.media>
+                                        <x-ui.icon name="chat-bubble-left-right" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                                    </x-ui.empty.media>
                                     <x-ui.heading level="h3">No published reviews yet.</x-ui.heading>
                                 </x-ui.empty>
                             @endforelse
@@ -294,7 +330,10 @@
             <div class="space-y-6">
                 <x-ui.card class="!max-w-none">
                     <div class="space-y-4">
-                        <x-ui.heading level="h2" size="lg">Details</x-ui.heading>
+                        <x-ui.heading level="h2" size="lg" class="inline-flex items-center gap-2">
+                            <x-ui.icon name="information-circle" class="size-5 text-neutral-500 dark:text-neutral-400" />
+                            <span>Details</span>
+                        </x-ui.heading>
 
                         <div class="grid gap-3">
                             @forelse ($detailItems as $item)
@@ -304,6 +343,9 @@
                                 </div>
                             @empty
                                 <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                    <x-ui.empty.media>
+                                        <x-ui.icon name="information-circle" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                                    </x-ui.empty.media>
                                     <x-ui.heading level="h3">Detailed metadata is still being curated.</x-ui.heading>
                                 </x-ui.empty>
                             @endforelse
@@ -314,8 +356,11 @@
                 <x-ui.card class="!max-w-none">
                     <div class="space-y-4">
                         <div class="flex items-center justify-between gap-4">
-                            <x-ui.heading level="h2" size="lg">Season lineup</x-ui.heading>
-                            <x-ui.badge variant="outline" color="neutral">{{ number_format($seasonEpisodes->count()) }} episodes</x-ui.badge>
+                            <x-ui.heading level="h2" size="lg" class="inline-flex items-center gap-2">
+                                <x-ui.icon name="list-bullet" class="size-5 text-neutral-500 dark:text-neutral-400" />
+                                <span>Season lineup</span>
+                            </x-ui.heading>
+                            <x-ui.badge variant="outline" color="neutral" icon="rectangle-stack">{{ number_format($seasonEpisodes->count()) }} episodes</x-ui.badge>
                         </div>
 
                         <div class="grid gap-3">
@@ -334,9 +379,16 @@
                                                     </a>
                                                 </div>
                                                 <div class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
-                                                    Episode {{ $seasonEpisode->episode_number }}
+                                                    <span class="inline-flex items-center gap-1.5">
+                                                        <x-ui.icon name="rectangle-stack" class="size-4" />
+                                                        <span>Episode {{ $seasonEpisode->episode_number }}</span>
+                                                    </span>
                                                     @if ($seasonEpisode->aired_at)
-                                                        · {{ $seasonEpisode->aired_at->format('M j, Y') }}
+                                                        <span class="mx-1">·</span>
+                                                        <span class="inline-flex items-center gap-1.5">
+                                                            <x-ui.icon name="calendar-days" class="size-4" />
+                                                            <span>{{ $seasonEpisode->aired_at->format('M j, Y') }}</span>
+                                                        </span>
                                                     @endif
                                                 </div>
                                             </div>
@@ -351,6 +403,9 @@
                                 @endif
                             @empty
                                 <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                    <x-ui.empty.media>
+                                        <x-ui.icon name="list-bullet" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                                    </x-ui.empty.media>
                                     <x-ui.heading level="h3">No season lineup is available yet.</x-ui.heading>
                                 </x-ui.empty>
                             @endforelse

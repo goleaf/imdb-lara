@@ -1,0 +1,46 @@
+<?php
+
+namespace Tests\Feature\Feature\Livewire;
+
+use App\Enums\ListVisibility;
+use App\Models\User;
+use App\Models\UserList;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
+use Tests\TestCase;
+
+class ProfileSettingsPanelTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_member_can_update_profile_settings_from_the_dashboard_panel(): void
+    {
+        $user = User::factory()->create([
+            'name' => 'Initial Curator',
+            'username' => 'initial-curator',
+        ]);
+
+        UserList::factory()->watchlist()->for($user)->create([
+            'visibility' => ListVisibility::Public,
+        ]);
+
+        Livewire::actingAs($user)
+            ->test('account.profile-settings-panel')
+            ->assertSet('watchlistVisibility', ListVisibility::Public->value)
+            ->set('name', 'Updated Curator')
+            ->set('bio', 'Obsessed with conspiracy thrillers and prestige miniseries.')
+            ->set('profileVisibility', 'private')
+            ->set('showRatingsOnProfile', false)
+            ->call('save')
+            ->assertSet('statusMessage', 'Profile settings updated.')
+            ->assertSet('publicProfileIsLive', false);
+
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'name' => 'Updated Curator',
+            'bio' => 'Obsessed with conspiracy thrillers and prestige miniseries.',
+            'profile_visibility' => 'private',
+            'show_ratings_on_profile' => false,
+        ]);
+    }
+}

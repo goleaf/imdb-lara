@@ -33,15 +33,15 @@
         $colorClasses = match ($color) {
             default => 'text-white dark:text-white bg-neutral-900 dark:bg-neutral-600 border-black/5 dark:border-white/5',
             'red' => 'text-white dark:text-white bg-red-500 dark:bg-red-500 border-red-400 dark:border-red-400/90',
-            'orange' => 'text-white dark:text-white bg-orange-400 dark:bg-orange-400 border-orange-400 dark:border-orange-400/90',
-            'amber' => 'text-white dark:text-white bg-amber-400 dark:bg-amber-400 border-amber-400 dark:border-amber-400/90',
-            'yellow' => 'text-white dark:text-white bg-yellow-400 dark:bg-yellow-400 border-yellow-400 dark:border-yellow-400/90',
-            'lime' => 'text-white dark:text-white bg-lime-400 dark:bg-lime-400 border-lime-400 dark:border-lime-400/90',
-            'green' => 'text-white dark:text-white bg-green-400 dark:bg-green-400 border-green-400 dark:border-green-400/90',
-            'emerald' => 'text-white dark:text-white bg-emerald-400 dark:bg-emerald-400 border-emerald-400 dark:border-emerald-400/90',
-            'teal' => 'text-white dark:text-white bg-teal-400 dark:bg-teal-400 border-teal-400 dark:border-teal-400/90',
-            'cyan' => 'text-white dark:text-white bg-cyan-400 dark:bg-cyan-400 border-cyan-400 dark:border-cyan-400/90',
-            'sky' => 'text-white dark:text-white bg-sky-400 dark:bg-sky-400 border-sky-400 dark:border-sky-400/90',
+            'orange' => 'text-orange-950 dark:text-orange-950 bg-orange-400 dark:bg-orange-400 border-orange-400 dark:border-orange-400/90',
+            'amber' => 'text-amber-950 dark:text-amber-950 bg-amber-400 dark:bg-amber-400 border-amber-400 dark:border-amber-400/90',
+            'yellow' => 'text-yellow-950 dark:text-yellow-950 bg-yellow-400 dark:bg-yellow-400 border-yellow-400 dark:border-yellow-400/90',
+            'lime' => 'text-lime-950 dark:text-lime-950 bg-lime-400 dark:bg-lime-400 border-lime-400 dark:border-lime-400/90',
+            'green' => 'text-green-950 dark:text-green-950 bg-green-400 dark:bg-green-400 border-green-400 dark:border-green-400/90',
+            'emerald' => 'text-emerald-950 dark:text-emerald-950 bg-emerald-400 dark:bg-emerald-400 border-emerald-400 dark:border-emerald-400/90',
+            'teal' => 'text-teal-950 dark:text-teal-950 bg-teal-400 dark:bg-teal-400 border-teal-400 dark:border-teal-400/90',
+            'cyan' => 'text-cyan-950 dark:text-cyan-950 bg-cyan-400 dark:bg-cyan-400 border-cyan-400 dark:border-cyan-400/90',
+            'sky' => 'text-sky-950 dark:text-sky-950 bg-sky-400 dark:bg-sky-400 border-sky-400 dark:border-sky-400/90',
             'blue' => 'text-white dark:text-white bg-blue-400 dark:bg-blue-400 border-blue-400 dark:border-blue-400/90',
             'indigo' => 'text-white dark:text-white bg-indigo-400 dark:bg-indigo-400 border-indigo-400 dark:border-indigo-400/90',
             'violet' => 'text-white dark:text-white bg-violet-400 dark:bg-violet-400 border-violet-400 dark:border-violet-400/90',
@@ -68,6 +68,7 @@
 
     $iconClasses = [
         'size-4' => $iconVariant === 'outline',
+        '!text-current',
     ];
 
 @endphp

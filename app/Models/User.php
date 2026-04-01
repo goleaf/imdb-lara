@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ListVisibility;
+use App\Enums\ProfileVisibility;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
 use Database\Factories\UserFactory;
@@ -31,6 +32,8 @@ class User extends Authenticatable
         'avatar_path',
         'role',
         'status',
+        'profile_visibility',
+        'show_ratings_on_profile',
         'email',
         'password',
     ];
@@ -50,6 +53,8 @@ class User extends Authenticatable
             'password' => 'hashed',
             'role' => UserRole::class,
             'status' => UserStatus::class,
+            'profile_visibility' => ProfileVisibility::class,
+            'show_ratings_on_profile' => 'boolean',
         ];
     }
 
@@ -59,6 +64,8 @@ class User extends Authenticatable
             $user->username ??= str($user->name)->slug()->value().fake()->numberBetween(10, 99);
             $user->role ??= UserRole::RegularUser;
             $user->status ??= UserStatus::Active;
+            $user->profile_visibility ??= ProfileVisibility::Public;
+            $user->show_ratings_on_profile ??= true;
         });
     }
 
@@ -101,14 +108,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserList::class)
             ->where('is_watchlist', false)
-            ->where('visibility', ListVisibility::Public);
+            ->where('visibility', ListVisibility::Public->value);
     }
 
     public function publicWatchlist(): HasOne
     {
         return $this->hasOne(UserList::class)
             ->where('is_watchlist', true)
-            ->where('visibility', ListVisibility::Public);
+            ->where('visibility', ListVisibility::Public->value);
     }
 
     public function watchlist(): HasOne
@@ -181,6 +188,41 @@ class User extends Authenticatable
     public function isActive(): bool
     {
         return $this->status === UserStatus::Active;
+    }
+
+    public function isProfilePublic(): bool
+    {
+        if ($this->profile_visibility instanceof ProfileVisibility) {
+            return $this->profile_visibility === ProfileVisibility::Public;
+        }
+
+        return ProfileVisibility::tryFrom((string) $this->profile_visibility) === ProfileVisibility::Public;
+    }
+
+    public function showsRatingsOnProfile(): bool
+    {
+        return $this->show_ratings_on_profile;
+    }
+
+    public function hasVisibleProfileContent(): bool
+    {
+        if (! $this->isProfilePublic()) {
+            return false;
+        }
+
+        if ($this->customLists()->where('visibility', ListVisibility::Public->value)->exists()) {
+            return true;
+        }
+
+        if ($this->watchlist()->where('visibility', ListVisibility::Public->value)->exists()) {
+            return true;
+        }
+
+        if ($this->reviews()->published()->exists()) {
+            return true;
+        }
+
+        return $this->showsRatingsOnProfile() && $this->ratings()->exists();
     }
 
     public function getAvatarUrlAttribute(): ?string

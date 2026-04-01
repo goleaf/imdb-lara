@@ -42,6 +42,8 @@ class TvHierarchyExperienceTest extends TestCase
 
         $this->get(route('public.seasons.show', ['series' => $series, 'season' => $season]))
             ->assertOk()
+            ->assertSeeHtml('data-slot="badge-icon"')
+            ->assertSeeHtml('data-slot="link-icon:after"')
             ->assertSee('Season watch progress')
             ->assertSee('Episode guide')
             ->assertSee('Top-rated episodes this season')
@@ -64,6 +66,7 @@ class TvHierarchyExperienceTest extends TestCase
             'episode' => $episode,
         ]))
             ->assertOk()
+            ->assertSeeHtml('data-slot="badge-icon"')
             ->assertSee('Episode navigation')
             ->assertSee('Guest cast')
             ->assertSee('Key crew')

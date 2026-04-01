@@ -1,5 +1,12 @@
 @php
     $modalId = 'report-review-'.$review->id;
+    $reasonIcons = [
+        'spoiler' => 'exclamation-triangle',
+        'spam' => 'no-symbol',
+        'abuse' => 'shield-exclamation',
+        'harassment' => 'shield-exclamation',
+        'inaccurate' => 'information-circle',
+    ];
 @endphp
 
 <div class="space-y-3">
@@ -37,6 +44,7 @@
                         <x-ui.combobox.option
                             wire:key="report-reason-{{ $review->id }}-{{ $reportReason['value'] }}"
                             value="{{ $reportReason['value'] }}"
+                            :icon="$reasonIcons[$reportReason['value']] ?? 'flag'"
                         >
                             {{ $reportReason['label'] }}
                         </x-ui.combobox.option>
@@ -53,7 +61,7 @@
         </form>
 
         <x-slot:footer>
-            <x-ui.button variant="ghost" x-on:click="$modal.close('{{ $modalId }}')">
+            <x-ui.button variant="ghost" icon="x-mark" x-on:click="$modal.close('{{ $modalId }}')">
                 Cancel
             </x-ui.button>
             <x-ui.button type="submit" form="review-report-form-{{ $review->id }}" icon="flag">

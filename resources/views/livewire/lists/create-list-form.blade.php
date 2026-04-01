@@ -1,9 +1,17 @@
+@php
+    $visibilityIcons = [
+        'private' => 'lock-closed',
+        'unlisted' => 'eye-slash',
+        'public' => 'globe-alt',
+    ];
+@endphp
+
 <x-ui.card class="!max-w-none">
     <form wire:submit="save" class="space-y-4">
         <div class="space-y-2">
             <x-ui.heading level="h2" size="lg">Create a list</x-ui.heading>
             <x-ui.text class="text-neutral-600 dark:text-neutral-300">
-                Create public or private collections that sit alongside your watchlist.
+                Create private, unlisted, or public collections that sit alongside your watchlist.
             </x-ui.text>
         </div>
 
@@ -16,7 +24,7 @@
         <div class="grid gap-4 sm:grid-cols-2">
             <x-ui.field class="sm:col-span-2">
                 <x-ui.label>Name</x-ui.label>
-                <x-ui.input wire:model.live="form.name" name="name" placeholder="Friday Night Picks" />
+                <x-ui.input wire:model.live="form.name" name="name" placeholder="Friday Night Picks" left-icon="queue-list" />
                 <x-ui.error name="form.name" />
             </x-ui.field>
 
@@ -38,6 +46,7 @@
                         <x-ui.combobox.option
                             wire:key="list-visibility-{{ $visibilityOption['value'] }}"
                             value="{{ $visibilityOption['value'] }}"
+                            :icon="$visibilityIcons[$visibilityOption['value']] ?? 'globe-alt'"
                         >
                             {{ $visibilityOption['label'] }}
                         </x-ui.combobox.option>

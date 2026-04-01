@@ -1,3 +1,33 @@
+@php
+    $watchlistStateIcons = [
+        'all' => 'squares-2x2',
+        'watched' => 'check-circle',
+        'unwatched' => 'eye',
+        'planned' => 'bookmark',
+        'watching' => 'play-circle',
+        'completed' => 'check-circle',
+        'paused' => 'pause-circle',
+        'dropped' => 'x-circle',
+    ];
+
+    $watchlistTypeIcons = [
+        'movie' => 'film',
+        'series' => 'tv',
+        'mini_series' => 'tv',
+        'documentary' => 'camera',
+        'short' => 'film',
+        'special' => 'sparkles',
+        'episode' => 'rectangle-stack',
+    ];
+
+    $watchlistSortIcons = [
+        'added' => 'calendar-days',
+        'year' => 'calendar-days',
+        'rating' => 'star',
+        'title' => 'bars-arrow-down',
+    ];
+@endphp
+
 <div class="space-y-4">
     <x-ui.card class="!max-w-none">
         <div class="grid gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
@@ -11,13 +41,13 @@
                     </div>
 
                     <div class="flex flex-wrap gap-2">
-                        <x-ui.badge variant="outline" color="neutral">
+                        <x-ui.badge variant="outline" color="neutral" icon="bookmark">
                             {{ number_format($watchlist->items_count) }} saved
                         </x-ui.badge>
-                        <x-ui.badge variant="outline" color="green">
+                        <x-ui.badge variant="outline" color="green" icon="check-circle">
                             {{ number_format((int) $watchlist->watched_items_count) }} watched
                         </x-ui.badge>
-                        <x-ui.badge variant="outline" color="slate">
+                        <x-ui.badge variant="outline" color="slate" icon="queue-list">
                             {{ number_format(max(0, (int) $watchlist->items_count - (int) $watchlist->watched_items_count)) }} queued
                         </x-ui.badge>
                     </div>
@@ -70,7 +100,7 @@
                     </div>
 
                     @if ($watchlist->visibility === \App\Enums\ListVisibility::Public)
-                        <x-ui.link :href="route('public.lists.show', [auth()->user(), $watchlist])" variant="ghost">
+                        <x-ui.link :href="route('public.lists.show', [auth()->user(), $watchlist])" variant="ghost" iconAfter="arrow-right">
                             View public watchlist
                         </x-ui.link>
                     @endif
@@ -88,6 +118,7 @@
                         <x-ui.combobox.option
                             wire:key="watchlist-state-{{ $stateOption['value'] }}"
                             value="{{ $stateOption['value'] }}"
+                            :icon="$watchlistStateIcons[$stateOption['value']] ?? 'squares-2x2'"
                         >
                             {{ $stateOption['label'] }}
                         </x-ui.combobox.option>
@@ -102,6 +133,7 @@
                         <x-ui.combobox.option
                             wire:key="watchlist-type-{{ $titleType->value }}"
                             value="{{ $titleType->value }}"
+                            :icon="$watchlistTypeIcons[$titleType->value] ?? 'film'"
                         >
                             {{ str($titleType->value)->headline() }}
                         </x-ui.combobox.option>
@@ -116,6 +148,7 @@
                         <x-ui.combobox.option
                             wire:key="watchlist-genre-{{ $genreOption->id }}"
                             value="{{ $genreOption->slug }}"
+                            icon="tag"
                         >
                             {{ $genreOption->name }}
                         </x-ui.combobox.option>
@@ -130,6 +163,7 @@
                         <x-ui.combobox.option
                             wire:key="watchlist-year-{{ $yearOption }}"
                             value="{{ $yearOption }}"
+                            icon="calendar-days"
                         >
                             {{ $yearOption }}
                         </x-ui.combobox.option>
@@ -144,6 +178,7 @@
                         <x-ui.combobox.option
                             wire:key="watchlist-sort-{{ $sortOption['value'] }}"
                             value="{{ $sortOption['value'] }}"
+                            :icon="$watchlistSortIcons[$sortOption['value']] ?? 'bars-arrow-down'"
                         >
                             {{ $sortOption['label'] }}
                         </x-ui.combobox.option>
@@ -202,6 +237,9 @@
             @empty
                 <div class="md:col-span-2 xl:col-span-3">
                     <x-ui.empty class="rounded-box border border-dashed border-black/10 bg-white dark:border-white/10 dark:bg-neutral-900">
+                        <x-ui.empty.media>
+                            <x-ui.icon name="bookmark" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                        </x-ui.empty.media>
                         <x-ui.heading level="h3">No titles match the current watchlist filters.</x-ui.heading>
                         <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
                             Adjust the state, genre, year, or type filters to widen the page.

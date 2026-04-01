@@ -3,11 +3,11 @@
 namespace App\Actions\Home;
 
 use App\Enums\MediaKind;
-use App\Enums\TitleType;
 use App\Models\MediaAsset;
 use App\Models\Title;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class GetLatestTrailerTitlesAction
 {
@@ -26,8 +26,7 @@ class GetLatestTrailerTitlesAction
                 'popularity_rank',
                 'is_published',
             ])
-            ->published()
-            ->where('title_type', '!=', TitleType::Episode)
+            ->publishedCatalog()
             ->whereHas('titleVideos', fn (Builder $videoQuery) => $videoQuery->whereIn('kind', $trailerKinds))
             ->with([
                 'genres:id,name,slug',
@@ -78,8 +77,12 @@ class GetLatestTrailerTitlesAction
      */
     public function handle(int $limit = 4): Collection
     {
-        return $this->query()
-            ->limit($limit)
-            ->get();
+        return Cache::remember(
+            "home:latest-trailers:{$limit}",
+            now()->addMinutes(10),
+            fn (): Collection => $this->query()
+                ->limit($limit)
+                ->get(),
+        );
     }
 }

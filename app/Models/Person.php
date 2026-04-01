@@ -61,6 +61,25 @@ class Person extends Model
         return $query->where('is_published', true);
     }
 
+    public function scopeMatchingSearch(Builder $query, string $search): Builder
+    {
+        $search = trim($search);
+
+        if ($search === '') {
+            return $query;
+        }
+
+        return $query->where(function (Builder $personQuery) use ($search): void {
+            $personQuery
+                ->where('name', 'like', '%'.$search.'%')
+                ->orWhere('slug', 'like', '%'.$search.'%')
+                ->orWhere('alternate_names', 'like', '%'.$search.'%')
+                ->orWhere('search_keywords', 'like', '%'.$search.'%')
+                ->orWhere('biography', 'like', '%'.$search.'%')
+                ->orWhere('short_biography', 'like', '%'.$search.'%');
+        });
+    }
+
     public function credits(): HasMany
     {
         return $this->hasMany(Credit::class);
@@ -73,7 +92,7 @@ class Person extends Model
 
     public function mediaAssets(): MorphMany
     {
-        return $this->morphMany(MediaAsset::class, 'mediable')->orderBy('position');
+        return $this->morphMany(MediaAsset::class, 'mediable')->ordered();
     }
 
     public function personImages(): MorphMany
@@ -84,7 +103,7 @@ class Person extends Model
                 MediaKind::Gallery,
                 MediaKind::Still,
             ])
-            ->orderBy('position');
+            ->ordered();
     }
 
     public function awardNominations(): HasMany

@@ -10,6 +10,8 @@
 
 @section('content')
     <section class="space-y-4">
+        <x-seo.pagination-links :paginator="$titles" />
+
         <x-ui.card class="!max-w-none">
             <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                 <div class="space-y-3">
@@ -20,8 +22,8 @@
                 </div>
 
                 <div class="flex flex-wrap gap-2">
-                    <x-ui.badge variant="outline">Trailer feed</x-ui.badge>
-                    <x-ui.badge variant="outline" color="neutral">Title-linked</x-ui.badge>
+                    <x-ui.badge variant="outline" icon="play">Trailer feed</x-ui.badge>
+                    <x-ui.badge variant="outline" color="neutral" icon="film">Title-linked</x-ui.badge>
                 </div>
             </div>
         </x-ui.card>
@@ -29,7 +31,11 @@
         <div class="grid gap-4 xl:grid-cols-2">
             @forelse ($titles as $title)
                 @php
-                    $poster = $title->mediaAssets->first();
+                    $poster = \App\Models\MediaAsset::preferredFrom(
+                        $title->mediaAssets,
+                        \App\Enums\MediaKind::Poster,
+                        \App\Enums\MediaKind::Backdrop,
+                    );
                     $trailer = $title->titleVideos->first();
                 @endphp
 
@@ -52,10 +58,10 @@
                         <div class="space-y-3">
                             <div class="flex flex-wrap items-center gap-2">
                                 <x-ui.badge icon="play" color="amber">Trailer</x-ui.badge>
-                                <x-ui.badge variant="outline">{{ str($title->title_type->value)->headline() }}</x-ui.badge>
+                                <x-ui.badge variant="outline" icon="film">{{ str($title->title_type->value)->headline() }}</x-ui.badge>
                                 @if ($title->release_year)
                                     <a href="{{ route('public.years.show', ['year' => $title->release_year]) }}">
-                                        <x-ui.badge variant="outline" color="slate">{{ $title->release_year }}</x-ui.badge>
+                                        <x-ui.badge variant="outline" color="slate" icon="calendar-days">{{ $title->release_year }}</x-ui.badge>
                                     </a>
                                 @endif
                             </div>
@@ -85,7 +91,7 @@
                                     View title
                                 </x-ui.button>
                                 @if (filled($trailer?->url))
-                                    <x-ui.link :href="$trailer->url" open-in-new-tab variant="ghost">
+                                    <x-ui.link :href="$trailer->url" open-in-new-tab variant="ghost" iconAfter="arrow-top-right-on-square">
                                         Open trailer
                                     </x-ui.link>
                                 @endif
@@ -95,6 +101,9 @@
                 </x-ui.card>
             @empty
                 <x-ui.empty class="rounded-box border border-dashed border-black/10 bg-white dark:border-white/10 dark:bg-neutral-900">
+                    <x-ui.empty.media>
+                        <x-ui.icon name="play-circle" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                    </x-ui.empty.media>
                     <x-ui.heading level="h3">No public trailers are available yet.</x-ui.heading>
                     <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
                         As trailer records are attached to titles, they will appear here in reverse chronological order.

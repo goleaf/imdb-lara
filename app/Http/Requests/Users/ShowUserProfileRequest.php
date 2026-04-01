@@ -15,11 +15,7 @@ class ShowUserProfileRequest extends NotFoundFormRequest
             return false;
         }
 
-        if ($this->integer('lists', 1) > 1) {
-            return true;
-        }
-
-        return $user->publicLists()->exists() || $user->publicWatchlist()->exists();
+        return $user->hasVisibleProfileContent();
     }
 
     public function profileUser(): User

@@ -56,7 +56,10 @@ new class extends Component
 
     <div class="space-y-4">
         <div class="space-y-1">
-            <x-ui.heading level="h2" size="lg">Featured Public Lists</x-ui.heading>
+            <x-ui.heading level="h2" size="lg" class="inline-flex items-center gap-2">
+                <x-ui.icon name="queue-list" class="size-5 text-neutral-500 dark:text-neutral-400" />
+                <span>Featured Public Lists</span>
+            </x-ui.heading>
             <x-ui.text class="max-w-3xl text-sm text-neutral-600 dark:text-neutral-300">
                 Public member curation with title previews, curator profiles, and visible list counts.
             </x-ui.text>
@@ -73,6 +76,9 @@ new class extends Component
             </x-ui.card>
         @elseif ($lists->isEmpty())
             <x-ui.empty class="rounded-box border border-dashed border-black/10 bg-white dark:border-white/10 dark:bg-neutral-900">
+                <x-ui.empty.media>
+                    <x-ui.icon name="queue-list" class="size-10 text-neutral-400 dark:text-neutral-500" />
+                </x-ui.empty.media>
                 <x-ui.heading level="h3">No public lists are featured right now.</x-ui.heading>
                 <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
                     Public lists will appear here once members publish and populate them with titles.
@@ -90,9 +96,9 @@ new class extends Component
                             <div class="space-y-2">
                                 <div class="flex flex-wrap items-center gap-2">
                                     <a href="{{ route('public.users.show', $list->user) }}">
-                                        <x-ui.badge variant="outline" color="neutral">{{ $list->user->name }}</x-ui.badge>
+                                        <x-ui.badge variant="outline" color="neutral" icon="user">{{ $list->user->name }}</x-ui.badge>
                                     </a>
-                                    <x-ui.badge variant="outline" color="slate">
+                                    <x-ui.badge variant="outline" color="slate" icon="queue-list">
                                         {{ number_format((int) $list->published_items_count) }} titles
                                     </x-ui.badge>
                                 </div>
@@ -110,7 +116,11 @@ new class extends Component
                             <div class="grid grid-cols-3 gap-2">
                                 @forelse ($previewItems as $item)
                                     @php
-                                        $poster = $item->title->mediaAssets->first();
+                                        $poster = \App\Models\MediaAsset::preferredFrom(
+                                            $item->title->mediaAssets,
+                                            \App\Enums\MediaKind::Poster,
+                                            \App\Enums\MediaKind::Backdrop,
+                                        );
                                     @endphp
 
                                     <a
@@ -132,7 +142,9 @@ new class extends Component
                                     </a>
                                 @empty
                                     @foreach (range(1, 3) as $index)
-                                        <div class="rounded-box border border-dashed border-black/10 bg-neutral-50 dark:border-white/10 dark:bg-neutral-800/70"></div>
+                                        <div class="flex aspect-[2/3] items-center justify-center rounded-box border border-dashed border-black/10 bg-neutral-50 text-neutral-400 dark:border-white/10 dark:bg-neutral-800/70 dark:text-neutral-500">
+                                            <x-ui.icon name="film" class="size-8" />
+                                        </div>
                                     @endforeach
                                 @endforelse
                             </div>
@@ -146,7 +158,7 @@ new class extends Component
                             @endif
 
                             <div class="mt-auto flex items-center justify-between gap-3">
-                                <x-ui.badge variant="outline" color="neutral">{{ '@'.$list->user->username }}</x-ui.badge>
+                                <x-ui.badge variant="outline" color="neutral" icon="at-symbol">{{ '@'.$list->user->username }}</x-ui.badge>
                                 <x-ui.link :href="route('public.lists.show', [$list->user, $list])" variant="ghost">
                                     View list
                                 </x-ui.link>

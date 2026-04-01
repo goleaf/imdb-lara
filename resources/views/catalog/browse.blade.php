@@ -14,6 +14,22 @@
 @endsection
 
 @section('content')
+    @php
+        $badgeIcons = [
+            'film' => 'film',
+            'movie' => 'film',
+            'tv' => 'tv',
+            'series' => 'tv',
+            'rating' => 'star',
+            'review' => 'chat-bubble-left-right',
+            'discover' => 'sparkles',
+            'genre' => 'tag',
+            'year' => 'calendar-days',
+            'people' => 'users',
+            'search' => 'magnifying-glass',
+        ];
+    @endphp
+
     <section class="space-y-4">
         <x-ui.card class="!max-w-none">
             <div class="space-y-4">
@@ -28,7 +44,12 @@
                     @if ($badges !== [])
                         <div class="flex flex-wrap gap-2">
                             @foreach ($badges as $badge)
-                                <x-ui.badge variant="outline" color="neutral">{{ $badge }}</x-ui.badge>
+                                @php
+                                    $normalizedBadge = str($badge)->lower();
+                                    $badgeIcon = collect($badgeIcons)->first(fn ($icon, $keyword) => $normalizedBadge->contains($keyword));
+                                @endphp
+
+                                <x-ui.badge variant="outline" color="neutral" :icon="$badgeIcon">{{ $badge }}</x-ui.badge>
                             @endforeach
                         </div>
                     @endif

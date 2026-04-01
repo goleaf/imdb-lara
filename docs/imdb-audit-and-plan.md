@@ -2,6 +2,21 @@
 
 Generated: 2026-04-01
 
+## Current Status
+
+The phased plan below has now been implemented inside this repository.
+
+Delivered areas:
+
+- core catalog schema for titles, people, credits, seasons, episodes, media, ratings, reviews, lists, reports, contributions, awards, and SEO metadata
+- role-aware auth and authorization for superadmin, admin, editor, moderator, contributor, and regular users
+- public browsing, homepage discovery, title pages, people pages, TV hierarchy, search, profiles, and dashboards
+- ratings, reviews, watchlist tracking, watched state, custom lists, moderation, and contribution flows
+- admin CMS for titles, people, genres, credits, seasons, episodes, media, reviews, reports, and contributions
+- media uploads through Laravel storage plus gallery and trailer rendering on public pages
+- SEO metadata, canonical handling, breadcrumb schema, and sitemap generation
+- seeded demo catalog plus end-to-end feature coverage
+
 ## Repository Audit Summary
 
 - Framework: Laravel `12.56.0` on PHP `8.5`.
@@ -9,11 +24,11 @@ Generated: 2026-04-01
 - Auth: first-party session auth. Login and registration are Livewire forms, guest/auth redirects are configured in `bootstrap/app.php`, and logout is handled by a standard controller action.
 - Users and permissions: `users` includes `username`, `bio`, `avatar_path`, `role`, and `status`. Access control uses `UserRole` and `UserStatus` enums, `active` and `admin` middleware aliases, plus model policies.
 - Layout and visual system: the app uses Sheaf UI Blade components, Tailwind CSS 4, and local theme tokens in `resources/css/theme.css`. Shared layouts live in `resources/views/layouts/*`.
-- Admin area: there is already a first-party `/admin` area for dashboard, titles, reviews, and reports. Filament is not installed; current admin conventions are Laravel + Blade + Livewire.
+- Admin area: there is a first-party `/admin` CMS for dashboard, titles, people, genres, credits, seasons, episodes, media assets, reviews, reports, and contributions. Filament is not installed; current admin conventions are Laravel + Blade + Livewire.
 - Tests: PHPUnit 11 feature tests are already in place for auth, public browse pages, Livewire interactions, lists, moderation, SEO, schema, and seeders.
 - Database structure: the schema already covers titles, people, companies, credits, genres, media assets, ratings, reviews, votes, title statistics, lists, list items, reports, and moderation actions.
 - Factories and seeders: factories exist for the full catalog and community domain. `DemoCatalogSeeder` provisions representative data.
-- Media support: Laravel filesystem support is available through standard disks and the public storage link, but the catalog currently stores media as URL-backed `media_assets` records rather than uploaded files.
+- Media support: Laravel filesystem support is wired through the public disk and admin media forms. The catalog supports both uploaded image assets and remote video metadata through `media_assets`.
 - Search support: search and discovery are database-backed through `App\Actions\Search\BuildDiscoveryQueryAction`. There is no Scout or external search engine integration.
 
 ## What Can Be Reused Directly
@@ -25,13 +40,11 @@ Generated: 2026-04-01
 - The current catalog schema, factories, seeders, and SEO endpoints.
 - The database-backed discovery query and the existing public/admin controllers.
 
-## Architectural Gaps
+## Remaining Architectural Gaps
 
-- Media is URL-based today. A production catalog still needs a managed upload pipeline, storage strategy, and admin upload tooling.
-- Search is Eloquent-backed only. That is fine for the current seed/demo scale, but a larger catalog may need search indexing later.
-- Admin pages are browse/moderation oriented. Full editorial CRUD workflows, relationship editors, and media management still need expansion.
-- Aggregate data existed, but lifecycle-driven consistency was incomplete. Phase 1 in this pass hardens that with observers and tests.
-- There is no external ingestion/import pipeline yet for large title and people datasets.
+- Search remains database-backed. That is acceptable for the seeded/demo scale, but a larger production catalog may eventually need dedicated indexing.
+- Cache invalidation for low-risk homepage/filter datasets is currently TTL-driven rather than observer-driven.
+- There is still no external ingestion/import pipeline for very large third-party datasets.
 
 ## Phased Implementation Plan
 

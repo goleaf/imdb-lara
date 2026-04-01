@@ -57,4 +57,47 @@ class Contribution extends Model
     {
         return $this->morphTo();
     }
+
+    public function getProposedFieldAttribute(): ?string
+    {
+        $field = $this->payload['field'] ?? null;
+
+        return is_string($field) && filled($field) ? $field : null;
+    }
+
+    public function getProposedFieldLabelAttribute(): ?string
+    {
+        $fieldLabel = $this->payload['field_label'] ?? null;
+
+        if (is_string($fieldLabel) && filled($fieldLabel)) {
+            return $fieldLabel;
+        }
+
+        return $this->proposed_field
+            ? str($this->proposed_field)->replace('_', ' ')->headline()->toString()
+            : null;
+    }
+
+    public function getProposedValueAttribute(): ?string
+    {
+        $value = $this->payload['value'] ?? null;
+
+        return is_scalar($value) && filled((string) $value) ? trim((string) $value) : null;
+    }
+
+    public function getSubmissionNotesAttribute(): ?string
+    {
+        $submissionNotes = $this->payload['submission_notes'] ?? null;
+
+        if (is_string($submissionNotes) && filled($submissionNotes)) {
+            return trim($submissionNotes);
+        }
+
+        return $this->reviewed_by === null && filled($this->notes) ? trim((string) $this->notes) : null;
+    }
+
+    public function getReviewNotesAttribute(): ?string
+    {
+        return $this->reviewed_by !== null && filled($this->notes) ? trim((string) $this->notes) : null;
+    }
 }
