@@ -2,10 +2,13 @@
 
 namespace Tests\Feature\Feature\Feature\Livewire;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class HelpfulVoteButtonTest extends TestCase
 {
+    use RefreshDatabase;
+
     /**
      * A basic feature test example.
      */

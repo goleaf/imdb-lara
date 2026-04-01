@@ -1,11 +1,11 @@
 <?php
 
-namespace Tests\Feature\Feature\Feature\Livewire;
+namespace Tests\Feature\Feature\Ui;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class TitleReviewListTest extends TestCase
+class IconAndFlagRenderingTest extends TestCase
 {
     use RefreshDatabase;
 
