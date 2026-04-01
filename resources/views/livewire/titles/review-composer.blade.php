@@ -1,4 +1,4 @@
-<x-ui.card class="!max-w-none">
+<x-ui.card class="!max-w-none" id="title-review">
     <form wire:submit="save" class="space-y-4">
         <div class="space-y-2">
             <x-ui.heading level="h3" size="md">Write a review</x-ui.heading>
@@ -6,6 +6,12 @@
                 Reviews are stored against the title and may enter moderation before publication.
             </x-ui.text>
         </div>
+
+        @guest
+            <x-ui.alerts variant="info" icon="information-circle">
+                <x-ui.alerts.heading>Sign in to write a review.</x-ui.alerts.heading>
+            </x-ui.alerts>
+        @endguest
 
         @if ($statusMessage)
             <x-ui.alerts variant="success" icon="check-circle">
@@ -31,8 +37,8 @@
         </label>
 
         <div class="flex justify-end">
-            <x-ui.button type="submit" icon="chat-bubble-left-right">
-                Submit review
+            <x-ui.button type="submit" icon="chat-bubble-left-right" wire:target="save">
+                {{ filled($headline) || filled($body) ? 'Update review' : 'Submit review' }}
             </x-ui.button>
         </div>
     </form>

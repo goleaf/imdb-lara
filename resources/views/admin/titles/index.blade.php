@@ -25,6 +25,7 @@
                             <th class="px-4 py-3 font-medium">Type</th>
                             <th class="px-4 py-3 font-medium">Year</th>
                             <th class="px-4 py-3 font-medium">Status</th>
+                            <th class="px-4 py-3 font-medium text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-black/5 dark:divide-white/10">
@@ -42,10 +43,15 @@
                                         {{ $title->is_published ? 'Published' : 'Draft' }}
                                     </x-ui.badge>
                                 </td>
+                                <td class="px-4 py-3 text-right">
+                                    <x-ui.link :href="route('admin.titles.edit', $title)" variant="ghost">
+                                        Edit
+                                    </x-ui.link>
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="px-4 py-8">
+                                <td colspan="5" class="px-4 py-8">
                                     <x-ui.empty>
                                         <x-ui.heading level="h3">No titles are available.</x-ui.heading>
                                     </x-ui.empty>

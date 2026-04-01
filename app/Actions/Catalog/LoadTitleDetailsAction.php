@@ -4,33 +4,309 @@ namespace App\Actions\Catalog;
 
 use App\Enums\MediaKind;
 use App\Enums\ReviewStatus;
+use App\Models\AwardNomination;
+use App\Models\Credit;
+use App\Models\MediaAsset;
+use App\Models\TitleRelationship;
 use App\Models\Title;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Support\Collection;
 
 class LoadTitleDetailsAction
 {
-    public function handle(Title $title): Title
+    /**
+     * @return array{
+     *     title: Title,
+     *     poster: MediaAsset|null,
+     *     backdrop: MediaAsset|null,
+     *     galleryAssets: Collection<int, MediaAsset>,
+     *     castPreview: Collection<int, Credit>,
+     *     crewPreview: Collection<int, array{role: string, department: string|null, credits: Collection<int, Credit>}>,
+     *     reviews: EloquentCollection<int, \App\Models\Review>,
+     *     detailItems: Collection<int, array{label: string, value: string}>,
+     *     technicalSpecItems: Collection<int, array{label: string, value: string}>,
+     *     ratingsBreakdown: Collection<int, array{score: int, count: int, percentage: int}>,
+     *     relatedTitles: Collection<int, array{title: Title, relationship: TitleRelationship, label: string}>,
+     *     awardHighlights: Collection<int, AwardNomination>,
+     *     countries: Collection<int, string>,
+     *     languages: Collection<int, string>
+     * }
+     */
+    public function handle(Title $title): array
     {
         $title->load([
             'genres:id,name,slug',
             'companies:id,name,slug,kind,country_code',
-            'credits.person:id,name,slug',
-            'statistic:id,title_id,average_rating,rating_count,review_count,watchlist_count',
-            'mediaAssets',
+            'credits' => fn ($query) => $query
+                ->select([
+                    'id',
+                    'title_id',
+                    'person_id',
+                    'department',
+                    'job',
+                    'character_name',
+                    'billing_order',
+                    'is_principal',
+                    'credited_as',
+                ])
+                ->with('person:id,name,slug')
+                ->orderBy('billing_order')
+                ->orderBy('job'),
+            'statistic:id,title_id,average_rating,rating_count,review_count,watchlist_count,episodes_count,awards_nominated_count,awards_won_count',
+            'mediaAssets' => fn ($query) => $query
+                ->select([
+                    'id',
+                    'mediable_type',
+                    'mediable_id',
+                    'kind',
+                    'url',
+                    'alt_text',
+                    'caption',
+                    'width',
+                    'height',
+                    'provider',
+                    'provider_key',
+                    'language',
+                    'duration_seconds',
+                    'is_primary',
+                    'position',
+                    'published_at',
+                ])
+                ->orderBy('position')
+                ->orderByDesc('published_at'),
             'titleVideos' => fn ($query) => $query
-                ->select(['id', 'mediable_type', 'mediable_id', 'kind', 'url', 'caption', 'published_at'])
+                ->select([
+                    'id',
+                    'mediable_type',
+                    'mediable_id',
+                    'kind',
+                    'url',
+                    'caption',
+                    'provider',
+                    'provider_key',
+                    'duration_seconds',
+                    'published_at',
+                ])
                 ->whereIn('kind', [MediaKind::Trailer, MediaKind::Clip, MediaKind::Featurette])
                 ->orderByDesc('published_at')
-                ->limit(3),
+                ->limit(4),
             'seasons' => fn ($query) => $query
-                ->select(['id', 'series_id', 'name', 'slug', 'season_number', 'summary', 'release_year'])
+                ->select(['id', 'series_id', 'name', 'slug', 'season_number', 'summary', 'release_year', 'meta_title', 'meta_description'])
                 ->withCount('episodes')
                 ->orderBy('season_number'),
             'reviews' => fn ($query) => $query
+                ->select([
+                    'id',
+                    'user_id',
+                    'title_id',
+                    'headline',
+                    'body',
+                    'contains_spoilers',
+                    'status',
+                    'published_at',
+                ])
                 ->where('status', ReviewStatus::Published)
+                ->withCount([
+                    'votes as helpful_votes_count' => fn ($voteQuery) => $voteQuery->where('is_helpful', true),
+                ])
                 ->with('author:id,name,username')
-                ->latest('published_at'),
+                ->latest('published_at')
+                ->limit(6),
+            'awardNominations' => fn ($query) => $query
+                ->select([
+                    'id',
+                    'award_event_id',
+                    'award_category_id',
+                    'title_id',
+                    'person_id',
+                    'company_id',
+                    'episode_id',
+                    'credited_name',
+                    'details',
+                    'is_winner',
+                    'sort_order',
+                ])
+                ->with([
+                    'awardEvent:id,award_id,name,slug,year',
+                    'awardEvent.award:id,name,slug',
+                    'awardCategory:id,award_id,name,slug',
+                    'person:id,name,slug',
+                    'company:id,name,slug',
+                    'episode:id,title_id,series_id,season_id,season_number,episode_number',
+                    'episode.title:id,name,slug',
+                ])
+                ->orderByDesc('is_winner')
+                ->orderBy('sort_order'),
+            'outgoingRelationships' => fn ($query) => $query
+                ->select(['id', 'from_title_id', 'to_title_id', 'relationship_type', 'weight', 'notes'])
+                ->with([
+                    'toTitle' => fn ($titleQuery) => $titleQuery
+                        ->select([
+                            'id',
+                            'name',
+                            'slug',
+                            'title_type',
+                            'release_year',
+                            'plot_outline',
+                            'is_published',
+                        ])
+                        ->published()
+                        ->with([
+                            'mediaAssets:id,mediable_type,mediable_id,kind,url,alt_text,position',
+                            'genres:id,name,slug',
+                            'statistic:id,title_id,average_rating,review_count',
+                        ]),
+                ])
+                ->orderByDesc('weight'),
+            'incomingRelationships' => fn ($query) => $query
+                ->select(['id', 'from_title_id', 'to_title_id', 'relationship_type', 'weight', 'notes'])
+                ->with([
+                    'fromTitle' => fn ($titleQuery) => $titleQuery
+                        ->select([
+                            'id',
+                            'name',
+                            'slug',
+                            'title_type',
+                            'release_year',
+                            'plot_outline',
+                            'is_published',
+                        ])
+                        ->published()
+                        ->with([
+                            'mediaAssets:id,mediable_type,mediable_id,kind,url,alt_text,position',
+                            'genres:id,name,slug',
+                            'statistic:id,title_id,average_rating,review_count',
+                        ]),
+                ])
+                ->orderByDesc('weight'),
         ]);
 
-        return $title;
+        $poster = $title->mediaAssets->firstWhere('kind', MediaKind::Poster);
+        $backdrop = $title->mediaAssets->firstWhere('kind', MediaKind::Backdrop);
+        $galleryAssets = $title->mediaAssets
+            ->filter(fn (MediaAsset $mediaAsset): bool => in_array($mediaAsset->kind, [
+                MediaKind::Poster,
+                MediaKind::Backdrop,
+                MediaKind::Gallery,
+                MediaKind::Still,
+            ], true))
+            ->take(8)
+            ->values();
+
+        $castPreview = $title->credits
+            ->where('department', 'Cast')
+            ->take(8)
+            ->values();
+
+        $crewPriority = [
+            'Director' => 1,
+            'Creator' => 2,
+            'Writer' => 3,
+            'Screenplay' => 4,
+            'Producer' => 5,
+            'Composer' => 6,
+            'Cinematographer' => 7,
+            'Editor' => 8,
+        ];
+
+        $crewPreview = $title->credits
+            ->where('department', '!=', 'Cast')
+            ->groupBy(fn (Credit $credit): string => filled($credit->job) ? $credit->job : $credit->department)
+            ->map(fn (Collection $credits, string $role): array => [
+                'role' => $role,
+                'department' => $credits->first()?->department,
+                'credits' => $credits->take(3)->values(),
+            ])
+            ->sortBy(fn (array $group): int => $crewPriority[$group['role']] ?? 99)
+            ->take(6)
+            ->values();
+
+        $ratings = $title->ratings()
+            ->select(['score'])
+            ->get();
+        $ratingsTotal = $ratings->count();
+        $ratingsByScore = $ratings->countBy('score');
+        $ratingsBreakdown = collect(range(10, 1))
+            ->map(function (int $score) use ($ratingsByScore, $ratingsTotal): array {
+                $count = (int) ($ratingsByScore[$score] ?? 0);
+
+                return [
+                    'score' => $score,
+                    'count' => $count,
+                    'percentage' => $ratingsTotal > 0
+                        ? (int) round(($count / $ratingsTotal) * 100)
+                        : 0,
+                ];
+            });
+
+        $detailItems = collect([
+            ['label' => 'Original title', 'value' => $title->original_name !== $title->name ? $title->original_name : null],
+            ['label' => 'Release date', 'value' => $title->release_date?->format('M j, Y')],
+            ['label' => 'Country of origin', 'value' => $title->origin_country ? str($title->origin_country)->upper()->toString() : null],
+            ['label' => 'Original language', 'value' => $title->original_language ? str($title->original_language)->upper()->toString() : null],
+            ['label' => 'Certification', 'value' => $title->age_rating],
+            ['label' => 'Production companies', 'value' => $title->companies->pluck('name')->implode(', ')],
+        ])->filter(fn (array $item): bool => filled($item['value']))->values();
+
+        $technicalSpecItems = collect([
+            ['label' => 'Runtime', 'value' => $title->runtime_minutes ? sprintf('%d min', $title->runtime_minutes) : null],
+            ['label' => 'Format', 'value' => str($title->title_type->value)->headline()->toString()],
+            ['label' => 'Published seasons', 'value' => $title->seasons->isNotEmpty() ? (string) $title->seasons->count() : null],
+            ['label' => 'Published episodes', 'value' => $title->statistic?->episodes_count ? (string) $title->statistic->episodes_count : null],
+            ['label' => 'Awards won', 'value' => $title->statistic?->awards_won_count ? (string) $title->statistic->awards_won_count : null],
+            ['label' => 'Media assets', 'value' => $galleryAssets->isNotEmpty() ? (string) $galleryAssets->count() : null],
+        ])->filter(fn (array $item): bool => filled($item['value']))->values();
+
+        $relatedTitles = $title->outgoingRelationships
+            ->map(fn (TitleRelationship $relationship): array => [
+                'title' => $relationship->toTitle,
+                'relationship' => $relationship,
+                'label' => str($relationship->relationship_type->value)->headline()->toString(),
+            ])
+            ->merge(
+                $title->incomingRelationships->map(fn (TitleRelationship $relationship): array => [
+                    'title' => $relationship->fromTitle,
+                    'relationship' => $relationship,
+                    'label' => str($relationship->relationship_type->value)->headline()->toString(),
+                ])
+            )
+            ->filter(fn (array $item): bool => $item['title'] instanceof Title)
+            ->unique(fn (array $item): string => $item['relationship']->relationship_type->value.'-'.$item['title']->id)
+            ->sortByDesc(fn (array $item): int => (int) ($item['relationship']->weight ?? 0))
+            ->take(6)
+            ->values();
+
+        $awardHighlights = $title->awardNominations
+            ->sortByDesc(fn (AwardNomination $awardNomination): int => (int) $awardNomination->is_winner)
+            ->take(6)
+            ->values();
+
+        return [
+            'title' => $title,
+            'poster' => $poster,
+            'backdrop' => $backdrop,
+            'galleryAssets' => $galleryAssets,
+            'castPreview' => $castPreview,
+            'crewPreview' => $crewPreview,
+            'reviews' => $title->reviews,
+            'detailItems' => $detailItems,
+            'technicalSpecItems' => $technicalSpecItems,
+            'ratingsBreakdown' => $ratingsBreakdown,
+            'relatedTitles' => $relatedTitles,
+            'awardHighlights' => $awardHighlights,
+            'countries' => $this->tokenizeList($title->origin_country),
+            'languages' => $this->tokenizeList($title->original_language),
+        ];
+    }
+
+    /**
+     * @return Collection<int, string>
+     */
+    private function tokenizeList(?string $value): Collection
+    {
+        return collect(preg_split('/[,|]/', (string) $value) ?: [])
+            ->map(fn (string $item): string => str($item)->trim()->upper()->toString())
+            ->filter()
+            ->values();
     }
 }

@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Catalog\BuildTitleCreditsQueryAction;
 use App\Actions\Catalog\LoadTitleDetailsAction;
 use App\Enums\TitleType;
 use App\Models\Title;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Route;
 
@@ -42,24 +44,81 @@ class TitleController extends Controller
 
     public function show(Title $title, LoadTitleDetailsAction $loadTitleDetails): View|RedirectResponse
     {
-        if ($title->title_type === TitleType::Episode) {
-            $title->load('episodeMeta.season:id,series_id,slug', 'episodeMeta.series:id,slug');
+        $this->ensurePubliclyVisible($title);
 
-            if (
-                Route::has('public.episodes.show')
-                && $title->episodeMeta?->season
-                && $title->episodeMeta?->series
-            ) {
-                return redirect()->route('public.episodes.show', [
-                    'series' => $title->episodeMeta->series,
-                    'season' => $title->episodeMeta->season,
-                    'episode' => $title,
-                ]);
-            }
+        if ($redirectResponse = $this->redirectCanonicalEpisode($title)) {
+            return $redirectResponse;
         }
 
-        return view('titles.show', [
-            'title' => $loadTitleDetails->handle($title),
+        return view('titles.show', $loadTitleDetails->handle($title));
+    }
+
+    public function cast(Title $title, BuildTitleCreditsQueryAction $buildTitleCreditsQuery): View|RedirectResponse
+    {
+        $this->ensurePubliclyVisible($title);
+
+        if ($redirectResponse = $this->redirectCanonicalEpisode($title)) {
+            return $redirectResponse;
+        }
+
+        $title->load([
+            'genres:id,name,slug',
+            'statistic:id,title_id,rating_count,average_rating,review_count',
+            'mediaAssets:id,mediable_type,mediable_id,kind,url,alt_text,position',
         ]);
+
+        $creditsQuery = $buildTitleCreditsQuery->handle($title);
+        $castCredits = (clone $creditsQuery)
+            ->where('department', 'Cast')
+            ->simplePaginate(24, ['*'], 'castPage')
+            ->withQueryString();
+        $crewCredits = (clone $creditsQuery)
+            ->where('department', '!=', 'Cast')
+            ->simplePaginate(24, ['*'], 'crewPage')
+            ->withQueryString();
+
+        return view('titles.cast', [
+            'title' => $title,
+            'castCredits' => $castCredits,
+            'crewCredits' => $crewCredits,
+            'castCount' => (clone $creditsQuery)->where('department', 'Cast')->count(),
+            'crewCount' => (clone $creditsQuery)->where('department', '!=', 'Cast')->count(),
+        ]);
+    }
+
+    private function ensurePubliclyVisible(Title $title): void
+    {
+        if ($title->is_published) {
+            return;
+        }
+
+        if (auth()->user()?->can('view', $title)) {
+            return;
+        }
+
+        throw new HttpResponseException(abort(404));
+    }
+
+    private function redirectCanonicalEpisode(Title $title): ?RedirectResponse
+    {
+        if ($title->title_type !== TitleType::Episode) {
+            return null;
+        }
+
+        $title->load('episodeMeta.season:id,series_id,slug', 'episodeMeta.series:id,slug');
+
+        if (
+            Route::has('public.episodes.show')
+            && $title->episodeMeta?->season
+            && $title->episodeMeta?->series
+        ) {
+            return redirect()->route('public.episodes.show', [
+                'series' => $title->episodeMeta->series,
+                'season' => $title->episodeMeta->season,
+                'episode' => $title,
+            ]);
+        }
+
+        return redirect()->route('public.titles.show', $title);
     }
 }

@@ -1,11 +1,17 @@
 <x-ui.card class="!max-w-none">
-    <form wire:submit="save" class="space-y-4">
+    <form wire:submit="save" class="space-y-4" id="title-rating">
         <div class="space-y-2">
             <x-ui.heading level="h3" size="md">Your rating</x-ui.heading>
             <x-ui.text class="text-neutral-600 dark:text-neutral-300">
                 Score this title on a ten-point scale.
             </x-ui.text>
         </div>
+
+        @guest
+            <x-ui.alerts variant="info" icon="information-circle">
+                <x-ui.alerts.heading>Sign in to save a rating.</x-ui.alerts.heading>
+            </x-ui.alerts>
+        @endguest
 
         <div class="grid gap-4 sm:grid-cols-[minmax(0,0.5fr)_auto] sm:items-end">
             <x-ui.field>
@@ -21,7 +27,7 @@
                 <x-ui.error name="form.score" />
             </x-ui.field>
 
-            <x-ui.button type="submit" icon="star">
+            <x-ui.button type="submit" icon="star" wire:target="save">
                 Save rating
             </x-ui.button>
         </div>

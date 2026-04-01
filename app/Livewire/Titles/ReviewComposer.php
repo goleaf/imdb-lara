@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Titles;
 
+use App\Actions\Titles\GetUserReviewForTitleAction;
 use App\Actions\Titles\StoreReviewAction;
 use App\Enums\ReviewStatus;
 use App\Livewire\Forms\Titles\ReviewForm;
@@ -22,9 +23,18 @@ class ReviewComposer extends Component
 
     public ?string $statusMessage = null;
 
-    public function mount(Title $title): void
+    public function mount(Title $title, GetUserReviewForTitleAction $getUserReviewForTitle): void
     {
         $this->title = $title;
+
+        if (auth()->check()) {
+            $review = $getUserReviewForTitle->handle(auth()->user(), $title);
+
+            $this->headline = (string) ($review?->headline ?? '');
+            $this->body = (string) ($review?->body ?? '');
+            $this->containsSpoilers = (bool) ($review?->contains_spoilers ?? false);
+        }
+
         $this->form->headline = $this->headline;
         $this->form->body = $this->body;
         $this->form->containsSpoilers = $this->containsSpoilers;

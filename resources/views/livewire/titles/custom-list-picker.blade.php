@@ -1,4 +1,4 @@
-<x-ui.card class="!max-w-none">
+<x-ui.card class="!max-w-none" id="title-lists">
     <form wire:submit="save" class="space-y-4">
         <div class="space-y-2">
             <x-ui.heading level="h3" size="md">Custom lists</x-ui.heading>
@@ -44,7 +44,7 @@
                 </div>
 
                 <div class="flex justify-end">
-                    <x-ui.button type="submit" icon="queue-list">
+                    <x-ui.button type="submit" icon="queue-list" wire:target="save">
                         Update lists
                     </x-ui.button>
                 </div>

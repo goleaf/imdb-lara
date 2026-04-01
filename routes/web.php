@@ -45,6 +45,7 @@ Route::name('public.')->group(function (): void {
     Route::get('/movies', MovieController::class)->name('movies.index');
     Route::get('/tv-shows', SeriesController::class)->name('series.index');
     Route::get('/titles', [TitleController::class, 'index'])->name('titles.index');
+    Route::get('/titles/{title:slug}/cast', [TitleController::class, 'cast'])->name('titles.cast');
     Route::get('/titles/{title:slug}', [TitleController::class, 'show'])->name('titles.show');
     Route::get('/people', [PersonController::class, 'index'])->name('people.index');
     Route::get('/people/{person:slug}', [PersonController::class, 'show'])->name('people.show');
@@ -87,6 +88,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'active', 'admin'])-
     Route::get('/titles', [AdminTitleController::class, 'index'])
         ->can('viewAny', Title::class)
         ->name('titles.index');
+    Route::get('/titles/{title:slug}/edit', [AdminTitleController::class, 'edit'])
+        ->can('update', 'title')
+        ->name('titles.edit');
+    Route::patch('/titles/{title:slug}', [AdminTitleController::class, 'update'])
+        ->can('update', 'title')
+        ->name('titles.update');
 
     Route::middleware('moderate')->group(function (): void {
         Route::get('/reviews', [AdminReviewController::class, 'index'])
