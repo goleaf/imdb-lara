@@ -29,6 +29,7 @@ class Credit extends Model
         'person_profession_id',
         'episode_id',
         'credited_as',
+        'imdb_source_group',
     ];
 
     protected function casts(): array

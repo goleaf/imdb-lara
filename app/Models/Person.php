@@ -24,8 +24,12 @@ class Person extends Model
      * @var list<string>
      */
     protected $fillable = [
+        'imdb_id',
         'name',
         'alternate_names',
+        'imdb_alternative_names',
+        'imdb_primary_professions',
+        'imdb_payload',
         'slug',
         'biography',
         'short_biography',
@@ -47,6 +51,9 @@ class Person extends Model
         return [
             'birth_date' => 'date',
             'death_date' => 'date',
+            'imdb_alternative_names' => 'array',
+            'imdb_primary_professions' => 'array',
+            'imdb_payload' => 'array',
             'is_published' => 'boolean',
         ];
     }
@@ -72,8 +79,10 @@ class Person extends Model
         return $query->where(function (Builder $personQuery) use ($search): void {
             $personQuery
                 ->where('name', 'like', '%'.$search.'%')
+                ->orWhere('imdb_id', 'like', '%'.$search.'%')
                 ->orWhere('slug', 'like', '%'.$search.'%')
                 ->orWhere('alternate_names', 'like', '%'.$search.'%')
+                ->orWhere('imdb_alternative_names', 'like', '%'.$search.'%')
                 ->orWhere('search_keywords', 'like', '%'.$search.'%')
                 ->orWhere('biography', 'like', '%'.$search.'%')
                 ->orWhere('short_biography', 'like', '%'.$search.'%');
@@ -114,5 +123,33 @@ class Person extends Model
     public function contributions(): MorphMany
     {
         return $this->morphMany(Contribution::class, 'contributable');
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    public function imdbPayloadSection(string $key): ?array
+    {
+        $payload = data_get($this->imdb_payload, $key);
+
+        return is_array($payload) ? $payload : null;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function resolvedAlternateNames(): array
+    {
+        $storedNames = preg_split('/\s*\|\s*/', $this->alternate_names ?? '') ?: [];
+
+        return collect([
+            ...$storedNames,
+            ...(is_array($this->imdb_alternative_names) ? $this->imdb_alternative_names : []),
+        ])
+            ->filter(fn (mixed $value): bool => is_string($value) && trim($value) !== '')
+            ->map(fn (string $value): string => trim($value))
+            ->unique()
+            ->values()
+            ->all();
     }
 }

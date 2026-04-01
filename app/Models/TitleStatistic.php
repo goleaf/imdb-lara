@@ -19,6 +19,8 @@ class TitleStatistic extends Model
         'title_id',
         'rating_count',
         'average_rating',
+        'metacritic_score',
+        'metacritic_review_count',
         'rating_distribution',
         'review_count',
         'watchlist_count',
