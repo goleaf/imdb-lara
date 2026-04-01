@@ -15,6 +15,6 @@ class ExampleTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertSee('Featured titles');
+            ->assertSee('Hero Spotlight');
     }
 }

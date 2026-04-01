@@ -11,6 +11,7 @@ use App\Models\Title;
 use App\Models\UserList;
 use Database\Seeders\DemoCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class PublicRouteArchitectureTest extends TestCase
@@ -20,6 +21,7 @@ class PublicRouteArchitectureTest extends TestCase
     public function test_public_routes_render_the_expected_imdb_style_page_families(): void
     {
         $this->seed(DemoCatalogSeeder::class);
+        Livewire::withoutLazyLoading();
 
         $movie = Title::query()->where('slug', 'northern-signal')->firstOrFail();
         $series = Title::query()->where('slug', 'static-bloom')->firstOrFail();
@@ -41,7 +43,8 @@ class PublicRouteArchitectureTest extends TestCase
 
         $this->get(route('public.home'))
             ->assertOk()
-            ->assertSee('Featured titles')
+            ->assertSee('Hero Spotlight')
+            ->assertSee('Trending Now')
             ->assertSee('Northern Signal');
 
         $this->get(route('public.movies.index'))

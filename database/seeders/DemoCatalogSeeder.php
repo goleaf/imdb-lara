@@ -252,6 +252,18 @@ class DemoCatalogSeeder extends Seeder
                 'release_year' => 2023,
                 'plot_outline' => 'A live charity special reunites a legendary ensemble for one uneasy night.',
             ]),
+            'aurora_run' => Title::factory()->movie()->create([
+                'name' => 'Aurora Run',
+                'slug' => 'aurora-run',
+                'sort_title' => 'Aurora Run',
+                'title_type' => TitleType::Movie,
+                'popularity_rank' => 9,
+                'release_year' => 2026,
+                'release_date' => now()->addDays(45)->toDateString(),
+                'plot_outline' => 'A test pilot chases a vanished spacecraft through the aurora corridor.',
+                'synopsis' => 'An atmospheric rescue thriller set above the Arctic circle, where a prototype launch disappears after re-entry and the only pilot willing to chase it has unfinished history with the crew on board.',
+                'tagline' => 'The rescue window closes at dawn.',
+            ]),
         ]);
 
         $titles['northern_signal']->genres()->attach([
@@ -266,6 +278,7 @@ class DemoCatalogSeeder extends Seeder
         $titles['worlds_beneath_ice']->genres()->attach([$genres[3]->id, $genres[5]->id]);
         $titles['signal_to_summit']->genres()->attach([$genres[1]->id, $genres[5]->id]);
         $titles['midwinter_broadcast']->genres()->attach([$genres[1]->id]);
+        $titles['aurora_run']->genres()->attach([$genres[0]->id, $genres[5]->id, $genres[4]->id]);
 
         $titles['northern_signal']->companies()->attach($companies[0], [
             'relationship' => 'production',
@@ -300,6 +313,12 @@ class DemoCatalogSeeder extends Seeder
         $titles['worlds_beneath_ice']->companies()->attach($companies[2], [
             'relationship' => 'production',
             'credited_as' => 'Atlas Documentary Unit',
+            'is_primary' => true,
+            'sort_order' => 1,
+        ]);
+        $titles['aurora_run']->companies()->attach($companies[1], [
+            'relationship' => 'production',
+            'credited_as' => 'Northlight Pictures',
             'is_primary' => true,
             'sort_order' => 1,
         ]);

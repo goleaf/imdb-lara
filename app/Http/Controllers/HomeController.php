@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Actions\Catalog\GetFeaturedTitlesAction;
+use App\Actions\Home\GetHeroSpotlightAction;
 use Illuminate\Contracts\View\View;
 
 class HomeController extends Controller
 {
-    public function __invoke(GetFeaturedTitlesAction $getFeaturedTitles): View
+    public function __invoke(GetHeroSpotlightAction $getHeroSpotlight): View
     {
         return view('home', [
-            'featuredTitles' => $getFeaturedTitles->handle(),
+            'heroSpotlight' => $getHeroSpotlight->handle(),
         ]);
     }
 }

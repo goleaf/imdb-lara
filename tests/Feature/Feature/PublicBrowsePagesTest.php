@@ -6,6 +6,7 @@ use App\Models\Person;
 use App\Models\Title;
 use Database\Seeders\DemoCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class PublicBrowsePagesTest extends TestCase
@@ -15,13 +16,15 @@ class PublicBrowsePagesTest extends TestCase
     public function test_public_catalog_pages_render_seeded_content(): void
     {
         $this->seed(DemoCatalogSeeder::class);
+        Livewire::withoutLazyLoading();
 
         $title = Title::query()->with(['credits.person', 'reviews.author'])->firstOrFail();
         $person = Person::query()->with('credits.title')->firstOrFail();
 
         $this->get(route('public.home'))
             ->assertOk()
-            ->assertSee('Featured titles')
+            ->assertSee('Hero Spotlight')
+            ->assertSee('Trending Now')
             ->assertSee('Northern Signal');
 
         $this->get(route('public.discover'))
