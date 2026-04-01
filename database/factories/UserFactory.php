@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\UserRole;
+use App\UserStatus;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -26,6 +28,11 @@ class UserFactory extends Factory
     {
         return [
             'name' => fake()->name(),
+            'username' => fake()->unique()->userName(),
+            'bio' => fake()->optional()->sentence(),
+            'avatar_path' => null,
+            'role' => UserRole::Member,
+            'status' => UserStatus::Active,
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
@@ -40,6 +47,27 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
+        ]);
+    }
+
+    public function admin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => UserRole::Admin,
+        ]);
+    }
+
+    public function moderator(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => UserRole::Moderator,
+        ]);
+    }
+
+    public function suspended(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => UserStatus::Suspended,
         ]);
     }
 }
