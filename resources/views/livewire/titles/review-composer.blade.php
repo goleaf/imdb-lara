@@ -15,18 +15,18 @@
 
         <x-ui.field>
             <x-ui.label>Headline</x-ui.label>
-            <x-ui.input wire:model.live="headline" name="headline" maxlength="160" placeholder="Optional review headline" />
-            <x-ui.error name="headline" />
+            <x-ui.input wire:model.live="form.headline" name="headline" maxlength="160" placeholder="Optional review headline" />
+            <x-ui.error name="form.headline" />
         </x-ui.field>
 
         <x-ui.field>
             <x-ui.label>Review</x-ui.label>
-            <x-ui.textarea wire:model.live="body" name="body" rows="6" placeholder="Share what worked, what did not, and who this title is for." />
-            <x-ui.error name="body" />
+            <x-ui.textarea wire:model.live="form.body" name="body" rows="6" placeholder="Share what worked, what did not, and who this title is for." />
+            <x-ui.error name="form.body" />
         </x-ui.field>
 
         <label class="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-300">
-            <input wire:model.live="containsSpoilers" type="checkbox" class="rounded border-black/20 dark:border-white/20">
+            <input wire:model.live="form.containsSpoilers" type="checkbox" class="rounded border-black/20 dark:border-white/20">
             <span>This review contains spoilers.</span>
         </label>
 

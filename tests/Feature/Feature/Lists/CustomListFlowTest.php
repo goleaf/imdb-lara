@@ -45,9 +45,9 @@ class CustomListFlowTest extends TestCase
 
         Livewire::actingAs($user)
             ->test(CreateListForm::class)
-            ->set('name', 'Friday Night Picks')
-            ->set('description', 'The public sci-fi shortlist.')
-            ->set('visibility', ListVisibility::Public->value)
+            ->set('form.name', 'Friday Night Picks')
+            ->set('form.description', 'The public sci-fi shortlist.')
+            ->set('form.visibility', ListVisibility::Public->value)
             ->call('save')
             ->assertHasNoErrors();
 

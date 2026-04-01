@@ -20,12 +20,12 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SeasonController;
 use App\Http\Controllers\SeriesController;
 use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\TitleController;
 use App\Http\Controllers\TopRatedMovieController;
 use App\Http\Controllers\TopRatedSeriesController;
-use App\Http\Controllers\TitleController;
 use App\Http\Controllers\TrendingController;
-use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\UserListController;
+use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\YearController;
 use App\Models\Report;
 use App\Models\Review;
@@ -57,8 +57,11 @@ Route::name('public.')->group(function (): void {
     Route::get('/reviews/latest', LatestReviewController::class)->name('reviews.latest');
     Route::get('/search', SearchController::class)->name('search');
     Route::get('/u/{user:username}', UserProfileController::class)->name('users.show');
-    Route::get('/series/{series:slug}/seasons/{season:slug}', SeasonController::class)->name('seasons.show');
-    Route::get('/series/{series:slug}/seasons/{season:slug}/episodes/{episode:slug}', EpisodeController::class)->name('episodes.show');
+
+    Route::withoutScopedBindings()->group(function (): void {
+        Route::get('/series/{series:slug}/seasons/{season:slug}', SeasonController::class)->name('seasons.show');
+        Route::get('/series/{series:slug}/seasons/{season:slug}/episodes/{episode:slug}', EpisodeController::class)->name('episodes.show');
+    });
 
     Route::scopeBindings()->group(function (): void {
         Route::get('/u/{user:username}/lists/{list:slug}', [UserListController::class, 'show'])->name('lists.show');

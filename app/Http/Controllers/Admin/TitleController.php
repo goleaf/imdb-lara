@@ -2,18 +2,17 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Actions\Admin\BuildAdminTitlesIndexQueryAction;
 use App\Http\Controllers\Controller;
-use App\Models\Title;
 use Illuminate\Contracts\View\View;
 
 class TitleController extends Controller
 {
-    public function index(): View
+    public function index(BuildAdminTitlesIndexQueryAction $buildAdminTitlesIndexQuery): View
     {
         return view('admin.titles.index', [
-            'titles' => Title::query()
-                ->select(['id', 'name', 'slug', 'title_type', 'release_year', 'is_published'])
-                ->orderBy('name')
+            'titles' => $buildAdminTitlesIndexQuery
+                ->handle()
                 ->simplePaginate(20)
                 ->withQueryString(),
         ]);

@@ -26,20 +26,20 @@
             <x-ui.field>
                 <x-ui.label>Reason</x-ui.label>
                 <select
-                    wire:model.live="reason"
+                    wire:model.live="form.reason"
                     class="min-h-10 rounded-box border border-black/10 bg-white px-3 text-sm text-neutral-800 shadow-xs transition focus:border-black/15 focus:outline-none focus:ring-2 focus:ring-neutral-900/15 dark:border-white/15 dark:bg-neutral-900 dark:text-neutral-200 dark:focus:border-white/20 dark:focus:ring-neutral-100/15"
                 >
                     @foreach ($reportReasons as $reportReason)
                         <option value="{{ $reportReason['value'] }}">{{ $reportReason['label'] }}</option>
                     @endforeach
                 </select>
-                <x-ui.error name="reason" />
+                <x-ui.error name="form.reason" />
             </x-ui.field>
 
             <x-ui.field>
                 <x-ui.label>Details</x-ui.label>
-                <x-ui.textarea wire:model.live="details" name="details" rows="5" placeholder="Optional context for the moderation team." />
-                <x-ui.error name="details" />
+                <x-ui.textarea wire:model.live="form.details" name="details" rows="5" placeholder="Optional context for the moderation team." />
+                <x-ui.error name="form.details" />
             </x-ui.field>
         </form>
 

@@ -19,12 +19,16 @@
                         <x-ui.button as="a" :href="route('public.discover')" icon="sparkles">
                             Start Discovering
                         </x-ui.button>
-                        <x-ui.button as="a" :href="route('public.movies.index')" variant="outline" icon="film">
-                            Browse Movies
-                        </x-ui.button>
-                        <x-ui.button as="a" :href="route('public.series.index')" variant="outline" icon="tv">
-                            Browse TV Shows
-                        </x-ui.button>
+                        @if ($hasPublicMoviesRoute)
+                            <x-ui.button as="a" :href="route('public.movies.index')" variant="outline" icon="film">
+                                Browse Movies
+                            </x-ui.button>
+                        @endif
+                        @if ($hasPublicSeriesRoute)
+                            <x-ui.button as="a" :href="route('public.series.index')" variant="outline" icon="tv">
+                                Browse TV Shows
+                            </x-ui.button>
+                        @endif
                         <x-ui.button as="a" :href="route('public.search')" variant="outline" color="slate" icon="magnifying-glass">
                             Advanced Search
                         </x-ui.button>
@@ -48,17 +52,25 @@
             <div class="space-y-3">
                 <div class="flex items-center justify-between gap-4">
                     <x-ui.heading level="h2" size="lg">What’s built in</x-ui.heading>
-                    <div class="flex flex-wrap gap-2">
-                        <x-ui.button as="a" :href="route('public.trending')" variant="ghost" icon="bolt">
-                            Trending
-                        </x-ui.button>
-                        <x-ui.button as="a" :href="route('public.trailers.latest')" variant="ghost" icon="play">
-                            Latest Trailers
-                        </x-ui.button>
-                        <x-ui.button as="a" :href="route('public.reviews.latest')" variant="ghost" icon="chat-bubble-left-right">
-                            Latest Reviews
-                        </x-ui.button>
-                    </div>
+                    @if ($hasPublicTrendingRoute || $hasPublicLatestTrailersRoute || $hasPublicLatestReviewsRoute)
+                        <div class="flex flex-wrap gap-2">
+                            @if ($hasPublicTrendingRoute)
+                                <x-ui.button as="a" :href="route('public.trending')" variant="ghost" icon="bolt">
+                                    Trending
+                                </x-ui.button>
+                            @endif
+                            @if ($hasPublicLatestTrailersRoute)
+                                <x-ui.button as="a" :href="route('public.trailers.latest')" variant="ghost" icon="play">
+                                    Latest Trailers
+                                </x-ui.button>
+                            @endif
+                            @if ($hasPublicLatestReviewsRoute)
+                                <x-ui.button as="a" :href="route('public.reviews.latest')" variant="ghost" icon="chat-bubble-left-right">
+                                    Latest Reviews
+                                </x-ui.button>
+                            @endif
+                        </div>
+                    @endif
                 </div>
                 <div class="grid gap-3 sm:grid-cols-2">
                     <div class="rounded-box border border-black/5 p-3 dark:border-white/10">

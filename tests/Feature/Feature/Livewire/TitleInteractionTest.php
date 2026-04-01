@@ -24,13 +24,13 @@ class TitleInteractionTest extends TestCase
             ->assertRedirect(route('login'));
 
         Livewire::test(RatingPanel::class, ['title' => $title])
-            ->set('score', 9)
+            ->set('form.score', 9)
             ->call('save')
             ->assertRedirect(route('login'));
 
         Livewire::test(ReviewComposer::class, ['title' => $title])
-            ->set('headline', 'Strong')
-            ->set('body', 'A compelling review body long enough to validate.')
+            ->set('form.headline', 'Strong')
+            ->set('form.body', 'A compelling review body long enough to validate.')
             ->call('save')
             ->assertRedirect(route('login'));
     }
@@ -47,14 +47,14 @@ class TitleInteractionTest extends TestCase
 
         Livewire::actingAs($user)
             ->test(RatingPanel::class, ['title' => $title])
-            ->set('score', 9)
+            ->set('form.score', 9)
             ->call('save')
             ->assertHasNoErrors();
 
         Livewire::actingAs($user)
             ->test(ReviewComposer::class, ['title' => $title])
-            ->set('headline', 'Strong')
-            ->set('body', 'A compelling review body long enough to validate.')
+            ->set('form.headline', 'Strong')
+            ->set('form.body', 'A compelling review body long enough to validate.')
             ->call('save')
             ->assertHasNoErrors();
 

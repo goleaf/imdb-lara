@@ -2,46 +2,46 @@
     <div class="grid gap-4 sm:grid-cols-2">
         <x-ui.field>
             <x-ui.label>Name</x-ui.label>
-            <x-ui.input wire:model.live="name" name="name" autocomplete="name" />
-            <x-ui.error name="name" />
+            <x-ui.input wire:model.live="form.name" name="name" autocomplete="name" />
+            <x-ui.error name="form.name" />
         </x-ui.field>
 
         <x-ui.field>
             <x-ui.label>Username</x-ui.label>
-            <x-ui.input wire:model.live="username" name="username" autocomplete="username" />
-            <x-ui.error name="username" />
+            <x-ui.input wire:model.live="form.username" name="username" autocomplete="username" />
+            <x-ui.error name="form.username" />
         </x-ui.field>
     </div>
 
     <x-ui.field>
         <x-ui.label>Email</x-ui.label>
-        <x-ui.input wire:model.live="email" name="email" type="email" autocomplete="email" />
-        <x-ui.error name="email" />
+        <x-ui.input wire:model.live="form.email" name="email" type="email" autocomplete="email" />
+        <x-ui.error name="form.email" />
     </x-ui.field>
 
     <div class="grid gap-4 sm:grid-cols-2">
         <x-ui.field>
             <x-ui.label>Password</x-ui.label>
             <x-ui.input
-                wire:model.live="password"
+                wire:model.live="form.password"
                 name="password"
                 type="password"
                 autocomplete="new-password"
                 revealable
             />
-            <x-ui.error name="password" />
+            <x-ui.error name="form.password" />
         </x-ui.field>
 
         <x-ui.field>
             <x-ui.label>Confirm password</x-ui.label>
             <x-ui.input
-                wire:model.live="password_confirmation"
+                wire:model.live="form.password_confirmation"
                 name="password_confirmation"
                 type="password"
                 autocomplete="new-password"
                 revealable
             />
-            <x-ui.error name="password_confirmation" />
+            <x-ui.error name="form.password_confirmation" />
         </x-ui.field>
     </div>
 

@@ -4,6 +4,7 @@ namespace App\Livewire\Titles;
 
 use App\Actions\Titles\StoreReviewAction;
 use App\Enums\ReviewStatus;
+use App\Livewire\Forms\Titles\ReviewForm;
 use App\Models\Title;
 use Livewire\Component;
 
@@ -17,20 +18,31 @@ class ReviewComposer extends Component
 
     public bool $containsSpoilers = false;
 
-    public ?string $statusMessage = null;
+    public ReviewForm $form;
 
-    protected function rules(): array
-    {
-        return [
-            'headline' => ['nullable', 'string', 'max:160'],
-            'body' => ['required', 'string', 'min:20'],
-            'containsSpoilers' => ['boolean'],
-        ];
-    }
+    public ?string $statusMessage = null;
 
     public function mount(Title $title): void
     {
         $this->title = $title;
+        $this->form->headline = $this->headline;
+        $this->form->body = $this->body;
+        $this->form->containsSpoilers = $this->containsSpoilers;
+    }
+
+    public function updatedHeadline(string $value): void
+    {
+        $this->form->headline = $value;
+    }
+
+    public function updatedBody(string $value): void
+    {
+        $this->form->body = $value;
+    }
+
+    public function updatedContainsSpoilers(bool $value): void
+    {
+        $this->form->containsSpoilers = $value;
     }
 
     public function save(StoreReviewAction $storeReview): void
@@ -41,19 +53,16 @@ class ReviewComposer extends Component
             return;
         }
 
-        $validated = $this->validate();
-
-        $review = $storeReview->handle(auth()->user(), $this->title, [
-            'headline' => $validated['headline'],
-            'body' => $validated['body'],
-            'contains_spoilers' => $validated['containsSpoilers'],
-        ]);
+        $review = $storeReview->handle(auth()->user(), $this->title, $this->form->payload());
 
         $this->statusMessage = $review->status === ReviewStatus::Published
             ? 'Review published.'
             : 'Review sent to moderation.';
 
         $this->title->refresh()->load('statistic');
+        $this->headline = $this->form->headline;
+        $this->body = $this->form->body;
+        $this->containsSpoilers = $this->form->containsSpoilers;
     }
 
     public function render()

@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\MediaKind;
-use App\Enums\ReviewStatus;
+use App\Actions\Catalog\LoadTitleDetailsAction;
 use App\Enums\TitleType;
 use App\Models\Title;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Route;
 
 class TitleController extends Controller
 {
@@ -23,10 +23,14 @@ class TitleController extends Controller
                 ['label' => 'Browse Titles'],
             ],
             'badges' => ['Movies', 'Series', 'Documentaries', 'Specials'],
-            'actions' => [
-                ['label' => 'Browse Movies', 'href' => route('public.movies.index'), 'variant' => 'outline', 'icon' => 'film'],
-                ['label' => 'Browse TV Shows', 'href' => route('public.series.index'), 'variant' => 'ghost', 'icon' => 'tv'],
-            ],
+            'actions' => array_values(array_filter([
+                Route::has('public.movies.index')
+                    ? ['label' => 'Browse Movies', 'href' => route('public.movies.index'), 'variant' => 'outline', 'icon' => 'film']
+                    : null,
+                Route::has('public.series.index')
+                    ? ['label' => 'Browse TV Shows', 'href' => route('public.series.index'), 'variant' => 'ghost', 'icon' => 'tv']
+                    : null,
+            ])),
             'browserProps' => [
                 'sort' => 'name',
                 'pageName' => 'titles',
@@ -36,12 +40,16 @@ class TitleController extends Controller
         ]);
     }
 
-    public function show(Title $title): View|RedirectResponse
+    public function show(Title $title, LoadTitleDetailsAction $loadTitleDetails): View|RedirectResponse
     {
         if ($title->title_type === TitleType::Episode) {
             $title->load('episodeMeta.season:id,series_id,slug', 'episodeMeta.series:id,slug');
 
-            if ($title->episodeMeta?->season && $title->episodeMeta?->series) {
+            if (
+                Route::has('public.episodes.show')
+                && $title->episodeMeta?->season
+                && $title->episodeMeta?->series
+            ) {
                 return redirect()->route('public.episodes.show', [
                     'series' => $title->episodeMeta->series,
                     'season' => $title->episodeMeta->season,
@@ -50,29 +58,8 @@ class TitleController extends Controller
             }
         }
 
-        $title->load([
-            'genres:id,name,slug',
-            'companies:id,name,slug,kind,country_code',
-            'credits.person:id,name,slug',
-            'statistic:id,title_id,average_rating,rating_count,review_count,watchlist_count',
-            'mediaAssets',
-            'titleVideos' => fn ($query) => $query
-                ->select(['id', 'mediable_type', 'mediable_id', 'kind', 'url', 'caption', 'published_at'])
-                ->whereIn('kind', [MediaKind::Trailer, MediaKind::Clip, MediaKind::Featurette])
-                ->orderByDesc('published_at')
-                ->limit(3),
-            'seasons' => fn ($query) => $query
-                ->select(['id', 'series_id', 'name', 'slug', 'season_number', 'summary', 'release_year'])
-                ->withCount('episodes')
-                ->orderBy('season_number'),
-            'reviews' => fn ($query) => $query
-                ->where('status', ReviewStatus::Published)
-                ->with('author:id,name,username')
-                ->latest('published_at'),
-        ]);
-
         return view('titles.show', [
-            'title' => $title,
+            'title' => $loadTitleDetails->handle($title),
         ]);
     }
 }

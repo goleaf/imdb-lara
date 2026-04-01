@@ -11,14 +11,14 @@
             <x-ui.field>
                 <x-ui.label>Score</x-ui.label>
                 <x-ui.input
-                    wire:model.live="score"
+                    wire:model.live="form.score"
                     name="score"
                     type="number"
                     min="1"
                     max="10"
                     step="1"
                 />
-                <x-ui.error name="score" />
+                <x-ui.error name="form.score" />
             </x-ui.field>
 
             <x-ui.button type="submit" icon="star">

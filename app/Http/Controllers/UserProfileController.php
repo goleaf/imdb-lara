@@ -15,7 +15,7 @@ class UserProfileController extends Controller
             ->select(['id', 'user_id', 'name', 'slug', 'description', 'visibility', 'is_watchlist', 'created_at'])
             ->where('visibility', ListVisibility::Public)
             ->withCount('items')
-            ->simplePaginate(12, pageName: 'lists')
+            ->paginate(12, ['*'], 'lists')
             ->withQueryString();
 
         abort_if($publicLists->isEmpty() && $publicLists->currentPage() === 1, 404);

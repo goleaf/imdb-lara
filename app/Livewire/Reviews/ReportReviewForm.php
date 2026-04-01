@@ -4,17 +4,15 @@ namespace App\Livewire\Reviews;
 
 use App\Actions\Moderation\ReportReviewAction;
 use App\Enums\ReportReason;
+use App\Livewire\Forms\Reviews\ReportReviewForm as ReportReviewDataForm;
 use App\Models\Review;
-use Illuminate\Validation\Rule;
 use Livewire\Component;
 
 class ReportReviewForm extends Component
 {
     public Review $review;
 
-    public string $reason = 'spoiler';
-
-    public string $details = '';
+    public ReportReviewDataForm $form;
 
     public ?string $statusMessage = null;
 
@@ -23,17 +21,10 @@ class ReportReviewForm extends Component
      */
     public array $reportReasons = [];
 
-    protected function rules(): array
-    {
-        return [
-            'reason' => ['required', Rule::in(array_map(fn (ReportReason $reason): string => $reason->value, ReportReason::cases()))],
-            'details' => ['nullable', 'string', 'max:1000'],
-        ];
-    }
-
     public function mount(Review $review): void
     {
         $this->review = $review;
+        $this->form->reason = ReportReason::Spoiler->value;
         $this->reportReasons = array_map(
             static fn (ReportReason $reportReason): array => [
                 'value' => $reportReason->value,
@@ -51,12 +42,10 @@ class ReportReviewForm extends Component
             return;
         }
 
-        $validated = $this->validate();
-
-        $reportReview->handle(auth()->user(), $this->review, $validated);
+        $reportReview->handle(auth()->user(), $this->review, $this->form->payload());
 
         $this->statusMessage = 'Review reported.';
-        $this->details = '';
+        $this->form->reset('details');
     }
 
     public function render()

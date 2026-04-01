@@ -20,11 +20,11 @@ class AuthenticationFlowTest extends TestCase
         $this->get(route('register'))->assertOk()->assertSee('Create account');
 
         Livewire::test(RegisterForm::class)
-            ->set('name', 'Dana Viewer')
-            ->set('username', 'dana')
-            ->set('email', 'dana@example.com')
-            ->set('password', 'password')
-            ->set('password_confirmation', 'password')
+            ->set('form.name', 'Dana Viewer')
+            ->set('form.username', 'dana')
+            ->set('form.email', 'dana@example.com')
+            ->set('form.password', 'password')
+            ->set('form.password_confirmation', 'password')
             ->call('register')
             ->assertHasNoErrors();
 
@@ -44,8 +44,8 @@ class AuthenticationFlowTest extends TestCase
         ]);
 
         Livewire::test(LoginForm::class)
-            ->set('email', $user->email)
-            ->set('password', 'password')
+            ->set('form.email', $user->email)
+            ->set('form.password', 'password')
             ->call('login')
             ->assertHasNoErrors();
 

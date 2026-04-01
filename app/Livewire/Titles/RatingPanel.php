@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Titles;
 
+use App\Actions\Titles\GetUserRatingForTitleAction;
 use App\Actions\Titles\UpsertRatingAction;
+use App\Livewire\Forms\Titles\RatingForm;
 use App\Models\Title;
 use Livewire\Component;
 
@@ -12,19 +14,20 @@ class RatingPanel extends Component
 
     public ?int $score = null;
 
-    protected function rules(): array
-    {
-        return [
-            'score' => ['required', 'integer', 'between:1,10'],
-        ];
-    }
+    public RatingForm $form;
 
-    public function mount(Title $title): void
+    public function mount(Title $title, GetUserRatingForTitleAction $getUserRatingForTitle): void
     {
         $this->title = $title;
         $this->score = auth()->check()
-            ? auth()->user()->ratings()->where('title_id', $title->id)->value('score')
+            ? $getUserRatingForTitle->handle(auth()->user(), $title)
             : null;
+        $this->form->score = $this->score;
+    }
+
+    public function updatedScore(?int $value): void
+    {
+        $this->form->score = $value;
     }
 
     public function save(UpsertRatingAction $upsertRating): void
@@ -35,10 +38,9 @@ class RatingPanel extends Component
             return;
         }
 
-        $validated = $this->validate();
-
-        $upsertRating->handle(auth()->user(), $this->title, (int) $validated['score']);
+        $upsertRating->handle(auth()->user(), $this->title, $this->form->validatedScore());
         $this->title->refresh()->load('statistic');
+        $this->score = $this->form->score;
     }
 
     public function render()

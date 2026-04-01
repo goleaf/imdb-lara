@@ -3,8 +3,7 @@
 namespace App\Livewire\Search;
 
 use App\Actions\Search\BuildDiscoveryQueryAction;
-use App\Enums\TitleType;
-use App\Models\Genre;
+use App\Actions\Search\GetDiscoveryFilterOptionsAction;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -12,6 +11,10 @@ use Livewire\WithPagination;
 class DiscoveryFilters extends Component
 {
     use WithPagination;
+
+    protected BuildDiscoveryQueryAction $buildDiscoveryQuery;
+
+    protected GetDiscoveryFilterOptionsAction $getDiscoveryFilterOptions;
 
     #[Url(as: 'q')]
     public string $search = '';
@@ -27,6 +30,14 @@ class DiscoveryFilters extends Component
 
     #[Url]
     public string $minimumRating = '';
+
+    public function boot(
+        BuildDiscoveryQueryAction $buildDiscoveryQuery,
+        GetDiscoveryFilterOptionsAction $getDiscoveryFilterOptions,
+    ): void {
+        $this->buildDiscoveryQuery = $buildDiscoveryQuery;
+        $this->getDiscoveryFilterOptions = $getDiscoveryFilterOptions;
+    }
 
     public function updatedSearch(): void
     {
@@ -55,7 +66,7 @@ class DiscoveryFilters extends Component
 
     public function render()
     {
-        $titles = app(BuildDiscoveryQueryAction::class)
+        $titles = $this->buildDiscoveryQuery
             ->handle([
                 'search' => $this->search,
                 'genre' => $this->genre,
@@ -66,10 +77,12 @@ class DiscoveryFilters extends Component
             ->simplePaginate(12, pageName: 'discover')
             ->withQueryString();
 
+        $filterOptions = $this->getDiscoveryFilterOptions->handle();
+
         return view('livewire.search.discovery-filters', [
             'titles' => $titles,
-            'genres' => Genre::query()->select(['id', 'name', 'slug'])->orderBy('name')->get(),
-            'titleTypes' => TitleType::cases(),
+            'genres' => $filterOptions['genres'],
+            'titleTypes' => $filterOptions['titleTypes'],
         ]);
     }
 }

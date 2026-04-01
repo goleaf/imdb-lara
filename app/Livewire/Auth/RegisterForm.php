@@ -3,39 +3,20 @@
 namespace App\Livewire\Auth;
 
 use App\Actions\Auth\RegisterUserAction;
+use App\Livewire\Forms\Auth\RegisterUserForm;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
 use Livewire\Component;
 
 class RegisterForm extends Component
 {
-    public string $name = '';
-
-    public string $username = '';
-
-    public string $email = '';
-
-    public string $password = '';
-
-    public string $password_confirmation = '';
-
-    protected function rules(): array
-    {
-        return [
-            'name' => ['required', 'string', 'max:255'],
-            'username' => ['required', 'string', 'max:255', Rule::unique('users', 'username')],
-            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')],
-            'password' => ['required', 'confirmed', 'min:8'],
-        ];
-    }
+    public RegisterUserForm $form;
 
     public function register(RegisterUserAction $registerUser): void
     {
-        $validated = $this->validate();
-
-        $user = $registerUser->handle($validated);
+        $user = $registerUser->handle($this->form->payload());
 
         Auth::login($user);
+
         if (request()->hasSession()) {
             request()->session()->regenerate();
         }

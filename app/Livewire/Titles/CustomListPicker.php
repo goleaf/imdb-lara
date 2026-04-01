@@ -2,13 +2,18 @@
 
 namespace App\Livewire\Titles;
 
+use App\Actions\Lists\BuildOwnedCustomListsQueryAction;
+use App\Actions\Lists\GetSelectedOwnedCustomListIdsAction;
 use App\Actions\Lists\SyncTitleInUserListsAction;
 use App\Models\Title;
-use App\Models\UserList;
 use Livewire\Component;
 
 class CustomListPicker extends Component
 {
+    protected BuildOwnedCustomListsQueryAction $buildOwnedCustomListsQuery;
+
+    protected GetSelectedOwnedCustomListIdsAction $getSelectedOwnedCustomListIds;
+
     public Title $title;
 
     /**
@@ -18,6 +23,14 @@ class CustomListPicker extends Component
 
     public ?string $statusMessage = null;
 
+    public function boot(
+        BuildOwnedCustomListsQueryAction $buildOwnedCustomListsQuery,
+        GetSelectedOwnedCustomListIdsAction $getSelectedOwnedCustomListIds,
+    ): void {
+        $this->buildOwnedCustomListsQuery = $buildOwnedCustomListsQuery;
+        $this->getSelectedOwnedCustomListIds = $getSelectedOwnedCustomListIds;
+    }
+
     public function mount(Title $title): void
     {
         $this->title = $title;
@@ -26,16 +39,7 @@ class CustomListPicker extends Component
             return;
         }
 
-        $selectedIds = UserList::query()
-            ->select(['id'])
-            ->whereBelongsTo(auth()->user())
-            ->where('is_watchlist', false)
-            ->whereHas('items', fn ($query) => $query->where('title_id', $title->id))
-            ->pluck('id');
-
-        $this->selectedLists = $selectedIds
-            ->mapWithKeys(fn (int $listId): array => [$listId => true])
-            ->all();
+        $this->selectedLists = $this->getSelectedOwnedCustomListIds->handle(auth()->user(), $title);
     }
 
     public function save(SyncTitleInUserListsAction $syncTitleInUserLists): void
@@ -62,12 +66,7 @@ class CustomListPicker extends Component
     {
         return view('livewire.titles.custom-list-picker', [
             'lists' => auth()->check()
-                ? UserList::query()
-                    ->select(['id', 'user_id', 'name', 'slug', 'visibility', 'is_watchlist'])
-                    ->whereBelongsTo(auth()->user())
-                    ->where('is_watchlist', false)
-                    ->orderBy('name')
-                    ->get()
+                ? $this->buildOwnedCustomListsQuery->handle(auth()->user())->get()
                 : collect(),
         ]);
     }

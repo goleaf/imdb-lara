@@ -7,11 +7,15 @@ use Illuminate\Database\Eloquent\Builder;
 
 class BuildDiscoveryQueryAction
 {
+    public function __construct(
+        public BuildPublicTitleIndexQueryAction $buildPublicTitleIndexQuery,
+    ) {}
+
     /**
      * @param  array{search?: string, genre?: string, minimumRating?: int|float|string|null, type?: string|null, sort?: string|null}  $filters
      */
     public function handle(array $filters = []): Builder
     {
-        return app(BuildPublicTitleIndexQueryAction::class)->handle($filters);
+        return $this->buildPublicTitleIndexQuery->handle($filters);
     }
 }

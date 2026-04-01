@@ -19,8 +19,8 @@ class ReviewReportingFlowTest extends TestCase
         $review = Review::factory()->published()->create();
 
         Livewire::test(ReportReviewForm::class, ['review' => $review])
-            ->set('reason', ReportReason::Spoiler->value)
-            ->set('details', 'Contains an unmarked ending reveal.')
+            ->set('form.reason', ReportReason::Spoiler->value)
+            ->set('form.details', 'Contains an unmarked ending reveal.')
             ->call('save')
             ->assertRedirect(route('login'));
     }
@@ -35,8 +35,8 @@ class ReviewReportingFlowTest extends TestCase
 
         Livewire::actingAs($reporter)
             ->test(ReportReviewForm::class, ['review' => $review])
-            ->set('reason', ReportReason::Spoiler->value)
-            ->set('details', 'Contains an unmarked ending reveal.')
+            ->set('form.reason', ReportReason::Spoiler->value)
+            ->set('form.details', 'Contains an unmarked ending reveal.')
             ->call('save')
             ->assertHasNoErrors();
 

@@ -2,40 +2,20 @@
 
 namespace App\Livewire\Auth;
 
-use Illuminate\Support\Facades\Auth;
+use App\Actions\Auth\AuthenticateUserAction;
+use App\Livewire\Forms\Auth\LoginUserForm;
 use Livewire\Component;
 
 class LoginForm extends Component
 {
-    public string $email = '';
+    public LoginUserForm $form;
 
-    public string $password = '';
-
-    public bool $remember = false;
-
-    protected function rules(): array
+    public function login(AuthenticateUserAction $authenticateUser): void
     {
-        return [
-            'email' => ['required', 'email'],
-            'password' => ['required', 'string'],
-        ];
-    }
-
-    public function login(): void
-    {
-        $this->validate();
-
-        if (! Auth::attempt([
-            'email' => $this->email,
-            'password' => $this->password,
-        ], $this->remember)) {
-            $this->addError('email', 'These credentials do not match our records.');
+        if (! $authenticateUser->handle($this->form->credentials(), $this->form->remember)) {
+            $this->addError('form.email', 'These credentials do not match our records.');
 
             return;
-        }
-
-        if (request()->hasSession()) {
-            request()->session()->regenerate();
         }
 
         $this->redirectRoute('public.discover');

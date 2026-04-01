@@ -2,13 +2,20 @@
 
 namespace App\Actions\Search;
 
+use App\Enums\TitleType;
+use App\Models\Genre;
+use Illuminate\Database\Eloquent\Collection;
+
 class GetDiscoveryFilterOptionsAction
 {
     /**
-     * Create a new class instance.
+     * @return array{genres: Collection<int, Genre>, titleTypes: list<TitleType>}
      */
-    public function __construct()
+    public function handle(): array
     {
-        //
+        return [
+            'genres' => Genre::query()->select(['id', 'name', 'slug'])->orderBy('name')->get(),
+            'titleTypes' => TitleType::cases(),
+        ];
     }
 }

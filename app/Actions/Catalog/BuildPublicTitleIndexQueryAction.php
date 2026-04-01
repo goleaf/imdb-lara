@@ -26,11 +26,11 @@ class BuildPublicTitleIndexQueryAction
     public function handle(array $filters = []): Builder
     {
         $search = trim((string) ($filters['search'] ?? ''));
-        $genre = filled($filters['genre'] ?? null) ? (string) $filters['genre'] : null;
+        $genre = filled($filters['genre'] ?? null) ? (string) ($filters['genre'] ?? null) : null;
         $minimumRating = filled($filters['minimumRating'] ?? null)
-            ? (float) $filters['minimumRating']
+            ? (float) ($filters['minimumRating'] ?? null)
             : null;
-        $type = filled($filters['type'] ?? null) ? (string) $filters['type'] : null;
+        $type = filled($filters['type'] ?? null) ? (string) ($filters['type'] ?? null) : null;
         $types = array_values(array_filter(
             array_map(
                 static fn (mixed $titleType): string => (string) $titleType,
@@ -39,7 +39,7 @@ class BuildPublicTitleIndexQueryAction
             static fn (string $titleType): bool => $titleType !== '',
         ));
         $sort = $filters['sort'] ?? 'popular';
-        $year = filled($filters['year'] ?? null) ? (int) $filters['year'] : null;
+        $year = filled($filters['year'] ?? null) ? (int) ($filters['year'] ?? null) : null;
         $excludeEpisodes = (bool) ($filters['excludeEpisodes'] ?? true);
 
         $query = Title::query()
@@ -62,7 +62,7 @@ class BuildPublicTitleIndexQueryAction
             ->with([
                 'genres:id,name,slug',
                 'statistic:id,title_id,average_rating,rating_count,review_count,watchlist_count',
-                'mediaAssets' => fn (Builder $mediaQuery) => $mediaQuery
+                'mediaAssets' => fn ($mediaQuery) => $mediaQuery
                     ->select([
                         'id',
                         'mediable_type',

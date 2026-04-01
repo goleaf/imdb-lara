@@ -4,27 +4,14 @@ namespace App\Livewire\Lists;
 
 use App\Actions\Lists\CreateUserListAction;
 use App\Enums\ListVisibility;
-use Illuminate\Validation\Rule;
+use App\Livewire\Forms\Lists\CreateUserListForm as CreateUserListDataForm;
 use Livewire\Component;
 
 class CreateListForm extends Component
 {
-    public string $name = '';
-
-    public string $description = '';
-
-    public string $visibility = 'private';
+    public CreateUserListDataForm $form;
 
     public ?string $statusMessage = null;
-
-    protected function rules(): array
-    {
-        return [
-            'name' => ['required', 'string', 'max:120'],
-            'description' => ['nullable', 'string', 'max:500'],
-            'visibility' => ['required', Rule::in(array_map(fn (ListVisibility $visibility): string => $visibility->value, ListVisibility::cases()))],
-        ];
-    }
 
     public function save(CreateUserListAction $createUserList): void
     {
@@ -34,12 +21,10 @@ class CreateListForm extends Component
             return;
         }
 
-        $validated = $this->validate();
+        $createUserList->handle(auth()->user(), $this->form->payload());
 
-        $createUserList->handle(auth()->user(), $validated);
-
-        $this->reset('name', 'description');
-        $this->visibility = ListVisibility::Private->value;
+        $this->form->reset('name', 'description');
+        $this->form->visibility = ListVisibility::Private->value;
         $this->statusMessage = 'List created.';
     }
 

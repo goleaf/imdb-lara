@@ -2,23 +2,16 @@
 
 namespace App\Http\Controllers\Account;
 
-use App\Actions\Lists\EnsureWatchlistAction;
+use App\Actions\Lists\GetAccountWatchlistAction;
 use App\Http\Controllers\Controller;
 use Illuminate\Contracts\View\View;
 
 class WatchlistController extends Controller
 {
-    public function __invoke(EnsureWatchlistAction $ensureWatchlist): View
+    public function __invoke(GetAccountWatchlistAction $getAccountWatchlist): View
     {
-        $watchlist = $ensureWatchlist->handle(request()->user());
-
-        $watchlist->load([
-            'items.title.statistic',
-            'items.title.mediaAssets',
-        ]);
-
         return view('account.watchlist', [
-            'watchlist' => $watchlist,
+            'watchlist' => $getAccountWatchlist->handle(request()->user()),
         ]);
     }
 }

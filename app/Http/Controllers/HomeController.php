@@ -2,43 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\MediaKind;
-use App\Enums\TitleType;
-use App\Models\Title;
+use App\Actions\Catalog\GetFeaturedTitlesAction;
 use Illuminate\Contracts\View\View;
 
 class HomeController extends Controller
 {
-    public function __invoke(): View
+    public function __invoke(GetFeaturedTitlesAction $getFeaturedTitles): View
     {
-        $featuredTitles = Title::query()
-            ->select([
-                'id',
-                'name',
-                'slug',
-                'title_type',
-                'release_year',
-                'plot_outline',
-                'popularity_rank',
-                'is_published',
-            ])
-            ->published()
-            ->where('title_type', '!=', TitleType::Episode)
-            ->with([
-                'statistic:id,title_id,average_rating,rating_count,review_count,watchlist_count',
-                'genres:id,name,slug',
-                'mediaAssets' => fn ($query) => $query
-                    ->select(['id', 'mediable_type', 'mediable_id', 'kind', 'url', 'alt_text', 'position', 'is_primary'])
-                    ->where('kind', MediaKind::Poster)
-                    ->orderBy('position')
-                    ->limit(1),
-            ])
-            ->orderBy('popularity_rank')
-            ->limit(6)
-            ->get();
-
         return view('home', [
-            'featuredTitles' => $featuredTitles,
+            'featuredTitles' => $getFeaturedTitles->handle(),
         ]);
     }
 }
