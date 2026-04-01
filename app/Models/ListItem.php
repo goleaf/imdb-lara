@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\WatchState;
+use App\Enums\WatchState;
 use Database\Factories\ListItemFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

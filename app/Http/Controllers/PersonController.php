@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\MediaKind;
+use App\Enums\MediaKind;
 use App\Models\Person;
 use Illuminate\Contracts\View\View;
 

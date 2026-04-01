@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Enums\TitleRelationshipType;
 use App\Models\Title;
 use App\Models\TitleRelationship;
-use App\TitleRelationshipType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

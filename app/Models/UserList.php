@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\ListVisibility;
+use App\Enums\ListVisibility;
 use App\Models\Concerns\GeneratesSlugs;
 use Database\Factories\UserListFactory;
 use Illuminate\Database\Eloquent\Builder;

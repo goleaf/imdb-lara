@@ -3,8 +3,8 @@
 namespace App\Livewire\Titles;
 
 use App\Actions\Titles\StoreReviewAction;
+use App\Enums\ReviewStatus;
 use App\Models\Title;
-use App\ReviewStatus;
 use Livewire\Component;
 
 class ReviewComposer extends Component

@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\ContributionAction;
-use App\ContributionStatus;
+use App\Enums\ContributionAction;
+use App\Enums\ContributionStatus;
 use Database\Factories\ContributionFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

@@ -2,10 +2,10 @@
 
 namespace Tests\Feature\Feature\Moderation;
 
+use App\Enums\ReportReason;
 use App\Livewire\Reviews\ReportReviewForm;
 use App\Models\Review;
 use App\Models\User;
-use App\ReportReason;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;

@@ -2,10 +2,10 @@
 
 namespace App\Actions\Titles;
 
+use App\Enums\ReviewStatus;
 use App\Models\Review;
 use App\Models\Title;
 use App\Models\User;
-use App\ReviewStatus;
 
 class StoreReviewAction
 {

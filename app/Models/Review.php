@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\ReviewStatus;
+use App\Enums\ReviewStatus;
 use Database\Factories\ReviewFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

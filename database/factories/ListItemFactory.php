@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
+use App\Enums\WatchState;
 use App\Models\ListItem;
 use App\Models\Title;
 use App\Models\UserList;
-use App\WatchState;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

@@ -3,7 +3,7 @@
 namespace App\Livewire\Lists;
 
 use App\Actions\Lists\CreateUserListAction;
-use App\ListVisibility;
+use App\Enums\ListVisibility;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 

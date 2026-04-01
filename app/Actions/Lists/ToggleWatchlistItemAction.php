@@ -2,9 +2,9 @@
 
 namespace App\Actions\Lists;
 
+use App\Enums\WatchState;
 use App\Models\Title;
 use App\Models\User;
-use App\WatchState;
 
 class ToggleWatchlistItemAction
 {

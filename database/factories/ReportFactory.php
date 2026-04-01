@@ -2,11 +2,11 @@
 
 namespace Database\Factories;
 
+use App\Enums\ReportReason;
+use App\Enums\ReportStatus;
 use App\Models\Report;
 use App\Models\Review;
 use App\Models\User;
-use App\ReportReason;
-use App\ReportStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Enums\TitleType;
 use App\Models\Title;
-use App\TitleType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 

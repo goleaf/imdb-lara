@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\MediaKind;
+use App\Enums\MediaKind;
 use App\Models\Genre;
 use App\Models\Title;
 use Illuminate\Contracts\View\View;

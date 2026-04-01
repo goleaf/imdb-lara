@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\MediaKind;
+use App\Enums\MediaKind;
+use App\Enums\ReviewStatus;
 use App\Models\Title;
-use App\ReviewStatus;
 use Illuminate\Contracts\View\View;
 
 class TitleController extends Controller

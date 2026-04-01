@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\MediaKind;
+use App\Enums\MediaKind;
 use App\Models\Concerns\GeneratesSlugs;
 use Database\Factories\PersonFactory;
 use Illuminate\Database\Eloquent\Builder;

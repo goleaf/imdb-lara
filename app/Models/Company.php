@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\CompanyKind;
+use App\Enums\CompanyKind;
 use App\Models\Concerns\GeneratesSlugs;
 use Database\Factories\CompanyFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

@@ -2,10 +2,10 @@
 
 namespace App\Actions\Search;
 
-use App\MediaKind;
+use App\Enums\MediaKind;
+use App\Enums\ReviewStatus;
 use App\Models\Title;
 use App\Models\TitleStatistic;
-use App\ReviewStatus;
 use Illuminate\Database\Eloquent\Builder;
 
 class BuildDiscoveryQueryAction

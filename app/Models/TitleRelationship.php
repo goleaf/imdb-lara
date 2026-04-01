@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\TitleRelationshipType;
+use App\Enums\TitleRelationshipType;
 use Database\Factories\TitleRelationshipFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

@@ -2,7 +2,7 @@
 
 namespace App\Actions\Lists;
 
-use App\ListVisibility;
+use App\Enums\ListVisibility;
 use App\Models\User;
 use App\Models\UserList;
 

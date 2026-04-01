@@ -2,13 +2,13 @@
 
 namespace Tests\Feature\Feature\Foundations;
 
+use App\Enums\ReviewStatus;
 use App\Models\ListItem;
 use App\Models\Rating;
 use App\Models\Review;
 use App\Models\Title;
 use App\Models\TitleStatistic;
 use App\Models\UserList;
-use App\ReviewStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

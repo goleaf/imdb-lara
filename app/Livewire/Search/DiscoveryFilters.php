@@ -3,8 +3,8 @@
 namespace App\Livewire\Search;
 
 use App\Actions\Search\BuildDiscoveryQueryAction;
+use App\Enums\TitleType;
 use App\Models\Genre;
-use App\TitleType;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;

@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Feature\Lists;
 
-use App\ListVisibility;
+use App\Enums\ListVisibility;
 use App\Livewire\Lists\CreateListForm;
 use App\Livewire\Titles\CustomListPicker;
 use App\Models\Title;

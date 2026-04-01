@@ -2,9 +2,10 @@
 
 namespace Tests\Feature\Feature\Database;
 
-use App\ContributionAction;
-use App\ContributionStatus;
-use App\MediaKind;
+use App\Enums\ContributionAction;
+use App\Enums\ContributionStatus;
+use App\Enums\MediaKind;
+use App\Enums\TitleRelationshipType;
 use App\Models\Award;
 use App\Models\AwardCategory;
 use App\Models\AwardEvent;
@@ -21,7 +22,6 @@ use App\Models\TitleRelationship;
 use App\Models\TitleTranslation;
 use App\Models\TitleVideo;
 use App\Models\User;
-use App\TitleRelationshipType;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;

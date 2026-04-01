@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
+use App\Enums\ReviewStatus;
 use App\Models\Review;
 use App\Models\Title;
 use App\Models\User;
-use App\ReviewStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

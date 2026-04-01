@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\ListVisibility;
+use App\Enums\ListVisibility;
 use App\Models\Person;
 use App\Models\Title;
 use App\Models\UserList;

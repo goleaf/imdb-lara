@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use App\MediaKind;
+use App\Enums\MediaKind;
+use App\Enums\TitleType;
 use App\Models\Concerns\GeneratesSlugs;
-use App\TitleType;
 use Database\Factories\TitleFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

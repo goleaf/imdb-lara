@@ -2,9 +2,9 @@
 
 namespace App\Policies;
 
+use App\Enums\ReviewStatus;
 use App\Models\Review;
 use App\Models\User;
-use App\ReviewStatus;
 
 class ReviewPolicy
 {

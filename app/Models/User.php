@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\UserRole;
-use App\UserStatus;
+use App\Enums\UserRole;
+use App\Enums\UserStatus;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;

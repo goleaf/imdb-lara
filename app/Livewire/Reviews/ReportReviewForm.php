@@ -3,8 +3,8 @@
 namespace App\Livewire\Reviews;
 
 use App\Actions\Moderation\ReportReviewAction;
+use App\Enums\ReportReason;
 use App\Models\Review;
-use App\ReportReason;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 

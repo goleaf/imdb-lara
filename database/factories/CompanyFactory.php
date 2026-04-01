@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\CompanyKind;
+use App\Enums\CompanyKind;
 use App\Models\Company;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;

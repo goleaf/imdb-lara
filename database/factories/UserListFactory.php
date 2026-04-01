@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\ListVisibility;
+use App\Enums\ListVisibility;
 use App\Models\User;
 use App\Models\UserList;
 use Illuminate\Database\Eloquent\Factories\Factory;

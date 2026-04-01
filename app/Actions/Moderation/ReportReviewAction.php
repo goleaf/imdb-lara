@@ -2,12 +2,12 @@
 
 namespace App\Actions\Moderation;
 
+use App\Enums\ReportReason;
+use App\Enums\ReportStatus;
+use App\Enums\ReviewStatus;
 use App\Models\Report;
 use App\Models\Review;
 use App\Models\User;
-use App\ReportReason;
-use App\ReportStatus;
-use App\ReviewStatus;
 
 class ReportReviewAction
 {

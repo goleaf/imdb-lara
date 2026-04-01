@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\MediaKind;
+use App\Enums\MediaKind;
 use Database\Factories\MediaAssetFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

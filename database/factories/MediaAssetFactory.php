@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\MediaKind;
+use App\Enums\MediaKind;
 use App\Models\MediaAsset;
 use Illuminate\Database\Eloquent\Factories\Factory;
 

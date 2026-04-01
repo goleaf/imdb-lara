@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\ContributionAction;
-use App\ContributionStatus;
+use App\Enums\ContributionAction;
+use App\Enums\ContributionStatus;
 use App\Models\Contribution;
 use App\Models\Title;
 use App\Models\User;
