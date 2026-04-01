@@ -13,54 +13,81 @@
 
             <x-ui.field>
                 <x-ui.label>Genre</x-ui.label>
-                <select
+                <x-ui.combobox
                     wire:model.live="genre"
-                    class="min-h-10 rounded-box border border-black/10 bg-white px-3 text-sm text-neutral-800 shadow-xs transition focus:border-black/15 focus:outline-none focus:ring-2 focus:ring-neutral-900/15 dark:border-white/15 dark:bg-neutral-900 dark:text-neutral-200 dark:focus:border-white/20 dark:focus:ring-neutral-100/15"
+                    class="w-full"
+                    size="sm"
+                    placeholder="All genres"
+                    clearable
                 >
-                    <option value="">All genres</option>
                     @foreach ($genres as $genreOption)
-                        <option value="{{ $genreOption->slug }}">{{ $genreOption->name }}</option>
+                        <x-ui.combobox.option
+                            wire:key="discover-genre-{{ $genreOption->id }}"
+                            value="{{ $genreOption->slug }}"
+                        >
+                            {{ $genreOption->name }}
+                        </x-ui.combobox.option>
                     @endforeach
-                </select>
+                </x-ui.combobox>
             </x-ui.field>
 
             <x-ui.field>
                 <x-ui.label>Type</x-ui.label>
-                <select
+                <x-ui.combobox
                     wire:model.live="type"
-                    class="min-h-10 rounded-box border border-black/10 bg-white px-3 text-sm text-neutral-800 shadow-xs transition focus:border-black/15 focus:outline-none focus:ring-2 focus:ring-neutral-900/15 dark:border-white/15 dark:bg-neutral-900 dark:text-neutral-200 dark:focus:border-white/20 dark:focus:ring-neutral-100/15"
+                    class="w-full"
+                    size="sm"
+                    placeholder="All types"
+                    clearable
                 >
-                    <option value="">All types</option>
                     @foreach ($titleTypes as $typeOption)
-                        <option value="{{ $typeOption->value }}">{{ str($typeOption->value)->headline() }}</option>
+                        <x-ui.combobox.option
+                            wire:key="discover-type-{{ $typeOption->value }}"
+                            value="{{ $typeOption->value }}"
+                        >
+                            {{ str($typeOption->value)->headline() }}
+                        </x-ui.combobox.option>
                     @endforeach
-                </select>
+                </x-ui.combobox>
             </x-ui.field>
 
             <x-ui.field>
                 <x-ui.label>Minimum rating</x-ui.label>
-                <select
+                <x-ui.combobox
                     wire:model.live="minimumRating"
-                    class="min-h-10 rounded-box border border-black/10 bg-white px-3 text-sm text-neutral-800 shadow-xs transition focus:border-black/15 focus:outline-none focus:ring-2 focus:ring-neutral-900/15 dark:border-white/15 dark:bg-neutral-900 dark:text-neutral-200 dark:focus:border-white/20 dark:focus:ring-neutral-100/15"
+                    class="w-full"
+                    size="sm"
+                    placeholder="Any score"
+                    clearable
                 >
-                    <option value="">Any score</option>
-                    @foreach (range(10, 1) as $ratingFloor)
-                        <option value="{{ $ratingFloor }}">{{ $ratingFloor }}+</option>
+                    @foreach ($minimumRatings as $ratingFloor)
+                        <x-ui.combobox.option
+                            wire:key="discover-rating-{{ $ratingFloor }}"
+                            value="{{ $ratingFloor }}"
+                        >
+                            {{ $ratingFloor }}+
+                        </x-ui.combobox.option>
                     @endforeach
-                </select>
+                </x-ui.combobox>
             </x-ui.field>
 
             <x-ui.field>
                 <x-ui.label>Sort</x-ui.label>
-                <select
+                <x-ui.combobox
                     wire:model.live="sort"
-                    class="min-h-10 rounded-box border border-black/10 bg-white px-3 text-sm text-neutral-800 shadow-xs transition focus:border-black/15 focus:outline-none focus:ring-2 focus:ring-neutral-900/15 dark:border-white/15 dark:bg-neutral-900 dark:text-neutral-200 dark:focus:border-white/20 dark:focus:ring-neutral-100/15"
+                    class="w-full"
+                    size="sm"
+                    placeholder="Sort titles"
                 >
-                    <option value="popular">Popularity</option>
-                    <option value="rating">Rating</option>
-                    <option value="year">Year</option>
-                    <option value="name">Name</option>
-                </select>
+                    @foreach ($sortOptions as $sortOption)
+                        <x-ui.combobox.option
+                            wire:key="discover-sort-{{ $sortOption['value'] }}"
+                            value="{{ $sortOption['value'] }}"
+                        >
+                            {{ $sortOption['label'] }}
+                        </x-ui.combobox.option>
+                    @endforeach
+                </x-ui.combobox>
             </x-ui.field>
         </div>
     </x-ui.card>

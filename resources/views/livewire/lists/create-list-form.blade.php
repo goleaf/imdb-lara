@@ -28,13 +28,21 @@
 
             <x-ui.field>
                 <x-ui.label>Visibility</x-ui.label>
-                <select
+                <x-ui.combobox
                     wire:model.live="form.visibility"
-                    class="min-h-10 rounded-box border border-black/10 bg-white px-3 text-sm text-neutral-800 shadow-xs transition focus:border-black/15 focus:outline-none focus:ring-2 focus:ring-neutral-900/15 dark:border-white/15 dark:bg-neutral-900 dark:text-neutral-200 dark:focus:border-white/20 dark:focus:ring-neutral-100/15"
+                    class="w-full"
+                    placeholder="Select visibility"
+                    :invalid="$errors->has('form.visibility')"
                 >
-                    <option value="private">Private</option>
-                    <option value="public">Public</option>
-                </select>
+                    @foreach ($visibilityOptions as $visibilityOption)
+                        <x-ui.combobox.option
+                            wire:key="list-visibility-{{ $visibilityOption['value'] }}"
+                            value="{{ $visibilityOption['value'] }}"
+                        >
+                            {{ $visibilityOption['label'] }}
+                        </x-ui.combobox.option>
+                    @endforeach
+                </x-ui.combobox>
                 <x-ui.error name="form.visibility" />
             </x-ui.field>
         </div>

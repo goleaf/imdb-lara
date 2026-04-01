@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Actions\Catalog\BuildPublicPeopleIndexQueryAction;
 use App\Actions\Catalog\LoadPersonDetailsAction;
+use App\Http\Requests\Catalog\ShowPersonRequest;
 use App\Models\Person;
 use Illuminate\Contracts\View\View;
 
@@ -21,8 +22,13 @@ class PersonController extends Controller
         ]);
     }
 
-    public function show(Person $person, LoadPersonDetailsAction $loadPersonDetails): View
-    {
+    public function show(
+        ShowPersonRequest $request,
+        Person $person,
+        LoadPersonDetailsAction $loadPersonDetails,
+    ): View {
+        $person = $request->person();
+
         return view('people.show', [
             'person' => $loadPersonDetails->handle($person),
         ]);

@@ -12,7 +12,7 @@ class GetSelectedOwnedCustomListIdsAction
     ) {}
 
     /**
-     * @return array<int, bool>
+     * @return list<string>
      */
     public function handle(User $user, Title $title): array
     {
@@ -20,7 +20,8 @@ class GetSelectedOwnedCustomListIdsAction
             ->handle($user)
             ->whereHas('items', fn ($query) => $query->where('title_id', $title->id))
             ->pluck('id')
-            ->mapWithKeys(fn (int $listId): array => [$listId => true])
+            ->map(fn (int $listId): string => (string) $listId)
+            ->values()
             ->all();
     }
 }

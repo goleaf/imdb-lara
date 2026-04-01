@@ -4,11 +4,15 @@ namespace App\Actions\Catalog;
 
 use App\Enums\MediaKind;
 use App\Enums\ReviewStatus;
+use App\Enums\TitleType;
 use App\Models\AwardNomination;
 use App\Models\Credit;
+use App\Models\Episode;
 use App\Models\MediaAsset;
-use App\Models\TitleRelationship;
+use App\Models\Review;
+use App\Models\Season;
 use App\Models\Title;
+use App\Models\TitleRelationship;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 
@@ -22,14 +26,17 @@ class LoadTitleDetailsAction
      *     galleryAssets: Collection<int, MediaAsset>,
      *     castPreview: Collection<int, Credit>,
      *     crewPreview: Collection<int, array{role: string, department: string|null, credits: Collection<int, Credit>}>,
-     *     reviews: EloquentCollection<int, \App\Models\Review>,
+     *     reviews: EloquentCollection<int, Review>,
      *     detailItems: Collection<int, array{label: string, value: string}>,
      *     technicalSpecItems: Collection<int, array{label: string, value: string}>,
      *     ratingsBreakdown: Collection<int, array{score: int, count: int, percentage: int}>,
      *     relatedTitles: Collection<int, array{title: Title, relationship: TitleRelationship, label: string}>,
      *     awardHighlights: Collection<int, AwardNomination>,
      *     countries: Collection<int, string>,
-     *     languages: Collection<int, string>
+     *     languages: Collection<int, string>,
+     *     latestSeason: Season|null,
+     *     latestSeasonEpisodes: Collection<int, Episode>,
+     *     topRatedEpisodes: Collection<int, Episode>
      * }
      */
     public function handle(Title $title): array
@@ -281,6 +288,96 @@ class LoadTitleDetailsAction
             ->take(6)
             ->values();
 
+        $latestSeason = null;
+        $latestSeasonEpisodes = collect();
+        $topRatedEpisodes = collect();
+
+        if (in_array($title->title_type, [TitleType::Series, TitleType::MiniSeries], true) && $title->seasons->isNotEmpty()) {
+            $latestSeason = $title->seasons
+                ->sortByDesc('season_number')
+                ->first();
+
+            if ($latestSeason instanceof Season) {
+                $latestSeason->load([
+                    'episodes' => fn ($query) => $query
+                        ->select([
+                            'id',
+                            'season_id',
+                            'series_id',
+                            'title_id',
+                            'episode_number',
+                            'season_number',
+                            'aired_at',
+                        ])
+                        ->with([
+                            'title' => fn ($titleQuery) => $titleQuery
+                                ->select([
+                                    'id',
+                                    'name',
+                                    'slug',
+                                    'title_type',
+                                    'release_year',
+                                    'runtime_minutes',
+                                    'plot_outline',
+                                    'is_published',
+                                ])
+                                ->published()
+                                ->with([
+                                    'statistic:id,title_id,average_rating,rating_count,review_count,watchlist_count',
+                                    'mediaAssets:id,mediable_type,mediable_id,kind,url,alt_text,position',
+                                ]),
+                        ])
+                        ->orderBy('episode_number')
+                        ->limit(4),
+                ]);
+
+                $latestSeasonEpisodes = $latestSeason->episodes
+                    ->filter(fn (Episode $episodeMeta): bool => $episodeMeta->title instanceof Title)
+                    ->values();
+            }
+
+            $topRatedEpisodes = $title->seriesEpisodes()
+                ->select([
+                    'id',
+                    'season_id',
+                    'series_id',
+                    'title_id',
+                    'episode_number',
+                    'season_number',
+                    'aired_at',
+                ])
+                ->with([
+                    'season:id,series_id,name,slug,season_number',
+                    'title' => fn ($titleQuery) => $titleQuery
+                        ->select([
+                            'id',
+                            'name',
+                            'slug',
+                            'title_type',
+                            'release_year',
+                            'runtime_minutes',
+                            'plot_outline',
+                            'is_published',
+                        ])
+                        ->published()
+                        ->with([
+                            'statistic:id,title_id,average_rating,rating_count,review_count,watchlist_count',
+                        ]),
+                ])
+                ->get()
+                ->filter(fn (Episode $episodeMeta): bool => $episodeMeta->title instanceof Title)
+                ->filter(fn (Episode $episodeMeta): bool => (int) ($episodeMeta->title->statistic?->rating_count ?? 0) > 0)
+                ->sortByDesc(function (Episode $episodeMeta): string {
+                    return sprintf(
+                        '%05.2f-%08d',
+                        (float) ($episodeMeta->title->statistic?->average_rating ?? 0),
+                        (int) ($episodeMeta->title->statistic?->rating_count ?? 0),
+                    );
+                })
+                ->take(5)
+                ->values();
+        }
+
         return [
             'title' => $title,
             'poster' => $poster,
@@ -296,6 +393,9 @@ class LoadTitleDetailsAction
             'awardHighlights' => $awardHighlights,
             'countries' => $this->tokenizeList($title->origin_country),
             'languages' => $this->tokenizeList($title->original_language),
+            'latestSeason' => $latestSeason,
+            'latestSeasonEpisodes' => $latestSeasonEpisodes,
+            'topRatedEpisodes' => $topRatedEpisodes,
         ];
     }
 

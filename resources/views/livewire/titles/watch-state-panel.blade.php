@@ -12,7 +12,7 @@
                 wire:click="markWatched"
                 wire:target="markWatched"
                 :variant="$watchState === \App\Enums\WatchState::Completed ? 'outline' : 'primary'"
-                icon="check-badge"
+                icon="check-circle"
             >
                 {{ $watchState === \App\Enums\WatchState::Completed ? 'Watched' : 'Mark watched' }}
             </x-ui.button>

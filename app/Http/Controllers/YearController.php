@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Catalog\ShowYearRequest;
 use Illuminate\Contracts\View\View;
 
 class YearController extends Controller
 {
-    public function __invoke(int $year): View
+    public function __invoke(ShowYearRequest $request): View
     {
-        abort_if($year < 1888 || $year > now()->addYear()->year, 404);
+        $year = $request->year();
 
         return view('catalog.browse', [
             'pageTitle' => 'Titles from '.$year,

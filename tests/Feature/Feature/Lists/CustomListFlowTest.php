@@ -16,6 +16,16 @@ class CustomListFlowTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_create_list_form_renders_a_combobox_for_visibility(): void
+    {
+        $user = User::factory()->create();
+
+        Livewire::actingAs($user)
+            ->test(CreateListForm::class)
+            ->assertSeeHtml('data-slot="combobox-input"')
+            ->assertDontSeeHtml('<select');
+    }
+
     public function test_account_lists_require_authentication_and_render_existing_lists(): void
     {
         $this->get(route('account.lists.index'))
@@ -58,7 +68,7 @@ class CustomListFlowTest extends TestCase
 
         Livewire::actingAs($user)
             ->test(CustomListPicker::class, ['title' => $title])
-            ->set("selectedLists.{$list->id}", true)
+            ->set('selectedListIds', [(string) $list->id])
             ->call('save')
             ->assertHasNoErrors();
 
@@ -71,5 +81,37 @@ class CustomListFlowTest extends TestCase
             ->assertOk()
             ->assertSee('Friday Night Picks')
             ->assertSee('Northern Signal');
+    }
+
+    public function test_title_picker_can_create_a_list_inline_and_preselect_it(): void
+    {
+        $user = User::factory()->create();
+        $title = Title::factory()->create([
+            'name' => 'Fresh Signal',
+        ]);
+
+        $component = Livewire::actingAs($user)
+            ->test(CustomListPicker::class, ['title' => $title])
+            ->set('listQuery', 'Fresh Finds')
+            ->set('createListForm.name', 'Fresh Finds')
+            ->set('createListForm.description', 'A brand new list from the title picker.')
+            ->set('createListForm.visibility', ListVisibility::Public->value)
+            ->call('createList')
+            ->assertHasNoErrors();
+
+        $createdList = UserList::query()
+            ->whereBelongsTo($user)
+            ->where('name', 'Fresh Finds')
+            ->firstOrFail();
+
+        $component
+            ->assertSet('selectedListIds', [(string) $createdList->id])
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('list_items', [
+            'user_list_id' => $createdList->id,
+            'title_id' => $title->id,
+        ]);
     }
 }

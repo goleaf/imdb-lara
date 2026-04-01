@@ -6,7 +6,7 @@ use App\Actions\Titles\GetUserWatchStateForTitleAction;
 use App\Actions\Titles\SetUserWatchStateForTitleAction;
 use App\Enums\WatchState;
 use App\Models\Title;
-use Carbon\CarbonInterface;
+use Illuminate\Support\Carbon;
 use Livewire\Component;
 
 class WatchStatePanel extends Component
@@ -15,9 +15,9 @@ class WatchStatePanel extends Component
 
     public ?WatchState $watchState = null;
 
-    public ?CarbonInterface $startedAt = null;
+    public ?Carbon $startedAt = null;
 
-    public ?CarbonInterface $watchedAt = null;
+    public ?Carbon $watchedAt = null;
 
     public ?string $statusMessage = null;
 

@@ -2,17 +2,12 @@
 
 namespace App\Actions\Lists;
 
-use App\Models\User;
 use App\Models\UserList;
-use Illuminate\Support\Facades\Gate;
 
 class LoadPublicUserListAction
 {
-    public function handle(User $owner, UserList $list): UserList
+    public function handle(UserList $list): UserList
     {
-        abort_unless($list->user_id === $owner->id, 404);
-        abort_unless(Gate::allows('view', $list), 404);
-
         $list->load([
             'user:id,name,username',
             'items' => fn ($query) => $query

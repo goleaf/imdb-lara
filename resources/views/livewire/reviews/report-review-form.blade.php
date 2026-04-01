@@ -25,14 +25,21 @@
         <form id="review-report-form-{{ $review->id }}" wire:submit="save" class="space-y-4">
             <x-ui.field>
                 <x-ui.label>Reason</x-ui.label>
-                <select
+                <x-ui.combobox
                     wire:model.live="form.reason"
-                    class="min-h-10 rounded-box border border-black/10 bg-white px-3 text-sm text-neutral-800 shadow-xs transition focus:border-black/15 focus:outline-none focus:ring-2 focus:ring-neutral-900/15 dark:border-white/15 dark:bg-neutral-900 dark:text-neutral-200 dark:focus:border-white/20 dark:focus:ring-neutral-100/15"
+                    class="w-full"
+                    placeholder="Choose a reason"
+                    :invalid="$errors->has('form.reason')"
                 >
                     @foreach ($reportReasons as $reportReason)
-                        <option value="{{ $reportReason['value'] }}">{{ $reportReason['label'] }}</option>
+                        <x-ui.combobox.option
+                            wire:key="report-reason-{{ $review->id }}-{{ $reportReason['value'] }}"
+                            value="{{ $reportReason['value'] }}"
+                        >
+                            {{ $reportReason['label'] }}
+                        </x-ui.combobox.option>
                     @endforeach
-                </select>
+                </x-ui.combobox>
                 <x-ui.error name="form.reason" />
             </x-ui.field>
 

@@ -1,12 +1,12 @@
 <?php
 
-namespace Tests\Feature\Feature\Feature;
+namespace Tests\Feature\Feature\Livewire;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
-class TitleDetailExperienceTest extends TestCase
+class PersonFilmographyPanelTest extends TestCase
 {
     /**
      * A basic feature test example.

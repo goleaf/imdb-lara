@@ -42,6 +42,7 @@
     x-rover
     @if($disabled) aria-disabled @endif
     @if($invalid)  aria-invalid  @endif
+    @if ($livewireId) data-livewire-id="{{ $livewireId }}" @endif
     x-bind:aria-expanded="__isOpen"
     aria-haspopup="listbox"
     x-bind:id="$id('combobox')"

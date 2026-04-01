@@ -20,16 +20,16 @@ class DiscoveryFilters extends Component
     public string $search = '';
 
     #[Url]
-    public string $genre = '';
+    public ?string $genre = null;
 
     #[Url]
-    public string $type = '';
+    public ?string $type = null;
 
     #[Url]
     public string $sort = 'popular';
 
     #[Url]
-    public string $minimumRating = '';
+    public ?string $minimumRating = null;
 
     public function boot(
         BuildDiscoveryQueryAction $buildDiscoveryQuery,
@@ -83,6 +83,8 @@ class DiscoveryFilters extends Component
             'titles' => $titles,
             'genres' => $filterOptions['genres'],
             'titleTypes' => $filterOptions['titleTypes'],
+            'minimumRatings' => $filterOptions['minimumRatings'],
+            'sortOptions' => $filterOptions['sortOptions'],
         ]);
     }
 }

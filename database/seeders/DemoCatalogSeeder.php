@@ -440,6 +440,9 @@ class DemoCatalogSeeder extends Seeder
                 'title_type' => TitleType::Episode,
                 'popularity_rank' => 901,
                 'release_year' => 2021,
+                'runtime_minutes' => 54,
+                'plot_outline' => 'A catastrophic district blackout forces Tess Mora back onto a repair crew she thought she had left behind.',
+                'synopsis' => 'When a core transit exchange dies in the middle of a record cold front, the Static Bloom crew discovers that the outage may have been triggered from inside the network itself.',
             ]),
             'switchback' => Title::factory()->episode()->create([
                 'name' => 'Static Bloom: Switchback',
@@ -448,6 +451,9 @@ class DemoCatalogSeeder extends Seeder
                 'title_type' => TitleType::Episode,
                 'popularity_rank' => 902,
                 'release_year' => 2021,
+                'runtime_minutes' => 51,
+                'plot_outline' => 'A reroute through abandoned infrastructure reveals how far the sabotage has already spread.',
+                'synopsis' => 'With the city still rationing power, Tess and Kellan chase a ghost signal through disused exchange tunnels and find proof that the blackout was only the opening move.',
             ]),
             'signal_path' => Title::factory()->episode()->create([
                 'name' => 'Static Bloom: Signal Path',
@@ -456,6 +462,9 @@ class DemoCatalogSeeder extends Seeder
                 'title_type' => TitleType::Episode,
                 'popularity_rank' => 903,
                 'release_year' => 2022,
+                'runtime_minutes' => 49,
+                'plot_outline' => 'A live migration to the rebuilt grid puts the entire south corridor at risk.',
+                'synopsis' => 'Season two opens with Static Bloom attempting its biggest network handoff yet while political and criminal interests race to control the switch.',
             ]),
             'deep_end' => Title::factory()->episode()->create([
                 'name' => 'Harbor Nine: The Deep End',
@@ -464,8 +473,16 @@ class DemoCatalogSeeder extends Seeder
                 'title_type' => TitleType::Episode,
                 'popularity_rank' => 904,
                 'release_year' => 2025,
+                'runtime_minutes' => 58,
+                'plot_outline' => 'A diver returns with evidence that the missing submarine case has civilian fingerprints.',
+                'synopsis' => 'The Harbor Nine investigation explodes when a recovered beacon points away from the naval yard and toward the city families profiting from the secrecy.',
             ]),
         ]);
+
+        $episodeTitles['pilot']->genres()->attach([$genres[0]->id, $genres[1]->id]);
+        $episodeTitles['switchback']->genres()->attach([$genres[0]->id, $genres[4]->id]);
+        $episodeTitles['signal_path']->genres()->attach([$genres[0]->id, $genres[1]->id]);
+        $episodeTitles['deep_end']->genres()->attach([$genres[1]->id, $genres[2]->id, $genres[4]->id]);
 
         $episodes = collect([
             'pilot' => Episode::factory()
@@ -534,6 +551,117 @@ class DemoCatalogSeeder extends Seeder
             'person_profession_id' => $professions['mina_director']->id,
         ]);
 
+        $episodeTitles['pilot']->credits()->createMany([
+            [
+                'person_id' => $people[5]->id,
+                'department' => 'Cast',
+                'job' => 'Actor',
+                'character_name' => 'Tess Mora',
+                'billing_order' => 2,
+                'is_principal' => true,
+                'person_profession_id' => $professions['elsie_actor']->id,
+            ],
+            [
+                'person_id' => $people[6]->id,
+                'department' => 'Cast',
+                'job' => 'Actor',
+                'character_name' => 'Kellan Rey',
+                'billing_order' => 3,
+                'is_principal' => true,
+                'person_profession_id' => $professions['rafi_actor']->id,
+            ],
+            [
+                'person_id' => $people[0]->id,
+                'department' => 'Cast',
+                'job' => 'Actor',
+                'character_name' => 'Dr. Mara Elling',
+                'billing_order' => 4,
+                'is_principal' => false,
+                'person_profession_id' => $professions['ava_actor']->id,
+                'credited_as' => 'Guest star',
+            ],
+        ]);
+
+        $episodeTitles['switchback']->credits()->createMany([
+            [
+                'person_id' => $people[5]->id,
+                'department' => 'Cast',
+                'job' => 'Actor',
+                'character_name' => 'Tess Mora',
+                'billing_order' => 1,
+                'is_principal' => true,
+                'person_profession_id' => $professions['elsie_actor']->id,
+            ],
+            [
+                'person_id' => $people[1]->id,
+                'department' => 'Cast',
+                'job' => 'Actor',
+                'character_name' => 'Elias Vonn',
+                'billing_order' => 2,
+                'is_principal' => false,
+                'person_profession_id' => $professions['jonah_actor']->id,
+                'credited_as' => 'Guest star',
+            ],
+        ]);
+
+        $episodeTitles['signal_path']->credits()->createMany([
+            [
+                'person_id' => $people[5]->id,
+                'department' => 'Cast',
+                'job' => 'Actor',
+                'character_name' => 'Tess Mora',
+                'billing_order' => 1,
+                'is_principal' => true,
+                'person_profession_id' => $professions['elsie_actor']->id,
+            ],
+            [
+                'person_id' => $people[6]->id,
+                'department' => 'Cast',
+                'job' => 'Actor',
+                'character_name' => 'Kellan Rey',
+                'billing_order' => 2,
+                'is_principal' => true,
+                'person_profession_id' => $professions['rafi_actor']->id,
+            ],
+            [
+                'person_id' => $people[2]->id,
+                'department' => 'Directing',
+                'job' => 'Director',
+                'billing_order' => 3,
+                'is_principal' => true,
+                'person_profession_id' => $professions['talia_director']->id,
+            ],
+        ]);
+
+        $episodeTitles['deep_end']->credits()->createMany([
+            [
+                'person_id' => $people[0]->id,
+                'department' => 'Cast',
+                'job' => 'Actor',
+                'character_name' => 'Commander Sena Ward',
+                'billing_order' => 1,
+                'is_principal' => true,
+                'person_profession_id' => $professions['ava_actor']->id,
+            ],
+            [
+                'person_id' => $people[1]->id,
+                'department' => 'Cast',
+                'job' => 'Actor',
+                'character_name' => 'Rian Cole',
+                'billing_order' => 2,
+                'is_principal' => true,
+                'person_profession_id' => $professions['jonah_actor']->id,
+            ],
+            [
+                'person_id' => $people[7]->id,
+                'department' => 'Directing',
+                'job' => 'Director',
+                'billing_order' => 3,
+                'is_principal' => true,
+                'person_profession_id' => $professions['mina_director']->id,
+            ],
+        ]);
+
         foreach ($titles as $title) {
             MediaAsset::factory()->for($title, 'mediable')->poster()->create();
             MediaAsset::factory()->for($title, 'mediable')->backdrop()->create();
@@ -548,6 +676,19 @@ class DemoCatalogSeeder extends Seeder
             'provider' => 'youtube',
             'provider_key' => 'static-bloom-trailer',
             'kind' => MediaKind::Trailer,
+        ]);
+
+        MediaAsset::factory()->for($episodeTitles['pilot'], 'mediable')->create([
+            'kind' => MediaKind::Still,
+            'width' => 1600,
+            'height' => 900,
+            'caption' => 'Tess Mora reconnects the exchange under blackout conditions.',
+        ]);
+        MediaAsset::factory()->for($episodeTitles['deep_end'], 'mediable')->create([
+            'kind' => MediaKind::Still,
+            'width' => 1600,
+            'height' => 900,
+            'caption' => 'Harbor divers surface with the first real clue.',
         ]);
 
         $people->each(fn (Person $person) => MediaAsset::factory()->for($person, 'mediable')->headshot()->create());
@@ -576,6 +717,21 @@ class DemoCatalogSeeder extends Seeder
                 'watched_at' => now()->subDays(1),
                 'rewatch_count' => 1,
             ],
+            [
+                'title_id' => $episodeTitles['pilot']->id,
+                'notes' => 'Strong opener, already watched.',
+                'position' => 4,
+                'watch_state' => WatchState::Completed,
+                'started_at' => now()->subDays(8),
+                'watched_at' => now()->subDays(8),
+            ],
+            [
+                'title_id' => $episodeTitles['switchback']->id,
+                'notes' => 'Paused halfway through the tunnel sequence.',
+                'position' => 5,
+                'watch_state' => WatchState::Watching,
+                'started_at' => now()->subDays(3),
+            ],
         ]);
 
         UserList::factory()->for($member)->public()->create([
@@ -602,6 +758,22 @@ class DemoCatalogSeeder extends Seeder
             }
         }
 
+        collect([
+            'pilot' => [10, 9, 9],
+            'switchback' => [9, 8, 9],
+            'signal_path' => [8, 8, 7],
+            'deep_end' => [9, 9, 8],
+        ])->each(function (array $scores, string $episodeKey) use ($contributors, $episodeTitles): void {
+            $episodeTitle = $episodeTitles[$episodeKey];
+
+            foreach ($scores as $index => $score) {
+                Rating::factory()
+                    ->for($contributors[$index], 'user')
+                    ->for($episodeTitle, 'title')
+                    ->create(['score' => $score]);
+            }
+        });
+
         $publishedReviews = collect([
             Review::factory()->published()->for($member, 'author')->for($titles['northern_signal'])->create([
                 'headline' => 'Elegant and sharp.',
@@ -624,6 +796,13 @@ class DemoCatalogSeeder extends Seeder
                 'moderated_at' => now(),
                 'published_at' => now(),
                 'status' => ReviewStatus::Published,
+            ]),
+            Review::factory()->published()->for($member, 'author')->for($episodeTitles['pilot'])->create([
+                'headline' => 'One of the strongest pilots in the sample catalog.',
+                'body' => 'The blackout setup is immediate, the guest turn lands, and the final exchange handoff gives the episode real momentum.',
+                'moderated_by' => $moderator->id,
+                'moderated_at' => now(),
+                'published_at' => now()->subHours(4),
             ]),
         ]);
 

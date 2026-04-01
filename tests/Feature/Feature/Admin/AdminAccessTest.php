@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Feature\Admin;
 
+use App\Models\Title;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -12,6 +13,7 @@ class AdminAccessTest extends TestCase
 
     public function test_admin_routes_follow_the_role_access_matrix(): void
     {
+        $title = Title::factory()->create();
         $regularUser = User::factory()->create();
         $contributor = User::factory()->contributor()->create();
         $editor = User::factory()->editor()->create();
@@ -38,6 +40,11 @@ class AdminAccessTest extends TestCase
             ->assertSee('Manage Titles');
 
         $this->actingAs($editor)
+            ->get(route('admin.titles.edit', $title))
+            ->assertOk()
+            ->assertSee('Edit '.$title->name);
+
+        $this->actingAs($editor)
             ->get(route('admin.reviews.index'))
             ->assertForbidden();
 
@@ -48,6 +55,10 @@ class AdminAccessTest extends TestCase
 
         $this->actingAs($moderator)
             ->get(route('admin.titles.index'))
+            ->assertForbidden();
+
+        $this->actingAs($moderator)
+            ->get(route('admin.titles.edit', $title))
             ->assertForbidden();
 
         $this->actingAs($moderator)
@@ -64,6 +75,11 @@ class AdminAccessTest extends TestCase
             ->get(route('admin.titles.index'))
             ->assertOk()
             ->assertSee('Manage Titles');
+
+        $this->actingAs($admin)
+            ->get(route('admin.titles.edit', $title))
+            ->assertOk()
+            ->assertSee('Edit '.$title->name);
 
         $this->actingAs($admin)
             ->get(route('admin.reviews.index'))

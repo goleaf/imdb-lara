@@ -5,6 +5,7 @@ namespace Tests\Feature\Feature\Livewire;
 use App\Livewire\Titles\RatingPanel;
 use App\Livewire\Titles\ReviewComposer;
 use App\Livewire\Titles\WatchlistToggle;
+use App\Livewire\Titles\WatchStatePanel;
 use App\Models\Title;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -33,6 +34,10 @@ class TitleInteractionTest extends TestCase
             ->set('form.body', 'A compelling review body long enough to validate.')
             ->call('save')
             ->assertRedirect(route('login'));
+
+        Livewire::test(WatchStatePanel::class, ['title' => $title])
+            ->call('markWatched')
+            ->assertRedirect(route('login'));
     }
 
     public function test_title_components_persist_authenticated_user_interactions(): void
@@ -58,6 +63,12 @@ class TitleInteractionTest extends TestCase
             ->call('save')
             ->assertHasNoErrors();
 
+        Livewire::actingAs($user)
+            ->test(WatchStatePanel::class, ['title' => $title])
+            ->call('markWatched')
+            ->assertHasNoErrors()
+            ->assertSet('watchState.value', 'completed');
+
         $this->assertDatabaseHas('ratings', [
             'user_id' => $user->id,
             'title_id' => $title->id,
@@ -68,6 +79,11 @@ class TitleInteractionTest extends TestCase
             'user_id' => $user->id,
             'title_id' => $title->id,
             'headline' => 'Strong',
+        ]);
+
+        $this->assertDatabaseHas('list_items', [
+            'title_id' => $title->id,
+            'watch_state' => 'completed',
         ]);
     }
 }

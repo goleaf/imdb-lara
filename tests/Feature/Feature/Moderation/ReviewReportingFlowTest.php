@@ -14,6 +14,15 @@ class ReviewReportingFlowTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_report_review_form_renders_a_combobox_for_reason_selection(): void
+    {
+        $review = Review::factory()->published()->create();
+
+        Livewire::test(ReportReviewForm::class, ['review' => $review])
+            ->assertSeeHtml('data-slot="combobox-input"')
+            ->assertDontSeeHtml('<select');
+    }
+
     public function test_guest_is_redirected_when_trying_to_report_a_review(): void
     {
         $review = Review::factory()->published()->create();

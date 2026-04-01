@@ -1,5 +1,3 @@
-let COMBOBOX_LIVEWIRE_ID;
-
 const comboboxComponent = ({
     livewire,
     livewireId,
@@ -11,8 +9,6 @@ const comboboxComponent = ({
     minSelection = null,
     maxSelection = null,
 }) => {
-
-    COMBOBOX_LIVEWIRE_ID = livewireId;
 
     const $entangle = (prop, live) => {
         const binding = livewire.$entangle(prop);
@@ -36,9 +32,9 @@ const comboboxComponent = ({
 
             this.input = this.$rover.input;
 
-            if (window.Livewire !== undefined) {
+            if (window.Livewire !== undefined && livewireId) {
                 window.Livewire.hook('commit', ({ component, succeed }) => {
-                    if (component.id === COMBOBOX_LIVEWIRE_ID) {
+                    if (component.id === livewireId) {
                         succeed(() => {
                             this.$nextTick(() => {
                                 this.$rover.reconcileDom();
@@ -155,6 +151,17 @@ const comboboxComponent = ({
             this.__isOpen = false;
 
             this.$rover.deactivate();
+
+            this.$nextTick(() => {
+                if (this.__isMultiple) {
+                    this.$rover.input.value = '';
+                    return;
+                }
+
+                this.$rover.input.value = this.__state
+                    ? this.utils.getLabel(this.__state) ?? ''
+                    : '';
+            });
 
             this.$rover.input.focus();
         },
@@ -304,13 +311,15 @@ const comboboxComponent = ({
 
 const CreateNewOptionActivator = () => ({
     init() {
+        const rootLivewireId = this.$root.dataset.livewireId;
+
         // defer until Alpine finishes bootstrapping (on the current microtask)
         //  this element's directives
         queueMicrotask(() => this.activate())
 
-        if (window.Livewire !== undefined) {
+        if (window.Livewire !== undefined && rootLivewireId) {
             window.Livewire.hook('commit', ({ component, succeed }) => {
-                if (component.id === LIVEWIRE_ID) {
+                if (component.id === rootLivewireId) {
                     succeed(() => {
                         // wait for Alpine's scheduler to flush 
                         // after the Livewire commit

@@ -14,6 +14,18 @@ class DiscoveryFiltersTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_discovery_filters_render_combobox_controls_instead_of_native_selects(): void
+    {
+        Genre::factory()->create([
+            'name' => 'Sci-Fi',
+            'slug' => 'sci-fi',
+        ]);
+
+        Livewire::test(DiscoveryFilters::class)
+            ->assertSeeHtml('data-slot="combobox-input"')
+            ->assertDontSeeHtml('<select');
+    }
+
     public function test_discovery_filters_search_by_text_genre_and_rating(): void
     {
         $sciFi = Genre::factory()->create([

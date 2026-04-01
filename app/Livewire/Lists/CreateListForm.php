@@ -30,6 +30,11 @@ class CreateListForm extends Component
 
     public function render()
     {
-        return view('livewire.lists.create-list-form');
+        return view('livewire.lists.create-list-form', [
+            'visibilityOptions' => [
+                ['value' => ListVisibility::Private->value, 'label' => 'Private'],
+                ['value' => ListVisibility::Public->value, 'label' => 'Public'],
+            ],
+        ]);
     }
 }

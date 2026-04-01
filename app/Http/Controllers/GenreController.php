@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Catalog\ShowGenreRequest;
 use App\Models\Genre;
 use Illuminate\Contracts\View\View;
 
 class GenreController extends Controller
 {
-    public function __invoke(Genre $genre): View
+    public function __invoke(ShowGenreRequest $request, Genre $genre): View
     {
+        $genre = $request->genre();
+
         return view('catalog.browse', [
             'pageTitle' => $genre->name,
             'metaDescription' => $genre->description ?: 'Browse '.$genre->name.' titles, reviews, and discovery pages on Screenbase.',

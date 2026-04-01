@@ -76,7 +76,14 @@ class PublicRouteArchitectureTest extends TestCase
             ->assertOk()
             ->assertSee($movie->name)
             ->assertSee('Ava Mercer')
-            ->assertSee('Elegant and sharp.');
+            ->assertSee('Elegant and sharp.')
+            ->assertSee('Ratings breakdown')
+            ->assertSee('Where to watch');
+
+        $this->get(route('public.titles.cast', $movie))
+            ->assertOk()
+            ->assertSee('Full Cast')
+            ->assertSee('Ava Mercer');
 
         $this->get(route('public.people.show', $person))
             ->assertOk()
@@ -87,13 +94,16 @@ class PublicRouteArchitectureTest extends TestCase
         $this->get(route('public.seasons.show', ['series' => $series, 'season' => $season]))
             ->assertOk()
             ->assertSee($season->name)
-            ->assertSee('Static Bloom: Pilot');
+            ->assertSee('Static Bloom: Pilot')
+            ->assertSee('Episode guide')
+            ->assertSee('Top-rated episodes this season');
 
         $this->get(route('public.episodes.show', ['series' => $series, 'season' => $season, 'episode' => $episode]))
             ->assertOk()
             ->assertSee($episode->name)
             ->assertSee($series->name)
-            ->assertSee('Episode credits');
+            ->assertSee('Episode navigation')
+            ->assertSee('Season lineup');
 
         $this->get(route('public.search', ['q' => 'Signal']))
             ->assertOk()

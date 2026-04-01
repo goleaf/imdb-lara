@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use App\Actions\Catalog\BuildTitleCreditsQueryAction;
 use App\Actions\Catalog\LoadTitleDetailsAction;
 use App\Enums\TitleType;
+use App\Http\Requests\Catalog\ShowTitleRequest;
 use App\Models\Title;
 use Illuminate\Contracts\View\View;
-use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Route;
 
@@ -42,9 +42,12 @@ class TitleController extends Controller
         ]);
     }
 
-    public function show(Title $title, LoadTitleDetailsAction $loadTitleDetails): View|RedirectResponse
-    {
-        $this->ensurePubliclyVisible($title);
+    public function show(
+        ShowTitleRequest $request,
+        Title $title,
+        LoadTitleDetailsAction $loadTitleDetails,
+    ): View|RedirectResponse {
+        $title = $request->title();
 
         if ($redirectResponse = $this->redirectCanonicalEpisode($title)) {
             return $redirectResponse;
@@ -53,9 +56,12 @@ class TitleController extends Controller
         return view('titles.show', $loadTitleDetails->handle($title));
     }
 
-    public function cast(Title $title, BuildTitleCreditsQueryAction $buildTitleCreditsQuery): View|RedirectResponse
-    {
-        $this->ensurePubliclyVisible($title);
+    public function cast(
+        ShowTitleRequest $request,
+        Title $title,
+        BuildTitleCreditsQueryAction $buildTitleCreditsQuery,
+    ): View|RedirectResponse {
+        $title = $request->title();
 
         if ($redirectResponse = $this->redirectCanonicalEpisode($title)) {
             return $redirectResponse;
@@ -86,19 +92,6 @@ class TitleController extends Controller
         ]);
     }
 
-    private function ensurePubliclyVisible(Title $title): void
-    {
-        if ($title->is_published) {
-            return;
-        }
-
-        if (auth()->user()?->can('view', $title)) {
-            return;
-        }
-
-        throw new HttpResponseException(abort(404));
-    }
-
     private function redirectCanonicalEpisode(Title $title): ?RedirectResponse
     {
         if ($title->title_type !== TitleType::Episode) {
@@ -119,6 +112,6 @@ class TitleController extends Controller
             ]);
         }
 
-        return redirect()->route('public.titles.show', $title);
+        abort(404);
     }
 }

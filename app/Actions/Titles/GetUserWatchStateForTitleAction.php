@@ -15,8 +15,14 @@ class GetUserWatchStateForTitleAction
     public function handle(User $user, Title $title): ?array
     {
         $watchlistEntry = $user->watchlistEntries()
-            ->select(['id', 'title_id', 'watch_state', 'started_at', 'watched_at'])
-            ->where('title_id', $title->id)
+            ->select([
+                'list_items.id',
+                'list_items.title_id',
+                'list_items.watch_state',
+                'list_items.started_at',
+                'list_items.watched_at',
+            ])
+            ->where('list_items.title_id', $title->id)
             ->first();
 
         if (! $watchlistEntry?->watch_state instanceof WatchState) {
