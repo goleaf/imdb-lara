@@ -2,19 +2,54 @@
 
 namespace Tests\Feature\Feature\Livewire;
 
+use App\Livewire\Catalog\PeopleBrowser;
+use App\Models\Person;
+use App\Models\PersonProfession;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class PeopleBrowserTest extends TestCase
 {
-    /**
-     * A basic feature test example.
-     */
-    public function test_example(): void
-    {
-        $response = $this->get('/');
+    use RefreshDatabase;
 
-        $response->assertStatus(200);
+    public function test_people_browser_uses_combobox_filters(): void
+    {
+        PersonProfession::factory()->create([
+            'profession' => 'Actor',
+        ]);
+
+        Livewire::test(PeopleBrowser::class)
+            ->assertSeeHtml('data-slot="combobox-input"')
+            ->assertDontSeeHtml('<select');
+    }
+
+    public function test_people_browser_filters_by_search_and_profession(): void
+    {
+        $actor = Person::factory()->create([
+            'name' => 'Ava Mercer',
+            'alternate_names' => 'A. Mercer',
+        ]);
+        $director = Person::factory()->create([
+            'name' => 'Talia Rowe',
+        ]);
+
+        PersonProfession::factory()->for($actor)->primary()->create([
+            'profession' => 'Actor',
+            'department' => 'Cast',
+        ]);
+        PersonProfession::factory()->for($director)->primary()->create([
+            'profession' => 'Director',
+            'department' => 'Directing',
+        ]);
+
+        Livewire::test(PeopleBrowser::class)
+            ->set('search', 'Ava')
+            ->assertSee('Ava Mercer')
+            ->assertDontSee('Talia Rowe')
+            ->set('search', '')
+            ->set('profession', 'Director')
+            ->assertSee('Talia Rowe')
+            ->assertDontSee('Ava Mercer');
     }
 }

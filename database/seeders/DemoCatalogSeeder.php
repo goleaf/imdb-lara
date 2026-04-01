@@ -104,41 +104,72 @@ class DemoCatalogSeeder extends Seeder
                 'name' => 'Ava Mercer',
                 'slug' => 'ava-mercer',
                 'known_for_department' => 'Acting',
+                'alternate_names' => 'A. Mercer | Ava L. Mercer',
+                'short_biography' => 'Ava Mercer is a screen actor known for controlled sci-fi leads and emotionally precise ensemble work.',
+                'biography' => 'Ava Mercer broke through with a run of tightly wound genre performances before becoming one of the defining leads in the Screenbase sample catalog. Her work balances cool intelligence with a strong physical presence, making her a natural fit for contained thrillers, naval mysteries, and science-fiction dramas.',
+                'birth_place' => 'Reykjavik, Iceland',
+                'nationality' => 'Icelandic',
             ]),
             Person::factory()->create([
                 'name' => 'Jonah Vale',
                 'slug' => 'jonah-vale',
                 'known_for_department' => 'Acting',
+                'alternate_names' => 'Jon Vale',
+                'short_biography' => 'Jonah Vale specializes in restrained genre performances and morally ambiguous supporting roles.',
+                'birth_place' => 'Bristol, England',
+                'nationality' => 'British',
             ]),
             Person::factory()->create([
                 'name' => 'Talia Rowe',
                 'slug' => 'talia-rowe',
                 'known_for_department' => 'Directing',
+                'alternate_names' => 'T. Rowe',
+                'short_biography' => 'Talia Rowe directs cold-weather thrillers and tense ensemble dramas with a documentary eye.',
+                'biography' => 'Talia Rowe emerged from short-form factual work before moving into drama features and serialized mystery. Her direction is known for strong environmental texture, restrained performances, and patient tension-building that rewards repeat viewing.',
+                'birth_place' => 'Halifax, Canada',
+                'nationality' => 'Canadian',
             ]),
             Person::factory()->create([
                 'name' => 'Micah Stone',
                 'slug' => 'micah-stone',
                 'known_for_department' => 'Writing',
+                'short_biography' => 'Micah Stone writes procedural thrillers and serialized character drama.',
+                'birth_place' => 'Chicago, United States',
+                'nationality' => 'American',
             ]),
             Person::factory()->create([
                 'name' => 'Noor Haddad',
                 'slug' => 'noor-haddad',
                 'known_for_department' => 'Production',
+                'short_biography' => 'Noor Haddad produces ambitious international projects with large location footprints.',
+                'birth_place' => 'Amman, Jordan',
+                'nationality' => 'Jordanian',
             ]),
             Person::factory()->create([
                 'name' => 'Elsie Tran',
                 'slug' => 'elsie-tran',
                 'known_for_department' => 'Acting',
+                'alternate_names' => 'E. Tran',
+                'short_biography' => 'Elsie Tran leads long-form television with a mix of technical precision and emotional clarity.',
+                'birth_place' => 'Melbourne, Australia',
+                'nationality' => 'Australian',
             ]),
             Person::factory()->create([
                 'name' => 'Rafi Quinn',
                 'slug' => 'rafi-quinn',
                 'known_for_department' => 'Acting',
+                'short_biography' => 'Rafi Quinn is a character actor favored for high-pressure ensemble storytelling.',
+                'birth_place' => 'Dublin, Ireland',
+                'nationality' => 'Irish',
             ]),
             Person::factory()->create([
                 'name' => 'Mina Sato',
                 'slug' => 'mina-sato',
                 'known_for_department' => 'Directing',
+                'alternate_names' => 'M. Sato',
+                'short_biography' => 'Mina Sato directs television episodes with a clean visual grammar and a strong sense of pace.',
+                'birth_place' => 'Osaka, Japan',
+                'nationality' => 'Japanese',
             ]),
         ]);
 
@@ -692,6 +723,19 @@ class DemoCatalogSeeder extends Seeder
         ]);
 
         $people->each(fn (Person $person) => MediaAsset::factory()->for($person, 'mediable')->headshot()->create());
+
+        MediaAsset::factory()->for($people[0], 'mediable')->create([
+            'kind' => MediaKind::Gallery,
+            'width' => 1600,
+            'height' => 1200,
+            'caption' => 'Ava Mercer on the Northern Signal press tour.',
+        ]);
+        MediaAsset::factory()->for($people[2], 'mediable')->create([
+            'kind' => MediaKind::Still,
+            'width' => 1600,
+            'height' => 900,
+            'caption' => 'Talia Rowe on set during a location shoot.',
+        ]);
 
         $watchlist = app(EnsureWatchlistAction::class)->handle($member);
         $watchlist->items()->createMany([

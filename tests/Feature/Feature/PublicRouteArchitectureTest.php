@@ -60,6 +60,7 @@ class PublicRouteArchitectureTest extends TestCase
         $this->get(route('public.people.index'))
             ->assertOk()
             ->assertSee('Browse People')
+            ->assertSee('Actors')
             ->assertSee($person->name);
 
         $this->get(route('public.genres.show', $genre))
@@ -88,7 +89,8 @@ class PublicRouteArchitectureTest extends TestCase
         $this->get(route('public.people.show', $person))
             ->assertOk()
             ->assertSee($person->name)
-            ->assertSee('Actor')
+            ->assertSee('Known for')
+            ->assertSee('Filmography')
             ->assertSee('Northern Signal');
 
         $this->get(route('public.seasons.show', ['series' => $series, 'season' => $season]))

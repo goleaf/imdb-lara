@@ -46,11 +46,14 @@ class PublicBrowsePagesTest extends TestCase
         $this->get(route('public.people.index'))
             ->assertOk()
             ->assertSee('Browse People')
+            ->assertSee('Actors')
             ->assertSee($person->name);
 
         $this->get(route('public.people.show', $person))
             ->assertOk()
             ->assertSee($person->name)
+            ->assertSee('Known for')
+            ->assertSee('Filmography')
             ->assertSee($person->credits->firstOrFail()->title->name);
 
         $this->get(route('public.search', ['q' => 'Signal']))
