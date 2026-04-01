@@ -20,6 +20,7 @@ class TitleDetailExperienceTest extends TestCase
 
         $this->get(route('public.titles.show', $title))
             ->assertOk()
+            ->assertSeeHtml('data-slot="accordion"')
             ->assertSee('Storyline')
             ->assertSee('Cast')
             ->assertSee('Key crew')

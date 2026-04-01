@@ -19,7 +19,7 @@ class ShowUserProfileRequest extends NotFoundFormRequest
             return true;
         }
 
-        return $user->publicLists()->exists();
+        return $user->publicLists()->exists() || $user->publicWatchlist()->exists();
     }
 
     public function profileUser(): User

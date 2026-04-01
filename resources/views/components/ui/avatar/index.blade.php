@@ -178,10 +178,14 @@
 
 
 
-<div class="relative w-fit" data-slot="avatar" data-size="{{ $avatarSize }}">
+<div class="relative w-fit" data-slot="avatar" data-size="{{ $size }}">
     <x-ui.button.abstract :href="$href" :as="$as" {{ $attributes->class(Arr::toCssClasses($classes)) }}>
         @if ($src)
-            <img src="{{ $src }}" alt="{{ $alt || $name }}">
+            <img
+                src="{{ $src }}"
+                alt="{{ $alt ?: $name ?: 'Avatar' }}"
+                class="h-full w-full object-cover"
+            >
         @elseif ($icon)
             <x-ui.icon name="{{ $icon }}" variant="{{ $iconVariant }}"
                 class="{{ Arr::toCssClasses($iconClasses) }}" />

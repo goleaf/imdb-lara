@@ -19,6 +19,8 @@ class PeopleDetailExperienceTest extends TestCase
 
         $this->get(route('public.people.show', $person))
             ->assertOk()
+            ->assertSeeHtml('data-slot="avatar"')
+            ->assertSeeHtml('data-slot="accordion"')
             ->assertSee($person->name)
             ->assertSee('A. Mercer')
             ->assertSee('Biography')
@@ -37,6 +39,7 @@ class PeopleDetailExperienceTest extends TestCase
 
         $this->get(route('public.people.index'))
             ->assertOk()
+            ->assertSeeHtml('data-slot="avatar"')
             ->assertSee('Browse People')
             ->assertSee('Actors')
             ->assertSee('Ava Mercer')

@@ -1,12 +1,18 @@
 @props([
     'title',
     'showSummary' => true,
+    'trackingAddedAt' => null,
+    'trackingState' => null,
+    'trackingWatchedAt' => null,
 ])
 
 @php
-    $poster = $title->relationLoaded('mediaAssets') ? $title->mediaAssets->first() : null;
+    $poster = $title->relationLoaded('mediaAssets')
+        ? ($title->mediaAssets->firstWhere('kind', \App\Enums\MediaKind::Poster) ?? $title->mediaAssets->first())
+        : null;
     $genres = $title->relationLoaded('genres') ? $title->genres->take(3) : collect();
     $statistic = $title->relationLoaded('statistic') ? $title->statistic : null;
+    $hasActions = trim((string) $slot) !== '';
 @endphp
 
 <x-ui.card class="!max-w-none h-full overflow-hidden">
@@ -70,12 +76,43 @@
                 </div>
             @endif
 
+            @if ($trackingState || $trackingAddedAt || $trackingWatchedAt)
+                <div class="flex flex-wrap gap-2 text-sm text-neutral-500 dark:text-neutral-400">
+                    @if ($trackingState instanceof \App\Enums\WatchState)
+                        <x-ui.badge
+                            variant="outline"
+                            :color="$trackingState === \App\Enums\WatchState::Completed ? 'green' : 'neutral'"
+                        >
+                            {{ str($trackingState->value)->headline() }}
+                        </x-ui.badge>
+                    @endif
+
+                    @if ($trackingAddedAt)
+                        <x-ui.badge variant="outline" color="slate">
+                            Added {{ $trackingAddedAt->format('M j, Y') }}
+                        </x-ui.badge>
+                    @endif
+
+                    @if ($trackingWatchedAt)
+                        <x-ui.badge variant="outline" color="green">
+                            Watched {{ $trackingWatchedAt->format('M j, Y') }}
+                        </x-ui.badge>
+                    @endif
+                </div>
+            @endif
+
             <div class="mt-auto flex items-center justify-between gap-3 text-sm text-neutral-500 dark:text-neutral-400">
                 <span>{{ number_format((int) ($statistic?->review_count ?? 0)) }} reviews</span>
                 <x-ui.link :href="route('public.titles.show', $title)" variant="ghost">
                     View title
                 </x-ui.link>
             </div>
+
+            @if ($hasActions)
+                <div class="flex flex-wrap gap-2">
+                    {{ $slot }}
+                </div>
+            @endif
         </div>
     </div>
 </x-ui.card>

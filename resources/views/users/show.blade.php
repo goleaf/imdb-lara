@@ -13,9 +13,13 @@
         <x-ui.card class="!max-w-none">
             <div class="space-y-4">
                 <div class="flex items-center gap-4">
-                    <div class="flex size-16 items-center justify-center rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900">
-                        <x-ui.icon name="user" class="size-8" />
-                    </div>
+                    <x-ui.avatar
+                        :src="$user->avatar_url"
+                        :name="$user->name"
+                        circle
+                        size="xl"
+                        class="ring-4 ring-white shadow-sm dark:ring-neutral-900"
+                    />
 
                     <div>
                         <x-ui.heading level="h1" size="xl">{{ $user->name }}</x-ui.heading>
@@ -75,6 +79,44 @@
             </div>
         </x-ui.card>
     </section>
+
+    @if ($publicWatchlist)
+        <section class="space-y-4">
+            <div class="flex items-center justify-between gap-4">
+                <x-ui.heading level="h2" size="lg">Public watchlist</x-ui.heading>
+                <x-ui.link :href="route('public.lists.show', [$user, $publicWatchlist])" variant="ghost">
+                    Open watchlist
+                </x-ui.link>
+            </div>
+
+            <x-ui.card class="!max-w-none">
+                <div class="space-y-4">
+                    <div class="flex flex-wrap items-start justify-between gap-4">
+                        <div>
+                            <x-ui.heading level="h3" size="md">
+                                <a href="{{ route('public.lists.show', [$user, $publicWatchlist]) }}" class="hover:opacity-80">
+                                    {{ $publicWatchlist->name }}
+                                </a>
+                            </x-ui.heading>
+                            <x-ui.text class="mt-1 text-neutral-600 dark:text-neutral-300">
+                                {{ $publicWatchlist->description ?: 'A public snapshot of what this member plans to watch next.' }}
+                            </x-ui.text>
+                        </div>
+
+                        <x-ui.badge variant="outline" color="neutral">
+                            {{ number_format($publicWatchlist->items_count) }} saved
+                        </x-ui.badge>
+                    </div>
+
+                    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                        @foreach ($publicWatchlist->items as $item)
+                            <x-catalog.title-card :title="$item->title" :show-summary="false" />
+                        @endforeach
+                    </div>
+                </div>
+            </x-ui.card>
+        </section>
+    @endif
 
     <section class="space-y-4">
         <div class="flex items-center justify-between gap-4">

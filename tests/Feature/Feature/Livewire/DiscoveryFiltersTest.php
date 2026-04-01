@@ -22,8 +22,29 @@ class DiscoveryFiltersTest extends TestCase
         ]);
 
         Livewire::test(DiscoveryFilters::class)
+            ->assertSeeHtml('data-slot="autocomplete"')
             ->assertSeeHtml('data-slot="combobox-input"')
             ->assertDontSeeHtml('<select');
+    }
+
+    public function test_discovery_filters_render_title_autocomplete_suggestions_for_matching_titles(): void
+    {
+        Title::factory()->create([
+            'name' => 'Northern Signal',
+            'search_keywords' => 'signal, sci-fi',
+            'is_published' => true,
+        ]);
+        Title::factory()->create([
+            'name' => 'Signal North',
+            'search_keywords' => 'signal, thriller',
+            'is_published' => true,
+        ]);
+
+        Livewire::test(DiscoveryFilters::class)
+            ->set('search', 'Signal')
+            ->assertSeeHtml('data-slot="autocomplete-item"')
+            ->assertSee('Northern Signal')
+            ->assertSee('Signal North');
     }
 
     public function test_discovery_filters_search_by_text_genre_and_rating(): void

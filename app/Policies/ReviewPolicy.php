@@ -35,6 +35,25 @@ class ReviewPolicy
         return $user->canModerateContent() || $review->author->is($user);
     }
 
+    public function voteHelpful(User $user, Review $review): bool
+    {
+        return $user->isActive()
+            && $review->status === ReviewStatus::Published
+            && ! $review->author->is($user);
+    }
+
+    public function report(User $user, Review $review): bool
+    {
+        return $user->isActive()
+            && $review->status === ReviewStatus::Published
+            && ! $review->author->is($user);
+    }
+
+    public function moderate(User $user, Review $review): bool
+    {
+        return $user->canModerateContent();
+    }
+
     public function restore(User $user, Review $review): bool
     {
         return $user->canModerateContent();

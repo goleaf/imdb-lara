@@ -16,6 +16,10 @@
         }
     },
     toggle() {
+        if (@js($disabled)) {
+            return;
+        }
+
         this.isVisible = !this.isVisible;
     },
     get isVisible() {
@@ -24,7 +28,14 @@
     set isVisible(value) {
         this.active = value ? this.id : null
     },
+    get triggerId() {
+        return `${this.id}-trigger`;
+    },
+    get panelId() {
+        return `${this.id}-panel`;
+    },
 }"
+    data-slot="accordion-item"
     {{ $attributes->class(
         Arr::toCssClasses([
             'dark:text-white text-gray-800 not-last:border-b border-black/10 dark:border-white/10 text-start',

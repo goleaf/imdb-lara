@@ -9,12 +9,12 @@
             </div>
 
             <x-ui.button
-                wire:click="markWatched"
-                wire:target="markWatched"
+                wire:click="toggleWatched"
+                wire:target="toggleWatched"
                 :variant="$watchState === \App\Enums\WatchState::Completed ? 'outline' : 'primary'"
                 icon="check-circle"
             >
-                {{ $watchState === \App\Enums\WatchState::Completed ? 'Watched' : 'Mark watched' }}
+                {{ $watchState === \App\Enums\WatchState::Completed ? 'Mark unwatched' : 'Mark watched' }}
             </x-ui.button>
         </div>
 

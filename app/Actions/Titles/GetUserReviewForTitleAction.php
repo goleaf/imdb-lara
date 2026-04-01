@@ -19,6 +19,9 @@ class GetUserReviewForTitleAction
                 'body',
                 'contains_spoilers',
                 'status',
+                'published_at',
+                'moderated_at',
+                'edited_at',
             ])
             ->where('title_id', $title->id)
             ->first();

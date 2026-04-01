@@ -3,12 +3,35 @@
         <div class="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_repeat(4,minmax(0,0.5fr))]">
             <x-ui.field>
                 <x-ui.label>Keyword</x-ui.label>
-                <x-ui.input
+                <x-ui.autocomplete
                     wire:model.live.debounce.300ms="search"
                     name="search"
                     placeholder="Search titles, synonyms, or plot notes"
                     left-icon="magnifying-glass"
-                />
+                    clearable
+                >
+                    @foreach ($searchSuggestions as $suggestedTitle)
+                        <x-ui.autocomplete.item
+                            wire:key="discover-suggestion-{{ $suggestedTitle->id }}"
+                            :value="$suggestedTitle->name"
+                            :label="$suggestedTitle->name"
+                        >
+                            <div class="flex items-center justify-between gap-3 py-1">
+                                <div>
+                                    <div class="font-medium text-neutral-900 dark:text-neutral-100">
+                                        {{ $suggestedTitle->name }}
+                                    </div>
+                                    <div class="text-xs text-neutral-500 dark:text-neutral-400">
+                                        {{ str($suggestedTitle->title_type->value)->headline() }}
+                                        @if ($suggestedTitle->release_year)
+                                            · {{ $suggestedTitle->release_year }}
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </x-ui.autocomplete.item>
+                    @endforeach
+                </x-ui.autocomplete>
             </x-ui.field>
 
             <x-ui.field>

@@ -4,6 +4,7 @@ namespace Tests\Feature\Feature;
 
 use App\Models\Person;
 use App\Models\Title;
+use App\Models\User;
 use Database\Seeders\DemoCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -20,6 +21,7 @@ class PublicBrowsePagesTest extends TestCase
 
         $title = Title::query()->with(['credits.person', 'reviews.author'])->firstOrFail();
         $person = Person::query()->with('credits.title')->firstOrFail();
+        $user = User::query()->whereHas('publicLists')->firstOrFail();
 
         $this->get(route('public.home'))
             ->assertOk()
@@ -55,6 +57,11 @@ class PublicBrowsePagesTest extends TestCase
             ->assertSee('Known for')
             ->assertSee('Filmography')
             ->assertSee($person->credits->firstOrFail()->title->name);
+
+        $this->get(route('public.users.show', $user))
+            ->assertOk()
+            ->assertSeeHtml('data-slot="avatar"')
+            ->assertSee($user->name);
 
         $this->get(route('public.search', ['q' => 'Signal']))
             ->assertOk()

@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable
 {
@@ -103,6 +104,13 @@ class User extends Authenticatable
             ->where('visibility', ListVisibility::Public);
     }
 
+    public function publicWatchlist(): HasOne
+    {
+        return $this->hasOne(UserList::class)
+            ->where('is_watchlist', true)
+            ->where('visibility', ListVisibility::Public);
+    }
+
     public function watchlist(): HasOne
     {
         return $this->hasOne(UserList::class)->where('is_watchlist', true);
@@ -173,5 +181,18 @@ class User extends Authenticatable
     public function isActive(): bool
     {
         return $this->status === UserStatus::Active;
+    }
+
+    public function getAvatarUrlAttribute(): ?string
+    {
+        if (blank($this->avatar_path)) {
+            return null;
+        }
+
+        if (filter_var($this->avatar_path, FILTER_VALIDATE_URL)) {
+            return $this->avatar_path;
+        }
+
+        return Storage::url($this->avatar_path);
     }
 }

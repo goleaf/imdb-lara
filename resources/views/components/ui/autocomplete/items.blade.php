@@ -5,6 +5,7 @@
 @endphp
 <div 
     @class($classes)
+    data-slot="autocomplete-items"
     x-transition
     x-on:click.away="handleClickAway($event.target)"
     x-anchor="$refs.autocompleteControl" 

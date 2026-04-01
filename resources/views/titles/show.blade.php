@@ -539,190 +539,185 @@
         </div>
 
         <div class="space-y-6">
-            <x-ui.card class="!max-w-none">
-                <div class="space-y-4">
-                    <x-ui.heading level="h2" size="lg">Details</x-ui.heading>
-
-                    <div class="grid gap-3">
-                        @forelse ($detailItems as $item)
-                            <div class="flex items-start justify-between gap-4 rounded-box border border-black/5 px-4 py-3 dark:border-white/10">
-                                <div class="text-sm font-medium text-neutral-500 dark:text-neutral-400">{{ $item['label'] }}</div>
-                                <div class="text-right text-sm text-neutral-800 dark:text-neutral-100">{{ $item['value'] }}</div>
-                            </div>
-                        @empty
-                            <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
-                                <x-ui.heading level="h3">Detailed metadata is still being curated.</x-ui.heading>
-                            </x-ui.empty>
-                        @endforelse
-                    </div>
-                </div>
-            </x-ui.card>
-
-            <x-ui.card class="!max-w-none">
-                <div class="space-y-4">
-                    <x-ui.heading level="h2" size="lg">Technical specs</x-ui.heading>
-
-                    <div class="grid gap-3">
-                        @forelse ($technicalSpecItems as $item)
-                            <div class="flex items-start justify-between gap-4 rounded-box border border-black/5 px-4 py-3 dark:border-white/10">
-                                <div class="text-sm font-medium text-neutral-500 dark:text-neutral-400">{{ $item['label'] }}</div>
-                                <div class="text-right text-sm text-neutral-800 dark:text-neutral-100">{{ $item['value'] }}</div>
-                            </div>
-                        @empty
-                            <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
-                                <x-ui.heading level="h3">Technical specs are not available yet.</x-ui.heading>
-                            </x-ui.empty>
-                        @endforelse
-                    </div>
-                </div>
-            </x-ui.card>
-
             <livewire:titles.rating-panel :title="$title" :key="'rating-'.$title->id" />
 
             <livewire:titles.custom-list-picker :title="$title" :key="'custom-lists-'.$title->id" />
 
             <x-ui.card class="!max-w-none">
-                <div class="space-y-4">
+                <div class="space-y-3">
                     <div class="flex items-center justify-between gap-4">
-                        <x-ui.heading level="h2" size="lg">Ratings breakdown</x-ui.heading>
-                        <x-ui.badge variant="outline" color="neutral">{{ number_format($ratingCount) }} votes</x-ui.badge>
-                    </div>
-
-                    @if ($ratingCount > 0)
-                        <div class="space-y-3">
-                            @foreach ($ratingsBreakdown as $bucket)
-                                <div class="grid grid-cols-[2.5rem_minmax(0,1fr)_3rem] items-center gap-3">
-                                    <div class="text-sm font-medium text-neutral-700 dark:text-neutral-200">{{ $bucket['score'] }}</div>
-                                    <div class="h-2 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-800">
-                                        <div
-                                            class="h-full rounded-full bg-amber-400"
-                                            style="width: {{ $bucket['count'] > 0 ? max(8, (int) round(($bucket['count'] / $maxBreakdownCount) * 100)) : 0 }}%;"
-                                        ></div>
-                                    </div>
-                                    <div class="text-right text-sm text-neutral-500 dark:text-neutral-400">{{ $bucket['count'] }}</div>
-                                </div>
-                            @endforeach
-                        </div>
-                    @else
-                        <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
-                            <x-ui.heading level="h3">Not enough ratings yet.</x-ui.heading>
-                            <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
-                                The score distribution will appear once audience ratings start arriving.
+                        <div>
+                            <x-ui.heading level="h2" size="lg">Details & context</x-ui.heading>
+                            <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                Secondary metadata, score distribution, related catalog links, and future extension points.
                             </x-ui.text>
-                        </x-ui.empty>
-                    @endif
-                </div>
-            </x-ui.card>
-
-            <x-ui.card class="!max-w-none">
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between gap-4">
-                        <x-ui.heading level="h2" size="lg">Related titles</x-ui.heading>
-                        <x-ui.badge variant="outline" color="neutral">{{ number_format($relatedTitles->count()) }} matches</x-ui.badge>
+                        </div>
+                        <x-ui.badge variant="outline" color="neutral">7 panels</x-ui.badge>
                     </div>
 
-                    @if ($relatedTitles->isNotEmpty())
-                        <div class="grid gap-4">
-                            @foreach ($relatedTitles as $relatedItem)
-                                <div class="space-y-2">
-                                    <div class="flex items-center justify-between gap-3">
-                                        <div class="text-sm font-medium text-neutral-500 dark:text-neutral-400">
-                                            {{ $relatedItem['label'] }}
+                    <x-ui.accordion class="rounded-box border border-black/5 dark:border-white/10">
+                        <x-ui.accordion.item expanded>
+                            <x-ui.accordion.trigger>Details</x-ui.accordion.trigger>
+                            <x-ui.accordion.content>
+                                <div class="grid gap-3">
+                                    @forelse ($detailItems as $item)
+                                        <div class="flex items-start justify-between gap-4 rounded-box border border-black/5 px-4 py-3 dark:border-white/10">
+                                            <div class="text-sm font-medium text-neutral-500 dark:text-neutral-400">{{ $item['label'] }}</div>
+                                            <div class="text-right text-sm text-neutral-800 dark:text-neutral-100">{{ $item['value'] }}</div>
                                         </div>
-                                        @if ($relatedItem['relationship']->weight)
-                                            <x-ui.badge variant="outline" color="slate">
-                                                Weight {{ $relatedItem['relationship']->weight }}
-                                            </x-ui.badge>
-                                        @endif
-                                    </div>
-
-                                    <x-catalog.title-card :title="$relatedItem['title']" :showSummary="false" />
+                                    @empty
+                                        <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                            <x-ui.heading level="h3">Detailed metadata is still being curated.</x-ui.heading>
+                                        </x-ui.empty>
+                                    @endforelse
                                 </div>
-                            @endforeach
-                        </div>
-                    @else
-                        <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
-                            <x-ui.heading level="h3">No related titles are linked yet.</x-ui.heading>
-                        </x-ui.empty>
-                    @endif
-                </div>
-            </x-ui.card>
+                            </x-ui.accordion.content>
+                        </x-ui.accordion.item>
 
-            <x-ui.card class="!max-w-none">
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between gap-4">
-                        <x-ui.heading level="h2" size="lg">Awards</x-ui.heading>
-                        <div class="flex flex-wrap gap-2">
-                            <x-ui.badge color="green" variant="outline">
-                                {{ number_format((int) ($title->statistic?->awards_won_count ?? 0)) }} wins
-                            </x-ui.badge>
-                            <x-ui.badge variant="outline" color="neutral">
-                                {{ number_format((int) ($title->statistic?->awards_nominated_count ?? 0)) }} nominations
-                            </x-ui.badge>
-                        </div>
-                    </div>
-
-                    <div class="grid gap-3">
-                        @forelse ($awardHighlights as $awardNomination)
-                            <div class="rounded-box border border-black/5 px-4 py-3 dark:border-white/10">
-                                <div class="flex flex-wrap items-start justify-between gap-3">
-                                    <div>
-                                        <div class="font-medium">
-                                            {{ $awardNomination->awardEvent->award->name }}
-                                            @if ($awardNomination->awardEvent->year)
-                                                {{ $awardNomination->awardEvent->year }}
-                                            @endif
+                        <x-ui.accordion.item>
+                            <x-ui.accordion.trigger>Technical specs</x-ui.accordion.trigger>
+                            <x-ui.accordion.content>
+                                <div class="grid gap-3">
+                                    @forelse ($technicalSpecItems as $item)
+                                        <div class="flex items-start justify-between gap-4 rounded-box border border-black/5 px-4 py-3 dark:border-white/10">
+                                            <div class="text-sm font-medium text-neutral-500 dark:text-neutral-400">{{ $item['label'] }}</div>
+                                            <div class="text-right text-sm text-neutral-800 dark:text-neutral-100">{{ $item['value'] }}</div>
                                         </div>
-                                        <div class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
-                                            {{ $awardNomination->awardCategory->name }}
-                                            @if ($awardNomination->credited_name)
-                                                · {{ $awardNomination->credited_name }}
-                                            @elseif ($awardNomination->person)
-                                                · {{ $awardNomination->person->name }}
-                                            @elseif ($awardNomination->episode?->title)
-                                                · {{ $awardNomination->episode->title->name }}
-                                            @endif
-                                        </div>
-                                    </div>
-
-                                    <x-ui.badge :color="$awardNomination->is_winner ? 'green' : 'neutral'" variant="outline">
-                                        {{ $awardNomination->is_winner ? 'Winner' : 'Nominee' }}
-                                    </x-ui.badge>
+                                    @empty
+                                        <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                            <x-ui.heading level="h3">Technical specs are not available yet.</x-ui.heading>
+                                        </x-ui.empty>
+                                    @endforelse
                                 </div>
+                            </x-ui.accordion.content>
+                        </x-ui.accordion.item>
 
-                                @if (filled($awardNomination->details))
-                                    <x-ui.text class="mt-3 text-sm text-neutral-600 dark:text-neutral-300">
-                                        {{ $awardNomination->details }}
-                                    </x-ui.text>
+                        <x-ui.accordion.item>
+                            <x-ui.accordion.trigger>Ratings breakdown</x-ui.accordion.trigger>
+                            <x-ui.accordion.content>
+                                @if ($ratingCount > 0)
+                                    <div class="space-y-3">
+                                        @foreach ($ratingsBreakdown as $bucket)
+                                            <div class="grid grid-cols-[2.5rem_minmax(0,1fr)_3rem] items-center gap-3">
+                                                <div class="text-sm font-medium text-neutral-700 dark:text-neutral-200">{{ $bucket['score'] }}</div>
+                                                <div class="h-2 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-800">
+                                                    <div
+                                                        class="h-full rounded-full bg-amber-400"
+                                                        style="width: {{ $bucket['count'] > 0 ? max(8, (int) round(($bucket['count'] / $maxBreakdownCount) * 100)) : 0 }}%;"
+                                                    ></div>
+                                                </div>
+                                                <div class="text-right text-sm text-neutral-500 dark:text-neutral-400">{{ $bucket['count'] }}</div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                        <x-ui.heading level="h3">Not enough ratings yet.</x-ui.heading>
+                                        <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
+                                            The score distribution will appear once audience ratings start arriving.
+                                        </x-ui.text>
+                                    </x-ui.empty>
                                 @endif
-                            </div>
-                        @empty
-                            <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
-                                <x-ui.heading level="h3">No awards have been linked yet.</x-ui.heading>
-                            </x-ui.empty>
-                        @endforelse
-                    </div>
-                </div>
-            </x-ui.card>
+                            </x-ui.accordion.content>
+                        </x-ui.accordion.item>
 
-            <x-ui.card class="!max-w-none">
-                <div class="space-y-3">
-                    <x-ui.heading level="h2" size="lg">Where to watch</x-ui.heading>
-                    <x-ui.text class="text-sm text-neutral-600 dark:text-neutral-300">
-                        Streaming and purchase availability can slot into this block once provider feeds are connected to the catalog.
-                    </x-ui.text>
-                    <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
-                        <x-ui.heading level="h3">Availability is not published yet.</x-ui.heading>
-                    </x-ui.empty>
-                </div>
-            </x-ui.card>
+                        <x-ui.accordion.item>
+                            <x-ui.accordion.trigger>Related titles</x-ui.accordion.trigger>
+                            <x-ui.accordion.content>
+                                @if ($relatedTitles->isNotEmpty())
+                                    <div class="grid gap-4">
+                                        @foreach ($relatedTitles as $relatedItem)
+                                            <div class="space-y-2">
+                                                <div class="flex items-center justify-between gap-3">
+                                                    <div class="text-sm font-medium text-neutral-500 dark:text-neutral-400">
+                                                        {{ $relatedItem['label'] }}
+                                                    </div>
+                                                    @if ($relatedItem['relationship']->weight)
+                                                        <x-ui.badge variant="outline" color="slate">
+                                                            Weight {{ $relatedItem['relationship']->weight }}
+                                                        </x-ui.badge>
+                                                    @endif
+                                                </div>
 
-            <x-ui.card class="!max-w-none">
-                <div class="space-y-3">
-                    <x-ui.heading level="h2" size="lg">Editorial extensions</x-ui.heading>
-                    <x-ui.text class="text-sm text-neutral-600 dark:text-neutral-300">
-                        Trivia, goofs, quotes, and soundtrack modules are not in the current domain model yet. This page keeps a reserved extension point so those datasets can slot in without changing the surrounding layout.
-                    </x-ui.text>
+                                                <x-catalog.title-card :title="$relatedItem['title']" :showSummary="false" />
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                        <x-ui.heading level="h3">No related titles are linked yet.</x-ui.heading>
+                                    </x-ui.empty>
+                                @endif
+                            </x-ui.accordion.content>
+                        </x-ui.accordion.item>
+
+                        <x-ui.accordion.item>
+                            <x-ui.accordion.trigger>Awards</x-ui.accordion.trigger>
+                            <x-ui.accordion.content>
+                                <div class="grid gap-3">
+                                    @forelse ($awardHighlights as $awardNomination)
+                                        <div class="rounded-box border border-black/5 px-4 py-3 dark:border-white/10">
+                                            <div class="flex flex-wrap items-start justify-between gap-3">
+                                                <div>
+                                                    <div class="font-medium">
+                                                        {{ $awardNomination->awardEvent->award->name }}
+                                                        @if ($awardNomination->awardEvent->year)
+                                                            {{ $awardNomination->awardEvent->year }}
+                                                        @endif
+                                                    </div>
+                                                    <div class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+                                                        {{ $awardNomination->awardCategory->name }}
+                                                        @if ($awardNomination->credited_name)
+                                                            · {{ $awardNomination->credited_name }}
+                                                        @elseif ($awardNomination->person)
+                                                            · {{ $awardNomination->person->name }}
+                                                        @elseif ($awardNomination->episode?->title)
+                                                            · {{ $awardNomination->episode->title->name }}
+                                                        @endif
+                                                    </div>
+                                                </div>
+
+                                                <x-ui.badge :color="$awardNomination->is_winner ? 'green' : 'neutral'" variant="outline">
+                                                    {{ $awardNomination->is_winner ? 'Winner' : 'Nominee' }}
+                                                </x-ui.badge>
+                                            </div>
+
+                                            @if (filled($awardNomination->details))
+                                                <x-ui.text class="mt-3 text-sm text-neutral-600 dark:text-neutral-300">
+                                                    {{ $awardNomination->details }}
+                                                </x-ui.text>
+                                            @endif
+                                        </div>
+                                    @empty
+                                        <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                            <x-ui.heading level="h3">No awards have been linked yet.</x-ui.heading>
+                                        </x-ui.empty>
+                                    @endforelse
+                                </div>
+                            </x-ui.accordion.content>
+                        </x-ui.accordion.item>
+
+                        <x-ui.accordion.item>
+                            <x-ui.accordion.trigger>Where to watch</x-ui.accordion.trigger>
+                            <x-ui.accordion.content>
+                                <x-ui.text class="text-sm text-neutral-600 dark:text-neutral-300">
+                                    Streaming and purchase availability can slot into this block once provider feeds are connected to the catalog.
+                                </x-ui.text>
+                                <x-ui.empty class="mt-3 rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                    <x-ui.heading level="h3">Availability is not published yet.</x-ui.heading>
+                                </x-ui.empty>
+                            </x-ui.accordion.content>
+                        </x-ui.accordion.item>
+
+                        <x-ui.accordion.item>
+                            <x-ui.accordion.trigger>Editorial extensions</x-ui.accordion.trigger>
+                            <x-ui.accordion.content>
+                                <x-ui.text class="text-sm text-neutral-600 dark:text-neutral-300">
+                                    Trivia, goofs, quotes, and soundtrack modules are not in the current domain model yet. This page keeps a reserved extension point so those datasets can slot in without changing the surrounding layout.
+                                </x-ui.text>
+                            </x-ui.accordion.content>
+                        </x-ui.accordion.item>
+                    </x-ui.accordion>
                 </div>
             </x-ui.card>
         </div>

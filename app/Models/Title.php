@@ -70,6 +70,24 @@ class Title extends Model
         return $query->where('is_published', true);
     }
 
+    public function scopeMatchingSearch(Builder $query, string $search): Builder
+    {
+        $search = trim($search);
+
+        if ($search === '') {
+            return $query;
+        }
+
+        return $query->where(function (Builder $titleQuery) use ($search): void {
+            $titleQuery
+                ->where('name', 'like', "%{$search}%")
+                ->orWhere('original_name', 'like', "%{$search}%")
+                ->orWhere('plot_outline', 'like', "%{$search}%")
+                ->orWhere('synopsis', 'like', "%{$search}%")
+                ->orWhere('search_keywords', 'like', "%{$search}%");
+        });
+    }
+
     public function scopeForType(Builder $query, TitleType $type): Builder
     {
         return $query->where('title_type', $type);

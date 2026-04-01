@@ -13,6 +13,22 @@ class UserProfileController extends Controller
     public function __invoke(ShowUserProfileRequest $request, User $user): View
     {
         $user = $request->profileUser();
+        $publicWatchlist = $user->publicWatchlist()
+            ->select(['id', 'user_id', 'name', 'slug', 'description', 'visibility', 'is_watchlist', 'created_at'])
+            ->withCount('items')
+            ->with([
+                'items' => fn ($query) => $query
+                    ->select(['id', 'user_list_id', 'title_id', 'position'])
+                    ->latest('created_at')
+                    ->limit(3)
+                    ->with([
+                        'title:id,name,slug,title_type,release_year,plot_outline',
+                        'title.mediaAssets:id,mediable_type,mediable_id,kind,url,alt_text,position,is_primary',
+                        'title.statistic:id,title_id,average_rating,rating_count,review_count,watchlist_count',
+                        'title.genres:id,name,slug',
+                    ]),
+            ])
+            ->first();
 
         $publicLists = $user->customLists()
             ->select(['id', 'user_id', 'name', 'slug', 'description', 'visibility', 'is_watchlist', 'created_at'])
@@ -31,6 +47,7 @@ class UserProfileController extends Controller
 
         return view('users.show', [
             'user' => $user,
+            'publicWatchlist' => $publicWatchlist,
             'publicLists' => $publicLists,
             'recentReviews' => $recentReviews,
         ]);

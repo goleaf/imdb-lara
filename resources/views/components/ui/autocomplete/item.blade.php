@@ -20,9 +20,11 @@
 
 <li 
     data-label="{{ $label }}"
+    data-value="{{ $value }}"
     value="{{ $value }}"
     data-slot="autocomplete-item"
     x-rover:option
+    role="option"
     {{-- morph will remove data-value for none changed els so the init ain't re-run --}} 
     wire:ignore.self
     

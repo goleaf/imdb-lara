@@ -4,6 +4,7 @@ namespace App\Livewire\Search;
 
 use App\Actions\Search\BuildDiscoveryQueryAction;
 use App\Actions\Search\GetDiscoveryFilterOptionsAction;
+use App\Actions\Search\GetDiscoveryTitleSuggestionsAction;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -15,6 +16,8 @@ class DiscoveryFilters extends Component
     protected BuildDiscoveryQueryAction $buildDiscoveryQuery;
 
     protected GetDiscoveryFilterOptionsAction $getDiscoveryFilterOptions;
+
+    protected GetDiscoveryTitleSuggestionsAction $getDiscoveryTitleSuggestions;
 
     #[Url(as: 'q')]
     public string $search = '';
@@ -34,9 +37,11 @@ class DiscoveryFilters extends Component
     public function boot(
         BuildDiscoveryQueryAction $buildDiscoveryQuery,
         GetDiscoveryFilterOptionsAction $getDiscoveryFilterOptions,
+        GetDiscoveryTitleSuggestionsAction $getDiscoveryTitleSuggestions,
     ): void {
         $this->buildDiscoveryQuery = $buildDiscoveryQuery;
         $this->getDiscoveryFilterOptions = $getDiscoveryFilterOptions;
+        $this->getDiscoveryTitleSuggestions = $getDiscoveryTitleSuggestions;
     }
 
     public function updatedSearch(): void
@@ -66,6 +71,8 @@ class DiscoveryFilters extends Component
 
     public function render()
     {
+        $searchSuggestions = $this->getDiscoveryTitleSuggestions->handle($this->search);
+
         $titles = $this->buildDiscoveryQuery
             ->handle([
                 'search' => $this->search,
@@ -85,6 +92,7 @@ class DiscoveryFilters extends Component
             'titleTypes' => $filterOptions['titleTypes'],
             'minimumRatings' => $filterOptions['minimumRatings'],
             'sortOptions' => $filterOptions['sortOptions'],
+            'searchSuggestions' => $searchSuggestions,
         ]);
     }
 }

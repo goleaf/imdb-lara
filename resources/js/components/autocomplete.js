@@ -40,9 +40,7 @@ const autocompleteComponent = ({
             inputManager.on('input', () => {
                 if (!this.__isOpen) this.open();
 
-                if (inputManager.value === '') {
-                    this.__state = null;
-                }
+                this.__state = inputManager.value === '' ? '' : inputManager.value;
             });
 
             // Click an option
@@ -85,7 +83,7 @@ const autocompleteComponent = ({
                 // we need to fallback to val for valeus that aren't part of 
                 // the provided items so they don't an associated label
                 const label = this.utils.getLabel(val) ?? val;
-                this.$rover.input.value = label;
+                this.$rover.input.value = label ?? '';
             });
         },
 
@@ -110,7 +108,7 @@ const autocompleteComponent = ({
         },
 
         clear() {
-            this.__state = null;
+            this.__state = '';
             this.$rover.input.value = '';
             this.$rover.collection.reset();
         },
@@ -120,7 +118,7 @@ const autocompleteComponent = ({
         },
 
         get hasSelection() {
-            return this.__state != null;
+            return this.__state !== '' && this.__state != null;
         },
     };
 };

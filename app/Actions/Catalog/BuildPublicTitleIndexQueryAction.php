@@ -85,16 +85,7 @@ class BuildPublicTitleIndexQueryAction
             $query->where('title_type', '!=', TitleType::Episode);
         }
 
-        if ($search !== '') {
-            $query->where(function (Builder $titleQuery) use ($search): void {
-                $titleQuery
-                    ->where('name', 'like', "%{$search}%")
-                    ->orWhere('original_name', 'like', "%{$search}%")
-                    ->orWhere('plot_outline', 'like', "%{$search}%")
-                    ->orWhere('synopsis', 'like', "%{$search}%")
-                    ->orWhere('search_keywords', 'like', "%{$search}%");
-            });
-        }
+        $query->matchingSearch($search);
 
         if ($genre !== null) {
             $query->whereHas('genres', fn (Builder $genreQuery) => $genreQuery->where('slug', $genre));

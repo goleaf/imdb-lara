@@ -15,7 +15,7 @@ class UserListPolicy
 
     public function view(?User $user, UserList $userList): bool
     {
-        if ($userList->visibility === ListVisibility::Public && ! $userList->is_watchlist) {
+        if ($userList->visibility === ListVisibility::Public) {
             return true;
         }
 

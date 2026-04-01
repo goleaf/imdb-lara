@@ -53,6 +53,29 @@ class WatchStatePanel extends Component
         $this->title->refresh()->load('statistic');
     }
 
+    public function toggleWatched(SetUserWatchStateForTitleAction $setUserWatchState): void
+    {
+        if (! auth()->check()) {
+            $this->redirectRoute('login');
+
+            return;
+        }
+
+        $targetState = $this->watchState === WatchState::Completed
+            ? WatchState::Planned
+            : WatchState::Completed;
+
+        $watchlistEntry = $setUserWatchState->handle(auth()->user(), $this->title, $targetState);
+
+        $this->watchState = $watchlistEntry->watch_state;
+        $this->startedAt = $watchlistEntry->started_at;
+        $this->watchedAt = $watchlistEntry->watched_at;
+        $this->statusMessage = $targetState === WatchState::Completed
+            ? 'Marked as watched.'
+            : 'Marked as unwatched.';
+        $this->title->refresh()->load('statistic');
+    }
+
     public function render()
     {
         return view('livewire.titles.watch-state-panel');
