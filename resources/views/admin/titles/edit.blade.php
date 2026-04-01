@@ -25,7 +25,7 @@
 
         @if (session('status'))
             <x-ui.alerts variant="success" icon="check-circle">
-                <x-ui.alerts.heading>{{ session('status') }}</x-ui.alerts.heading>
+                <x-ui.alerts.description>{{ session('status') }}</x-ui.alerts.description>
             </x-ui.alerts>
         @endif
 

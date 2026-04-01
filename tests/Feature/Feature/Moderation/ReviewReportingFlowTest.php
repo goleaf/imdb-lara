@@ -19,6 +19,9 @@ class ReviewReportingFlowTest extends TestCase
         $review = Review::factory()->published()->create();
 
         Livewire::test(ReportReviewForm::class, ['review' => $review])
+            ->assertSeeHtml('data-slot="alert"')
+            ->assertSeeHtml('data-slot="alert-description"')
+            ->assertSeeHtml('data-slot="alert-controls"')
             ->assertSeeHtml('data-slot="combobox-input"')
             ->assertDontSeeHtml('<select');
     }

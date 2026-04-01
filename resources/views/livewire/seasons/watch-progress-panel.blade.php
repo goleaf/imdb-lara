@@ -21,11 +21,17 @@
         @guest
             <x-ui.alerts variant="info" icon="information-circle">
                 <x-ui.alerts.heading>Sign in to track season progress.</x-ui.alerts.heading>
+                <x-ui.alerts.description>
+                    Mark finished episodes in bulk and keep your season progress synced with your watch history.
+                </x-ui.alerts.description>
             </x-ui.alerts>
         @else
             @if ($statusMessage)
-                <x-ui.alerts variant="success" icon="check-circle">
-                    <x-ui.alerts.heading>{{ $statusMessage }}</x-ui.alerts.heading>
+                <x-ui.alerts
+                    :variant="str_contains(strtolower($statusMessage), 'no published episodes') ? 'info' : 'success'"
+                    :icon="str_contains(strtolower($statusMessage), 'no published episodes') ? 'information-circle' : 'check-circle'"
+                >
+                    <x-ui.alerts.description>{{ $statusMessage }}</x-ui.alerts.description>
                 </x-ui.alerts>
             @endif
 

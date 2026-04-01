@@ -1,7 +1,7 @@
 @extends('layouts.public')
 
-@section('title', $person->name)
-@section('meta_description', $person->biography ?: 'Browse credits and biography for '.$person->name.'.')
+@section('title', $person->meta_title ?: $person->name)
+@section('meta_description', $person->meta_description ?: ($biographyIntro ?: 'Browse credits and biography for '.$person->name.'.'))
 
 @section('breadcrumbs')
     <x-ui.breadcrumbs.item :href="route('public.home')">Home</x-ui.breadcrumbs.item>
@@ -10,102 +10,305 @@
 @endsection
 
 @section('content')
-    @php
-        $headshot = $person->mediaAssets->first();
-    @endphp
-
-    <section class="grid gap-6 xl:grid-cols-[minmax(0,0.7fr)_minmax(0,1.3fr)]">
-        <x-ui.card class="!max-w-none overflow-hidden">
-            @if ($headshot)
-                <img
-                    src="{{ $headshot->url }}"
-                    alt="{{ $headshot->alt_text ?: $person->name }}"
-                    class="aspect-[3/4] w-full rounded-box object-cover"
-                >
-            @else
-                <div class="flex aspect-[3/4] items-center justify-center rounded-box bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400">
-                    <x-ui.icon name="user" class="size-12" />
-                </div>
-            @endif
-        </x-ui.card>
-
-        <x-ui.card class="!max-w-none">
-            <div class="space-y-4">
-                <div class="flex flex-wrap items-center gap-2">
-                    @if ($person->known_for_department)
-                        <x-ui.badge variant="outline">{{ $person->known_for_department }}</x-ui.badge>
-                    @endif
-
-                    @if ($person->birth_place)
-                        <x-ui.badge variant="outline" color="slate">{{ $person->birth_place }}</x-ui.badge>
+    <section class="space-y-6">
+        <x-ui.card class="!max-w-none overflow-hidden p-0">
+            <div class="grid gap-6 p-6 xl:grid-cols-[14rem_minmax(0,1fr)]">
+                <div class="overflow-hidden rounded-box border border-black/5 bg-neutral-100 shadow-sm dark:border-white/10 dark:bg-neutral-800">
+                    @if ($headshot)
+                        <img
+                            src="{{ $headshot->url }}"
+                            alt="{{ $headshot->alt_text ?: $person->name }}"
+                            class="aspect-[3/4] w-full object-cover"
+                        >
+                    @else
+                        <div class="flex aspect-[3/4] items-center justify-center text-neutral-500 dark:text-neutral-400">
+                            <x-ui.icon name="user" class="size-14" />
+                        </div>
                     @endif
                 </div>
 
-                @if ($person->professions->isNotEmpty())
-                    <div class="flex flex-wrap gap-2">
-                        @foreach ($person->professions as $profession)
-                            <x-ui.badge variant="outline" color="neutral">{{ $profession->profession }}</x-ui.badge>
-                        @endforeach
-                    </div>
-                @endif
+                <div class="space-y-6">
+                    <div class="space-y-4">
+                        <div class="flex flex-wrap items-center gap-2">
+                            @if ($person->known_for_department)
+                                <x-ui.badge variant="outline">{{ $person->known_for_department }}</x-ui.badge>
+                            @endif
 
-                <div class="space-y-2">
-                    <x-ui.heading level="h1" size="xl">{{ $person->name }}</x-ui.heading>
-                    <x-ui.text class="text-base text-neutral-600 dark:text-neutral-300">
-                        {{ $person->biography ?: 'No biography has been published for this person yet.' }}
-                    </x-ui.text>
-                </div>
+                            @if ($person->nationality)
+                                <x-ui.badge variant="outline" color="slate">{{ $person->nationality }}</x-ui.badge>
+                            @endif
 
-                <div class="grid gap-3 sm:grid-cols-2">
-                    <div class="rounded-box border border-black/5 p-3 dark:border-white/10">
-                        <div class="text-xs uppercase tracking-[0.2em] text-neutral-500 dark:text-neutral-400">Birth date</div>
-                        <div class="mt-2 text-lg font-semibold">{{ $person->birth_date?->format('M j, Y') ?: 'Unknown' }}</div>
+                            @if ($person->birth_place)
+                                <x-ui.badge variant="outline" color="neutral">{{ $person->birth_place }}</x-ui.badge>
+                            @endif
+                        </div>
+
+                        <div class="space-y-2">
+                            <x-ui.heading level="h1" size="xl">{{ $person->name }}</x-ui.heading>
+
+                            @if ($alternateNames->isNotEmpty())
+                                <div class="flex flex-wrap gap-2">
+                                    @foreach ($alternateNames as $alternateName)
+                                        <x-ui.badge variant="outline" color="neutral">{{ $alternateName }}</x-ui.badge>
+                                    @endforeach
+                                </div>
+                            @endif
+
+                            @if ($professionLabels->isNotEmpty())
+                                <div class="flex flex-wrap gap-2">
+                                    @foreach ($professionLabels as $professionLabel)
+                                        <x-ui.badge variant="outline" color="slate">{{ $professionLabel }}</x-ui.badge>
+                                    @endforeach
+                                </div>
+                            @endif
+
+                            @if ($biographyIntro)
+                                <x-ui.text class="max-w-4xl text-base text-neutral-700 dark:text-neutral-200">
+                                    {{ $biographyIntro }}
+                                </x-ui.text>
+                            @endif
+                        </div>
                     </div>
-                    <div class="rounded-box border border-black/5 p-3 dark:border-white/10">
-                        <div class="text-xs uppercase tracking-[0.2em] text-neutral-500 dark:text-neutral-400">Credits</div>
-                        <div class="mt-2 text-lg font-semibold">{{ number_format($person->credits->count()) }}</div>
+
+                    <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                        @forelse ($detailItems as $item)
+                            <div class="rounded-box border border-black/5 bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
+                                <div class="text-xs uppercase tracking-[0.2em] text-neutral-500 dark:text-neutral-400">{{ $item['label'] }}</div>
+                                <div class="mt-2 text-lg font-semibold">{{ $item['value'] }}</div>
+                            </div>
+                        @empty
+                            <div class="rounded-box border border-black/5 bg-white/70 p-4 dark:border-white/10 dark:bg-white/5 sm:col-span-2 xl:col-span-4">
+                                <div class="text-sm text-neutral-500 dark:text-neutral-400">Public metadata is still being curated.</div>
+                            </div>
+                        @endforelse
                     </div>
                 </div>
             </div>
         </x-ui.card>
-    </section>
 
-    <section class="space-y-4">
-        <x-ui.heading level="h2" size="lg">Credits</x-ui.heading>
-
-        <div class="grid gap-3">
-            @forelse ($person->credits as $credit)
-                <x-ui.card class="!max-w-none">
-                    <div class="flex flex-wrap items-center justify-between gap-3">
-                        <div>
-                            <x-ui.heading level="h3" size="md">
-                                <a href="{{ route('public.titles.show', $credit->title) }}" class="hover:opacity-80">
-                                    {{ $credit->title->name }}
-                                </a>
-                            </x-ui.heading>
-                            <div class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
-                                {{ str($credit->title->title_type->value)->headline() }} ·
-                                @if ($credit->title->release_year)
-                                    <a href="{{ route('public.years.show', ['year' => $credit->title->release_year]) }}" class="hover:opacity-80">
-                                        {{ $credit->title->release_year }}
-                                    </a>
-                                @else
-                                    TBA
-                                @endif
-                            </div>
-                        </div>
-
-                        <div class="flex flex-wrap gap-2">
-                            <x-ui.badge variant="outline" color="neutral">{{ $credit->department }}</x-ui.badge>
-                            <x-ui.badge variant="outline" color="slate">{{ $credit->job }}</x-ui.badge>
-                        </div>
+        <section class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+            <x-ui.card class="!max-w-none">
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between gap-4">
+                        <x-ui.heading level="h2" size="lg">Biography</x-ui.heading>
+                        <x-ui.badge variant="outline" color="neutral">{{ number_format($professionLabels->count()) }} professions</x-ui.badge>
                     </div>
-                </x-ui.card>
-            @empty
-                <x-ui.empty class="rounded-box border border-dashed border-black/10 bg-white dark:border-white/10 dark:bg-neutral-900">
-                    <x-ui.heading level="h3">No credits have been published yet.</x-ui.heading>
-                </x-ui.empty>
-            @endforelse
-        </div>
+
+                    @if ($person->biography)
+                        <x-ui.text class="text-sm leading-7 text-neutral-600 dark:text-neutral-300">
+                            {{ $person->biography }}
+                        </x-ui.text>
+                    @else
+                        <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                            <x-ui.heading level="h3">No biography has been published yet.</x-ui.heading>
+                        </x-ui.empty>
+                    @endif
+                </div>
+            </x-ui.card>
+
+            <x-ui.card class="!max-w-none">
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between gap-4">
+                        <x-ui.heading level="h2" size="lg">Known for</x-ui.heading>
+                        <x-ui.badge variant="outline" color="neutral">{{ number_format($knownForTitles->count()) }} titles</x-ui.badge>
+                    </div>
+
+                    @if ($knownForTitles->isNotEmpty())
+                        <div class="grid gap-4 md:grid-cols-2">
+                            @foreach ($knownForTitles as $title)
+                                <x-catalog.title-card :title="$title" :showSummary="false" />
+                            @endforeach
+                        </div>
+                    @else
+                        <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                            <x-ui.heading level="h3">Known-for titles are still being ranked.</x-ui.heading>
+                        </x-ui.empty>
+                    @endif
+                </div>
+            </x-ui.card>
+        </section>
+
+        <section class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+            <x-ui.card class="!max-w-none">
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between gap-4">
+                        <x-ui.heading level="h2" size="lg">Photo gallery</x-ui.heading>
+                        <x-ui.badge variant="outline" color="neutral">{{ number_format($photoGallery->count()) }} assets</x-ui.badge>
+                    </div>
+
+                    @if ($photoGallery->isNotEmpty())
+                        <div class="grid gap-4 sm:grid-cols-2">
+                            @foreach ($photoGallery as $galleryAsset)
+                                <div class="overflow-hidden rounded-box border border-black/5 bg-neutral-100 dark:border-white/10 dark:bg-neutral-800">
+                                    <img
+                                        src="{{ $galleryAsset->url }}"
+                                        alt="{{ $galleryAsset->alt_text ?: $person->name }}"
+                                        class="aspect-[4/3] w-full object-cover"
+                                        loading="lazy"
+                                    >
+                                    @if (filled($galleryAsset->caption))
+                                        <div class="border-t border-black/5 px-3 py-2 text-sm text-neutral-600 dark:border-white/10 dark:text-neutral-300">
+                                            {{ $galleryAsset->caption }}
+                                        </div>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                            <x-ui.heading level="h3">No gallery images are published yet.</x-ui.heading>
+                        </x-ui.empty>
+                    @endif
+                </div>
+            </x-ui.card>
+
+            <x-ui.card class="!max-w-none">
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between gap-4">
+                        <x-ui.heading level="h2" size="lg">Awards</x-ui.heading>
+                        <x-ui.badge variant="outline" color="neutral">{{ number_format($awardHighlights->count()) }} highlights</x-ui.badge>
+                    </div>
+
+                    @if ($awardHighlights->isNotEmpty())
+                        <div class="grid gap-3">
+                            @foreach ($awardHighlights as $awardNomination)
+                                <div class="rounded-box border border-black/5 px-4 py-3 dark:border-white/10">
+                                    <div class="flex flex-wrap items-center justify-between gap-3">
+                                        <div>
+                                            <div class="font-medium">
+                                                {{ $awardNomination->awardCategory?->name }}
+                                            </div>
+                                            <div class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+                                                {{ $awardNomination->awardEvent?->award?->name }}
+                                                @if ($awardNomination->awardEvent?->year)
+                                                    · {{ $awardNomination->awardEvent->year }}
+                                                @endif
+                                            </div>
+                                        </div>
+
+                                        <div class="flex flex-wrap gap-2">
+                                            @if ($awardNomination->is_winner)
+                                                <x-ui.badge color="amber">Winner</x-ui.badge>
+                                            @else
+                                                <x-ui.badge variant="outline" color="neutral">Nominee</x-ui.badge>
+                                            @endif
+
+                                            @if ($awardNomination->title)
+                                                <a href="{{ route('public.titles.show', $awardNomination->title) }}">
+                                                    <x-ui.badge variant="outline" color="slate">{{ $awardNomination->title->name }}</x-ui.badge>
+                                                </a>
+                                            @elseif ($awardNomination->episode?->title)
+                                                <a href="{{ route('public.titles.show', $awardNomination->episode->title) }}">
+                                                    <x-ui.badge variant="outline" color="slate">{{ $awardNomination->episode->title->name }}</x-ui.badge>
+                                                </a>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                            <x-ui.heading level="h3">No awards have been published yet.</x-ui.heading>
+                        </x-ui.empty>
+                    @endif
+                </div>
+            </x-ui.card>
+        </section>
+
+        <livewire:people.filmography-panel :person="$person" :key="'filmography-'.$person->id" />
+
+        <section class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+            <x-ui.card class="!max-w-none">
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between gap-4">
+                        <x-ui.heading level="h2" size="lg">Related titles</x-ui.heading>
+                        <x-ui.badge variant="outline" color="neutral">{{ number_format($relatedTitles->count()) }} more credits</x-ui.badge>
+                    </div>
+
+                    @if ($relatedTitles->isNotEmpty())
+                        <div class="grid gap-4 md:grid-cols-2">
+                            @foreach ($relatedTitles as $title)
+                                <x-catalog.title-card :title="$title" :showSummary="false" />
+                            @endforeach
+                        </div>
+                    @else
+                        <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                            <x-ui.heading level="h3">Additional related titles are still being curated.</x-ui.heading>
+                        </x-ui.empty>
+                    @endif
+                </div>
+            </x-ui.card>
+
+            <x-ui.card class="!max-w-none">
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between gap-4">
+                        <x-ui.heading level="h2" size="lg">Frequent collaborators</x-ui.heading>
+                        <x-ui.badge variant="outline" color="neutral">{{ number_format($collaborators->count()) }} collaborators</x-ui.badge>
+                    </div>
+
+                    @if ($collaborators->isNotEmpty())
+                        <div class="grid gap-3">
+                            @foreach ($collaborators as $collaborator)
+                                @php
+                                    $collaboratorHeadshot = $collaborator['person']->mediaAssets->first();
+                                @endphp
+
+                                <div class="rounded-box border border-black/5 px-4 py-3 dark:border-white/10">
+                                    <div class="flex items-start gap-4">
+                                        <div class="size-16 overflow-hidden rounded-box border border-black/5 bg-neutral-100 dark:border-white/10 dark:bg-neutral-800">
+                                            @if ($collaboratorHeadshot)
+                                                <img
+                                                    src="{{ $collaboratorHeadshot->url }}"
+                                                    alt="{{ $collaboratorHeadshot->alt_text ?: $collaborator['person']->name }}"
+                                                    class="h-full w-full object-cover"
+                                                >
+                                            @else
+                                                <div class="flex h-full w-full items-center justify-center text-neutral-500 dark:text-neutral-400">
+                                                    <x-ui.icon name="user" class="size-6" />
+                                                </div>
+                                            @endif
+                                        </div>
+
+                                        <div class="flex-1 space-y-2">
+                                            <div class="flex flex-wrap items-center justify-between gap-3">
+                                                <div>
+                                                    <div class="font-medium">
+                                                        <a href="{{ route('public.people.show', $collaborator['person']) }}" class="hover:opacity-80">
+                                                            {{ $collaborator['person']->name }}
+                                                        </a>
+                                                    </div>
+                                                    <div class="text-sm text-neutral-500 dark:text-neutral-400">
+                                                        {{ number_format($collaborator['sharedTitlesCount']) }} shared title{{ $collaborator['sharedTitlesCount'] === 1 ? '' : 's' }}
+                                                    </div>
+                                                </div>
+
+                                                @if ($collaborator['person']->known_for_department)
+                                                    <x-ui.badge variant="outline" color="neutral">
+                                                        {{ $collaborator['person']->known_for_department }}
+                                                    </x-ui.badge>
+                                                @endif
+                                            </div>
+
+                                            <div class="flex flex-wrap gap-2">
+                                                @foreach ($collaborator['sharedTitles'] as $sharedTitle)
+                                                    <a href="{{ route('public.titles.show', $sharedTitle) }}">
+                                                        <x-ui.badge variant="outline" color="slate">{{ $sharedTitle->name }}</x-ui.badge>
+                                                    </a>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                            <x-ui.heading level="h3">No collaborator graph has been published yet.</x-ui.heading>
+                        </x-ui.empty>
+                    @endif
+                </div>
+            </x-ui.card>
+        </section>
     </section>
 @endsection

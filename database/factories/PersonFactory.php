@@ -22,12 +22,16 @@ class PersonFactory extends Factory
 
         return [
             'name' => $name,
+            'alternate_names' => sprintf('%s | %s', fake()->name(), fake()->name()),
             'slug' => Str::slug($name).'-'.fake()->unique()->numberBetween(10, 9999),
             'biography' => fake()->paragraphs(2, true),
+            'short_biography' => fake()->sentence(18),
             'known_for_department' => fake()->randomElement(['Acting', 'Directing', 'Writing', 'Production']),
             'birth_date' => fake()->dateTimeBetween('-80 years', '-20 years'),
             'death_date' => null,
             'birth_place' => sprintf('%s, %s', fake()->city(), fake()->country()),
+            'death_place' => null,
+            'nationality' => fake()->country(),
             'popularity_rank' => fake()->numberBetween(1, 500),
             'meta_title' => null,
             'meta_description' => null,

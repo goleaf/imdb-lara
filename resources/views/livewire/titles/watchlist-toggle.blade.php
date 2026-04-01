@@ -21,11 +21,16 @@
         @guest
             <x-ui.alerts variant="info" icon="information-circle">
                 <x-ui.alerts.heading>Sign in to track titles in your watchlist.</x-ui.alerts.heading>
+                <x-ui.alerts.description>
+                    Your watchlist is private and follows you across the catalog.
+                </x-ui.alerts.description>
             </x-ui.alerts>
         @else
-            <div class="text-sm text-neutral-500 dark:text-neutral-400">
-                {{ $inWatchlist ? 'This title is already in your private watchlist.' : 'Add it now to keep it in your personal queue.' }}
-            </div>
+            <x-ui.alerts :variant="$inWatchlist ? 'success' : 'info'" :icon="$inWatchlist ? 'check-circle' : 'information-circle'">
+                <x-ui.alerts.description>
+                    {{ $inWatchlist ? 'This title is already in your private watchlist.' : 'Add it now to keep it in your personal queue.' }}
+                </x-ui.alerts.description>
+            </x-ui.alerts>
         @endguest
     </div>
 </x-ui.card>

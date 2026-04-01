@@ -10,12 +10,15 @@
         @guest
             <x-ui.alerts variant="info" icon="information-circle">
                 <x-ui.alerts.heading>Sign in to write a review.</x-ui.alerts.heading>
+                <x-ui.alerts.description>
+                    Share your reaction, update it later, and publish it after moderation.
+                </x-ui.alerts.description>
             </x-ui.alerts>
         @endguest
 
         @if ($statusMessage)
             <x-ui.alerts variant="success" icon="check-circle">
-                <x-ui.alerts.heading>{{ $statusMessage }}</x-ui.alerts.heading>
+                <x-ui.alerts.description>{{ $statusMessage }}</x-ui.alerts.description>
             </x-ui.alerts>
         @endif
 

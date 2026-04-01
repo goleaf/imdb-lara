@@ -8,19 +8,63 @@ use Illuminate\Database\Eloquent\Builder;
 
 class BuildPublicPeopleIndexQueryAction
 {
-    public function handle(): Builder
+    /**
+     * @param  array{search?: string, profession?: string|null, sort?: string}  $filters
+     */
+    public function handle(array $filters = []): Builder
     {
-        return Person::query()
-            ->select(['id', 'name', 'slug', 'known_for_department', 'biography', 'popularity_rank', 'is_published'])
+        $search = trim((string) ($filters['search'] ?? ''));
+        $profession = filled($filters['profession'] ?? null)
+            ? (string) $filters['profession']
+            : null;
+        $sort = (string) ($filters['sort'] ?? 'popular');
+
+        $query = Person::query()
+            ->select([
+                'id',
+                'name',
+                'alternate_names',
+                'slug',
+                'biography',
+                'short_biography',
+                'known_for_department',
+                'birth_date',
+                'birth_place',
+                'nationality',
+                'popularity_rank',
+                'is_published',
+            ])
             ->published()
-            ->withCount('credits')
+            ->withCount(['credits', 'awardNominations'])
             ->with([
                 'mediaAssets' => fn ($query) => $query
                     ->select(['id', 'mediable_type', 'mediable_id', 'kind', 'url', 'alt_text', 'position', 'is_primary'])
                     ->where('kind', MediaKind::Headshot)
                     ->orderBy('position')
                     ->limit(1),
-            ])
-            ->orderBy('name');
+                'professions' => fn ($query) => $query
+                    ->select(['id', 'person_id', 'department', 'profession', 'is_primary', 'sort_order'])
+                    ->orderBy('sort_order'),
+            ]);
+
+        if ($search !== '') {
+            $query->where(function (Builder $builder) use ($search): void {
+                $builder
+                    ->where('name', 'like', '%'.$search.'%')
+                    ->orWhere('alternate_names', 'like', '%'.$search.'%')
+                    ->orWhere('search_keywords', 'like', '%'.$search.'%');
+            });
+        }
+
+        if ($profession) {
+            $query->whereHas('professions', fn (Builder $builder) => $builder->where('profession', $profession));
+        }
+
+        return match ($sort) {
+            'name' => $query->orderBy('name'),
+            'credits' => $query->orderByDesc('credits_count')->orderBy('name'),
+            'awards' => $query->orderByDesc('award_nominations_count')->orderBy('name'),
+            default => $query->orderBy('popularity_rank')->orderBy('name'),
+        };
     }
 }

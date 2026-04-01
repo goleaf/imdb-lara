@@ -16,6 +16,49 @@ class TitleInteractionTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_guest_title_panels_render_descriptive_alerts(): void
+    {
+        $title = Title::factory()->create();
+
+        Livewire::test(WatchlistToggle::class, ['title' => $title])
+            ->assertSeeHtml('data-slot="alert-description"');
+
+        Livewire::test(RatingPanel::class, ['title' => $title])
+            ->assertSeeHtml('data-slot="alert-description"');
+
+        Livewire::test(ReviewComposer::class, ['title' => $title])
+            ->assertSeeHtml('data-slot="alert-description"');
+
+        Livewire::test(WatchStatePanel::class, ['title' => $title])
+            ->assertSeeHtml('data-slot="alert-description"');
+    }
+
+    public function test_authenticated_title_panels_render_alert_notices_for_current_state(): void
+    {
+        $user = User::factory()->create();
+        $title = Title::factory()->create();
+
+        Livewire::actingAs($user)
+            ->test(WatchlistToggle::class, ['title' => $title])
+            ->assertSeeHtml('data-slot="alert-description"')
+            ->call('toggle')
+            ->assertSeeHtml('data-slot="alert-description"');
+
+        Livewire::actingAs($user)
+            ->test(ReviewComposer::class, ['title' => $title])
+            ->set('form.headline', 'Strong')
+            ->set('form.body', 'A compelling review body long enough to validate.')
+            ->call('save')
+            ->assertHasNoErrors()
+            ->assertSeeHtml('data-slot="alert-description"');
+
+        Livewire::actingAs($user)
+            ->test(WatchStatePanel::class, ['title' => $title])
+            ->call('markWatched')
+            ->assertHasNoErrors()
+            ->assertSeeHtml('data-slot="alert-description"');
+    }
+
     public function test_title_components_require_authentication_for_mutations(): void
     {
         $title = Title::factory()->create();

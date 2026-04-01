@@ -25,12 +25,16 @@ class Person extends Model
      */
     protected $fillable = [
         'name',
+        'alternate_names',
         'slug',
         'biography',
+        'short_biography',
         'known_for_department',
         'birth_date',
         'death_date',
         'birth_place',
+        'death_place',
+        'nationality',
         'popularity_rank',
         'meta_title',
         'meta_description',

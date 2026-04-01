@@ -10,6 +10,9 @@
         @guest
             <x-ui.alerts variant="info" icon="information-circle">
                 <x-ui.alerts.heading>Sign in to save a rating.</x-ui.alerts.heading>
+                <x-ui.alerts.description>
+                    Your score is stored on a ten-point scale and contributes to the audience average.
+                </x-ui.alerts.description>
             </x-ui.alerts>
         @endguest
 

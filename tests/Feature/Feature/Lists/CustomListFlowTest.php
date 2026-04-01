@@ -53,13 +53,14 @@ class CustomListFlowTest extends TestCase
             'name' => 'Northern Signal',
         ]);
 
-        Livewire::actingAs($user)
+        $createList = Livewire::actingAs($user)
             ->test(CreateListForm::class)
             ->set('form.name', 'Friday Night Picks')
             ->set('form.description', 'The public sci-fi shortlist.')
             ->set('form.visibility', ListVisibility::Public->value)
             ->call('save')
-            ->assertHasNoErrors();
+            ->assertHasNoErrors()
+            ->assertSeeHtml('data-slot="alert-description"');
 
         $list = UserList::query()
             ->where('user_id', $user->id)
@@ -70,7 +71,8 @@ class CustomListFlowTest extends TestCase
             ->test(CustomListPicker::class, ['title' => $title])
             ->set('selectedListIds', [(string) $list->id])
             ->call('save')
-            ->assertHasNoErrors();
+            ->assertHasNoErrors()
+            ->assertSeeHtml('data-slot="alert-description"');
 
         $this->assertDatabaseHas('list_items', [
             'user_list_id' => $list->id,
@@ -97,7 +99,8 @@ class CustomListFlowTest extends TestCase
             ->set('createListForm.description', 'A brand new list from the title picker.')
             ->set('createListForm.visibility', ListVisibility::Public->value)
             ->call('createList')
-            ->assertHasNoErrors();
+            ->assertHasNoErrors()
+            ->assertSeeHtml('data-slot="alert-description"');
 
         $createdList = UserList::query()
             ->whereBelongsTo($user)
@@ -113,5 +116,13 @@ class CustomListFlowTest extends TestCase
             'user_list_id' => $createdList->id,
             'title_id' => $title->id,
         ]);
+    }
+
+    public function test_custom_list_picker_guest_notice_uses_alert_description(): void
+    {
+        $title = Title::factory()->create();
+
+        Livewire::test(CustomListPicker::class, ['title' => $title])
+            ->assertSeeHtml('data-slot="alert-description"');
     }
 }

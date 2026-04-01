@@ -2,25 +2,17 @@
 
 namespace App\Http\Requests\Catalog;
 
+use App\Http\Requests\NotFoundFormRequest;
 use App\Models\Person;
-use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
 
-class ShowPersonRequest extends FormRequest
+class ShowPersonRequest extends NotFoundFormRequest
 {
     public function authorize(): bool
     {
-        return $this->route('person') instanceof Person;
-    }
+        $person = $this->route('person');
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
-     */
-    public function rules(): array
-    {
-        return [];
+        return $person instanceof Person
+            && ($person->is_published || ($this->user()?->can('view', $person) ?? false));
     }
 
     public function person(): Person

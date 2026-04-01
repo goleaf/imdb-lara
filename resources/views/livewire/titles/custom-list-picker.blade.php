@@ -10,11 +10,14 @@
         @guest
             <x-ui.alerts variant="info" icon="information-circle">
                 <x-ui.alerts.heading>Sign in to use custom lists.</x-ui.alerts.heading>
+                <x-ui.alerts.description>
+                    Create collections and attach this title to them once you are signed in.
+                </x-ui.alerts.description>
             </x-ui.alerts>
         @else
             @if ($statusMessage)
                 <x-ui.alerts variant="success" icon="check-circle">
-                    <x-ui.alerts.heading>{{ $statusMessage }}</x-ui.alerts.heading>
+                    <x-ui.alerts.description>{{ $statusMessage }}</x-ui.alerts.description>
                 </x-ui.alerts>
             @endif
 

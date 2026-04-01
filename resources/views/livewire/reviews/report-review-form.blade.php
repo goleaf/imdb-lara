@@ -2,18 +2,20 @@
     $modalId = 'report-review-'.$review->id;
 @endphp
 
-<div class="flex items-center justify-between gap-3">
-    @if ($statusMessage)
-        <span class="text-sm text-green-600 dark:text-green-400">{{ $statusMessage }}</span>
-    @else
-        <span class="text-sm text-neutral-500 dark:text-neutral-400">See an issue with this review?</span>
-    @endif
+<div class="space-y-3">
+    <x-ui.alerts :variant="$statusMessage ? 'success' : 'info'" :icon="$statusMessage ? 'check-circle' : 'information-circle'">
+        <x-ui.alerts.description>
+            {{ $statusMessage ?: 'See an issue with this review?' }}
+        </x-ui.alerts.description>
 
-    <x-ui.modal.trigger :id="$modalId">
-        <x-ui.button variant="ghost" size="sm" icon="flag">
-            Report
-        </x-ui.button>
-    </x-ui.modal.trigger>
+        <x-slot:controls class="self-center">
+            <x-ui.modal.trigger :id="$modalId">
+                <x-ui.button variant="ghost" size="sm" icon="flag">
+                    Report
+                </x-ui.button>
+            </x-ui.modal.trigger>
+        </x-slot:controls>
+    </x-ui.alerts>
 
     <x-ui.modal
         :id="$modalId"

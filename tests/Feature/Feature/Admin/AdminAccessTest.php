@@ -118,4 +118,16 @@ class AdminAccessTest extends TestCase
             ->assertOk()
             ->assertSee('Admin');
     }
+
+    public function test_admin_title_edit_flash_message_uses_alert_description_markup(): void
+    {
+        $title = Title::factory()->create();
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->withSession(['status' => 'Title updated.'])
+            ->get(route('admin.titles.edit', $title))
+            ->assertOk()
+            ->assertSeeHtml('data-slot="alert-description"');
+    }
 }

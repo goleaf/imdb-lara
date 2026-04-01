@@ -7,6 +7,10 @@
     $creditsCount = isset($person->credits_count)
         ? (int) $person->credits_count
         : ($person->relationLoaded('credits') ? $person->credits->count() : 0);
+    $professionLabels = $person->relationLoaded('professions')
+        ? $person->professions->pluck('profession')->filter()->unique()->take(2)
+        : collect();
+    $summary = $person->short_biography ?: $person->biography;
 @endphp
 
 <x-ui.card class="!max-w-none h-full overflow-hidden">
@@ -37,14 +41,24 @@
                     </a>
                 </x-ui.heading>
 
-                @if ($person->known_for_department)
-                    <x-ui.badge variant="outline">{{ $person->known_for_department }}</x-ui.badge>
-                @endif
+                <div class="flex flex-wrap gap-2">
+                    @if ($person->known_for_department)
+                        <x-ui.badge variant="outline">{{ $person->known_for_department }}</x-ui.badge>
+                    @endif
+
+                    @foreach ($professionLabels as $professionLabel)
+                        <x-ui.badge variant="outline" color="neutral">{{ $professionLabel }}</x-ui.badge>
+                    @endforeach
+
+                    @if ($person->nationality)
+                        <x-ui.badge variant="outline" color="slate">{{ $person->nationality }}</x-ui.badge>
+                    @endif
+                </div>
             </div>
 
-            @if (filled($person->biography))
+            @if (filled($summary))
                 <x-ui.text class="text-sm text-neutral-600 dark:text-neutral-300">
-                    {{ str($person->biography)->limit(120) }}
+                    {{ str($summary)->limit(140) }}
                 </x-ui.text>
             @endif
 

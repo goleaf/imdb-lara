@@ -9,7 +9,7 @@
 
         @if ($statusMessage)
             <x-ui.alerts variant="success" icon="check-circle">
-                <x-ui.alerts.heading>{{ $statusMessage }}</x-ui.alerts.heading>
+                <x-ui.alerts.description>{{ $statusMessage }}</x-ui.alerts.description>
             </x-ui.alerts>
         @endif
 
