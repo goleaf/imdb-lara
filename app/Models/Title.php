@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\TitleType;
 use App\Models\Concerns\GeneratesSlugs;
+use App\TitleType;
 use Database\Factories\TitleFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,6 +17,7 @@ class Title extends Model
 {
     /** @use HasFactory<TitleFactory> */
     use GeneratesSlugs;
+
     use HasFactory;
 
     /**
@@ -100,5 +101,10 @@ class Title extends Model
     public function reviews(): HasMany
     {
         return $this->hasMany(Review::class);
+    }
+
+    public function listItems(): HasMany
+    {
+        return $this->hasMany(ListItem::class);
     }
 }
