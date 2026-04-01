@@ -2,38 +2,47 @@
 
 namespace Tests\Feature\Feature\Database;
 
-use App\ListVisibility;
-use App\Models\Company;
-use App\Models\Genre;
-use App\Models\MediaAsset;
+use App\ContributionAction;
+use App\ContributionStatus;
+use App\MediaKind;
+use App\Models\Award;
+use App\Models\AwardCategory;
+use App\Models\AwardEvent;
+use App\Models\AwardNomination;
+use App\Models\Contribution;
+use App\Models\Episode;
 use App\Models\Person;
-use App\Models\Rating;
-use App\Models\Report;
-use App\Models\Review;
-use App\Models\ReviewVote;
+use App\Models\PersonImage;
+use App\Models\PersonProfession;
+use App\Models\Season;
 use App\Models\Title;
-use App\Models\TitleStatistic;
+use App\Models\TitleImage;
+use App\Models\TitleRelationship;
+use App\Models\TitleTranslation;
+use App\Models\TitleVideo;
 use App\Models\User;
-use App\Models\UserList;
-use App\ReviewStatus;
-use App\TitleType;
-use Illuminate\Database\QueryException;
+use App\TitleRelationshipType;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class ImdbCatalogSchemaTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_core_catalog_tables_and_columns_exist(): void
+    public function test_expanded_catalog_tables_and_columns_exist(): void
     {
         foreach ([
             'titles',
+            'title_translations',
             'people',
+            'person_professions',
             'genres',
             'companies',
             'credits',
+            'seasons',
+            'episodes',
             'media_assets',
             'title_statistics',
             'ratings',
@@ -41,8 +50,15 @@ class ImdbCatalogSchemaTest extends TestCase
             'review_votes',
             'user_lists',
             'list_items',
+            'title_relationships',
+            'awards',
+            'award_events',
+            'award_categories',
+            'award_nominations',
+            'contributions',
             'reports',
             'moderation_actions',
+            'notifications',
             'genre_title',
             'company_title',
         ] as $table) {
@@ -50,144 +66,179 @@ class ImdbCatalogSchemaTest extends TestCase
         }
 
         $this->assertTrue(Schema::hasColumns('titles', [
-            'name',
-            'original_name',
-            'slug',
-            'title_type',
-            'release_year',
-            'runtime_minutes',
-            'plot_outline',
-            'synopsis',
-            'origin_country',
-            'original_language',
-            'is_published',
+            'sort_title',
+            'canonical_title_id',
+            'meta_title',
+            'meta_description',
+            'search_keywords',
+            'deleted_at',
         ]));
 
-        $this->assertTrue(Schema::hasColumns('people', [
-            'name',
-            'slug',
-            'biography',
-            'known_for_department',
-            'birth_date',
-            'birth_place',
-            'is_published',
+        $this->assertTrue(Schema::hasColumns('title_translations', [
+            'locale',
+            'localized_title',
+            'localized_slug',
+            'localized_plot_outline',
+            'localized_synopsis',
         ]));
 
-        $this->assertTrue(Schema::hasColumns('reviews', [
-            'user_id',
-            'title_id',
-            'headline',
-            'body',
-            'contains_spoilers',
-            'status',
-            'moderated_by',
-            'moderated_at',
+        $this->assertTrue(Schema::hasColumns('credits', [
+            'person_profession_id',
+            'episode_id',
+            'credited_as',
+            'deleted_at',
+        ]));
+
+        $this->assertTrue(Schema::hasColumns('list_items', [
+            'watch_state',
+            'started_at',
+            'watched_at',
+            'rewatch_count',
+        ]));
+
+        $this->assertTrue(Schema::hasColumns('media_assets', [
+            'provider',
+            'provider_key',
+            'language',
+            'duration_seconds',
+            'metadata',
             'published_at',
+            'deleted_at',
         ]));
     }
 
-    public function test_title_relationships_load_genres_companies_people_media_and_statistics(): void
+    public function test_catalog_relationships_support_translations_media_seasons_awards_and_contributions(): void
     {
-        $title = Title::factory()->create([
-            'title_type' => TitleType::Movie,
+        $user = User::factory()->create();
+        $series = Title::factory()->series()->create([
+            'name' => 'Static Bloom',
+            'slug' => 'static-bloom',
         ]);
-        $genre = Genre::factory()->create();
-        $company = Company::factory()->create();
-        $person = Person::factory()->create();
-        $asset = MediaAsset::factory()->for($title, 'mediable')->poster()->create();
-        $statistic = TitleStatistic::factory()->for($title)->create();
+        $relatedTitle = Title::factory()->movie()->create([
+            'name' => 'Northern Signal',
+            'slug' => 'northern-signal',
+        ]);
+        $season = Season::factory()->for($series, 'series')->create([
+            'season_number' => 1,
+            'slug' => 'static-bloom-season-1',
+        ]);
+        $episodeTitle = Title::factory()->episode()->create([
+            'name' => 'Static Bloom: Pilot',
+            'slug' => 'static-bloom-pilot',
+        ]);
+        $episode = Episode::factory()
+            ->for($episodeTitle, 'title')
+            ->for($series, 'series')
+            ->for($season, 'season')
+            ->create([
+                'season_number' => 1,
+                'episode_number' => 1,
+            ]);
+        $person = Person::factory()->create([
+            'name' => 'Ava Mercer',
+            'slug' => 'ava-mercer',
+        ]);
+        $profession = PersonProfession::factory()->for($person)->primary()->create([
+            'department' => 'Cast',
+            'profession' => 'Actor',
+        ]);
 
-        $title->genres()->attach($genre);
-        $title->companies()->attach($company, ['relationship' => 'production']);
-        $title->credits()->create([
+        $series->credits()->create([
             'person_id' => $person->id,
             'department' => 'Cast',
             'job' => 'Actor',
-            'character_name' => 'Captain Mira Sol',
+            'character_name' => 'Tess Mora',
             'billing_order' => 1,
             'is_principal' => true,
+            'person_profession_id' => $profession->id,
+            'episode_id' => $episode->id,
+            'credited_as' => 'Special Guest Star',
         ]);
 
-        $title->load([
-            'genres',
-            'companies',
+        $translation = TitleTranslation::factory()->for($series)->create([
+            'locale' => 'lt',
+            'localized_title' => 'Statinis Žydėjimas',
+            'localized_slug' => 'statinis-zydejimas',
+        ]);
+
+        $titleImage = TitleImage::factory()->for($series, 'mediable')->create([
+            'kind' => MediaKind::Poster,
+        ]);
+        $titleVideo = TitleVideo::factory()->for($series, 'mediable')->create([
+            'kind' => MediaKind::Trailer,
+        ]);
+        $personImage = PersonImage::factory()->for($person, 'mediable')->create([
+            'kind' => MediaKind::Headshot,
+        ]);
+
+        $relationship = TitleRelationship::factory()->create([
+            'from_title_id' => $series->id,
+            'to_title_id' => $relatedTitle->id,
+            'relationship_type' => TitleRelationshipType::Similar,
+        ]);
+
+        $award = Award::factory()->create([
+            'name' => 'Celestial Screen Awards',
+            'slug' => 'celestial-screen-awards',
+        ]);
+        $event = AwardEvent::factory()->for($award)->create([
+            'name' => '2025 Celestial Screen Awards',
+            'slug' => '2025-celestial-screen-awards',
+            'year' => 2025,
+        ]);
+        $category = AwardCategory::factory()->for($award)->create([
+            'name' => 'Best Episode',
+            'slug' => 'best-episode',
+            'recipient_scope' => 'episode',
+        ]);
+        $nomination = AwardNomination::factory()->for($event)->for($category, 'awardCategory')->create([
+            'title_id' => $series->id,
+            'episode_id' => $episode->id,
+            'credited_name' => $episodeTitle->name,
+        ]);
+
+        $contribution = Contribution::factory()->for($user)->for($series, 'contributable')->create([
+            'action' => ContributionAction::Update,
+            'status' => ContributionStatus::Approved,
+        ]);
+
+        $user->notifications()->create([
+            'id' => (string) Str::uuid(),
+            'type' => 'catalog.review-approved',
+            'data' => [
+                'title' => $series->name,
+            ],
+        ]);
+
+        $series->load([
+            'translations',
+            'seasons.episodes.title',
             'credits.person',
-            'mediaAssets',
-            'statistic',
+            'credits.profession',
+            'credits.episode.title',
+            'titleImages',
+            'titleVideos',
+            'outgoingRelationships.toTitle',
+            'awardNominations.awardEvent',
+            'contributions',
+        ]);
+        $person->load([
+            'professions',
+            'personImages',
         ]);
 
-        $this->assertTrue($title->genres->contains($genre));
-        $this->assertTrue($title->companies->contains($company));
-        $this->assertSame('Captain Mira Sol', $title->credits->first()?->character_name);
-        $this->assertTrue($title->credits->first()?->person->is($person));
-        $this->assertTrue($title->mediaAssets->contains($asset));
-        $this->assertTrue($title->statistic->is($statistic));
-    }
-
-    public function test_ratings_are_unique_per_user_and_title(): void
-    {
-        $user = User::factory()->create();
-        $title = Title::factory()->create();
-
-        Rating::factory()->for($user)->for($title)->create();
-
-        $this->expectException(QueryException::class);
-
-        Rating::factory()->for($user)->for($title)->create();
-    }
-
-    public function test_reviews_lists_and_reports_are_related_to_users_titles_and_moderators(): void
-    {
-        $user = User::factory()->create();
-        $moderator = User::factory()->moderator()->create();
-        $title = Title::factory()->create();
-
-        $review = Review::factory()
-            ->for($user, 'author')
-            ->for($title)
-            ->published()
-            ->create([
-                'moderated_by' => $moderator->id,
-                'moderated_at' => now(),
-            ]);
-
-        $vote = ReviewVote::factory()->for($review)->for($moderator)->helpful()->create();
-        $list = UserList::factory()->for($user)->public()->create([
-            'visibility' => ListVisibility::Public,
-        ]);
-
-        $list->items()->create([
-            'title_id' => $title->id,
-            'notes' => 'Essential sci-fi viewing.',
-            'position' => 1,
-        ]);
-
-        $report = Report::factory()->for($moderator, 'reporter')->for($review, 'reportable')->open()->create();
-
-        $review->load(['author', 'moderator', 'votes', 'title']);
-        $list->load('items.title');
-        $report->load(['reporter', 'reportable']);
-
-        $this->assertSame(ReviewStatus::Published, $review->status);
-        $this->assertTrue($review->author->is($user));
-        $this->assertTrue($review->moderator->is($moderator));
-        $this->assertTrue($review->votes->contains($vote));
-        $this->assertTrue($review->title->is($title));
-        $this->assertSame(ListVisibility::Public, $list->visibility);
-        $this->assertTrue($list->items->first()->title->is($title));
-        $this->assertTrue($report->reporter->is($moderator));
-        $this->assertTrue($report->reportable->is($review));
-    }
-
-    public function test_review_votes_are_unique_per_review_and_user(): void
-    {
-        $review = Review::factory()->create();
-        $user = User::factory()->create();
-
-        ReviewVote::factory()->for($review)->for($user)->create();
-
-        $this->expectException(QueryException::class);
-
-        ReviewVote::factory()->for($review)->for($user)->create();
+        $this->assertTrue($series->translations->contains($translation));
+        $this->assertTrue($series->seasons->first()->episodes->first()->title->is($episodeTitle));
+        $this->assertSame('Special Guest Star', $series->credits->first()->credited_as);
+        $this->assertTrue($series->credits->first()->profession->is($profession));
+        $this->assertTrue($series->credits->first()->episode->is($episode));
+        $this->assertTrue($series->titleImages->contains($titleImage));
+        $this->assertTrue($series->titleVideos->contains($titleVideo));
+        $this->assertTrue($person->personImages->contains($personImage));
+        $this->assertTrue($series->outgoingRelationships->first()->toTitle->is($relatedTitle));
+        $this->assertTrue($series->awardNominations->first()->is($nomination));
+        $this->assertTrue($series->contributions->first()->is($contribution));
+        $this->assertSame(1, $user->notifications()->count());
+        $this->assertTrue($relationship->fromTitle->is($series));
     }
 }

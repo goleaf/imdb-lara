@@ -8,11 +8,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Review extends Model
 {
     /** @use HasFactory<ReviewFactory> */
     use HasFactory;
+
+    use SoftDeletes;
 
     /**
      * @var list<string>
@@ -27,6 +31,7 @@ class Review extends Model
         'moderated_by',
         'moderated_at',
         'published_at',
+        'edited_at',
     ];
 
     protected function casts(): array
@@ -36,6 +41,7 @@ class Review extends Model
             'status' => ReviewStatus::class,
             'moderated_at' => 'datetime',
             'published_at' => 'datetime',
+            'edited_at' => 'datetime',
         ];
     }
 
@@ -57,5 +63,10 @@ class Review extends Model
     public function votes(): HasMany
     {
         return $this->hasMany(ReviewVote::class);
+    }
+
+    public function reports(): MorphMany
+    {
+        return $this->morphMany(Report::class, 'reportable');
     }
 }

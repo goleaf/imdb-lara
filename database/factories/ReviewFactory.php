@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
-use App\ReviewStatus;
 use App\Models\Review;
 use App\Models\Title;
 use App\Models\User;
+use App\ReviewStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -30,6 +30,7 @@ class ReviewFactory extends Factory
             'moderated_by' => null,
             'moderated_at' => null,
             'published_at' => null,
+            'edited_at' => null,
         ];
     }
 

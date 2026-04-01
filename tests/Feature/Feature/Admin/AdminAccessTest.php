@@ -3,7 +3,6 @@
 namespace Tests\Feature\Feature\Admin;
 
 use App\Models\User;
-use Database\Seeders\DemoCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -11,21 +10,55 @@ class AdminAccessTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_admin_routes_are_restricted_to_staff(): void
+    public function test_admin_routes_follow_the_role_access_matrix(): void
     {
-        $member = User::factory()->create();
+        $regularUser = User::factory()->create();
+        $contributor = User::factory()->contributor()->create();
+        $editor = User::factory()->editor()->create();
+        $moderator = User::factory()->moderator()->create();
         $admin = User::factory()->admin()->create();
+        $superAdmin = User::factory()->superAdmin()->create();
 
-        $this->actingAs($member)
+        $this->actingAs($regularUser)
             ->get(route('admin.dashboard'))
             ->assertForbidden();
 
-        $this->seed(DemoCatalogSeeder::class);
+        $this->actingAs($contributor)
+            ->get(route('admin.dashboard'))
+            ->assertForbidden();
 
-        $this->actingAs($admin)
+        $this->actingAs($editor)
             ->get(route('admin.dashboard'))
             ->assertOk()
             ->assertSee('Admin Dashboard');
+
+        $this->actingAs($editor)
+            ->get(route('admin.titles.index'))
+            ->assertOk()
+            ->assertSee('Manage Titles');
+
+        $this->actingAs($editor)
+            ->get(route('admin.reviews.index'))
+            ->assertForbidden();
+
+        $this->actingAs($moderator)
+            ->get(route('admin.dashboard'))
+            ->assertOk()
+            ->assertSee('Admin Dashboard');
+
+        $this->actingAs($moderator)
+            ->get(route('admin.titles.index'))
+            ->assertForbidden();
+
+        $this->actingAs($moderator)
+            ->get(route('admin.reviews.index'))
+            ->assertOk()
+            ->assertSee('Moderate Reviews');
+
+        $this->actingAs($moderator)
+            ->get(route('admin.reports.index'))
+            ->assertOk()
+            ->assertSee('Reports');
 
         $this->actingAs($admin)
             ->get(route('admin.titles.index'))
@@ -36,5 +69,37 @@ class AdminAccessTest extends TestCase
             ->get(route('admin.reviews.index'))
             ->assertOk()
             ->assertSee('Moderate Reviews');
+
+        $this->actingAs($superAdmin)
+            ->get(route('admin.reports.index'))
+            ->assertOk()
+            ->assertSee('Reports');
+    }
+
+    public function test_admin_navigation_entry_is_only_visible_to_staff_roles(): void
+    {
+        $regularUser = User::factory()->create();
+        $contributor = User::factory()->contributor()->create();
+        $editor = User::factory()->editor()->create();
+
+        $this->actingAs($regularUser)
+            ->get(route('public.discover'))
+            ->assertOk()
+            ->assertDontSee('Admin');
+
+        $this->actingAs($contributor)
+            ->get(route('account.watchlist'))
+            ->assertOk()
+            ->assertDontSee('Admin');
+
+        $this->actingAs($editor)
+            ->get(route('public.discover'))
+            ->assertOk()
+            ->assertSee('Admin');
+
+        $this->actingAs($editor)
+            ->get(route('account.watchlist'))
+            ->assertOk()
+            ->assertSee('Admin');
     }
 }

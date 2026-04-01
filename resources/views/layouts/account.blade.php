@@ -12,15 +12,21 @@
         icon="bookmark"
         :active="request()->routeIs('account.watchlist')"
     />
+    <x-ui.navbar.item
+        :href="route('account.lists.index')"
+        label="Lists"
+        icon="queue-list"
+        :active="request()->routeIs('account.lists.*')"
+    />
 
-    @if (auth()->user()?->isAdmin())
+    @can('access-admin-area')
         <x-ui.navbar.item
             :href="route('admin.dashboard')"
             label="Admin"
             icon="shield-check"
             :active="request()->routeIs('admin.*')"
         />
-    @endif
+    @endcan
 
     <div class="hidden md:block">
         <x-ui.theme-switcher />
@@ -46,6 +52,12 @@
             label="Watchlist"
             icon="bookmark"
             :active="request()->routeIs('account.watchlist')"
+        />
+        <x-ui.navlist.item
+            :href="route('account.lists.index')"
+            label="Custom Lists"
+            icon="queue-list"
+            :active="request()->routeIs('account.lists.*')"
         />
         <x-ui.navlist.item
             :href="route('public.discover')"

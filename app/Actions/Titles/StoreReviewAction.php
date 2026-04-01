@@ -9,18 +9,14 @@ use App\ReviewStatus;
 
 class StoreReviewAction
 {
-    public function __construct(
-        public RefreshTitleStatisticsAction $refreshTitleStatistics,
-    ) {}
-
     /**
      * @param  array{headline?: string|null, body: string, contains_spoilers?: bool}  $attributes
      */
     public function handle(User $user, Title $title, array $attributes): Review
     {
-        $status = $user->isAdmin() ? ReviewStatus::Published : ReviewStatus::Pending;
+        $status = $user->canModerateContent() ? ReviewStatus::Published : ReviewStatus::Pending;
 
-        $review = Review::query()->updateOrCreate(
+        return Review::query()->updateOrCreate(
             [
                 'user_id' => $user->id,
                 'title_id' => $title->id,
@@ -30,14 +26,10 @@ class StoreReviewAction
                 'body' => $attributes['body'],
                 'contains_spoilers' => (bool) ($attributes['contains_spoilers'] ?? false),
                 'status' => $status,
-                'moderated_by' => $user->isAdmin() ? $user->id : null,
-                'moderated_at' => $user->isAdmin() ? now() : null,
+                'moderated_by' => $user->canModerateContent() ? $user->id : null,
+                'moderated_at' => $user->canModerateContent() ? now() : null,
                 'published_at' => $status === ReviewStatus::Published ? now() : null,
             ],
         );
-
-        $this->refreshTitleStatistics->handle($title);
-
-        return $review;
     }
 }

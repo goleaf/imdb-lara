@@ -5,6 +5,7 @@ namespace Tests\Feature\Feature\Auth;
 use App\Livewire\Auth\LoginForm;
 use App\Livewire\Auth\RegisterForm;
 use App\Models\User;
+use App\UserRole;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -31,6 +32,7 @@ class AuthenticationFlowTest extends TestCase
         $this->assertDatabaseHas('users', [
             'email' => 'dana@example.com',
             'username' => 'dana',
+            'role' => UserRole::RegularUser->value,
         ]);
     }
 

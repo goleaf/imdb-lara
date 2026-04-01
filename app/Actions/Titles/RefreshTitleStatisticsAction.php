@@ -21,6 +21,9 @@ class RefreshTitleStatisticsAction
                 'watchlist_count' => $title->listItems()
                     ->whereHas('userList', fn ($query) => $query->where('is_watchlist', true))
                     ->count(),
+                'episodes_count' => $title->seriesEpisodes()->count(),
+                'awards_nominated_count' => $title->awardNominations()->count(),
+                'awards_won_count' => $title->awardNominations()->where('is_winner', true)->count(),
             ],
         );
     }

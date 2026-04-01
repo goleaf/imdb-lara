@@ -9,11 +9,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Report extends Model
 {
     /** @use HasFactory<ReportFactory> */
     use HasFactory;
+
+    use SoftDeletes;
 
     /**
      * @var list<string>
@@ -27,6 +30,7 @@ class Report extends Model
         'status',
         'reviewed_by',
         'reviewed_at',
+        'resolution_notes',
     ];
 
     protected function casts(): array

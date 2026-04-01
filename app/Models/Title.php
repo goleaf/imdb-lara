@@ -2,16 +2,19 @@
 
 namespace App\Models;
 
+use App\MediaKind;
 use App\Models\Concerns\GeneratesSlugs;
 use App\TitleType;
 use Database\Factories\TitleFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Title extends Model
 {
@@ -19,6 +22,7 @@ class Title extends Model
     use GeneratesSlugs;
 
     use HasFactory;
+    use SoftDeletes;
 
     /**
      * @var list<string>
@@ -27,6 +31,7 @@ class Title extends Model
         'name',
         'original_name',
         'slug',
+        'sort_title',
         'title_type',
         'release_year',
         'end_year',
@@ -39,6 +44,10 @@ class Title extends Model
         'origin_country',
         'original_language',
         'popularity_rank',
+        'canonical_title_id',
+        'meta_title',
+        'meta_description',
+        'search_keywords',
         'is_published',
     ];
 
@@ -66,6 +75,16 @@ class Title extends Model
         return $query->where('title_type', $type);
     }
 
+    public function canonicalTitle(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'canonical_title_id');
+    }
+
+    public function alternateTitles(): HasMany
+    {
+        return $this->hasMany(self::class, 'canonical_title_id');
+    }
+
     public function genres(): BelongsToMany
     {
         return $this->belongsToMany(Genre::class)->withTimestamps();
@@ -74,7 +93,7 @@ class Title extends Model
     public function companies(): BelongsToMany
     {
         return $this->belongsToMany(Company::class)
-            ->withPivot('relationship')
+            ->withPivot('relationship', 'credited_as', 'is_primary', 'sort_order')
             ->withTimestamps();
     }
 
@@ -83,9 +102,54 @@ class Title extends Model
         return $this->hasMany(Credit::class)->orderBy('billing_order');
     }
 
+    public function translations(): HasMany
+    {
+        return $this->hasMany(TitleTranslation::class);
+    }
+
+    public function seasons(): HasMany
+    {
+        return $this->hasMany(Season::class, 'series_id')->orderBy('season_number');
+    }
+
+    public function seriesEpisodes(): HasMany
+    {
+        return $this->hasMany(Episode::class, 'series_id')
+            ->orderBy('season_number')
+            ->orderBy('episode_number');
+    }
+
+    public function episodeMeta(): HasOne
+    {
+        return $this->hasOne(Episode::class);
+    }
+
     public function mediaAssets(): MorphMany
     {
         return $this->morphMany(MediaAsset::class, 'mediable')->orderBy('position');
+    }
+
+    public function titleImages(): MorphMany
+    {
+        return $this->morphMany(TitleImage::class, 'mediable')
+            ->whereIn('kind', [
+                MediaKind::Poster,
+                MediaKind::Backdrop,
+                MediaKind::Gallery,
+                MediaKind::Still,
+            ])
+            ->orderBy('position');
+    }
+
+    public function titleVideos(): MorphMany
+    {
+        return $this->morphMany(TitleVideo::class, 'mediable')
+            ->whereIn('kind', [
+                MediaKind::Trailer,
+                MediaKind::Clip,
+                MediaKind::Featurette,
+            ])
+            ->orderBy('position');
     }
 
     public function statistic(): HasOne
@@ -106,5 +170,25 @@ class Title extends Model
     public function listItems(): HasMany
     {
         return $this->hasMany(ListItem::class);
+    }
+
+    public function outgoingRelationships(): HasMany
+    {
+        return $this->hasMany(TitleRelationship::class, 'from_title_id');
+    }
+
+    public function incomingRelationships(): HasMany
+    {
+        return $this->hasMany(TitleRelationship::class, 'to_title_id');
+    }
+
+    public function awardNominations(): HasMany
+    {
+        return $this->hasMany(AwardNomination::class);
+    }
+
+    public function contributions(): MorphMany
+    {
+        return $this->morphMany(Contribution::class, 'contributable');
     }
 }

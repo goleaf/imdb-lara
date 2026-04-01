@@ -90,6 +90,8 @@
                 <livewire:titles.watchlist-toggle :title="$title" :key="'watchlist-'.$title->id" />
                 <livewire:titles.rating-panel :title="$title" :key="'rating-'.$title->id" />
             </div>
+
+            <livewire:titles.custom-list-picker :title="$title" :key="'custom-lists-'.$title->id" />
         </div>
     </section>
 
@@ -183,6 +185,10 @@
                         <x-ui.text class="text-neutral-700 dark:text-neutral-200">
                             {{ $review->body }}
                         </x-ui.text>
+
+                        <div class="pt-1">
+                            <livewire:reviews.report-review-form :review="$review" :key="'report-'.$review->id" />
+                        </div>
                     </div>
                 </x-ui.card>
             @empty

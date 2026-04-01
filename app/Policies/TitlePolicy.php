@@ -9,36 +9,36 @@ class TitlePolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin();
+        return $user->canManageCatalog();
     }
 
     public function view(User $user, Title $title): bool
     {
-        return $user->isAdmin();
+        return $user->canManageCatalog();
     }
 
     public function create(User $user): bool
     {
-        return $user->isAdmin();
+        return $user->canManageCatalog();
     }
 
     public function update(User $user, Title $title): bool
     {
-        return $user->isAdmin();
+        return $user->canManageCatalog();
     }
 
     public function delete(User $user, Title $title): bool
     {
-        return $user->isAdmin();
+        return $user->canManageCatalog();
     }
 
     public function restore(User $user, Title $title): bool
     {
-        return $user->isAdmin();
+        return $user->canManageCatalog();
     }
 
     public function forceDelete(User $user, Title $title): bool
     {
-        return $user->isAdmin();
+        return $user->canManageCatalog();
     }
 }

@@ -31,14 +31,14 @@
     </div>
 
     @auth
-        @if (auth()->user()->isAdmin())
+        @can('access-admin-area')
             <x-ui.navbar.item
                 :href="route('admin.dashboard')"
                 label="Admin"
                 icon="shield-check"
                 :active="request()->routeIs('admin.*')"
             />
-        @endif
+        @endcan
 
         <x-ui.navbar.item
             :href="route('account.watchlist')"
@@ -112,6 +112,12 @@
             :active="request()->routeIs('public.search')"
         />
         @auth
+            <x-ui.navlist.item
+                :href="route('account.lists.index')"
+                label="Custom Lists"
+                icon="queue-list"
+                :active="request()->routeIs('account.lists.*') || request()->routeIs('public.lists.*')"
+            />
             <x-ui.navlist.item
                 :href="route('account.watchlist')"
                 label="Your Watchlist"

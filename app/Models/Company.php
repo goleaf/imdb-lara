@@ -8,12 +8,17 @@ use Database\Factories\CompanyFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Company extends Model
 {
     /** @use HasFactory<CompanyFactory> */
     use GeneratesSlugs;
+
     use HasFactory;
+    use SoftDeletes;
 
     /**
      * @var list<string>
@@ -24,6 +29,8 @@ class Company extends Model
         'kind',
         'country_code',
         'description',
+        'meta_title',
+        'meta_description',
         'is_published',
     ];
 
@@ -38,7 +45,17 @@ class Company extends Model
     public function titles(): BelongsToMany
     {
         return $this->belongsToMany(Title::class)
-            ->withPivot('relationship')
+            ->withPivot('relationship', 'credited_as', 'is_primary', 'sort_order')
             ->withTimestamps();
+    }
+
+    public function awardNominations(): HasMany
+    {
+        return $this->hasMany(AwardNomination::class);
+    }
+
+    public function contributions(): MorphMany
+    {
+        return $this->morphMany(Contribution::class, 'contributable');
     }
 }

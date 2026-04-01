@@ -10,12 +10,14 @@ class ReviewPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin();
+        return $user->canModerateContent();
     }
 
     public function view(User $user, Review $review): bool
     {
-        return $review->status === ReviewStatus::Published || $user->isAdmin() || $review->author->is($user);
+        return $review->status === ReviewStatus::Published
+            || $user->canModerateContent()
+            || $review->author->is($user);
     }
 
     public function create(User $user): bool
@@ -25,21 +27,21 @@ class ReviewPolicy
 
     public function update(User $user, Review $review): bool
     {
-        return $user->isAdmin() || $review->author->is($user);
+        return $user->canModerateContent() || $review->author->is($user);
     }
 
     public function delete(User $user, Review $review): bool
     {
-        return $user->isAdmin() || $review->author->is($user);
+        return $user->canModerateContent() || $review->author->is($user);
     }
 
     public function restore(User $user, Review $review): bool
     {
-        return $user->isAdmin();
+        return $user->canModerateContent();
     }
 
     public function forceDelete(User $user, Review $review): bool
     {
-        return $user->isAdmin();
+        return $user->canModerateContent();
     }
 }

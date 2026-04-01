@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\WatchState;
 use Database\Factories\ListItemFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -20,7 +21,20 @@ class ListItem extends Model
         'title_id',
         'notes',
         'position',
+        'watch_state',
+        'started_at',
+        'watched_at',
+        'rewatch_count',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'watch_state' => WatchState::class,
+            'started_at' => 'datetime',
+            'watched_at' => 'datetime',
+        ];
+    }
 
     public function title(): BelongsTo
     {

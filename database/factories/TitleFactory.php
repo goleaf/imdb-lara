@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\TitleType;
 use App\Models\Title;
+use App\TitleType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -25,6 +25,7 @@ class TitleFactory extends Factory
             'name' => $name,
             'original_name' => $name,
             'slug' => Str::slug($name),
+            'sort_title' => $name,
             'title_type' => TitleType::Movie,
             'release_year' => fake()->numberBetween(1980, 2025),
             'end_year' => null,
@@ -37,6 +38,10 @@ class TitleFactory extends Factory
             'origin_country' => fake()->countryCode(),
             'original_language' => fake()->randomElement(['en', 'lt', 'fr', 'es']),
             'popularity_rank' => fake()->numberBetween(1, 500),
+            'canonical_title_id' => null,
+            'meta_title' => null,
+            'meta_description' => null,
+            'search_keywords' => implode(', ', fake()->words(4)),
             'is_published' => true,
         ];
     }
@@ -56,10 +61,42 @@ class TitleFactory extends Factory
         ]);
     }
 
+    public function miniSeries(): static
+    {
+        return $this->state(fn (): array => [
+            'title_type' => TitleType::MiniSeries,
+            'runtime_minutes' => fake()->numberBetween(35, 70),
+        ]);
+    }
+
     public function documentary(): static
     {
         return $this->state(fn (): array => [
             'title_type' => TitleType::Documentary,
+        ]);
+    }
+
+    public function short(): static
+    {
+        return $this->state(fn (): array => [
+            'title_type' => TitleType::Short,
+            'runtime_minutes' => fake()->numberBetween(8, 35),
+        ]);
+    }
+
+    public function special(): static
+    {
+        return $this->state(fn (): array => [
+            'title_type' => TitleType::Special,
+            'runtime_minutes' => fake()->numberBetween(40, 100),
+        ]);
+    }
+
+    public function episode(): static
+    {
+        return $this->state(fn (): array => [
+            'title_type' => TitleType::Episode,
+            'runtime_minutes' => fake()->numberBetween(24, 62),
         ]);
     }
 }

@@ -27,6 +27,9 @@ class CreditFactory extends Factory
             'character_name' => fake()->optional()->name(),
             'billing_order' => fake()->numberBetween(1, 10),
             'is_principal' => fake()->boolean(35),
+            'person_profession_id' => null,
+            'episode_id' => null,
+            'credited_as' => null,
         ];
     }
 }

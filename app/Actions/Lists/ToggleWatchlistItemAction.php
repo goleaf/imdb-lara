@@ -2,15 +2,14 @@
 
 namespace App\Actions\Lists;
 
-use App\Actions\Titles\RefreshTitleStatisticsAction;
 use App\Models\Title;
 use App\Models\User;
+use App\WatchState;
 
 class ToggleWatchlistItemAction
 {
     public function __construct(
         public EnsureWatchlistAction $ensureWatchlist,
-        public RefreshTitleStatisticsAction $refreshTitleStatistics,
     ) {}
 
     public function handle(User $user, Title $title): bool
@@ -21,17 +20,14 @@ class ToggleWatchlistItemAction
         if ($existingItem) {
             $existingItem->delete();
 
-            $this->refreshTitleStatistics->handle($title);
-
             return false;
         }
 
         $watchlist->items()->create([
             'title_id' => $title->id,
             'position' => (int) $watchlist->items()->max('position') + 1,
+            'watch_state' => WatchState::Planned,
         ]);
-
-        $this->refreshTitleStatistics->handle($title);
 
         return true;
     }

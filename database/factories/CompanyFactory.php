@@ -27,6 +27,8 @@ class CompanyFactory extends Factory
             'kind' => fake()->randomElement(CompanyKind::cases()),
             'country_code' => fake()->countryCode(),
             'description' => fake()->sentence(),
+            'meta_title' => null,
+            'meta_description' => null,
             'is_published' => true,
         ];
     }

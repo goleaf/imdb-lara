@@ -29,6 +29,8 @@ class UserListFactory extends Factory
             'description' => fake()->sentence(),
             'visibility' => ListVisibility::Private,
             'is_watchlist' => false,
+            'meta_title' => null,
+            'meta_description' => null,
         ];
     }
 

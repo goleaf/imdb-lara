@@ -21,6 +21,9 @@ class TitleStatistic extends Model
         'average_rating',
         'review_count',
         'watchlist_count',
+        'episodes_count',
+        'awards_nominated_count',
+        'awards_won_count',
     ];
 
     protected function casts(): array

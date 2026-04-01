@@ -29,6 +29,9 @@ class PersonFactory extends Factory
             'death_date' => null,
             'birth_place' => sprintf('%s, %s', fake()->city(), fake()->country()),
             'popularity_rank' => fake()->numberBetween(1, 500),
+            'meta_title' => null,
+            'meta_description' => null,
+            'search_keywords' => implode(', ', fake()->words(3)),
             'is_published' => true,
         ];
     }

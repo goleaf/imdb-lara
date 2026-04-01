@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Models\ListItem;
 use App\Models\Title;
 use App\Models\UserList;
+use App\WatchState;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -24,6 +25,20 @@ class ListItemFactory extends Factory
             'title_id' => Title::factory(),
             'notes' => fake()->optional()->sentence(),
             'position' => fake()->numberBetween(1, 20),
+            'watch_state' => WatchState::Planned,
+            'started_at' => null,
+            'watched_at' => null,
+            'rewatch_count' => 0,
         ];
+    }
+
+    public function completed(): static
+    {
+        return $this->state(fn (): array => [
+            'watch_state' => WatchState::Completed,
+            'started_at' => now()->subDays(7),
+            'watched_at' => now(),
+            'rewatch_count' => 1,
+        ]);
     }
 }

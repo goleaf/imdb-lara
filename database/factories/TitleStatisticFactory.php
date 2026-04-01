@@ -24,6 +24,9 @@ class TitleStatisticFactory extends Factory
             'average_rating' => fake()->randomFloat(2, 5.5, 9.8),
             'review_count' => fake()->numberBetween(0, 200),
             'watchlist_count' => fake()->numberBetween(0, 1000),
+            'episodes_count' => fake()->numberBetween(0, 40),
+            'awards_nominated_count' => fake()->numberBetween(0, 15),
+            'awards_won_count' => fake()->numberBetween(0, 8),
         ];
     }
 }

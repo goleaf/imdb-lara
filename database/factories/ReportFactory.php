@@ -2,11 +2,11 @@
 
 namespace Database\Factories;
 
-use App\ReportReason;
-use App\ReportStatus;
 use App\Models\Report;
 use App\Models\Review;
 use App\Models\User;
+use App\ReportReason;
+use App\ReportStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -30,6 +30,7 @@ class ReportFactory extends Factory
             'status' => ReportStatus::Open,
             'reviewed_by' => null,
             'reviewed_at' => null,
+            'resolution_notes' => null,
         ];
     }
 

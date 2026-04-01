@@ -18,7 +18,7 @@ class RegisterUserAction
             'username' => $attributes['username'],
             'email' => $attributes['email'],
             'password' => $attributes['password'],
-            'role' => UserRole::Member,
+            'role' => UserRole::RegularUser,
             'status' => UserStatus::Active,
         ]);
     }
