@@ -35,7 +35,9 @@
                     <div class="flex flex-wrap items-center gap-2">
                         <x-ui.badge variant="outline">{{ str($title->title_type->value)->headline() }}</x-ui.badge>
                         @if ($title->release_year)
-                            <x-ui.badge variant="outline" color="slate">{{ $title->release_year }}</x-ui.badge>
+                            <a href="{{ route('public.years.show', ['year' => $title->release_year]) }}">
+                                <x-ui.badge variant="outline" color="slate">{{ $title->release_year }}</x-ui.badge>
+                            </a>
                         @endif
                         @if ($title->age_rating)
                             <x-ui.badge variant="outline" color="neutral">{{ $title->age_rating }}</x-ui.badge>
@@ -64,7 +66,9 @@
                     @if ($title->genres->isNotEmpty())
                         <div class="flex flex-wrap gap-2">
                             @foreach ($title->genres as $genre)
-                                <x-ui.badge variant="outline" color="neutral">{{ $genre->name }}</x-ui.badge>
+                                <a href="{{ route('public.genres.show', $genre) }}">
+                                    <x-ui.badge variant="outline" color="neutral">{{ $genre->name }}</x-ui.badge>
+                                </a>
                             @endforeach
                         </div>
                     @endif
@@ -92,6 +96,77 @@
             </div>
 
             <livewire:titles.custom-list-picker :title="$title" :key="'custom-lists-'.$title->id" />
+
+            @if ($title->seasons->isNotEmpty() || $title->titleVideos->isNotEmpty())
+                <x-ui.card class="!max-w-none">
+                    <div class="space-y-4">
+                        @if ($title->seasons->isNotEmpty())
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between gap-4">
+                                    <x-ui.heading level="h2" size="lg">Seasons</x-ui.heading>
+                                    <x-ui.badge variant="outline" color="neutral">
+                                        {{ number_format($title->seasons->count()) }} published
+                                    </x-ui.badge>
+                                </div>
+
+                                <div class="grid gap-3">
+                                    @foreach ($title->seasons as $season)
+                                        <div class="flex flex-wrap items-start justify-between gap-3 rounded-box border border-black/5 px-4 py-3 dark:border-white/10">
+                                            <div>
+                                                <div class="font-medium">
+                                                    <a href="{{ route('public.seasons.show', ['series' => $title, 'season' => $season]) }}" class="hover:opacity-80">
+                                                        {{ $season->name }}
+                                                    </a>
+                                                </div>
+                                                <div class="text-sm text-neutral-500 dark:text-neutral-400">
+                                                    {{ number_format($season->episodes_count) }} episodes
+                                                </div>
+                                            </div>
+
+                                            <x-ui.link :href="route('public.seasons.show', ['series' => $title, 'season' => $season])" variant="ghost">
+                                                View season
+                                            </x-ui.link>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+
+                        @if ($title->titleVideos->isNotEmpty())
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between gap-4">
+                                    <x-ui.heading level="h2" size="lg">Latest Videos</x-ui.heading>
+                                    <x-ui.link :href="route('public.trailers.latest')" variant="ghost">
+                                        Browse trailer feed
+                                    </x-ui.link>
+                                </div>
+
+                                <div class="grid gap-3">
+                                    @foreach ($title->titleVideos as $video)
+                                        <div class="flex flex-wrap items-start justify-between gap-3 rounded-box border border-black/5 px-4 py-3 dark:border-white/10">
+                                            <div>
+                                                <div class="font-medium">{{ $video->caption ?: str($video->kind->value)->headline() }}</div>
+                                                <div class="text-sm text-neutral-500 dark:text-neutral-400">
+                                                    {{ str($video->kind->value)->headline() }}
+                                                    @if ($video->published_at)
+                                                        · {{ $video->published_at->format('M j, Y') }}
+                                                    @endif
+                                                </div>
+                                            </div>
+
+                                            @if (filled($video->url))
+                                                <x-ui.link :href="$video->url" open-in-new-tab variant="ghost">
+                                                    Open video
+                                                </x-ui.link>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                </x-ui.card>
+            @endif
         </div>
     </section>
 

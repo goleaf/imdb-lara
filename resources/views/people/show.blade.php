@@ -41,6 +41,14 @@
                     @endif
                 </div>
 
+                @if ($person->professions->isNotEmpty())
+                    <div class="flex flex-wrap gap-2">
+                        @foreach ($person->professions as $profession)
+                            <x-ui.badge variant="outline" color="neutral">{{ $profession->profession }}</x-ui.badge>
+                        @endforeach
+                    </div>
+                @endif
+
                 <div class="space-y-2">
                     <x-ui.heading level="h1" size="xl">{{ $person->name }}</x-ui.heading>
                     <x-ui.text class="text-base text-neutral-600 dark:text-neutral-300">
@@ -76,7 +84,14 @@
                                 </a>
                             </x-ui.heading>
                             <div class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
-                                {{ str($credit->title->title_type->value)->headline() }} · {{ $credit->title->release_year ?: 'TBA' }}
+                                {{ str($credit->title->title_type->value)->headline() }} ·
+                                @if ($credit->title->release_year)
+                                    <a href="{{ route('public.years.show', ['year' => $credit->title->release_year]) }}" class="hover:opacity-80">
+                                        {{ $credit->title->release_year }}
+                                    </a>
+                                @else
+                                    TBA
+                                @endif
                             </div>
                         </div>
 

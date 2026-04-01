@@ -22,7 +22,9 @@
                     </div>
 
                     <div class="flex flex-wrap gap-2">
-                        <x-ui.badge variant="outline" color="neutral">{{ $owner->name }}</x-ui.badge>
+                        <a href="{{ route('public.users.show', $owner) }}">
+                            <x-ui.badge variant="outline" color="neutral">{{ $owner->name }}</x-ui.badge>
+                        </a>
                         <x-ui.badge variant="outline" color="slate">{{ number_format($list->items_count) }} titles</x-ui.badge>
                     </div>
                 </div>

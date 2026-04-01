@@ -38,29 +38,29 @@
             icon="chart-bar-square"
             :active="request()->routeIs('admin.dashboard')"
         />
-        @can('viewAny', \App\Models\Title::class)
+        @if ($canViewAdminTitles)
             <x-ui.navlist.item
                 :href="route('admin.titles.index')"
                 label="Titles"
                 icon="film"
                 :active="request()->routeIs('admin.titles.*')"
             />
-        @endcan
-        @can('viewAny', \App\Models\Review::class)
+        @endif
+        @if ($canViewAdminReviews)
             <x-ui.navlist.item
                 :href="route('admin.reviews.index')"
                 label="Reviews"
                 icon="chat-bubble-left-right"
                 :active="request()->routeIs('admin.reviews.*')"
             />
-        @endcan
-        @can('viewAny', \App\Models\Report::class)
+        @endif
+        @if ($canViewAdminReports)
             <x-ui.navlist.item
                 :href="route('admin.reports.index')"
                 label="Reports"
                 icon="flag"
                 :active="request()->routeIs('admin.reports.*')"
             />
-        @endcan
+        @endif
     </x-ui.navlist>
 @endsection

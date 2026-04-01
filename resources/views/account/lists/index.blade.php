@@ -46,7 +46,7 @@
                             </div>
                         @endif
 
-                        @if ($list->visibility === \App\ListVisibility::Public)
+                        @if ($list->isPublic())
                             <div class="flex justify-end">
                                 <x-ui.link :href="route('public.lists.show', [auth()->user(), $list])" variant="ghost">
                                     View public page

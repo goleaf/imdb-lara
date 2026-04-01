@@ -8,10 +8,16 @@
         :active="request()->routeIs('public.discover')"
     />
     <x-ui.navbar.item
-        :href="route('public.titles.index')"
-        label="Titles"
+        :href="route('public.movies.index')"
+        label="Movies"
         icon="film"
-        :active="request()->routeIs('public.titles.*')"
+        :active="request()->routeIs('public.movies.*') || request()->routeIs('public.rankings.movies')"
+    />
+    <x-ui.navbar.item
+        :href="route('public.series.index')"
+        label="TV Shows"
+        icon="tv"
+        :active="request()->routeIs('public.series.*') || request()->routeIs('public.seasons.*') || request()->routeIs('public.episodes.*') || request()->routeIs('public.rankings.series')"
     />
     <x-ui.navbar.item
         :href="route('public.people.index')"
@@ -95,15 +101,45 @@
         />
         <x-ui.navlist.item
             :href="route('public.titles.index')"
-            label="Browse Titles"
+            label="All Titles"
             icon="film"
-            :active="request()->routeIs('public.titles.*')"
+            :active="request()->routeIs('public.titles.*') || request()->routeIs('public.genres.*') || request()->routeIs('public.years.*')"
+        />
+        <x-ui.navlist.item
+            :href="route('public.movies.index')"
+            label="Movies"
+            icon="film"
+            :active="request()->routeIs('public.movies.*') || request()->routeIs('public.rankings.movies')"
+        />
+        <x-ui.navlist.item
+            :href="route('public.series.index')"
+            label="TV Shows"
+            icon="tv"
+            :active="request()->routeIs('public.series.*') || request()->routeIs('public.seasons.*') || request()->routeIs('public.episodes.*') || request()->routeIs('public.rankings.series')"
         />
         <x-ui.navlist.item
             :href="route('public.people.index')"
             label="Browse People"
             icon="users"
             :active="request()->routeIs('public.people.*')"
+        />
+        <x-ui.navlist.item
+            :href="route('public.trending')"
+            label="Trending"
+            icon="bolt"
+            :active="request()->routeIs('public.trending')"
+        />
+        <x-ui.navlist.item
+            :href="route('public.trailers.latest')"
+            label="Latest Trailers"
+            icon="play"
+            :active="request()->routeIs('public.trailers.*')"
+        />
+        <x-ui.navlist.item
+            :href="route('public.reviews.latest')"
+            label="Latest Reviews"
+            icon="chat-bubble-left-right"
+            :active="request()->routeIs('public.reviews.*')"
         />
         <x-ui.navlist.item
             :href="route('public.search')"

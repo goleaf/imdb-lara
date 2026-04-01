@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ListVisibility;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
 use Database\Factories\UserFactory;
@@ -93,6 +94,13 @@ class User extends Authenticatable
     public function customLists(): HasMany
     {
         return $this->hasMany(UserList::class)->where('is_watchlist', false);
+    }
+
+    public function publicLists(): HasMany
+    {
+        return $this->hasMany(UserList::class)
+            ->where('is_watchlist', false)
+            ->where('visibility', ListVisibility::Public);
     }
 
     public function watchlist(): HasOne

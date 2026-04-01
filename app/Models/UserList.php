@@ -57,6 +57,11 @@ class UserList extends Model
         return $query->where('is_watchlist', true);
     }
 
+    public function isPublic(): bool
+    {
+        return $this->visibility === ListVisibility::Public;
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

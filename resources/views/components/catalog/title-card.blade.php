@@ -34,7 +34,9 @@
                 <x-ui.badge variant="outline">{{ str($title->title_type->value)->headline() }}</x-ui.badge>
 
                 @if ($title->release_year)
-                    <x-ui.badge variant="outline" color="slate">{{ $title->release_year }}</x-ui.badge>
+                    <a href="{{ route('public.years.show', ['year' => $title->release_year]) }}">
+                        <x-ui.badge variant="outline" color="slate">{{ $title->release_year }}</x-ui.badge>
+                    </a>
                 @endif
 
                 @if ($statistic?->average_rating)
@@ -61,7 +63,9 @@
             @if ($genres->isNotEmpty())
                 <div class="flex flex-wrap gap-2">
                     @foreach ($genres as $genre)
-                        <x-ui.badge variant="outline" color="neutral">{{ $genre->name }}</x-ui.badge>
+                        <a href="{{ route('public.genres.show', $genre) }}">
+                            <x-ui.badge variant="outline" color="neutral">{{ $genre->name }}</x-ui.badge>
+                        </a>
                     @endforeach
                 </div>
             @endif

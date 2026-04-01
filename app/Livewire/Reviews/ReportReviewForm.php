@@ -18,6 +18,11 @@ class ReportReviewForm extends Component
 
     public ?string $statusMessage = null;
 
+    /**
+     * @var list<array{value: string, label: string}>
+     */
+    public array $reportReasons = [];
+
     protected function rules(): array
     {
         return [
@@ -29,6 +34,13 @@ class ReportReviewForm extends Component
     public function mount(Review $review): void
     {
         $this->review = $review;
+        $this->reportReasons = array_map(
+            static fn (ReportReason $reportReason): array => [
+                'value' => $reportReason->value,
+                'label' => str($reportReason->value)->headline()->toString(),
+            ],
+            ReportReason::cases(),
+        );
     }
 
     public function save(ReportReviewAction $reportReview): void

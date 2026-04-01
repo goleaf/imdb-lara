@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\MediaKind;
+use App\Enums\TitleType;
 use App\Models\Title;
 use Illuminate\Contracts\View\View;
 
@@ -22,6 +23,7 @@ class HomeController extends Controller
                 'is_published',
             ])
             ->published()
+            ->where('title_type', '!=', TitleType::Episode)
             ->with([
                 'statistic:id,title_id,average_rating,rating_count,review_count,watchlist_count',
                 'genres:id,name,slug',

@@ -34,6 +34,7 @@ class PersonController extends Controller
     {
         $person->load([
             'mediaAssets',
+            'professions:id,person_id,department,profession,is_primary,sort_order',
             'credits.title:id,name,slug,title_type,release_year',
         ]);
 
