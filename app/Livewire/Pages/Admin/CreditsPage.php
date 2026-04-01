@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Pages\Admin;
 
-use App\Livewire\Pages\Concerns\RendersLegacyPage;
+use App\Livewire\Pages\Concerns\RendersPageView;
 use App\Models\Credit;
 use App\Models\Episode;
 use App\Models\Person;
@@ -14,7 +14,7 @@ use Livewire\Component;
 
 class CreditsPage extends Component
 {
-    use RendersLegacyPage;
+    use RendersPageView;
 
     public ?Credit $credit = null;
 
@@ -26,7 +26,7 @@ class CreditsPage extends Component
     public function render(): View
     {
         if (request()->routeIs('admin.credits.create')) {
-            return $this->renderLegacyPage('admin.credits.create', [
+            return $this->renderPageView('admin.credits.create', [
                 'credit' => new Credit([
                     'title_id' => request()->integer('title'),
                     'person_id' => request()->integer('person'),
@@ -37,7 +37,7 @@ class CreditsPage extends Component
 
         abort_unless($this->credit instanceof Credit, 404);
 
-        return $this->renderLegacyPage('admin.credits.edit', [
+        return $this->renderPageView('admin.credits.edit', [
             'credit' => $this->credit->load(['title', 'person', 'profession', 'episode.title']),
             ...$this->formOptions(),
         ]);

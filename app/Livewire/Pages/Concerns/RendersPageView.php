@@ -3,14 +3,15 @@
 namespace App\Livewire\Pages\Concerns;
 
 use App\Actions\Seo\PageSeoData;
+use App\Livewire\Pages\Support\PageShellState;
 use Illuminate\Contracts\View\View;
 
-trait RendersLegacyPage
+trait RendersPageView
 {
     /**
      * @param  array<string, mixed>  $data
      */
-    protected function renderLegacyPage(string $view, array $data = []): View
+    protected function renderPageView(string $view, array $data = []): View
     {
         $sections = view($view, $data)->renderSections();
         $layoutView = match (true) {
@@ -59,7 +60,9 @@ trait RendersLegacyPage
             'sidebar' => $layoutSections['sidebar'] ?? null,
         ];
 
-        return view('livewire.pages.legacy-page', [
+        app(PageShellState::class)->replace($layoutData);
+
+        return view('livewire.pages.page-content', [
             'content' => $sections['content'] ?? '',
         ])->layout('components.layouts.livewire-page', $layoutData);
     }

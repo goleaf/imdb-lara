@@ -3,7 +3,7 @@
 namespace App\Livewire\Pages\Admin;
 
 use App\Actions\Admin\BuildAdminMediaAssetsIndexQueryAction;
-use App\Livewire\Pages\Concerns\RendersLegacyPage;
+use App\Livewire\Pages\Concerns\RendersPageView;
 use App\Models\MediaAsset;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
@@ -11,7 +11,7 @@ use Livewire\WithPagination;
 
 class MediaAssetsPage extends Component
 {
-    use RendersLegacyPage;
+    use RendersPageView;
     use WithPagination;
 
     public ?MediaAsset $mediaAsset = null;
@@ -24,7 +24,7 @@ class MediaAssetsPage extends Component
     public function render(BuildAdminMediaAssetsIndexQueryAction $buildAdminMediaAssetsIndexQuery): View
     {
         if (request()->routeIs('admin.media-assets.index')) {
-            return $this->renderLegacyPage('admin.media-assets.index', [
+            return $this->renderPageView('admin.media-assets.index', [
                 'mediaAssets' => $buildAdminMediaAssetsIndexQuery
                     ->handle()
                     ->simplePaginate(20)
@@ -34,7 +34,7 @@ class MediaAssetsPage extends Component
 
         abort_unless($this->mediaAsset instanceof MediaAsset, 404);
 
-        return $this->renderLegacyPage('admin.media-assets.edit', [
+        return $this->renderPageView('admin.media-assets.edit', [
             'mediaAsset' => $this->mediaAsset->load('mediable'),
         ]);
     }

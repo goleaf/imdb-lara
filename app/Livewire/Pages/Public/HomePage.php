@@ -5,13 +5,13 @@ namespace App\Livewire\Pages\Public;
 use App\Actions\Home\GetHeroSpotlightAction;
 use App\Actions\Seo\PageSeoData;
 use App\Enums\MediaKind;
-use App\Livewire\Pages\Concerns\RendersLegacyPage;
+use App\Livewire\Pages\Concerns\RendersPageView;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
 class HomePage extends Component
 {
-    use RendersLegacyPage;
+    use RendersPageView;
 
     public function render(GetHeroSpotlightAction $getHeroSpotlight): View
     {
@@ -19,7 +19,7 @@ class HomePage extends Component
         $heroImage = $heroSpotlight?->titleImages?->firstWhere('kind', MediaKind::Backdrop)
             ?? $heroSpotlight?->titleImages?->firstWhere('kind', MediaKind::Poster);
 
-        return $this->renderLegacyPage('home', [
+        return $this->renderPageView('home', [
             'heroSpotlight' => $heroSpotlight,
             'seo' => new PageSeoData(
                 title: 'Home',

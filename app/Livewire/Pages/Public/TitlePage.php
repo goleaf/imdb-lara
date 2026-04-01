@@ -7,7 +7,7 @@ use App\Actions\Catalog\LoadTitleDetailsAction;
 use App\Actions\Seo\PageSeoData;
 use App\Enums\MediaKind;
 use App\Enums\TitleType;
-use App\Livewire\Pages\Concerns\RendersLegacyPage;
+use App\Livewire\Pages\Concerns\RendersPageView;
 use App\Models\MediaAsset;
 use App\Models\Title;
 use Illuminate\Contracts\View\View;
@@ -16,7 +16,7 @@ use Livewire\Component;
 
 class TitlePage extends Component
 {
-    use RendersLegacyPage;
+    use RendersPageView;
 
     public ?Title $title = null;
 
@@ -62,7 +62,7 @@ class TitlePage extends Component
                 ['label' => 'Full Cast'],
             ];
 
-            return $this->renderLegacyPage('titles.cast', [
+            return $this->renderPageView('titles.cast', [
                 'title' => $this->title,
                 'castCredits' => $castCredits,
                 'crewCredits' => $crewCredits,
@@ -81,7 +81,7 @@ class TitlePage extends Component
             ]);
         }
 
-        return $this->renderLegacyPage('titles.show', $loadTitleDetails->handle($this->title));
+        return $this->renderPageView('titles.show', $loadTitleDetails->handle($this->title));
     }
 
     private function redirectCanonicalEpisode(Title $title): void

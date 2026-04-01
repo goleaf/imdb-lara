@@ -4,14 +4,14 @@ namespace App\Livewire\Pages\Public;
 
 use App\Actions\Seo\PageSeoData;
 use App\Enums\TitleType;
-use App\Livewire\Pages\Concerns\RendersLegacyPage;
+use App\Livewire\Pages\Concerns\RendersPageView;
 use App\Models\Genre;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
 class BrowseTitlesPage extends Component
 {
-    use RendersLegacyPage;
+    use RendersPageView;
 
     public ?Genre $genre = null;
 
@@ -51,7 +51,7 @@ class BrowseTitlesPage extends Component
             ['label' => 'Browse Titles'],
         ];
 
-        return $this->renderLegacyPage('catalog.browse', [
+        return $this->renderPageView('catalog.browse', [
             'pageTitle' => 'Browse Titles',
             'metaDescription' => 'Browse published Screenbase titles across movies, series, documentaries, shorts, and specials.',
             'heading' => 'Browse Titles',
@@ -89,7 +89,7 @@ class BrowseTitlesPage extends Component
             ['label' => 'Movies'],
         ];
 
-        return $this->renderLegacyPage('catalog.browse', [
+        return $this->renderPageView('catalog.browse', [
             'pageTitle' => 'Browse Movies',
             'metaDescription' => 'Browse published movies on Screenbase with ratings, reviews, and genre links.',
             'heading' => 'Browse Movies',
@@ -124,7 +124,7 @@ class BrowseTitlesPage extends Component
             ['label' => 'TV Shows'],
         ];
 
-        return $this->renderLegacyPage('catalog.browse', [
+        return $this->renderPageView('catalog.browse', [
             'pageTitle' => 'Browse TV Shows',
             'metaDescription' => 'Browse published TV series and mini-series on Screenbase.',
             'heading' => 'Browse TV Shows',
@@ -162,7 +162,7 @@ class BrowseTitlesPage extends Component
             ['label' => $this->genre->name],
         ];
 
-        return $this->renderLegacyPage('catalog.browse', [
+        return $this->renderPageView('catalog.browse', [
             'pageTitle' => $this->genre->name,
             'metaDescription' => $this->genre->description ?: 'Browse '.$this->genre->name.' titles, reviews, and discovery pages on Screenbase.',
             'heading' => $this->genre->name,
@@ -200,7 +200,7 @@ class BrowseTitlesPage extends Component
             ['label' => (string) $this->year],
         ];
 
-        return $this->renderLegacyPage('catalog.browse', [
+        return $this->renderPageView('catalog.browse', [
             'pageTitle' => 'Titles from '.$this->year,
             'metaDescription' => 'Browse public title pages released in '.$this->year.' on Screenbase.',
             'heading' => (string) $this->year,
@@ -235,7 +235,7 @@ class BrowseTitlesPage extends Component
             ['label' => 'Top Rated Movies'],
         ];
 
-        return $this->renderLegacyPage('catalog.browse', [
+        return $this->renderPageView('catalog.browse', [
             'pageTitle' => 'Top Rated Movies',
             'metaDescription' => 'Browse Screenbase movies ordered by rating and rating volume.',
             'heading' => 'Top Rated Movies',
@@ -270,7 +270,7 @@ class BrowseTitlesPage extends Component
             ['label' => 'Top Rated Series'],
         ];
 
-        return $this->renderLegacyPage('catalog.browse', [
+        return $this->renderPageView('catalog.browse', [
             'pageTitle' => 'Top Rated Series',
             'metaDescription' => 'Browse Screenbase series and mini-series ordered by audience rating.',
             'heading' => 'Top Rated Series',
@@ -305,7 +305,7 @@ class BrowseTitlesPage extends Component
             ['label' => 'Trending'],
         ];
 
-        return $this->renderLegacyPage('catalog.browse', [
+        return $this->renderPageView('catalog.browse', [
             'pageTitle' => 'Trending',
             'metaDescription' => 'Browse titles trending on Screenbase by watchlist activity and review momentum.',
             'heading' => 'Trending Now',

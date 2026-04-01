@@ -16,6 +16,22 @@
 ])
 
 @php
+    $pageShellState = app(\App\Livewire\Pages\Support\PageShellState::class)->all();
+    $pageTitle = $pageShellState['pageTitle'] ?? $pageTitle;
+    $pageDescription = $pageShellState['pageDescription'] ?? $pageDescription;
+    $pageRobots = $pageShellState['pageRobots'] ?? $pageRobots;
+    $canonicalUrl = $pageShellState['canonicalUrl'] ?? $canonicalUrl;
+    $openGraphTitle = $pageShellState['openGraphTitle'] ?? $openGraphTitle;
+    $openGraphDescription = $pageShellState['openGraphDescription'] ?? $openGraphDescription;
+    $openGraphType = $pageShellState['openGraphType'] ?? $openGraphType;
+    $openGraphImage = $pageShellState['openGraphImage'] ?? $openGraphImage;
+    $openGraphImageAlt = $pageShellState['openGraphImageAlt'] ?? $openGraphImageAlt;
+    $twitterCard = $pageShellState['twitterCard'] ?? $twitterCard;
+    $breadcrumbSchema = $pageShellState['breadcrumbSchema'] ?? $breadcrumbSchema;
+    $breadcrumbs = $pageShellState['breadcrumbs'] ?? $breadcrumbs;
+    $navbar = $pageShellState['navbar'] ?? $navbar;
+    $sidebar = $pageShellState['sidebar'] ?? $sidebar;
+
     $canonicalUrl = filled($canonicalUrl) ? $canonicalUrl : url()->current();
     $openGraphDescription = filled($openGraphDescription) ? $openGraphDescription : $pageDescription;
     $renderedBreadcrumbs = $breadcrumbs;

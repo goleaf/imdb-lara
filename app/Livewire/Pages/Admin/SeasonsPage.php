@@ -2,14 +2,14 @@
 
 namespace App\Livewire\Pages\Admin;
 
-use App\Livewire\Pages\Concerns\RendersLegacyPage;
+use App\Livewire\Pages\Concerns\RendersPageView;
 use App\Models\Season;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
 class SeasonsPage extends Component
 {
-    use RendersLegacyPage;
+    use RendersPageView;
 
     public ?Season $season = null;
 
@@ -22,7 +22,7 @@ class SeasonsPage extends Component
     {
         abort_unless($this->season instanceof Season, 404);
 
-        return $this->renderLegacyPage('admin.seasons.edit', [
+        return $this->renderPageView('admin.seasons.edit', [
             'season' => $this->season->load([
                 'series:id,name,slug',
                 'episodes' => fn ($episodeQuery) => $episodeQuery

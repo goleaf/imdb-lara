@@ -4,7 +4,7 @@ namespace App\Livewire\Pages\Public;
 
 use App\Actions\Catalog\LoadEpisodeDetailsAction;
 use App\Enums\TitleType;
-use App\Livewire\Pages\Concerns\RendersLegacyPage;
+use App\Livewire\Pages\Concerns\RendersPageView;
 use App\Models\Season;
 use App\Models\Title;
 use Illuminate\Contracts\View\View;
@@ -12,7 +12,7 @@ use Livewire\Component;
 
 class EpisodeShowPage extends Component
 {
-    use RendersLegacyPage;
+    use RendersPageView;
 
     public ?Title $episode = null;
 
@@ -51,7 +51,7 @@ class EpisodeShowPage extends Component
             404,
         );
 
-        return $this->renderLegacyPage('episodes.show', $loadEpisodeDetails->handle(
+        return $this->renderPageView('episodes.show', $loadEpisodeDetails->handle(
             $this->series,
             $this->season,
             $this->episode,

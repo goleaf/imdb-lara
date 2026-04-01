@@ -4,7 +4,7 @@ namespace App\Livewire\Pages\Public;
 
 use App\Actions\Catalog\LoadSeasonDetailsAction;
 use App\Enums\TitleType;
-use App\Livewire\Pages\Concerns\RendersLegacyPage;
+use App\Livewire\Pages\Concerns\RendersPageView;
 use App\Models\Season;
 use App\Models\Title;
 use Illuminate\Contracts\View\View;
@@ -12,7 +12,7 @@ use Livewire\Component;
 
 class SeasonShowPage extends Component
 {
-    use RendersLegacyPage;
+    use RendersPageView;
 
     public ?Season $season = null;
 
@@ -35,7 +35,7 @@ class SeasonShowPage extends Component
     {
         abort_unless($this->series instanceof Title && $this->season instanceof Season, 404);
 
-        return $this->renderLegacyPage('seasons.show', $loadSeasonDetails->handle(
+        return $this->renderPageView('seasons.show', $loadSeasonDetails->handle(
             $this->series,
             $this->season,
             auth()->user(),

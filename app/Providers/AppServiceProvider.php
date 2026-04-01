@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Http\Middleware\EnsureUserCanModerate;
 use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\EnsureUserIsAdmin;
+use App\Livewire\Pages\Support\PageShellState;
 use App\Models\ListItem;
 use App\Models\Rating;
 use App\Models\Review;
@@ -25,7 +26,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(PageShellState::class, static fn (): PageShellState => new PageShellState);
     }
 
     /**

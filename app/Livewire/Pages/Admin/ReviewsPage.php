@@ -4,19 +4,19 @@ namespace App\Livewire\Pages\Admin;
 
 use App\Actions\Admin\BuildAdminReviewsIndexQueryAction;
 use App\Enums\ReviewStatus;
-use App\Livewire\Pages\Concerns\RendersLegacyPage;
+use App\Livewire\Pages\Concerns\RendersPageView;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class ReviewsPage extends Component
 {
-    use RendersLegacyPage;
+    use RendersPageView;
     use WithPagination;
 
     public function render(BuildAdminReviewsIndexQueryAction $buildAdminReviewsIndexQuery): View
     {
-        return $this->renderLegacyPage('admin.reviews.index', [
+        return $this->renderPageView('admin.reviews.index', [
             'reviews' => $buildAdminReviewsIndexQuery
                 ->handle()
                 ->simplePaginate(20)

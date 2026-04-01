@@ -5,13 +5,13 @@ namespace App\Livewire\Pages\Public;
 use App\Actions\Catalog\GetFeaturedGenresAction;
 use App\Actions\Catalog\GetFeaturedTitlesAction;
 use App\Actions\Seo\PageSeoData;
-use App\Livewire\Pages\Concerns\RendersLegacyPage;
+use App\Livewire\Pages\Concerns\RendersPageView;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
 class DiscoverPage extends Component
 {
-    use RendersLegacyPage;
+    use RendersPageView;
 
     public function render(
         GetFeaturedGenresAction $getFeaturedGenres,
@@ -22,7 +22,7 @@ class DiscoverPage extends Component
             ['label' => 'Discovery'],
         ];
 
-        return $this->renderLegacyPage('discover.index', [
+        return $this->renderPageView('discover.index', [
             'featuredGenres' => $getFeaturedGenres->handle(),
             'featuredTitles' => $getFeaturedTitles->handle(3),
             'seo' => new PageSeoData(

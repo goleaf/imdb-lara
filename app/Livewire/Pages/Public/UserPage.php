@@ -7,7 +7,7 @@ use App\Actions\Lists\LoadPublicUserListAction;
 use App\Actions\Seo\PageSeoData;
 use App\Actions\Users\LoadPublicUserProfileAction;
 use App\Enums\MediaKind;
-use App\Livewire\Pages\Concerns\RendersLegacyPage;
+use App\Livewire\Pages\Concerns\RendersPageView;
 use App\Models\MediaAsset;
 use App\Models\User;
 use App\Models\UserList;
@@ -17,7 +17,7 @@ use Livewire\Component;
 
 class UserPage extends Component
 {
-    use RendersLegacyPage;
+    use RendersPageView;
 
     public ?UserList $list = null;
 
@@ -63,7 +63,7 @@ class UserPage extends Component
                 ['label' => $list->name],
             ];
 
-            return $this->renderLegacyPage('lists.show', [
+            return $this->renderPageView('lists.show', [
                 'items' => $items,
                 'list' => $list,
                 'owner' => $this->user,
@@ -79,6 +79,6 @@ class UserPage extends Component
             ]);
         }
 
-        return $this->renderLegacyPage('users.show', $loadPublicUserProfile->handle($this->user, auth()->user()));
+        return $this->renderPageView('users.show', $loadPublicUserProfile->handle($this->user, auth()->user()));
     }
 }

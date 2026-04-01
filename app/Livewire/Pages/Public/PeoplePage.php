@@ -4,14 +4,14 @@ namespace App\Livewire\Pages\Public;
 
 use App\Actions\Catalog\LoadPersonDetailsAction;
 use App\Actions\Seo\PageSeoData;
-use App\Livewire\Pages\Concerns\RendersLegacyPage;
+use App\Livewire\Pages\Concerns\RendersPageView;
 use App\Models\Person;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
 class PeoplePage extends Component
 {
-    use RendersLegacyPage;
+    use RendersPageView;
 
     public ?Person $person = null;
 
@@ -32,10 +32,10 @@ class PeoplePage extends Component
         if (request()->routeIs('public.people.show')) {
             abort_unless($this->person instanceof Person, 404);
 
-            return $this->renderLegacyPage('people.show', $loadPersonDetails->handle($this->person));
+            return $this->renderPageView('people.show', $loadPersonDetails->handle($this->person));
         }
 
-        return $this->renderLegacyPage('people.index', [
+        return $this->renderPageView('people.index', [
             'seo' => new PageSeoData(
                 title: 'Browse People',
                 description: 'Browse actors, directors, writers, and other creators in the Screenbase catalog.',

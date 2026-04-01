@@ -110,6 +110,7 @@ class PublicRouteArchitectureTest extends TestCase
         $this->get(route('public.search', ['q' => 'Signal']))
             ->assertOk()
             ->assertSee('Search')
+            ->assertDontSeeHtml('data-slot="site-footer"')
             ->assertSee('Northern Signal');
 
         $this->get(route('public.rankings.movies'))

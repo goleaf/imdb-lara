@@ -4,13 +4,13 @@ namespace App\Livewire\Pages\Public;
 
 use App\Actions\Home\GetLatestTrailerTitlesAction;
 use App\Actions\Seo\PageSeoData;
-use App\Livewire\Pages\Concerns\RendersLegacyPage;
+use App\Livewire\Pages\Concerns\RendersPageView;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
 class LatestTrailersPage extends Component
 {
-    use RendersLegacyPage;
+    use RendersPageView;
 
     public function render(GetLatestTrailerTitlesAction $getLatestTrailerTitles): View
     {
@@ -19,7 +19,7 @@ class LatestTrailersPage extends Component
             ->simplePaginate(12)
             ->withQueryString();
 
-        return $this->renderLegacyPage('trailers.index', [
+        return $this->renderPageView('trailers.index', [
             'titles' => $titles,
             'seo' => new PageSeoData(
                 title: 'Latest Trailers',

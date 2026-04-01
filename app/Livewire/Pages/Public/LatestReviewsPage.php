@@ -4,13 +4,13 @@ namespace App\Livewire\Pages\Public;
 
 use App\Actions\Home\GetLatestReviewFeedAction;
 use App\Actions\Seo\PageSeoData;
-use App\Livewire\Pages\Concerns\RendersLegacyPage;
+use App\Livewire\Pages\Concerns\RendersPageView;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
 class LatestReviewsPage extends Component
 {
-    use RendersLegacyPage;
+    use RendersPageView;
 
     public function render(GetLatestReviewFeedAction $getLatestReviewFeed): View
     {
@@ -19,7 +19,7 @@ class LatestReviewsPage extends Component
             ->simplePaginate(12)
             ->withQueryString();
 
-        return $this->renderLegacyPage('reviews.index', [
+        return $this->renderPageView('reviews.index', [
             'reviews' => $reviews,
             'seo' => new PageSeoData(
                 title: 'Latest Reviews',

@@ -3,7 +3,7 @@
 namespace App\Livewire\Pages\Account;
 
 use App\Actions\Lists\BuildAccountListsIndexQueryAction;
-use App\Livewire\Pages\Concerns\RendersLegacyPage;
+use App\Livewire\Pages\Concerns\RendersPageView;
 use App\Models\User;
 use App\Models\UserList;
 use Illuminate\Contracts\View\View;
@@ -11,7 +11,7 @@ use Livewire\Component;
 
 class ListsPage extends Component
 {
-    use RendersLegacyPage;
+    use RendersPageView;
 
     public ?UserList $list = null;
 
@@ -54,7 +54,7 @@ class ListsPage extends Component
     public function render(BuildAccountListsIndexQueryAction $buildAccountListsIndexQuery): View
     {
         if (request()->routeIs('account.lists.show')) {
-            return $this->renderLegacyPage('account.lists.show', [
+            return $this->renderPageView('account.lists.show', [
                 'list' => $this->list,
             ]);
         }
@@ -64,7 +64,7 @@ class ListsPage extends Component
             ->simplePaginate(12)
             ->withQueryString();
 
-        return $this->renderLegacyPage('account.lists.index', [
+        return $this->renderPageView('account.lists.index', [
             'lists' => $lists,
         ]);
     }

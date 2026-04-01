@@ -1,3 +1,33 @@
+@php
+    $pageShellState = app(\App\Livewire\Pages\Support\PageShellState::class)->all();
+    $pageTitle = $pageShellState['pageTitle'] ?? $pageTitle;
+    $pageDescription = $pageShellState['pageDescription'] ?? $pageDescription;
+    $pageRobots = $pageShellState['pageRobots'] ?? $pageRobots;
+    $canonicalUrl = $pageShellState['canonicalUrl'] ?? $canonicalUrl;
+    $openGraphTitle = $pageShellState['openGraphTitle'] ?? $openGraphTitle;
+    $openGraphDescription = $pageShellState['openGraphDescription'] ?? $openGraphDescription;
+    $openGraphType = $pageShellState['openGraphType'] ?? $openGraphType;
+    $openGraphImage = $pageShellState['openGraphImage'] ?? $openGraphImage;
+    $openGraphImageAlt = $pageShellState['openGraphImageAlt'] ?? $openGraphImageAlt;
+    $twitterCard = $pageShellState['twitterCard'] ?? $twitterCard;
+    $breadcrumbSchema = $pageShellState['breadcrumbSchema'] ?? $breadcrumbSchema;
+    $renderedBreadcrumbs = $pageShellState['breadcrumbs'] ?? $renderedBreadcrumbs;
+    $renderedNavbar = $pageShellState['navbar'] ?? $renderedNavbar;
+    $renderedSidebar = $pageShellState['sidebar'] ?? $renderedSidebar;
+    $renderedNavbarText = strip_tags((string) $renderedNavbar);
+    $hasBreadcrumbs = trim((string) $renderedBreadcrumbs) !== '';
+    $shouldRenderAdminShortcut = auth()->user()?->can('access-admin-area')
+        && ! request()->routeIs('admin.*')
+        && ! str_contains($renderedNavbarText, 'Admin');
+    $shouldRenderWatchlistShortcut = auth()->check()
+        && ! str_contains($renderedNavbarText, 'Watchlist');
+    $shouldRenderSignOutShortcut = auth()->check()
+        && ! str_contains($renderedNavbarText, 'Sign out');
+    $shouldRenderGuestAuthShortcuts = ! auth()->check()
+        && ! str_contains($renderedNavbarText, 'Sign in')
+        && ! str_contains($renderedNavbarText, 'Create account');
+@endphp
+
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full scroll-smooth">
     <head>
@@ -138,7 +168,7 @@
                         @endisset
                     </div>
 
-                    @unless (request()->routeIs('admin.*'))
+                    @unless (request()->routeIs('admin.*') || request()->routeIs('public.search'))
                         <x-ui.footer class="mx-auto w-full max-w-7xl px-4 pb-6 md:px-6 md:pb-8" />
                     @endunless
                 </div>

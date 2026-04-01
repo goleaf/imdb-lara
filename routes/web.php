@@ -15,10 +15,8 @@ use App\Actions\Admin\UpdateContributionStatusAction;
 use App\Actions\Admin\UpdateReportStatusAction;
 use App\Actions\Admin\UpdateTitleAction;
 use App\Actions\Moderation\ModerateReviewAction;
-use App\Actions\Pages\RenderPageComponentAction;
 use App\Actions\Seo\GetSitemapDataAction;
 use App\Enums\ReviewStatus;
-use App\Enums\TitleType;
 use App\Http\Requests\Admin\StoreCreditRequest;
 use App\Http\Requests\Admin\StoreEpisodeRequest;
 use App\Http\Requests\Admin\StoreGenreRequest;
@@ -76,8 +74,6 @@ use App\Models\Report;
 use App\Models\Review;
 use App\Models\Season;
 use App\Models\Title;
-use App\Models\User;
-use App\Models\UserList;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -95,54 +91,38 @@ Route::get('/robots.txt', fn () => response(
     ['Content-Type' => 'text/plain; charset=UTF-8'],
 ))->name('robots');
 Route::name('public.')->group(function (): void {
-    Route::get('/', fn (RenderPageComponentAction $renderPage): Response => $renderPage->handle(HomePage::class))->name('home');
-    Route::get('/discover', fn (RenderPageComponentAction $renderPage): Response => $renderPage->handle(DiscoverPage::class))->name('discover');
-    Route::get('/movies', fn (RenderPageComponentAction $renderPage): Response => $renderPage->handle(BrowseTitlesPage::class))->name('movies.index');
-    Route::get('/tv-shows', fn (RenderPageComponentAction $renderPage): Response => $renderPage->handle(BrowseTitlesPage::class))->name('series.index');
-    Route::get('/titles', fn (RenderPageComponentAction $renderPage): Response => $renderPage->handle(BrowseTitlesPage::class))->name('titles.index');
-    Route::get('/titles/{title:slug}/cast', fn (RenderPageComponentAction $renderPage, Title $title): Response => $renderPage->handle(TitlePage::class, ['title' => $title]))->name('titles.cast');
-    Route::get('/titles/{title:slug}', function (RenderPageComponentAction $renderPage, Title $title): Response|RedirectResponse {
-        if ($title->title_type === TitleType::Episode) {
-            $title->loadMissing('episodeMeta.season:id,series_id,slug', 'episodeMeta.series:id,slug');
-
-            if ($title->episodeMeta?->season && $title->episodeMeta?->series) {
-                return redirect()->route('public.episodes.show', [
-                    'series' => $title->episodeMeta->series,
-                    'season' => $title->episodeMeta->season,
-                    'episode' => $title,
-                ]);
-            }
-
-            abort(404);
-        }
-
-        return $renderPage->handle(TitlePage::class, ['title' => $title]);
-    })->name('titles.show');
-    Route::get('/people', fn (RenderPageComponentAction $renderPage): Response => $renderPage->handle(PeoplePage::class))->name('people.index');
-    Route::get('/people/{person:slug}', fn (RenderPageComponentAction $renderPage, Person $person): Response => $renderPage->handle(PeoplePage::class, ['person' => $person]))->name('people.show');
-    Route::get('/genres/{genre:slug}', fn (RenderPageComponentAction $renderPage, Genre $genre): Response => $renderPage->handle(BrowseTitlesPage::class, ['genre' => $genre]))->name('genres.show');
-    Route::get('/years/{year}', fn (RenderPageComponentAction $renderPage, int $year): Response => $renderPage->handle(BrowseTitlesPage::class, ['year' => $year]))->whereNumber('year')->name('years.show');
-    Route::get('/top-rated/movies', fn (RenderPageComponentAction $renderPage): Response => $renderPage->handle(BrowseTitlesPage::class))->name('rankings.movies');
-    Route::get('/top-rated/series', fn (RenderPageComponentAction $renderPage): Response => $renderPage->handle(BrowseTitlesPage::class))->name('rankings.series');
-    Route::get('/trending', fn (RenderPageComponentAction $renderPage): Response => $renderPage->handle(BrowseTitlesPage::class))->name('trending');
-    Route::get('/trailers/latest', fn (RenderPageComponentAction $renderPage): Response => $renderPage->handle(LatestTrailersPage::class))->name('trailers.latest');
-    Route::get('/reviews/latest', fn (RenderPageComponentAction $renderPage): Response => $renderPage->handle(LatestReviewsPage::class))->name('reviews.latest');
-    Route::get('/search', fn (RenderPageComponentAction $renderPage): Response => $renderPage->handle(SearchPage::class))->name('search');
-    Route::get('/u/{user:username}', fn (RenderPageComponentAction $renderPage, User $user): Response => $renderPage->handle(UserPage::class, ['user' => $user]))->name('users.show');
+    Route::livewire('/', HomePage::class)->name('home');
+    Route::livewire('/discover', DiscoverPage::class)->name('discover');
+    Route::livewire('/movies', BrowseTitlesPage::class)->name('movies.index');
+    Route::livewire('/tv-shows', BrowseTitlesPage::class)->name('series.index');
+    Route::livewire('/titles', BrowseTitlesPage::class)->name('titles.index');
+    Route::livewire('/titles/{title:slug}/cast', TitlePage::class)->name('titles.cast');
+    Route::livewire('/titles/{title:slug}', TitlePage::class)->name('titles.show');
+    Route::livewire('/people', PeoplePage::class)->name('people.index');
+    Route::livewire('/people/{person:slug}', PeoplePage::class)->name('people.show');
+    Route::livewire('/genres/{genre:slug}', BrowseTitlesPage::class)->name('genres.show');
+    Route::livewire('/years/{year}', BrowseTitlesPage::class)->whereNumber('year')->name('years.show');
+    Route::livewire('/top-rated/movies', BrowseTitlesPage::class)->name('rankings.movies');
+    Route::livewire('/top-rated/series', BrowseTitlesPage::class)->name('rankings.series');
+    Route::livewire('/trending', BrowseTitlesPage::class)->name('trending');
+    Route::livewire('/trailers/latest', LatestTrailersPage::class)->name('trailers.latest');
+    Route::livewire('/reviews/latest', LatestReviewsPage::class)->name('reviews.latest');
+    Route::livewire('/search', SearchPage::class)->name('search');
+    Route::livewire('/u/{user:username}', UserPage::class)->name('users.show');
 
     Route::withoutScopedBindings()->group(function (): void {
-        Route::get('/series/{series:slug}/seasons/{season:slug}', fn (RenderPageComponentAction $renderPage, Title $series, Season $season): Response => $renderPage->handle(SeasonShowPage::class, ['series' => $series, 'season' => $season]))->name('seasons.show');
-        Route::get('/series/{series:slug}/seasons/{season:slug}/episodes/{episode:slug}', fn (RenderPageComponentAction $renderPage, Title $series, Season $season, Title $episode): Response => $renderPage->handle(EpisodeShowPage::class, ['series' => $series, 'season' => $season, 'episode' => $episode]))->name('episodes.show');
+        Route::livewire('/series/{series:slug}/seasons/{season:slug}', SeasonShowPage::class)->name('seasons.show');
+        Route::livewire('/series/{series:slug}/seasons/{season:slug}/episodes/{episode:slug}', EpisodeShowPage::class)->name('episodes.show');
     });
 
     Route::scopeBindings()->group(function (): void {
-        Route::get('/u/{user:username}/lists/{list:slug}', fn (RenderPageComponentAction $renderPage, User $user, UserList $list): Response => $renderPage->handle(UserPage::class, ['user' => $user, 'list' => $list]))->name('lists.show');
+        Route::livewire('/u/{user:username}/lists/{list:slug}', UserPage::class)->name('lists.show');
     });
 });
 
 Route::middleware('guest')->group(function (): void {
-    Route::get('/login', fn (RenderPageComponentAction $renderPage): Response => $renderPage->handle(AuthPage::class))->name('login');
-    Route::get('/register', fn (RenderPageComponentAction $renderPage): Response => $renderPage->handle(AuthPage::class))->name('register');
+    Route::livewire('/login', AuthPage::class)->name('login');
+    Route::livewire('/register', AuthPage::class)->name('register');
 });
 
 Route::middleware(['auth', 'active'])->group(function (): void {
@@ -155,10 +135,10 @@ Route::middleware(['auth', 'active'])->group(function (): void {
     })->name('logout');
 
     Route::prefix('account')->name('account.')->group(function (): void {
-        Route::get('/', fn (RenderPageComponentAction $renderPage): Response => $renderPage->handle(AccountDashboardPage::class))->name('dashboard');
-        Route::get('/watchlist', fn (RenderPageComponentAction $renderPage): Response => $renderPage->handle(AccountWatchlistPage::class))->name('watchlist');
-        Route::get('/lists', fn (RenderPageComponentAction $renderPage): Response => $renderPage->handle(AccountListsPage::class))->name('lists.index');
-        Route::get('/lists/{list}', fn (RenderPageComponentAction $renderPage): Response => $renderPage->handle(AccountListsPage::class))->name('lists.show');
+        Route::livewire('/', AccountDashboardPage::class)->name('dashboard');
+        Route::livewire('/watchlist', AccountWatchlistPage::class)->name('watchlist');
+        Route::livewire('/lists', AccountListsPage::class)->name('lists.index');
+        Route::livewire('/lists/{list}', AccountListsPage::class)->name('lists.show');
     });
 });
 

@@ -4,7 +4,7 @@ namespace App\Livewire\Pages\Admin;
 
 use App\Actions\Admin\BuildAdminTitlesIndexQueryAction;
 use App\Enums\TitleType;
-use App\Livewire\Pages\Concerns\RendersLegacyPage;
+use App\Livewire\Pages\Concerns\RendersPageView;
 use App\Models\Genre;
 use App\Models\Title;
 use Illuminate\Contracts\View\View;
@@ -14,7 +14,7 @@ use Livewire\WithPagination;
 
 class TitlesPage extends Component
 {
-    use RendersLegacyPage;
+    use RendersPageView;
     use WithPagination;
 
     public ?Title $title = null;
@@ -27,7 +27,7 @@ class TitlesPage extends Component
     public function render(BuildAdminTitlesIndexQueryAction $buildAdminTitlesIndexQuery): View
     {
         if (request()->routeIs('admin.titles.index')) {
-            return $this->renderLegacyPage('admin.titles.index', [
+            return $this->renderPageView('admin.titles.index', [
                 'titles' => $buildAdminTitlesIndexQuery
                     ->handle()
                     ->simplePaginate(20)
@@ -36,7 +36,7 @@ class TitlesPage extends Component
         }
 
         if (request()->routeIs('admin.titles.create')) {
-            return $this->renderLegacyPage('admin.titles.create', [
+            return $this->renderPageView('admin.titles.create', [
                 'title' => new Title(['is_published' => true]),
                 ...$this->formOptions(),
             ]);
@@ -44,7 +44,7 @@ class TitlesPage extends Component
 
         abort_unless($this->title instanceof Title, 404);
 
-        return $this->renderLegacyPage('admin.titles.edit', [
+        return $this->renderPageView('admin.titles.edit', [
             'title' => $this->title->load([
                 'genres:id,name',
                 'credits' => fn ($creditQuery) => $creditQuery

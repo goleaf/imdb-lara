@@ -3,17 +3,17 @@
 namespace App\Livewire\Pages\Admin;
 
 use App\Actions\Admin\GetDashboardStatsAction;
-use App\Livewire\Pages\Concerns\RendersLegacyPage;
+use App\Livewire\Pages\Concerns\RendersPageView;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
 class DashboardPage extends Component
 {
-    use RendersLegacyPage;
+    use RendersPageView;
 
     public function render(GetDashboardStatsAction $getDashboardStats): View
     {
-        return $this->renderLegacyPage('admin.dashboard', [
+        return $this->renderPageView('admin.dashboard', [
             'stats' => $getDashboardStats->handle(),
         ]);
     }

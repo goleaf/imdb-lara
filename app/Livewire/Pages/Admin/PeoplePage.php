@@ -3,7 +3,7 @@
 namespace App\Livewire\Pages\Admin;
 
 use App\Actions\Admin\BuildAdminPeopleIndexQueryAction;
-use App\Livewire\Pages\Concerns\RendersLegacyPage;
+use App\Livewire\Pages\Concerns\RendersPageView;
 use App\Models\Person;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
@@ -11,7 +11,7 @@ use Livewire\WithPagination;
 
 class PeoplePage extends Component
 {
-    use RendersLegacyPage;
+    use RendersPageView;
     use WithPagination;
 
     public ?Person $person = null;
@@ -24,7 +24,7 @@ class PeoplePage extends Component
     public function render(BuildAdminPeopleIndexQueryAction $buildAdminPeopleIndexQuery): View
     {
         if (request()->routeIs('admin.people.index')) {
-            return $this->renderLegacyPage('admin.people.index', [
+            return $this->renderPageView('admin.people.index', [
                 'people' => $buildAdminPeopleIndexQuery
                     ->handle()
                     ->simplePaginate(20)
@@ -33,14 +33,14 @@ class PeoplePage extends Component
         }
 
         if (request()->routeIs('admin.people.create')) {
-            return $this->renderLegacyPage('admin.people.create', [
+            return $this->renderPageView('admin.people.create', [
                 'person' => new Person,
             ]);
         }
 
         abort_unless($this->person instanceof Person, 404);
 
-        return $this->renderLegacyPage('admin.people.edit', [
+        return $this->renderPageView('admin.people.edit', [
             'person' => $this->person->load([
                 'professions' => fn ($professionQuery) => $professionQuery->select([
                     'id',
