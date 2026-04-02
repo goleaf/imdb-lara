@@ -193,14 +193,35 @@
 
     <div wire:loading.remove wire:target="addTitle,moveItemUp,moveItemDown,removeTitle" class="space-y-4">
         <div class="flex items-center justify-between gap-4">
-            <x-ui.heading level="h2" size="lg">List items</x-ui.heading>
+            <div class="space-y-1">
+                <x-ui.heading level="h2" size="lg">List items</x-ui.heading>
+                <x-ui.text class="text-sm text-neutral-600 dark:text-neutral-300">
+                    Drag the reorder handle to reshuffle this page, or use the move buttons for finer adjustments.
+                </x-ui.text>
+            </div>
             <x-ui.badge variant="outline" color="slate" icon="bookmark">{{ number_format($list->items_count) }} saved</x-ui.badge>
         </div>
 
-        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div wire:sort="sortItems" class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             @forelse ($items as $item)
-                <div wire:key="manage-list-item-{{ $item->id }}">
+                <div
+                    wire:key="manage-list-item-{{ $item->id }}"
+                    wire:sort:item="{{ $item->id }}"
+                    class="h-full"
+                >
                     <x-catalog.title-card :title="$item->title">
+                        <x-ui.button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            wire:sort:handle
+                            icon="bars-3"
+                            aria-label="Drag to reorder {{ $item->title->name }}"
+                            title="Drag to reorder"
+                        >
+                            Reorder
+                        </x-ui.button>
+
                         <x-ui.button
                             type="button"
                             size="sm"

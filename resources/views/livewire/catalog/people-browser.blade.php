@@ -1,14 +1,5 @@
-@php
-    $peopleSortIcons = [
-        'popular' => 'fire',
-        'name' => 'bars-arrow-down',
-        'credits' => 'film',
-        'awards' => 'trophy',
-    ];
-@endphp
-
 <div class="space-y-4">
-    <x-ui.card class="!max-w-none">
+    <x-ui.card class="sb-filter-shell !max-w-none rounded-[1.6rem] p-5">
         <div class="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.7fr)_minmax(0,0.7fr)]">
             <x-ui.field>
                 <x-ui.label>Keyword</x-ui.label>
@@ -17,6 +8,7 @@
                     name="people_search"
                     placeholder="Search names, alternate names, or keywords"
                     left-icon="magnifying-glass"
+                    class="sb-filter-control"
                 />
             </x-ui.field>
 
@@ -24,7 +16,7 @@
                 <x-ui.label>Profession</x-ui.label>
                 <x-ui.combobox
                     wire:model.live="profession"
-                    class="w-full"
+                    class="sb-filter-control w-full"
                     size="sm"
                     placeholder="All professions"
                     clearable
@@ -45,7 +37,7 @@
                 <x-ui.label>Sort</x-ui.label>
                 <x-ui.combobox
                     wire:model.live="sort"
-                    class="w-full"
+                    class="sb-filter-control w-full"
                     size="sm"
                     placeholder="Sort people"
                 >
@@ -53,7 +45,7 @@
                         <x-ui.combobox.option
                             wire:key="people-sort-{{ $sortOption['value'] }}"
                             value="{{ $sortOption['value'] }}"
-                            :icon="$peopleSortIcons[$sortOption['value']] ?? 'bars-arrow-down'"
+                            :icon="$sortOption['icon']"
                         >
                             {{ $sortOption['label'] }}
                         </x-ui.combobox.option>
@@ -65,7 +57,7 @@
 
     <div wire:loading.delay class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         @foreach (range(1, 6) as $index)
-            <x-ui.card class="!max-w-none h-full overflow-hidden" wire:key="people-browser-skeleton-{{ $index }}">
+            <x-ui.card class="sb-person-card !max-w-none h-full overflow-hidden rounded-[1.4rem]" wire:key="people-browser-skeleton-{{ $index }}">
                 <div class="space-y-4">
                     <x-ui.skeleton class="aspect-[3/4] w-full rounded-box" />
                     <x-ui.skeleton.text class="w-1/3" />
@@ -76,7 +68,7 @@
         @endforeach
     </div>
 
-    <div wire:loading.remove class="space-y-4">
+    <div wire:loading.remove class="sb-results-shell space-y-4 rounded-[1.6rem] p-4 sm:p-5">
         <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             @forelse ($people as $person)
                 <x-catalog.person-card :person="$person" />

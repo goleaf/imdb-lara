@@ -2,9 +2,13 @@
 
 namespace Tests\Feature\Feature\Account;
 
+use App\Enums\WatchState;
 use App\Livewire\Titles\RatingPanel;
 use App\Livewire\Titles\ReviewComposer;
 use App\Livewire\Titles\WatchlistToggle;
+use App\Livewire\Titles\WatchStatePanel;
+use App\Models\Episode;
+use App\Models\Season;
 use App\Models\Title;
 use App\Models\User;
 use Database\Seeders\DemoCatalogSeeder;
@@ -42,6 +46,7 @@ class WatchlistInteractionTest extends TestCase
 
         Livewire::test(WatchlistToggle::class, ['title' => $title])
             ->call('toggle')
+            ->assertDispatched('title-personal-tracking-updated')
             ->assertSet('inWatchlist', true);
 
         $this->assertDatabaseHas('list_items', [
@@ -49,7 +54,7 @@ class WatchlistInteractionTest extends TestCase
         ]);
 
         Livewire::test(RatingPanel::class, ['title' => $title])
-            ->set('score', 8)
+            ->set('form.score', 8)
             ->call('save')
             ->assertHasNoErrors();
 
@@ -60,9 +65,9 @@ class WatchlistInteractionTest extends TestCase
         ]);
 
         Livewire::test(ReviewComposer::class, ['title' => $title])
-            ->set('headline', 'Sharp, grounded sci-fi')
-            ->set('body', 'The character work keeps the whole thing moving.')
-            ->set('containsSpoilers', false)
+            ->set('form.headline', 'Sharp, grounded sci-fi')
+            ->set('form.body', 'The character work keeps the whole thing moving.')
+            ->set('form.containsSpoilers', false)
             ->call('save')
             ->assertHasNoErrors();
 
@@ -70,6 +75,72 @@ class WatchlistInteractionTest extends TestCase
             'user_id' => $user->id,
             'title_id' => $title->id,
             'headline' => 'Sharp, grounded sci-fi',
+        ]);
+    }
+
+    public function test_authenticated_user_can_toggle_watched_state_from_the_title_panel(): void
+    {
+        $user = User::factory()->create();
+        $title = Title::factory()->create();
+
+        Livewire::actingAs($user)
+            ->test(WatchStatePanel::class, ['title' => $title])
+            ->call('toggleWatched')
+            ->assertDispatched('title-personal-tracking-updated')
+            ->assertSet('watchState', WatchState::Completed)
+            ->assertSee('Marked as watched.');
+
+        $this->assertDatabaseHas('list_items', [
+            'title_id' => $title->id,
+            'watch_state' => WatchState::Completed->value,
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(WatchStatePanel::class, ['title' => $title])
+            ->call('toggleWatched')
+            ->assertDispatched('title-personal-tracking-updated')
+            ->assertSet('watchState', WatchState::Planned)
+            ->assertSee('Marked as unwatched.');
+
+        $this->assertDatabaseHas('list_items', [
+            'title_id' => $title->id,
+            'watch_state' => WatchState::Planned->value,
+            'watched_at' => null,
+        ]);
+    }
+
+    public function test_authenticated_user_can_toggle_episode_watched_state_without_marking_the_series(): void
+    {
+        $user = User::factory()->create();
+        $series = Title::factory()->series()->create();
+        $season = Season::factory()->for($series, 'series')->create([
+            'season_number' => 1,
+        ]);
+        $episode = Title::factory()->episode()->create();
+
+        Episode::factory()
+            ->for($episode, 'title')
+            ->for($series, 'series')
+            ->for($season, 'season')
+            ->create([
+                'season_number' => 1,
+                'episode_number' => 1,
+            ]);
+
+        Livewire::actingAs($user)
+            ->test(WatchStatePanel::class, ['title' => $episode])
+            ->call('toggleWatched')
+            ->assertHasNoErrors()
+            ->assertSet('watchState', WatchState::Completed)
+            ->assertSee('Marked as watched.');
+
+        $this->assertDatabaseHas('list_items', [
+            'title_id' => $episode->id,
+            'watch_state' => WatchState::Completed->value,
+        ]);
+
+        $this->assertDatabaseMissing('list_items', [
+            'title_id' => $series->id,
         ]);
     }
 }

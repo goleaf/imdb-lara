@@ -89,23 +89,10 @@ new class extends Component
         $this->profileVisibility = $user->profile_visibility->value;
         $this->showRatingsOnProfile = $user->show_ratings_on_profile;
         $this->watchlistVisibility = $watchlist->visibility->value;
-        $this->publicProfileIsLive = $user->hasVisibleProfileContent();
+        $this->publicProfileIsLive = $user->isProfileVisibleToPublic();
     }
 };
 ?>
-
-@php
-    $visibilityIcons = [
-        'public' => 'globe-alt',
-        'private' => 'lock-closed',
-    ];
-
-    $watchlistVisibilityIcons = [
-        'public' => 'globe-alt',
-        'private' => 'lock-closed',
-        'unlisted' => 'eye-slash',
-    ];
-@endphp
 
 <x-ui.card class="!max-w-none">
     <form wire:submit="save" class="space-y-4">
@@ -117,7 +104,7 @@ new class extends Component
                         <span>Profile settings</span>
                     </x-ui.heading>
                     <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                        Control the public visibility of your profile while keeping watchlist privacy managed from the watchlist page.
+                        Control whether your public profile is reachable while keeping watchlist privacy managed from the watchlist page.
                     </x-ui.text>
                 </div>
 
@@ -129,11 +116,11 @@ new class extends Component
             </div>
 
             <div class="flex flex-wrap gap-2">
-                <x-ui.badge variant="outline" color="neutral" :icon="$visibilityIcons[$profileVisibility] ?? 'globe-alt'">
-                    Profile {{ str($profileVisibility)->headline() }}
+                <x-ui.badge variant="outline" color="neutral" :icon="\App\Enums\ProfileVisibility::from($profileVisibility)->icon()">
+                    Profile {{ \App\Enums\ProfileVisibility::from($profileVisibility)->label() }}
                 </x-ui.badge>
-                <x-ui.badge variant="outline" color="neutral" :icon="$watchlistVisibilityIcons[$watchlistVisibility] ?? 'lock-closed'">
-                    Watchlist {{ str($watchlistVisibility)->headline() }}
+                <x-ui.badge variant="outline" color="neutral" :icon="\App\Enums\ListVisibility::from($watchlistVisibility)->icon()">
+                    Watchlist {{ \App\Enums\ListVisibility::from($watchlistVisibility)->label() }}
                 </x-ui.badge>
                 <x-ui.badge variant="outline" color="neutral" icon="star">
                     Ratings {{ $showRatingsOnProfile ? 'Visible' : 'Hidden' }}
@@ -185,7 +172,7 @@ new class extends Component
                 <span class="space-y-1">
                     <span class="block font-medium">Show ratings on your public profile</span>
                     <span class="block text-neutral-500 dark:text-neutral-400">
-                        Reviews, lists, and watchlist visibility continue to follow their own rules.
+                        Reviews, lists, and watchlist visibility continue to follow their own privacy rules.
                     </span>
                 </span>
             </label>

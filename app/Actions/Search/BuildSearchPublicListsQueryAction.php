@@ -3,6 +3,7 @@
 namespace App\Actions\Search;
 
 use App\Enums\ListVisibility;
+use App\Enums\MediaKind;
 use App\Models\UserList;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -31,7 +32,34 @@ class BuildSearchPublicListsQueryAction
                     ->whereHas('title', fn (Builder $titleQuery) => $titleQuery->publishedCatalog()),
             ])
             ->with([
-                'user:id,name,username',
+                'user:id,name,username,avatar_path',
+                'items' => fn ($itemQuery) => $itemQuery
+                    ->select([
+                        'id',
+                        'user_list_id',
+                        'title_id',
+                        'position',
+                    ])
+                    ->whereHas('title', fn (Builder $titleQuery) => $titleQuery->publishedCatalog())
+                    ->orderBy('position')
+                    ->limit(3)
+                    ->with([
+                        'title:id,name,slug,title_type,release_year,plot_outline',
+                        'title.mediaAssets' => fn ($mediaQuery) => $mediaQuery
+                            ->select([
+                                'id',
+                                'mediable_type',
+                                'mediable_id',
+                                'kind',
+                                'url',
+                                'alt_text',
+                                'position',
+                                'is_primary',
+                            ])
+                            ->whereIn('kind', [MediaKind::Poster, MediaKind::Backdrop])
+                            ->orderBy('position')
+                            ->limit(1),
+                    ]),
             ]);
 
         if ($search !== '') {
@@ -46,6 +74,19 @@ class BuildSearchPublicListsQueryAction
                             ->orWhere('username', 'like', '%'.$search.'%');
                     });
             });
+
+            $searchPrefix = $search.'%';
+
+            $query->orderByRaw(
+                'case
+                    when lower(name) = lower(?) then 0
+                    when lower(slug) = lower(?) then 1
+                    when lower(name) like lower(?) then 2
+                    when lower(slug) like lower(?) then 3
+                    else 4
+                end',
+                [$search, $search, $searchPrefix, $searchPrefix],
+            );
         }
 
         return $query

@@ -20,19 +20,23 @@ class ReportListForm extends Component
 
     public ?string $statusMessage = null;
 
+    public string $modalId = '';
+
     /**
-     * @var list<array{value: string, label: string}>
+     * @var list<array{value: string, label: string, icon: string}>
      */
     public array $reportReasons = [];
 
     public function mount(UserList $list): void
     {
         $this->list = $list;
+        $this->modalId = 'report-list-'.$list->id;
         $this->form->reason = ReportReason::Inaccurate->value;
         $this->reportReasons = array_map(
             static fn (ReportReason $reportReason): array => [
                 'value' => $reportReason->value,
-                'label' => str($reportReason->value)->headline()->toString(),
+                'label' => $reportReason->label(),
+                'icon' => $reportReason->icon(),
             ],
             ReportReason::cases(),
         );

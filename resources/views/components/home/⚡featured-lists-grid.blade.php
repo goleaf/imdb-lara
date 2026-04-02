@@ -54,15 +54,21 @@ new class extends Component
         </div>
     @endplaceholder
 
-    <div class="space-y-4">
-        <div class="space-y-1">
-            <x-ui.heading level="h2" size="lg" class="inline-flex items-center gap-2">
-                <x-ui.icon name="queue-list" class="size-5 text-neutral-500 dark:text-neutral-400" />
-                <span>Featured Public Lists</span>
-            </x-ui.heading>
-            <x-ui.text class="max-w-3xl text-sm text-neutral-600 dark:text-neutral-300">
-                Public member curation with title previews, curator profiles, and visible list counts.
-            </x-ui.text>
+    <div class="sb-home-section space-y-4 rounded-[1.6rem] p-4 sm:p-5">
+        <div class="flex items-start justify-between gap-4">
+            <div class="space-y-1">
+                <x-ui.heading level="h2" size="lg" class="sb-home-section-heading inline-flex items-center gap-2">
+                    <x-ui.icon name="queue-list" class="size-5 text-[#d6b574]" />
+                    <span>Featured Public Lists</span>
+                </x-ui.heading>
+                <x-ui.text class="sb-home-section-copy max-w-3xl text-sm">
+                    Public member curation with title previews, curator profiles, and visible list counts.
+                </x-ui.text>
+            </div>
+
+            <x-ui.link :href="route('public.lists.index')" variant="ghost">
+                See all lists
+            </x-ui.link>
         </div>
 
         @if ($errorMessage)
@@ -87,10 +93,6 @@ new class extends Component
         @else
             <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 @foreach ($lists as $list)
-                    @php
-                        $previewItems = $list->items->filter(fn ($item) => $item->title !== null)->take(3);
-                    @endphp
-
                     <x-ui.card class="!max-w-none h-full" wire:key="home-list-{{ $list->id }}">
                         <div class="flex h-full flex-col gap-4">
                             <div class="space-y-2">
@@ -114,23 +116,15 @@ new class extends Component
                             </div>
 
                             <div class="grid grid-cols-3 gap-2">
-                                @forelse ($previewItems as $item)
-                                    @php
-                                        $poster = \App\Models\MediaAsset::preferredFrom(
-                                            $item->title->mediaAssets,
-                                            \App\Enums\MediaKind::Poster,
-                                            \App\Enums\MediaKind::Backdrop,
-                                        );
-                                    @endphp
-
+                                @forelse ($list->previewItems() as $item)
                                     <a
                                         href="{{ route('public.titles.show', $item->title) }}"
                                         class="group overflow-hidden rounded-box border border-black/5 bg-neutral-100 dark:border-white/10 dark:bg-neutral-800"
                                     >
-                                        @if ($poster)
+                                        @if ($item->title->preferredPoster())
                                             <img
-                                                src="{{ $poster->url }}"
-                                                alt="{{ $poster->alt_text ?: $item->title->name }}"
+                                                src="{{ $item->title->preferredPoster()->url }}"
+                                                alt="{{ $item->title->preferredPoster()->alt_text ?: $item->title->name }}"
                                                 class="aspect-[2/3] w-full object-cover transition duration-300 group-hover:scale-[1.02]"
                                                 loading="lazy"
                                             >
@@ -149,9 +143,9 @@ new class extends Component
                                 @endforelse
                             </div>
 
-                            @if ($previewItems->isNotEmpty())
+                            @if ($list->previewItems()->isNotEmpty())
                                 <div class="flex flex-wrap gap-2 text-sm text-neutral-500 dark:text-neutral-400">
-                                    @foreach ($previewItems as $item)
+                                    @foreach ($list->previewItems() as $item)
                                         <span>{{ $item->title->name }}</span>
                                     @endforeach
                                 </div>

@@ -5,6 +5,7 @@ namespace App\Http\Requests\Admin;
 use App\Enums\MediaKind;
 use App\Models\MediaAsset;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\File;
@@ -50,9 +51,23 @@ class StoreMediaAssetRequest extends FormRequest
     {
         return [
             function (Validator $validator): void {
+                $this->validateAllowedKind($validator);
                 $this->validateSourceRequirements($validator);
             },
         ];
+    }
+
+    private function validateAllowedKind(Validator $validator): void
+    {
+        $kind = MediaKind::tryFrom((string) $this->input('kind'));
+
+        if ($kind === null) {
+            return;
+        }
+
+        if (! in_array($kind->value, MediaKind::allowedValuesForMediable($this->mediable()), true)) {
+            $validator->errors()->add('kind', 'That media type is not supported for this record.');
+        }
     }
 
     private function validateSourceRequirements(Validator $validator): void
@@ -81,5 +96,12 @@ class StoreMediaAssetRequest extends FormRequest
         if (! $hasFile && ! $hasUrl) {
             $validator->errors()->add('url', 'Provide either an uploaded image or a remote media URL.');
         }
+    }
+
+    private function mediable(): ?Model
+    {
+        $mediable = $this->route('title') ?? $this->route('person');
+
+        return $mediable instanceof Model ? $mediable : null;
     }
 }

@@ -19,20 +19,24 @@ class SearchExperienceTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_search_page_groups_titles_people_and_lists_for_a_query(): void
+    public function test_search_page_highlights_top_matches_with_titles_and_people_lanes(): void
     {
         [$movie, $series] = $this->seedSearchDataset();
 
         $this->get(route('public.search', ['q' => 'Signal']))
             ->assertOk()
-            ->assertSee('Search')
-            ->assertSee('Title Results')
+            ->assertSee('Search Results')
+            ->assertSee('Top Match')
+            ->assertSee('Best title match')
+            ->assertSee('Search Lanes')
+            ->assertSee('Titles')
             ->assertSee('People')
             ->assertSee('Lists')
             ->assertSee($movie->name)
             ->assertSee($series->name)
             ->assertSee('Ava Signal')
-            ->assertSee('Signal Essentials');
+            ->assertSee('Signal Essentials')
+            ->assertDontSee('Signal Draft Vault');
     }
 
     public function test_search_matches_translated_titles_and_supports_advanced_title_filters(): void
@@ -59,9 +63,9 @@ class SearchExperienceTest extends TestCase
         ]))
             ->assertOk()
             ->assertSee($series->name)
-            ->assertDontSee($movie->name)
-            ->assertDontSee($endedSeries->name)
-            ->assertDontSee($upcomingSeries->name);
+            ->assertDontSee(route('public.titles.show', $movie), false)
+            ->assertDontSee(route('public.titles.show', $endedSeries), false)
+            ->assertDontSee(route('public.titles.show', $upcomingSeries), false);
     }
 
     public function test_search_page_shows_a_no_results_state_when_nothing_matches(): void
@@ -187,21 +191,28 @@ class SearchExperienceTest extends TestCase
             'name' => 'Signal Curator',
             'username' => 'signal-curator',
         ]);
-        $list = UserList::factory()->public()->for($curator)->create([
+
+        $publicList = UserList::factory()->public()->for($curator)->create([
             'name' => 'Signal Essentials',
             'slug' => 'signal-essentials',
-            'description' => 'A public list of signal-driven stories.',
+            'description' => 'A public list of essential signal stories.',
             'visibility' => ListVisibility::Public,
         ]);
-        ListItem::factory()->for($list, 'userList')->for($movie, 'title')->create([
+        ListItem::factory()->for($publicList, 'userList')->for($movie, 'title')->create([
             'position' => 1,
         ]);
+        ListItem::factory()->for($publicList, 'userList')->for($series, 'title')->create([
+            'position' => 2,
+        ]);
 
-        UserList::factory()->for($curator)->create([
-            'name' => 'Signal Private Cuts',
-            'slug' => 'signal-private-cuts',
-            'description' => 'Should not appear in public search.',
+        $privateList = UserList::factory()->for($curator)->create([
+            'name' => 'Signal Draft Vault',
+            'slug' => 'signal-draft-vault',
+            'description' => 'A private draft signal list.',
             'visibility' => ListVisibility::Private,
+        ]);
+        ListItem::factory()->for($privateList, 'userList')->for($movie, 'title')->create([
+            'position' => 1,
         ]);
 
         return [$movie, $series, $endedSeries, $upcomingSeries];

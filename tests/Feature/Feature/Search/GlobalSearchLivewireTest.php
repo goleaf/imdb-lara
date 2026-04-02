@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Feature\Search;
 
-use App\Enums\ListVisibility;
 use App\Livewire\Search\GlobalSearch;
 use App\Models\ListItem;
 use App\Models\Person;
@@ -19,7 +18,7 @@ class GlobalSearchLivewireTest extends TestCase
 
     public function test_global_search_shows_grouped_live_suggestions_and_redirects_to_full_results(): void
     {
-        $title = Title::factory()->create([
+        Title::factory()->create([
             'name' => 'Northern Signal',
             'search_keywords' => 'signal, sci-fi',
             'is_published' => true,
@@ -30,14 +29,20 @@ class GlobalSearchLivewireTest extends TestCase
             'search_keywords' => 'signal',
             'is_published' => true,
         ]);
-        $owner = User::factory()->create([
-            'username' => 'signal-owner',
+        $curator = User::factory()->create([
+            'name' => 'Signal Curator',
+            'username' => 'signal-curator',
         ]);
-        $list = UserList::factory()->public()->for($owner)->create([
+        $publicList = UserList::factory()->public()->for($curator)->create([
             'name' => 'Signal Essentials',
-            'visibility' => ListVisibility::Public,
+            'slug' => 'signal-essentials',
         ]);
-        ListItem::factory()->for($list, 'userList')->for($title, 'title')->create();
+        ListItem::factory()->for($publicList, 'userList')->create();
+        $privateList = UserList::factory()->for($curator)->create([
+            'name' => 'Signal Draft Vault',
+            'slug' => 'signal-draft-vault',
+        ]);
+        ListItem::factory()->for($privateList, 'userList')->create();
 
         Livewire::test(GlobalSearch::class)
             ->set('query', 'Signal')
@@ -47,6 +52,7 @@ class GlobalSearchLivewireTest extends TestCase
             ->assertSee('Northern Signal')
             ->assertSee('Ava Signal')
             ->assertSee('Signal Essentials')
+            ->assertDontSee('Signal Draft Vault')
             ->call('submitSearch')
             ->assertRedirect(route('public.search', ['q' => 'Signal']));
     }

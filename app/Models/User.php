@@ -157,32 +157,32 @@ class User extends Authenticatable
 
     public function canAccessAdminPanel(): bool
     {
-        return $this->role?->canAccessAdminPanel() ?? false;
+        return $this->isActive() && ($this->role?->canAccessAdminPanel() ?? false);
     }
 
     public function canManageCatalog(): bool
     {
-        return $this->role?->canManageCatalog() ?? false;
+        return $this->isActive() && ($this->role?->canManageCatalog() ?? false);
     }
 
     public function canModerateContent(): bool
     {
-        return $this->role?->canModerateContent() ?? false;
+        return $this->isActive() && ($this->role?->canModerateContent() ?? false);
     }
 
     public function canSubmitContributions(): bool
     {
-        return $this->role?->canSubmitContributions() ?? false;
+        return $this->isActive() && ($this->role?->canSubmitContributions() ?? false);
     }
 
     public function canReviewContributions(): bool
     {
-        return $this->role?->canReviewContributions() ?? false;
+        return $this->isActive() && ($this->role?->canReviewContributions() ?? false);
     }
 
     public function canManageMedia(): bool
     {
-        return $this->role?->canManageMedia() ?? false;
+        return $this->isActive() && ($this->role?->canManageMedia() ?? false);
     }
 
     public function isActive(): bool
@@ -202,6 +202,11 @@ class User extends Authenticatable
     public function showsRatingsOnProfile(): bool
     {
         return $this->show_ratings_on_profile;
+    }
+
+    public function isProfileVisibleToPublic(): bool
+    {
+        return $this->isProfilePublic();
     }
 
     public function hasVisibleProfileContent(): bool

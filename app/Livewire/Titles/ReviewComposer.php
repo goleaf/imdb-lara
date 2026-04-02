@@ -18,11 +18,7 @@ class ReviewComposer extends Component
 
     public Title $title;
 
-    public string $headline = '';
-
-    public string $body = '';
-
-    public bool $containsSpoilers = false;
+    public string $anchorId = 'title-review';
 
     public ReviewForm $form;
 
@@ -38,22 +34,7 @@ class ReviewComposer extends Component
             $this->review = $getUserReviewForTitle->handle(auth()->user(), $title);
         }
 
-        $this->syncPublicFields();
-    }
-
-    public function updatedHeadline(string $value): void
-    {
-        $this->form->headline = $value;
-    }
-
-    public function updatedBody(string $value): void
-    {
-        $this->form->body = $value;
-    }
-
-    public function updatedContainsSpoilers(bool $value): void
-    {
-        $this->form->containsSpoilers = $value;
+        $this->syncForm();
     }
 
     public function save(StoreReviewAction $storeReview): void
@@ -86,7 +67,6 @@ class ReviewComposer extends Component
 
         $this->review = null;
         $this->form->resetForm();
-        $this->syncPublicFields();
         $this->statusMessage = 'Review deleted.';
         $this->title->refresh()->load('statistic');
         $this->dispatch('title-review-updated');
@@ -94,7 +74,15 @@ class ReviewComposer extends Component
 
     public function render()
     {
-        return view('livewire.titles.review-composer');
+        return view('livewire.titles.review-composer', [
+            'reviewSavedAt' => $this->review?->edited_at ?? $this->review?->created_at,
+            'reviewStatusBadge' => $this->review?->status
+                ? [
+                    'color' => $this->review->status->badgeColor(),
+                    'label' => $this->review->status->label(),
+                ]
+                : null,
+        ]);
     }
 
     private function storeReview(StoreReviewAction $storeReview, ReviewStatus $requestedStatus): void
@@ -125,15 +113,12 @@ class ReviewComposer extends Component
         };
 
         $this->title->refresh()->load('statistic');
-        $this->syncPublicFields();
+        $this->syncForm();
         $this->dispatch('title-review-updated');
     }
 
-    private function syncPublicFields(): void
+    private function syncForm(): void
     {
         $this->form->fillFromReview($this->review);
-        $this->headline = $this->form->headline;
-        $this->body = $this->form->body;
-        $this->containsSpoilers = $this->form->containsSpoilers;
     }
 }

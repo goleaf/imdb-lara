@@ -44,7 +44,10 @@
 
             <form method="POST" action="{{ route('admin.seasons.episodes.store', $season) }}" class="space-y-4">
                 @csrf
-                @include('admin.episodes._form', ['episode' => new \App\Models\Episode(['season_number' => $season->season_number])])
+                @include('admin.episodes._form', [
+                    'episode' => new \App\Models\Episode(['season_number' => $season->season_number]),
+                    'fieldPrefix' => 'episode',
+                ])
                 <div>
                     <x-ui.button type="submit" icon="plus">Add episode</x-ui.button>
                 </div>

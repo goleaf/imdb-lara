@@ -7,10 +7,13 @@ use App\Actions\Titles\SetUserWatchStateForTitleAction;
 use App\Enums\WatchState;
 use App\Models\Title;
 use Illuminate\Support\Carbon;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class WatchStatePanel extends Component
 {
+    protected GetUserWatchStateForTitleAction $getUserWatchStateForTitle;
+
     public Title $title;
 
     public ?WatchState $watchState = null;
@@ -21,15 +24,29 @@ class WatchStatePanel extends Component
 
     public ?string $statusMessage = null;
 
-    public function mount(Title $title, GetUserWatchStateForTitleAction $getUserWatchStateForTitle): void
+    public function boot(GetUserWatchStateForTitleAction $getUserWatchStateForTitle): void
+    {
+        $this->getUserWatchStateForTitle = $getUserWatchStateForTitle;
+    }
+
+    public function mount(Title $title): void
     {
         $this->title = $title;
+        $this->refreshTrackingState();
+    }
 
+    #[On('title-personal-tracking-updated')]
+    public function refreshTrackingState(): void
+    {
         if (! auth()->check()) {
+            $this->watchState = null;
+            $this->startedAt = null;
+            $this->watchedAt = null;
+
             return;
         }
 
-        $watchStateData = $getUserWatchStateForTitle->handle(auth()->user(), $title);
+        $watchStateData = $this->getUserWatchStateForTitle->handle(auth()->user(), $this->title);
 
         $this->watchState = $watchStateData['state'] ?? null;
         $this->startedAt = $watchStateData['started_at'] ?? null;
@@ -51,6 +68,7 @@ class WatchStatePanel extends Component
         $this->watchedAt = $watchlistEntry->watched_at;
         $this->statusMessage = 'Marked as watched.';
         $this->title->refresh()->load('statistic');
+        $this->dispatch('title-personal-tracking-updated');
     }
 
     public function toggleWatched(SetUserWatchStateForTitleAction $setUserWatchState): void
@@ -74,6 +92,7 @@ class WatchStatePanel extends Component
             ? 'Marked as watched.'
             : 'Marked as unwatched.';
         $this->title->refresh()->load('statistic');
+        $this->dispatch('title-personal-tracking-updated');
     }
 
     public function render()

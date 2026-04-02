@@ -11,26 +11,22 @@
 @endsection
 
 @section('content')
-    @php
-        $episodeCount = $episodeRows->count();
-    @endphp
-
     <section class="space-y-6">
-        <x-ui.card class="!max-w-none overflow-hidden p-0">
+        <x-ui.card class="sb-detail-hero sb-season-browser-hero !max-w-none overflow-hidden p-0" data-slot="season-browser-hero">
             <div class="relative">
                 @if ($backdrop)
                     <img
                         src="{{ $backdrop->url }}"
                         alt="{{ $backdrop->alt_text ?: $series->name }}"
-                        class="absolute inset-0 h-full w-full object-cover opacity-20"
+                        class="absolute inset-0 h-full w-full object-cover opacity-24"
                     >
-                    <div class="absolute inset-0 bg-linear-to-r from-white via-white/95 to-white/85 dark:from-neutral-950 dark:via-neutral-950/95 dark:to-neutral-950/85"></div>
+                    <div class="absolute inset-0 bg-[linear-gradient(112deg,rgba(10,10,9,0.95),rgba(10,10,9,0.84),rgba(10,10,9,0.54))]"></div>
                 @else
-                    <div class="absolute inset-0 bg-linear-to-br from-neutral-100 via-white to-neutral-50 dark:from-neutral-950 dark:via-neutral-900 dark:to-neutral-950"></div>
+                    <div class="absolute inset-0 bg-[linear-gradient(135deg,rgba(12,11,10,0.98),rgba(10,10,9,0.96))]"></div>
                 @endif
 
                 <div class="relative grid gap-6 p-6 xl:grid-cols-[14rem_minmax(0,1fr)]">
-                    <div class="overflow-hidden rounded-box border border-black/5 bg-neutral-100 shadow-sm dark:border-white/10 dark:bg-neutral-800">
+                    <div class="sb-season-browser-poster overflow-hidden rounded-[1.3rem] border border-black/5 bg-neutral-100 shadow-sm dark:border-white/10 dark:bg-neutral-800">
                         @if ($poster)
                             <img
                                 src="{{ $poster->url }}"
@@ -44,25 +40,32 @@
                         @endif
                     </div>
 
-                    <div class="space-y-6">
+                    <div class="sb-season-browser-panel space-y-6">
                         <div class="space-y-4">
-                            <div class="flex flex-wrap items-center gap-2">
-                                <x-ui.badge variant="outline" icon="tv">{{ $series->name }}</x-ui.badge>
-                                <x-ui.badge variant="outline" color="slate" icon="rectangle-stack">Season {{ $season->season_number }}</x-ui.badge>
-                                <x-ui.badge variant="outline" color="neutral" icon="rectangle-stack">{{ number_format($episodeCount) }} episodes</x-ui.badge>
+                            <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+                                <span class="sb-season-browser-kicker">Season browser</span>
+                                <span class="sb-cast-meta-item">{{ $series->name }}</span>
+                                <span class="sb-cast-meta-item">Season {{ $season->season_number }}</span>
+                                <span class="sb-cast-meta-item">{{ number_format($episodeCount) }} episodes</span>
                                 @if ($season->release_year)
-                                    <a href="{{ route('public.years.show', ['year' => $season->release_year]) }}">
-                                        <x-ui.badge variant="outline" color="neutral" icon="calendar-days">{{ $season->release_year }}</x-ui.badge>
+                                    <a href="{{ route('public.years.show', ['year' => $season->release_year]) }}" class="sb-cast-meta-item">
+                                        {{ $season->release_year }}
                                     </a>
                                 @endif
                                 @if ($airedRangeLabel)
-                                    <x-ui.badge variant="outline" color="neutral" icon="calendar-days">{{ $airedRangeLabel }}</x-ui.badge>
+                                    <span class="sb-cast-meta-item">{{ $airedRangeLabel }}</span>
+                                @endif
+                                @if ($series->statistic?->average_rating)
+                                    <span class="sb-cast-meta-item sb-cast-meta-item--rating">
+                                        <x-ui.icon name="star" class="size-4" />
+                                        {{ number_format((float) $series->statistic->average_rating, 1) }}
+                                    </span>
                                 @endif
                             </div>
 
                             <div class="space-y-2">
-                                <x-ui.heading level="h1" size="xl">{{ $season->name }}</x-ui.heading>
-                                <x-ui.text class="max-w-4xl text-base text-neutral-700 dark:text-neutral-200">
+                                <x-ui.heading level="h1" size="xl" class="sb-detail-title">{{ $series->name }} — {{ $season->name }}</x-ui.heading>
+                                <x-ui.text class="sb-detail-copy max-w-4xl text-base">
                                     {{ $season->summary ?: 'Episode order, release chronology, and audience signals for this season.' }}
                                 </x-ui.text>
                             </div>
@@ -85,33 +88,24 @@
                         </div>
 
                         <div class="grid gap-3 sm:grid-cols-3">
-                            <div class="rounded-box border border-black/5 bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
-                                <div class="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-neutral-500 dark:text-neutral-400">
-                                    <x-ui.icon name="rectangle-stack" class="size-4" />
-                                    <span>Season episodes</span>
-                                </div>
-                                <div class="mt-2 text-2xl font-semibold">{{ number_format($episodeCount) }}</div>
-                                <div class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">Published in the public guide</div>
+                            <div class="sb-season-browser-stat">
+                                <div class="sb-cast-summary-label">Season episodes</div>
+                                <div class="sb-cast-summary-value">{{ number_format($episodeCount) }}</div>
+                                <div class="sb-cast-summary-copy">Published in this binge guide.</div>
                             </div>
-                            <div class="rounded-box border border-black/5 bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
-                                <div class="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-neutral-500 dark:text-neutral-400">
-                                    <x-ui.icon name="star" class="size-4" />
-                                    <span>Series audience score</span>
-                                </div>
-                                <div class="mt-2 text-2xl font-semibold">
+                            <div class="sb-season-browser-stat">
+                                <div class="sb-cast-summary-label">Series audience score</div>
+                                <div class="sb-cast-summary-value">
                                     {{ $series->statistic?->average_rating ? number_format((float) $series->statistic->average_rating, 1) : 'N/A' }}
                                 </div>
-                                <div class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
-                                    {{ number_format((int) ($series->statistic?->rating_count ?? 0)) }} total series ratings
-                                </div>
+                                <div class="sb-cast-summary-copy">{{ number_format((int) ($series->statistic?->rating_count ?? 0)) }} total series ratings</div>
                             </div>
-                            <div class="rounded-box border border-black/5 bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
-                                <div class="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-neutral-500 dark:text-neutral-400">
-                                    <x-ui.icon name="list-bullet" class="size-4" />
-                                    <span>Season navigation</span>
+                            <div class="sb-season-browser-stat">
+                                <div class="sb-cast-summary-label">Average runtime</div>
+                                <div class="sb-cast-summary-value">
+                                    {{ $currentSeasonRuntimeAverage ? number_format((float) $currentSeasonRuntimeAverage, 0) : 'N/A' }}
                                 </div>
-                                <div class="mt-2 text-2xl font-semibold">{{ number_format($seasonNavigation->count()) }}</div>
-                                <div class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">Published seasons in this run</div>
+                                <div class="sb-cast-summary-copy">Minutes per episode in this run.</div>
                             </div>
                         </div>
                     </div>
@@ -119,32 +113,30 @@
             </div>
         </x-ui.card>
 
-        <x-ui.card class="!max-w-none">
+        <x-ui.card class="sb-detail-section sb-season-nav-shell !max-w-none" data-slot="season-browser-navigation">
             <div class="space-y-4">
                 <div class="flex flex-wrap items-center justify-between gap-4">
                     <div>
-                        <x-ui.heading level="h2" size="lg" class="inline-flex items-center gap-2">
-                            <x-ui.icon name="list-bullet" class="size-5 text-neutral-500 dark:text-neutral-400" />
-                            <span>Season navigation</span>
-                        </x-ui.heading>
+                        <div class="sb-cast-section-label">Season navigation</div>
+                        <x-ui.heading level="h2" size="lg" class="mt-2">Choose a season</x-ui.heading>
                         <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                            Jump between seasons without losing the current series context.
+                            Jump between seasons without leaving the current series and keep the episode browser anchored below.
                         </x-ui.text>
                     </div>
 
                     <x-ui.badge variant="outline" color="neutral" icon="rectangle-stack">{{ number_format($seasonNavigation->count()) }} seasons</x-ui.badge>
                 </div>
 
-                <div class="flex flex-wrap gap-2">
+                <div class="sb-season-nav-row">
                     @foreach ($seasonNavigation as $navigationSeason)
-                        <a href="{{ route('public.seasons.show', ['series' => $series, 'season' => $navigationSeason]) }}">
-                            <x-ui.badge
-                                variant="outline"
-                                icon="rectangle-stack"
-                                :color="$navigationSeason->is($season) ? 'green' : 'neutral'"
-                            >
-                                Season {{ $navigationSeason->season_number }}
-                            </x-ui.badge>
+                        <a
+                            href="{{ route('public.seasons.show', ['series' => $series, 'season' => $navigationSeason]) }}"
+                            class="sb-season-nav-pill{{ $navigationSeason->is($season) ? ' sb-season-nav-pill--active' : '' }}"
+                        >
+                            <span class="sb-season-nav-pill-title">Season {{ $navigationSeason->season_number }}</span>
+                            <span class="sb-season-nav-pill-meta">
+                                {{ number_format((int) $navigationSeason->episodes_count) }} episodes
+                            </span>
                         </a>
                     @endforeach
                 </div>
@@ -155,16 +147,14 @@
             <div class="space-y-6">
                 <livewire:seasons.watch-progress-panel :series="$series" :season="$season" :key="'season-progress-'.$season->id" />
 
-                <x-ui.card class="!max-w-none">
+                <x-ui.card class="sb-detail-section sb-episode-browser-shell !max-w-none" data-slot="season-browser-episodes">
                     <div class="space-y-4">
                         <div class="flex items-center justify-between gap-4">
                             <div>
-                                <x-ui.heading level="h2" size="lg" class="inline-flex items-center gap-2">
-                                    <x-ui.icon name="list-bullet" class="size-5 text-neutral-500 dark:text-neutral-400" />
-                                    <span>Episode guide</span>
-                                </x-ui.heading>
+                                <div class="sb-cast-section-label">Episode browser</div>
+                                <x-ui.heading level="h2" size="lg" class="mt-2">Episode list</x-ui.heading>
                                 <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                    Ratings, summaries, release timing, and quick access for every published episode in this season.
+                                    Still images, release timing, ratings, and short synopsis copy arranged for fast binge planning.
                                 </x-ui.text>
                             </div>
 
@@ -173,104 +163,111 @@
 
                         <div class="grid gap-3">
                             @forelse ($episodeRows as $episodeMeta)
-                                @php
-                                    $episodeTitle = $episodeMeta->title;
-                                    $watchState = $watchStatesByTitle->get($episodeMeta->title_id);
-                                    $watchStateColor = match ($watchState) {
-                                        'completed' => 'green',
-                                        'watching' => 'slate',
-                                        'paused', 'dropped' => 'amber',
-                                        default => 'neutral',
-                                    };
-                                @endphp
+                                <article class="sb-episode-row">
+                                    <a
+                                        href="{{ route('public.episodes.show', ['series' => $series, 'season' => $season, 'episode' => $episodeMeta->title]) }}"
+                                        class="sb-episode-media"
+                                    >
+                                        @if ($episodeMeta->title->preferredDisplayImage() ?? $backdrop ?? $poster)
+                                            <img
+                                                src="{{ ($episodeMeta->title->preferredDisplayImage() ?? $backdrop ?? $poster)->url }}"
+                                                alt="{{ ($episodeMeta->title->preferredDisplayImage() ?? $backdrop ?? $poster)->alt_text ?: $episodeMeta->title->name }}"
+                                                class="sb-episode-media-image"
+                                                loading="lazy"
+                                            >
+                                        @else
+                                            <div class="sb-episode-media-empty">
+                                                <x-ui.icon name="photo" class="size-10" />
+                                            </div>
+                                        @endif
+                                    </a>
 
-                                <x-ui.card class="!max-w-none">
-                                    <div class="space-y-4">
-                                        <div class="flex flex-wrap items-start justify-between gap-4">
-                                            <div class="space-y-3">
-                                                <div class="flex flex-wrap items-center gap-2">
-                                                    <x-ui.badge variant="outline" color="slate" icon="rectangle-stack">
-                                                        S{{ str_pad((string) $episodeMeta->season_number, 2, '0', STR_PAD_LEFT) }}E{{ str_pad((string) $episodeMeta->episode_number, 2, '0', STR_PAD_LEFT) }}
-                                                    </x-ui.badge>
-                                                    @if ($episodeMeta->aired_at)
-                                                        <x-ui.badge variant="outline" color="neutral" icon="calendar-days">
-                                                            {{ $episodeMeta->aired_at->format('M j, Y') }}
-                                                        </x-ui.badge>
-                                                    @endif
-                                                    @if ($episodeTitle->runtime_minutes)
-                                                        <x-ui.badge variant="outline" color="neutral" icon="clock">{{ $episodeTitle->runtime_minutes }} min</x-ui.badge>
-                                                    @endif
-                                                    @if ($episodeTitle->statistic?->average_rating)
-                                                        <x-ui.badge icon="star" color="amber">
-                                                            {{ number_format((float) $episodeTitle->statistic->average_rating, 1) }}/10
-                                                        </x-ui.badge>
-                                                    @endif
-                                                    @auth
-                                                        @if ($watchState)
-                                                            <x-ui.badge
-                                                                variant="outline"
-                                                                :color="$watchStateColor"
-                                                                :icon="match ($watchState) {
-                                                                    'completed' => 'check-circle',
-                                                                    'watching' => 'play-circle',
-                                                                    'paused' => 'pause-circle',
-                                                                    'dropped' => 'x-circle',
-                                                                    default => 'bookmark',
-                                                                }"
-                                                            >
-                                                                {{ str($watchState)->headline() }}
-                                                            </x-ui.badge>
-                                                        @endif
-                                                    @endauth
-                                                </div>
-
-                                                <div class="space-y-2">
-                                                    <x-ui.heading level="h3" size="md">
-                                                        <a href="{{ route('public.episodes.show', ['series' => $series, 'season' => $season, 'episode' => $episodeTitle]) }}" class="hover:opacity-80">
-                                                            {{ $episodeTitle->name }}
-                                                        </a>
-                                                    </x-ui.heading>
-                                                    <x-ui.text class="text-sm text-neutral-600 dark:text-neutral-300">
-                                                        {{ $episodeTitle->plot_outline ?: 'No public synopsis is available for this episode yet.' }}
-                                                    </x-ui.text>
-                                                </div>
-
-                                                @if ($episodeTitle->credits->isNotEmpty())
-                                                    <div class="flex flex-wrap gap-2 text-sm text-neutral-500 dark:text-neutral-400">
-                                                        <span class="inline-flex items-center gap-1.5 font-medium text-neutral-700 dark:text-neutral-200">
-                                                            <x-ui.icon name="users" class="size-4 text-neutral-500 dark:text-neutral-400" />
-                                                            <span>Guest cast:</span>
-                                                        </span>
-                                                        @foreach ($episodeTitle->credits->take(3) as $credit)
-                                                            <a href="{{ route('public.people.show', $credit->person) }}" class="hover:opacity-80">
-                                                                {{ $credit->person->name }}
-                                                            </a>
-                                                        @endforeach
-                                                    </div>
+                                    <div class="min-w-0 space-y-3">
+                                        <div class="sb-episode-primary-bar">
+                                            <div class="flex flex-wrap items-center gap-2">
+                                                <span class="sb-episode-meta-pill sb-episode-meta-pill--number">
+                                                    Episode {{ $episodeMeta->episode_number }}
+                                                </span>
+                                                @if ($episodeMeta->title->statistic?->average_rating)
+                                                    <span class="sb-episode-meta-pill sb-episode-meta-pill--rating">
+                                                        <x-ui.icon name="star" class="size-4" />
+                                                        {{ number_format((float) $episodeMeta->title->statistic->average_rating, 1) }}
+                                                    </span>
                                                 @endif
+                                                @auth
+                                                    @if ($watchStatesByTitle->has($episodeMeta->title_id))
+                                                        <x-ui.badge
+                                                            variant="outline"
+                                                            :color="$watchStatesByTitle->get($episodeMeta->title_id)->color()"
+                                                            :icon="$watchStatesByTitle->get($episodeMeta->title_id)->icon()"
+                                                        >
+                                                            {{ $watchStatesByTitle->get($episodeMeta->title_id)->label() }}
+                                                        </x-ui.badge>
+                                                    @endif
+                                                @endauth
                                             </div>
 
-                                            <x-ui.link :href="route('public.episodes.show', ['series' => $series, 'season' => $season, 'episode' => $episodeTitle])" variant="ghost" iconAfter="arrow-right">
+                                            <x-ui.link
+                                                :href="route('public.episodes.show', ['series' => $series, 'season' => $season, 'episode' => $episodeMeta->title])"
+                                                variant="ghost"
+                                                iconAfter="arrow-right"
+                                                class="sb-episode-link"
+                                            >
                                                 View episode
                                             </x-ui.link>
                                         </div>
 
-                                        <div class="grid gap-3 sm:grid-cols-3 text-sm text-neutral-500 dark:text-neutral-400">
-                                            <div class="inline-flex items-center gap-1.5">
-                                                <x-ui.icon name="star" class="size-4" />
-                                                <span>{{ number_format((int) ($episodeTitle->statistic?->rating_count ?? 0)) }} ratings</span>
+                                        <div class="space-y-2">
+                                            <x-ui.heading level="h3" size="md" class="sb-episode-title">
+                                                <a href="{{ route('public.episodes.show', ['series' => $series, 'season' => $season, 'episode' => $episodeMeta->title]) }}" class="hover:opacity-80">
+                                                    {{ $episodeMeta->title->name }}
+                                                </a>
+                                            </x-ui.heading>
+
+                                            <div class="sb-episode-facts">
+                                                @if ($episodeMeta->aired_at)
+                                                    <span>{{ $episodeMeta->aired_at->format('M j, Y') }}</span>
+                                                @endif
+                                                @if ($episodeMeta->title->runtime_minutes)
+                                                    <span>{{ $episodeMeta->title->runtime_minutes }} min</span>
+                                                @endif
+                                                <span>{{ number_format((int) ($episodeMeta->title->statistic?->rating_count ?? 0)) }} ratings</span>
                                             </div>
-                                            <div class="inline-flex items-center gap-1.5">
-                                                <x-ui.icon name="chat-bubble-left-right" class="size-4" />
-                                                <span>{{ number_format((int) ($episodeTitle->statistic?->review_count ?? 0)) }} reviews</span>
+
+                                            <x-ui.text class="sb-episode-copy">
+                                                {{ $episodeMeta->title->plot_outline ?: 'No public synopsis is available for this episode yet.' }}
+                                            </x-ui.text>
+                                        </div>
+
+                                        <div class="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
+                                            <div class="flex flex-wrap gap-3 text-sm text-neutral-500 dark:text-neutral-400">
+                                                <span class="inline-flex items-center gap-1.5">
+                                                    <x-ui.icon name="star" class="size-4" />
+                                                    <span>{{ number_format((int) ($episodeMeta->title->statistic?->rating_count ?? 0)) }} ratings</span>
+                                                </span>
+                                                <span class="inline-flex items-center gap-1.5">
+                                                    <x-ui.icon name="chat-bubble-left-right" class="size-4" />
+                                                    <span>{{ number_format((int) ($episodeMeta->title->statistic?->review_count ?? 0)) }} reviews</span>
+                                                </span>
+                                                <span class="inline-flex items-center gap-1.5">
+                                                    <x-ui.icon name="bookmark" class="size-4" />
+                                                    <span>{{ number_format((int) ($episodeMeta->title->statistic?->watchlist_count ?? 0)) }} watchlists</span>
+                                                </span>
                                             </div>
-                                            <div class="inline-flex items-center gap-1.5">
-                                                <x-ui.icon name="bookmark" class="size-4" />
-                                                <span>{{ number_format((int) ($episodeTitle->statistic?->watchlist_count ?? 0)) }} watchlists</span>
-                                            </div>
+
+                                            @if ($episodeMeta->title->credits->isNotEmpty())
+                                                <div class="sb-episode-guest-cast">
+                                                    <span class="font-medium text-neutral-700 dark:text-neutral-200">Guest cast:</span>
+                                                    @foreach ($episodeMeta->title->credits->take(3) as $credit)
+                                                        <a href="{{ route('public.people.show', $credit->person) }}" class="hover:opacity-80">
+                                                            {{ $credit->person->name }}
+                                                        </a>@if (! $loop->last), @endif
+                                                    @endforeach
+                                                </div>
+                                            @endif
                                         </div>
                                     </div>
-                                </x-ui.card>
+                                </article>
                             @empty
                                 <x-ui.empty class="rounded-box border border-dashed border-black/10 bg-white dark:border-white/10 dark:bg-neutral-900">
                                     <x-ui.empty.media>

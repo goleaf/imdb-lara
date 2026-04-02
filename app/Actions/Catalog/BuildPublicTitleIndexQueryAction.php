@@ -27,8 +27,11 @@ class BuildPublicTitleIndexQueryAction
      *     language?: string|null,
      *     country?: string|null,
      *     runtime?: string|null,
+     *     awards?: string|null,
      *     status?: string|null,
-     *     excludeEpisodes?: bool
+     *     excludeEpisodes?: bool,
+     *     includePresentationRelations?: bool,
+     *     includePublishedReviewCount?: bool
      * }  $filters
      */
     public function handle(array $filters = []): Builder
@@ -59,8 +62,11 @@ class BuildPublicTitleIndexQueryAction
         $language = filled($filters['language'] ?? null) ? (string) ($filters['language'] ?? null) : null;
         $country = filled($filters['country'] ?? null) ? (string) ($filters['country'] ?? null) : null;
         $runtime = filled($filters['runtime'] ?? null) ? (string) ($filters['runtime'] ?? null) : null;
+        $awards = filled($filters['awards'] ?? null) ? (string) ($filters['awards'] ?? null) : null;
         $status = filled($filters['status'] ?? null) ? (string) ($filters['status'] ?? null) : null;
         $excludeEpisodes = (bool) ($filters['excludeEpisodes'] ?? true);
+        $includePresentationRelations = (bool) ($filters['includePresentationRelations'] ?? true);
+        $includePublishedReviewCount = (bool) ($filters['includePublishedReviewCount'] ?? true);
 
         $query = Title::query()
             ->select([
@@ -78,8 +84,10 @@ class BuildPublicTitleIndexQueryAction
                 'popularity_rank',
                 'is_published',
             ])
-            ->published()
-            ->with([
+            ->published();
+
+        if ($includePresentationRelations) {
+            $query->with([
                 'genres:id,name,slug',
                 'statistic:id,title_id,average_rating,rating_count,review_count,watchlist_count',
                 'mediaAssets' => fn ($mediaQuery) => $mediaQuery
@@ -96,11 +104,15 @@ class BuildPublicTitleIndexQueryAction
                     ->where('kind', MediaKind::Poster)
                     ->orderBy('position')
                     ->limit(1),
-            ])
-            ->withCount([
+            ]);
+        }
+
+        if ($includePublishedReviewCount) {
+            $query->withCount([
                 'reviews as published_reviews_count' => fn (Builder $reviewQuery) => $reviewQuery
                     ->where('status', ReviewStatus::Published),
             ]);
+        }
 
         if ($excludeEpisodes) {
             $query->withoutEpisodes();
@@ -165,6 +177,16 @@ class BuildPublicTitleIndexQueryAction
                 '120-plus' => $query->where('runtime_minutes', '>=', 120),
                 default => $query,
             };
+        }
+
+        if ($awards !== null) {
+            $query->whereHas('statistic', function (Builder $statisticQuery) use ($awards): void {
+                match ($awards) {
+                    'winners' => $statisticQuery->where('awards_won_count', '>', 0),
+                    'nominated' => $statisticQuery->where('awards_nominated_count', '>', 0),
+                    default => $statisticQuery,
+                };
+            });
         }
 
         if ($status !== null) {

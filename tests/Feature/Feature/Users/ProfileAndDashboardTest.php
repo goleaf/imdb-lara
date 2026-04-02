@@ -22,6 +22,12 @@ class ProfileAndDashboardTest extends TestCase
             ->assertRedirect(route('login'));
     }
 
+    public function test_settings_page_requires_authentication(): void
+    {
+        $this->get(route('account.settings'))
+            ->assertRedirect(route('login'));
+    }
+
     public function test_dashboard_surfaces_recent_activity_summaries_and_quick_links(): void
     {
         $user = User::factory()->create([
@@ -72,10 +78,32 @@ class ProfileAndDashboardTest extends TestCase
             ->assertSee('Recent ratings')
             ->assertSee('Recent reviews')
             ->assertSee('Quick links')
+            ->assertSee('Profile settings')
             ->assertSee('Night Atlas')
             ->assertSee('Signal Harbor')
             ->assertSee('Weekend Thrillers')
             ->assertSee('Festival Favourites');
+    }
+
+    public function test_authenticated_member_can_open_dedicated_settings_page(): void
+    {
+        $user = User::factory()->create([
+            'name' => 'Ari Lane',
+            'username' => 'ari-lane',
+        ]);
+
+        UserList::factory()->watchlist()->for($user)->create([
+            'visibility' => ListVisibility::Public,
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('account.settings'))
+            ->assertOk()
+            ->assertSee('Profile Settings')
+            ->assertSee('Current identity')
+            ->assertSee('Visibility rules')
+            ->assertSee('Save settings')
+            ->assertSee('@ari-lane');
     }
 
     public function test_public_profile_renders_visible_sections_for_public_users(): void
@@ -171,8 +199,59 @@ class ProfileAndDashboardTest extends TestCase
 
         $this->get(route('public.users.show', $user))
             ->assertOk()
-            ->assertDontSee('Recent ratings')
+            ->assertSee('Recent ratings')
+            ->assertSee('Ratings are private on this profile.')
             ->assertDontSee('Hidden Score Title')
             ->assertSee('Visible Profile Anchor');
+    }
+
+    public function test_public_profile_stays_available_without_public_activity(): void
+    {
+        $user = User::factory()->create([
+            'name' => 'Casey North',
+            'username' => 'casey-north',
+            'profile_visibility' => 'public',
+            'show_ratings_on_profile' => false,
+        ]);
+
+        $this->get(route('public.users.show', $user))
+            ->assertOk()
+            ->assertSee('Casey North')
+            ->assertSee('Recent Reviews')
+            ->assertSee('Recent ratings')
+            ->assertSee('Ratings are private on this profile.')
+            ->assertSee('Watchlist visibility')
+            ->assertSee('Watchlist is private on this profile.')
+            ->assertSee('No public lists are visible for this profile.');
+    }
+
+    public function test_public_profile_lists_are_ordered_by_recent_updates(): void
+    {
+        $user = User::factory()->create([
+            'username' => 'list-curator',
+            'profile_visibility' => 'public',
+        ]);
+
+        $olderList = UserList::factory()->public()->for($user)->create([
+            'name' => 'Archive Run',
+            'slug' => 'archive-run',
+            'updated_at' => now()->subWeek(),
+        ]);
+
+        $newerList = UserList::factory()->public()->for($user)->create([
+            'name' => 'Fresh Discoveries',
+            'slug' => 'fresh-discoveries',
+            'updated_at' => now()->subHour(),
+        ]);
+
+        ListItem::factory()->for($olderList, 'userList')->create();
+        ListItem::factory()->for($newerList, 'userList')->create();
+
+        $this->get(route('public.users.show', $user))
+            ->assertOk()
+            ->assertSeeInOrder([
+                'Fresh Discoveries',
+                'Archive Run',
+            ]);
     }
 }

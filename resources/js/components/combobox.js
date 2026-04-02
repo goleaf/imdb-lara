@@ -1,3 +1,21 @@
+const registerLivewireMorphInterceptor = (livewireId, callback) => {
+    if (window.Livewire === undefined || !livewireId) {
+        return () => { }
+    }
+
+    return window.Livewire.interceptMessage(({ message, onSuccess }) => {
+        if (message.component.id !== livewireId) {
+            return
+        }
+
+        onSuccess(({ onMorph }) => {
+            onMorph(async () => {
+                callback()
+            })
+        })
+    })
+}
+
 const comboboxComponent = ({
     livewire,
     livewireId,
@@ -27,23 +45,18 @@ const comboboxComponent = ({
         __previousSelected: undefined,
         __isUsingExternalSearch: false,
         __selectedTags: [],
+        __unsubscribeMessageInterceptor: () => { },
 
         init() {
 
             this.input = this.$rover.input;
 
-            if (window.Livewire !== undefined && livewireId) {
-                window.Livewire.hook('commit', ({ component, succeed }) => {
-                    if (component.id === livewireId) {
-                        succeed(() => {
-                            this.$nextTick(() => {
-                                this.$rover.reconcileDom();
-                                this.__ensureSelectedMarked();
-                            });
-                        });
-                    }
+            this.__unsubscribeMessageInterceptor = registerLivewireMorphInterceptor(livewireId, () => {
+                this.$nextTick(() => {
+                    this.$rover.reconcileDom();
+                    this.__ensureSelectedMarked();
                 });
-            }
+            });
 
             const optionsManager = this.$rover.options;
 
@@ -305,11 +318,15 @@ const comboboxComponent = ({
             return Array.isArray(this.__state) && this.__state.length <= this.__minSelection;
         },
 
-        destroy() { },
+        destroy() {
+            this.__unsubscribeMessageInterceptor?.();
+        },
     };
 };
 
 const CreateNewOptionActivator = () => ({
+    __unsubscribeMessageInterceptor: () => { },
+
     init() {
         const rootLivewireId = this.$root.dataset.livewireId;
 
@@ -317,17 +334,9 @@ const CreateNewOptionActivator = () => ({
         //  this element's directives
         queueMicrotask(() => this.activate())
 
-        if (window.Livewire !== undefined && rootLivewireId) {
-            window.Livewire.hook('commit', ({ component, succeed }) => {
-                if (component.id === rootLivewireId) {
-                    succeed(() => {
-                        // wait for Alpine's scheduler to flush 
-                        // after the Livewire commit
-                        this.$nextTick(() => this.activate());
-                    });
-                }
-            });
-        }
+        this.__unsubscribeMessageInterceptor = registerLivewireMorphInterceptor(rootLivewireId, () => {
+            this.$nextTick(() => this.activate());
+        });
 
         this.$rover.input.on('keydown', (event,) => {
             if (event.key === "Enter") {
@@ -342,6 +351,7 @@ const CreateNewOptionActivator = () => ({
         delete this.$el.dataset.active;
     },
     destroy() {
+        this.__unsubscribeMessageInterceptor?.();
         this.deactivate();
     }
 });

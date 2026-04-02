@@ -8,20 +8,18 @@
 @endsection
 
 @section('content')
-    @php
-        $visibilityIcons = [
-            'public' => 'globe-alt',
-            'private' => 'lock-closed',
-            'unlisted' => 'eye-slash',
-        ];
-    @endphp
-
     <section class="space-y-4">
-        <div>
-            <x-ui.heading level="h1" size="xl">Your Lists</x-ui.heading>
-            <x-ui.text class="mt-1 text-neutral-600 dark:text-neutral-300">
-                Build shareable or private collections for themes, moods, franchises, and rewatches.
-            </x-ui.text>
+        <div class="flex flex-wrap items-start justify-between gap-4">
+            <div>
+                <x-ui.heading level="h1" size="xl">Your Lists</x-ui.heading>
+                <x-ui.text class="mt-1 text-neutral-600 dark:text-neutral-300">
+                    Build shareable or private collections for themes, moods, franchises, and rewatches.
+                </x-ui.text>
+            </div>
+
+            <x-ui.link :href="route('public.lists.index')" variant="ghost" iconAfter="arrow-right">
+                Browse public lists
+            </x-ui.link>
         </div>
 
         <livewire:lists.create-list-form />
@@ -41,7 +39,7 @@
                             </div>
 
                             <div class="flex flex-wrap gap-2">
-                                <x-ui.badge variant="outline" color="neutral" :icon="$visibilityIcons[$list->visibility->value] ?? 'globe-alt'">{{ str($list->visibility->value)->headline() }}</x-ui.badge>
+                                <x-ui.badge variant="outline" color="neutral" :icon="$list->visibility->icon()">{{ $list->visibility->label() }}</x-ui.badge>
                                 <x-ui.badge variant="outline" color="slate" icon="queue-list">{{ number_format($list->items_count) }} titles</x-ui.badge>
                             </div>
                         </div>

@@ -3,7 +3,12 @@
 namespace App\Livewire\Pages\Public;
 
 use App\Actions\Catalog\BuildTitleCreditsQueryAction;
+use App\Actions\Catalog\LoadTitleBoxOfficeAction;
 use App\Actions\Catalog\LoadTitleDetailsAction;
+use App\Actions\Catalog\LoadTitleMediaGalleryAction;
+use App\Actions\Catalog\LoadTitleMetadataExplorationAction;
+use App\Actions\Catalog\LoadTitleParentsGuideAction;
+use App\Actions\Catalog\LoadTitleTriviaAndGoofsAction;
 use App\Actions\Seo\PageSeoData;
 use App\Enums\MediaKind;
 use App\Enums\TitleType;
@@ -34,9 +39,57 @@ class TitlePage extends Component
 
     public function render(
         LoadTitleDetailsAction $loadTitleDetails,
+        LoadTitleBoxOfficeAction $loadTitleBoxOffice,
+        LoadTitleMediaGalleryAction $loadTitleMediaGallery,
+        LoadTitleMetadataExplorationAction $loadTitleMetadataExploration,
+        LoadTitleParentsGuideAction $loadTitleParentsGuide,
+        LoadTitleTriviaAndGoofsAction $loadTitleTriviaAndGoofs,
         BuildTitleCreditsQueryAction $buildTitleCreditsQuery,
     ): View {
         abort_unless($this->title instanceof Title, 404);
+
+        if (request()->routeIs('public.titles.media')) {
+            $mediaPage = $loadTitleMediaGallery->handle($this->title);
+            $openGraphImage = $mediaPage['viewerAsset']?->url ?? $mediaPage['poster']?->url;
+            $openGraphImageAlt = $mediaPage['viewerAsset']?->alt_text
+                ?: $mediaPage['poster']?->alt_text
+                ?: $this->title->name;
+
+            return $this->renderPageView('titles.media', [
+                ...$mediaPage,
+                'seo' => new PageSeoData(
+                    title: $this->title->name.' Media Gallery',
+                    description: 'Browse posters, stills, backdrops, and trailers for '.$this->title->name.'.',
+                    canonical: route('public.titles.media', $this->title),
+                    openGraphType: in_array($this->title->title_type, [TitleType::Series, TitleType::MiniSeries], true) ? 'video.tv_show' : 'video.movie',
+                    openGraphImage: $openGraphImage,
+                    openGraphImageAlt: $openGraphImageAlt,
+                    breadcrumbs: [
+                        ['label' => 'Home', 'href' => route('public.home')],
+                        ['label' => 'Titles', 'href' => route('public.titles.index')],
+                        ['label' => $this->title->name, 'href' => route('public.titles.show', $this->title)],
+                        ['label' => 'Media Gallery'],
+                    ],
+                    paginationPageName: null,
+                ),
+            ]);
+        }
+
+        if (request()->routeIs('public.titles.box-office')) {
+            return $this->renderPageView('titles.box-office', $loadTitleBoxOffice->handle($this->title));
+        }
+
+        if (request()->routeIs('public.titles.metadata')) {
+            return $this->renderPageView('titles.metadata', $loadTitleMetadataExploration->handle($this->title));
+        }
+
+        if (request()->routeIs('public.titles.parents-guide')) {
+            return $this->renderPageView('titles.parents-guide', $loadTitleParentsGuide->handle($this->title));
+        }
+
+        if (request()->routeIs('public.titles.trivia')) {
+            return $this->renderPageView('titles.trivia', $loadTitleTriviaAndGoofs->handle($this->title));
+        }
 
         if (request()->routeIs('public.titles.cast')) {
             $this->title->load([
@@ -55,6 +108,22 @@ class TitlePage extends Component
                 ->simplePaginate(24, ['*'], 'crewPage')
                 ->withQueryString();
             $poster = MediaAsset::preferredFrom($this->title->mediaAssets, MediaKind::Poster, MediaKind::Backdrop);
+            $backdrop = MediaAsset::preferredFrom($this->title->mediaAssets, MediaKind::Backdrop, MediaKind::Poster);
+            $castPageCredits = collect($castCredits->items());
+            $crewPageCredits = collect($crewCredits->items());
+            $crewGroups = $crewPageCredits
+                ->groupBy(fn ($credit) => filled($credit->department) ? $credit->department : 'Crew')
+                ->sortKeys();
+            $castBillingGroups = collect([
+                'Principal cast' => $castPageCredits->filter(fn ($credit) => $credit->is_principal),
+                'Supporting & guest' => $castPageCredits->reject(fn ($credit) => $credit->is_principal),
+            ])->filter(fn ($credits) => $credits->isNotEmpty());
+            $leadDepartmentOrder = ['Directing', 'Writing', 'Production'];
+            $leadCrewGroups = collect($leadDepartmentOrder)
+                ->mapWithKeys(fn ($department) => [$department => $crewGroups->get($department, collect())])
+                ->filter(fn ($credits) => $credits->isNotEmpty());
+            $technicalCrewGroups = $crewGroups
+                ->reject(fn ($credits, $department) => in_array($department, $leadDepartmentOrder, true));
             $breadcrumbs = [
                 ['label' => 'Home', 'href' => route('public.home')],
                 ['label' => 'Titles', 'href' => route('public.titles.index')],
@@ -64,10 +133,20 @@ class TitlePage extends Component
 
             return $this->renderPageView('titles.cast', [
                 'title' => $this->title,
+                'poster' => $poster,
+                'backdrop' => $backdrop,
                 'castCredits' => $castCredits,
                 'crewCredits' => $crewCredits,
+                'castPageCredits' => $castPageCredits,
+                'crewPageCredits' => $crewPageCredits,
+                'crewGroups' => $crewGroups,
+                'castBillingGroups' => $castBillingGroups,
+                'leadCrewGroups' => $leadCrewGroups,
+                'technicalCrewGroups' => $technicalCrewGroups,
                 'castCount' => (clone $creditsQuery)->where('department', 'Cast')->count(),
                 'crewCount' => (clone $creditsQuery)->where('department', '!=', 'Cast')->count(),
+                'leadCrewCount' => $leadCrewGroups->sum(fn ($credits) => $credits->count()),
+                'technicalCrewCount' => $technicalCrewGroups->sum(fn ($credits) => $credits->count()),
                 'seo' => new PageSeoData(
                     title: $this->title->name.' Full Cast',
                     description: 'Browse the full cast and crew list for '.$this->title->name.'.',

@@ -1,33 +1,3 @@
-@php
-    $watchlistStateIcons = [
-        'all' => 'squares-2x2',
-        'watched' => 'check-circle',
-        'unwatched' => 'eye',
-        'planned' => 'bookmark',
-        'watching' => 'play-circle',
-        'completed' => 'check-circle',
-        'paused' => 'pause-circle',
-        'dropped' => 'x-circle',
-    ];
-
-    $watchlistTypeIcons = [
-        'movie' => 'film',
-        'series' => 'tv',
-        'mini_series' => 'tv',
-        'documentary' => 'camera',
-        'short' => 'film',
-        'special' => 'sparkles',
-        'episode' => 'rectangle-stack',
-    ];
-
-    $watchlistSortIcons = [
-        'added' => 'calendar-days',
-        'year' => 'calendar-days',
-        'rating' => 'star',
-        'title' => 'bars-arrow-down',
-    ];
-@endphp
-
 <div class="space-y-4">
     <x-ui.card class="!max-w-none">
         <div class="grid gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
@@ -83,8 +53,11 @@
                                 class="w-full"
                                 placeholder="Select visibility"
                             >
-                                <x-ui.combobox.option value="private">Private</x-ui.combobox.option>
-                                <x-ui.combobox.option value="public">Public</x-ui.combobox.option>
+                                @foreach ($visibilityOptions as $visibilityOption)
+                                    <x-ui.combobox.option value="{{ $visibilityOption['value'] }}">
+                                        {{ $visibilityOption['label'] }}
+                                    </x-ui.combobox.option>
+                                @endforeach
                             </x-ui.combobox>
                             <x-ui.error name="visibility" />
                         </x-ui.field>
@@ -110,7 +83,20 @@
     </x-ui.card>
 
     <x-ui.card class="!max-w-none">
-        <div class="grid gap-4 lg:grid-cols-[repeat(5,minmax(0,1fr))]">
+        <div class="space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <x-ui.text class="text-sm text-neutral-600 dark:text-neutral-300">
+                    Filter by tracking state, title metadata, and sort order without leaving your private queue.
+                </x-ui.text>
+
+                @if ($hasActiveFilters)
+                    <x-ui.button type="button" variant="ghost" size="sm" wire:click="clearFilters" icon="x-mark">
+                        Clear filters
+                    </x-ui.button>
+                @endif
+            </div>
+
+            <div class="grid gap-4 lg:grid-cols-[repeat(5,minmax(0,1fr))]">
             <x-ui.field>
                 <x-ui.label>State</x-ui.label>
                 <x-ui.combobox wire:model.live="state" class="w-full" placeholder="All tracking">
@@ -118,7 +104,9 @@
                         <x-ui.combobox.option
                             wire:key="watchlist-state-{{ $stateOption['value'] }}"
                             value="{{ $stateOption['value'] }}"
-                            :icon="$watchlistStateIcons[$stateOption['value']] ?? 'squares-2x2'"
+                            :icon="$stateOption['value'] === 'all'
+                                ? 'squares-2x2'
+                                : (\App\Enums\WatchState::tryFrom($stateOption['value'])?->icon() ?? 'eye')"
                         >
                             {{ $stateOption['label'] }}
                         </x-ui.combobox.option>
@@ -133,9 +121,9 @@
                         <x-ui.combobox.option
                             wire:key="watchlist-type-{{ $titleType->value }}"
                             value="{{ $titleType->value }}"
-                            :icon="$watchlistTypeIcons[$titleType->value] ?? 'film'"
+                            :icon="$titleType->icon()"
                         >
-                            {{ str($titleType->value)->headline() }}
+                            {{ $titleType->label() }}
                         </x-ui.combobox.option>
                     @endforeach
                 </x-ui.combobox>
@@ -178,13 +166,18 @@
                         <x-ui.combobox.option
                             wire:key="watchlist-sort-{{ $sortOption['value'] }}"
                             value="{{ $sortOption['value'] }}"
-                            :icon="$watchlistSortIcons[$sortOption['value']] ?? 'bars-arrow-down'"
+                            :icon="match ($sortOption['value']) {
+                                'added', 'year' => 'calendar-days',
+                                'rating' => 'star',
+                                default => 'bars-arrow-down',
+                            }"
                         >
                             {{ $sortOption['label'] }}
                         </x-ui.combobox.option>
                     @endforeach
                 </x-ui.combobox>
             </x-ui.field>
+            </div>
         </div>
     </x-ui.card>
 
@@ -240,10 +233,17 @@
                         <x-ui.empty.media>
                             <x-ui.icon name="bookmark" class="size-8 text-neutral-400 dark:text-neutral-500" />
                         </x-ui.empty.media>
-                        <x-ui.heading level="h3">No titles match the current watchlist filters.</x-ui.heading>
-                        <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
-                            Adjust the state, genre, year, or type filters to widen the page.
-                        </x-ui.text>
+                        @if ((int) $watchlist->items_count === 0)
+                            <x-ui.heading level="h3">Your watchlist is empty.</x-ui.heading>
+                            <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
+                                Save titles from any title page to build a private queue you can sort and filter here.
+                            </x-ui.text>
+                        @else
+                            <x-ui.heading level="h3">No titles match the current watchlist filters.</x-ui.heading>
+                            <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
+                                Adjust the state, genre, year, or type filters to widen the page.
+                            </x-ui.text>
+                        @endif
                     </x-ui.empty>
                 </div>
             @endforelse

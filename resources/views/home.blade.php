@@ -1,36 +1,28 @@
 @extends('layouts.public')
 
 @section('title', 'Home')
-@section('meta_description', 'Discover trending titles, top rated movies and TV shows, popular people, fresh trailers, and community lists on Screenbase.')
+@section('meta_description', 'Discover trending titles, top rated movies and TV shows, coming soon releases, recently added titles, popular people, latest trailers, latest reviews, featured public lists, genres, and browse by year on Screenbase.')
 
 @section('content')
-    @php
-        $heroBackdrop = $heroSpotlight?->titleImages?->firstWhere('kind', \App\Enums\MediaKind::Backdrop);
-        $heroPoster = $heroSpotlight?->mediaAssets?->first() ?? $heroSpotlight?->titleImages?->firstWhere('kind', \App\Enums\MediaKind::Poster);
-        $heroStatistic = $heroSpotlight?->statistic;
-        $heroGenres = $heroSpotlight?->genres?->take(4) ?? collect();
-        $heroCast = $heroSpotlight?->credits?->pluck('person')->filter()->unique('id')->take(4) ?? collect();
-        $heroTrailer = $heroSpotlight?->titleVideos?->first();
-    @endphp
-
-    <section class="grid gap-6 xl:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)]">
+    <section class="sb-home-hero-stage grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(17rem,0.55fr)]">
         <x-ui.card
             data-slot="home-hero"
-            class="!max-w-none relative overflow-hidden border-black/5 bg-[radial-gradient(circle_at_top_right,rgba(251,191,36,0.18),transparent_32%),linear-gradient(145deg,rgba(255,255,255,0.98),rgba(248,250,252,0.98))] text-neutral-950 shadow-sm dark:border-white/10 dark:bg-[radial-gradient(circle_at_top_right,rgba(56,189,248,0.16),transparent_28%),linear-gradient(145deg,rgba(23,23,23,0.98),rgba(10,10,10,0.98))] dark:text-white"
+            class="sb-home-hero-card !max-w-none relative overflow-hidden text-neutral-950 dark:text-white"
         >
             @if ($heroBackdrop)
                 <div class="absolute inset-0">
                     <img
                         src="{{ $heroBackdrop->url }}"
                         alt="{{ $heroBackdrop->alt_text ?: ($heroSpotlight?->name ?? 'Screenbase spotlight') }}"
-                        class="h-full w-full object-cover opacity-14 dark:opacity-20"
+                        class="sb-home-hero-backdrop h-full w-full object-cover"
                     >
-                    <div class="absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.94),rgba(255,255,255,0.84),rgba(248,250,252,0.92))] dark:bg-[linear-gradient(120deg,rgba(15,23,42,0.92),rgba(15,23,42,0.82),rgba(23,23,23,0.92))]"></div>
+                    <div class="sb-home-hero-scrim absolute inset-0"></div>
+                    <div class="sb-home-hero-halo absolute inset-0"></div>
                 </div>
             @endif
 
-            <div class="relative grid gap-6 lg:grid-cols-[minmax(0,1fr)_15rem]">
-                <div class="space-y-4 rounded-box bg-white/90 p-5 shadow-md ring-1 ring-black/5 backdrop-blur-sm dark:bg-neutral-950/70 dark:ring-white/10">
+            <div class="relative grid gap-8 lg:grid-cols-[minmax(0,1fr)_16rem]">
+                <div class="sb-home-hero-panel space-y-6 rounded-[1.6rem] p-5 sm:p-8">
                     <x-ui.badge color="amber" icon="sparkles">Hero Spotlight</x-ui.badge>
 
                     @if ($heroSpotlight)
@@ -49,18 +41,18 @@
                         </div>
 
                         <div class="space-y-3">
-                            <x-ui.heading level="h1" size="xl" class="text-neutral-950 dark:text-white">
+                            <x-ui.heading level="h1" size="xl" class="sb-home-hero-title">
                                 <a href="{{ route('public.titles.show', $heroSpotlight) }}" class="hover:opacity-80">
                                     {{ $heroSpotlight->name }}
                                 </a>
                             </x-ui.heading>
 
-                            <x-ui.text class="max-w-3xl text-base text-neutral-700 dark:text-white/80">
+                            <x-ui.text class="sb-home-hero-copy max-w-3xl text-base">
                                 {{ $heroSpotlight->tagline ?: $heroSpotlight->plot_outline ?: 'A featured title from the public Screenbase catalog.' }}
                             </x-ui.text>
 
                             @if (filled($heroSpotlight->synopsis))
-                                <x-ui.text class="max-w-3xl text-sm text-neutral-600 dark:text-white/70">
+                                <x-ui.text class="max-w-3xl text-sm text-[#9f9384] dark:text-[#b5a998]">
                                     {{ str($heroSpotlight->synopsis)->limit(280) }}
                                 </x-ui.text>
                             @endif
@@ -124,7 +116,7 @@
                 </div>
 
                 <div class="grid gap-3">
-                    <div class="overflow-hidden rounded-box border border-black/5 bg-white/75 shadow-sm dark:border-white/10 dark:bg-white/5">
+                    <div class="sb-poster-frame sb-home-hero-poster overflow-hidden rounded-[1.55rem]">
                         @if ($heroPoster)
                             <img
                                 src="{{ $heroPoster->url }}"
@@ -139,21 +131,21 @@
                     </div>
 
                     <div class="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-                        <div class="rounded-box border border-black/5 bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
+                        <div class="sb-home-stat rounded-[1.2rem] p-4">
                             <div class="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-neutral-500 dark:text-white/50">
                                 <x-ui.icon name="star" class="size-4 text-neutral-500 dark:text-white/60" />
                                 <span>Ratings</span>
                             </div>
                             <div class="mt-2 text-2xl font-semibold">{{ number_format((int) ($heroStatistic?->rating_count ?? 0)) }}</div>
                         </div>
-                        <div class="rounded-box border border-black/5 bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
+                        <div class="sb-home-stat rounded-[1.2rem] p-4">
                             <div class="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-neutral-500 dark:text-white/50">
                                 <x-ui.icon name="chat-bubble-left-right" class="size-4 text-neutral-500 dark:text-white/60" />
                                 <span>Reviews</span>
                             </div>
                             <div class="mt-2 text-2xl font-semibold">{{ number_format((int) ($heroStatistic?->review_count ?? 0)) }}</div>
                         </div>
-                        <div class="rounded-box border border-black/5 bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
+                        <div class="sb-home-stat rounded-[1.2rem] p-4">
                             <div class="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-neutral-500 dark:text-white/50">
                                 <x-ui.icon name="bookmark" class="size-4 text-neutral-500 dark:text-white/60" />
                                 <span>Watchlists</span>
@@ -166,14 +158,14 @@
         </x-ui.card>
 
         <div class="grid gap-4">
-            <x-ui.card class="!max-w-none">
+            <x-ui.card class="sb-home-side-card sb-home-side-card--subdued !max-w-none text-white">
                 <div class="space-y-4">
                     <div>
-                        <x-ui.heading level="h2" size="lg" class="inline-flex items-center gap-2">
-                            <x-ui.icon name="squares-2x2" class="size-5 text-neutral-500 dark:text-neutral-400" />
+                        <x-ui.heading level="h2" size="lg" class="sb-home-section-heading inline-flex items-center gap-2">
+                            <x-ui.icon name="squares-2x2" class="size-5 text-[#d6b574]" />
                             <span>Start Anywhere</span>
                         </x-ui.heading>
-                        <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                        <x-ui.text class="sb-home-section-copy mt-1 text-sm">
                             The public surface is split into focused browse routes, not one overloaded index.
                         </x-ui.text>
                     </div>
@@ -199,38 +191,38 @@
                 </div>
             </x-ui.card>
 
-            <x-ui.card class="!max-w-none">
+            <x-ui.card class="sb-home-side-card sb-home-side-card--subdued !max-w-none text-white">
                 <div class="space-y-3">
-                    <x-ui.heading level="h2" size="lg" class="inline-flex items-center gap-2">
-                        <x-ui.icon name="chart-bar" class="size-5 text-neutral-500 dark:text-neutral-400" />
+                    <x-ui.heading level="h2" size="lg" class="sb-home-section-heading inline-flex items-center gap-2">
+                        <x-ui.icon name="chart-bar" class="size-5 text-[#d6b574]" />
                         <span>Live Signals</span>
                     </x-ui.heading>
 
                     <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-                        <div class="rounded-box border border-black/5 p-3 dark:border-white/10">
+                        <div class="rounded-[1.1rem] border border-white/8 bg-white/[0.03] p-3">
                             <div class="inline-flex items-center gap-2 font-medium">
-                                <x-ui.icon name="fire" class="size-4 text-neutral-500 dark:text-neutral-400" />
+                                <x-ui.icon name="fire" class="size-4 text-[#d6b574]" />
                                 <span>Trending, not static</span>
                             </div>
-                            <div class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                            <div class="mt-1 text-sm text-[#a99f92]">
                                 Watchlists and review volume already influence the homepage ranking rails.
                             </div>
                         </div>
-                        <div class="rounded-box border border-black/5 p-3 dark:border-white/10">
+                        <div class="rounded-[1.1rem] border border-white/8 bg-white/[0.03] p-3">
                             <div class="inline-flex items-center gap-2 font-medium">
-                                <x-ui.icon name="users" class="size-4 text-neutral-500 dark:text-neutral-400" />
+                                <x-ui.icon name="users" class="size-4 text-[#d6b574]" />
                                 <span>People and lists matter</span>
                             </div>
-                            <div class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                            <div class="mt-1 text-sm text-[#a99f92]">
                                 Public profiles, curated lists, and latest writing sit beside the title catalog.
                             </div>
                         </div>
-                        <div class="rounded-box border border-black/5 p-3 dark:border-white/10">
+                        <div class="rounded-[1.1rem] border border-white/8 bg-white/[0.03] p-3">
                             <div class="inline-flex items-center gap-2 font-medium">
-                                <x-ui.icon name="globe-alt" class="size-4 text-neutral-500 dark:text-neutral-400" />
+                                <x-ui.icon name="globe-alt" class="size-4 text-[#d6b574]" />
                                 <span>SEO-friendly routes</span>
                             </div>
-                            <div class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                            <div class="mt-1 text-sm text-[#a99f92]">
                                 Every card routes into slug-based title, person, year, genre, and list pages.
                             </div>
                         </div>
@@ -240,9 +232,12 @@
         </div>
     </section>
 
-    <div class="mt-10 space-y-10">
+    <div class="mt-14 space-y-8">
         <livewire:home.title-rail rail="trending" lazy.bundle />
         <livewire:home.title-rail rail="top-rated-movies" lazy.bundle />
+    </div>
+
+    <div class="sb-home-secondary-stack mt-12 space-y-10">
         <livewire:home.title-rail rail="top-rated-series" lazy.bundle />
         <livewire:home.title-rail rail="coming-soon" lazy.bundle />
         <livewire:home.title-rail rail="recently-added" lazy.bundle />

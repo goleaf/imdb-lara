@@ -9,14 +9,6 @@
 @endsection
 
 @section('content')
-    @php
-        $visibilityIcons = [
-            'private' => 'lock-closed',
-            'public' => 'globe-alt',
-            'unlisted' => 'eye-slash',
-        ];
-    @endphp
-
     <section class="space-y-6">
         <x-ui.card class="!max-w-none overflow-hidden">
             <div class="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
@@ -41,7 +33,7 @@
                             <div class="flex flex-wrap gap-2">
                                 <x-ui.badge variant="outline" color="neutral" icon="at-symbol">{{ '@'.$user->username }}</x-ui.badge>
                                 <x-ui.badge variant="outline" color="neutral" icon="calendar-days">Member since {{ $user->created_at->format('M Y') }}</x-ui.badge>
-                                <x-ui.badge variant="outline" color="neutral" :icon="$visibilityIcons[$watchlist->visibility->value] ?? 'lock-closed'">
+                                <x-ui.badge variant="outline" color="neutral" :icon="$watchlist->visibility->icon()">
                                     Watchlist {{ str($watchlist->visibility->value)->headline() }}
                                 </x-ui.badge>
                             </div>
@@ -53,6 +45,9 @@
                     </x-ui.text>
 
                     <div class="flex flex-wrap gap-3">
+                        <x-ui.link :href="route('account.settings')" variant="ghost" iconAfter="arrow-right">
+                            Profile settings
+                        </x-ui.link>
                         <x-ui.link :href="route('account.watchlist')" variant="ghost" iconAfter="arrow-right">
                             Manage watchlist
                         </x-ui.link>

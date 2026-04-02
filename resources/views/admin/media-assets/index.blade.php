@@ -19,34 +19,18 @@
         <div class="grid gap-4">
             @forelse ($mediaAssets as $mediaAsset)
                 <x-ui.card class="!max-w-none">
-                    @php
-                        $mediable = $mediaAsset->mediable;
-                        $mediableClass = $mediable ? get_class($mediable) : null;
-                        $attachedLabel = match ($mediableClass) {
-                            \App\Models\Title::class => $mediable->name,
-                            \App\Models\Person::class => $mediable->name,
-                            default => class_basename($mediaAsset->mediable_type).' #'.$mediaAsset->mediable_id,
-                        };
-                        $attachedUrl = match ($mediableClass) {
-                            \App\Models\Title::class => route('admin.titles.edit', $mediable),
-                            \App\Models\Person::class => route('admin.people.edit', $mediable),
-                            default => null,
-                        };
-                        $isVideoAsset = in_array($mediaAsset->kind, [\App\Enums\MediaKind::Trailer, \App\Enums\MediaKind::Clip, \App\Enums\MediaKind::Featurette], true);
-                    @endphp
-
                     <div class="flex flex-wrap items-center justify-between gap-4">
                         <div class="flex items-center gap-4">
                             <div class="overflow-hidden rounded-box border border-black/5 bg-neutral-100 dark:border-white/10 dark:bg-neutral-800">
-                                @if ($mediaAsset->url && ! $isVideoAsset)
+                                @if ($mediaAsset->url && ! $mediaAsset->isVideo())
                                     <img
                                         src="{{ $mediaAsset->url }}"
-                                        alt="{{ $mediaAsset->alt_text ?: $attachedLabel }}"
+                                        alt="{{ $mediaAsset->alt_text ?: $mediaAsset->adminAttachedLabel() }}"
                                         class="size-20 object-cover"
                                     >
                                 @else
                                     <div class="flex size-20 items-center justify-center text-neutral-500 dark:text-neutral-400">
-                                        <x-ui.icon :name="$isVideoAsset ? 'play-circle' : 'photo'" class="size-8" />
+                                        <x-ui.icon :name="$mediaAsset->isVideo() ? 'play-circle' : 'photo'" class="size-8" />
                                     </div>
                                 @endif
                             </div>
@@ -60,10 +44,10 @@
                                 </div>
 
                                 <div class="text-sm text-neutral-500 dark:text-neutral-400">
-                                    @if ($attachedUrl)
-                                        <a href="{{ $attachedUrl }}" class="font-medium hover:opacity-80">{{ $attachedLabel }}</a>
+                                    @if ($mediaAsset->adminAttachedEditUrl())
+                                        <a href="{{ $mediaAsset->adminAttachedEditUrl() }}" class="font-medium hover:opacity-80">{{ $mediaAsset->adminAttachedLabel() }}</a>
                                     @else
-                                        {{ $attachedLabel }}
+                                        {{ $mediaAsset->adminAttachedLabel() }}
                                     @endif
                                     · {{ $mediaAsset->provider ?: 'Direct URL' }}
                                     @if ($mediaAsset->position !== null)

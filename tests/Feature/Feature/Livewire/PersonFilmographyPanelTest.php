@@ -55,7 +55,9 @@ class PersonFilmographyPanelTest extends TestCase
             ->assertSee('Actor')
             ->assertSee('Writer')
             ->assertSee('Northern Signal')
-            ->assertSee('Static Bloom');
+            ->assertSee('Static Bloom')
+            ->assertSee(route('public.titles.show', $movie), false)
+            ->assertSee(route('public.titles.show', $series), false);
     }
 
     public function test_filmography_panel_filters_and_sorts_titles(): void

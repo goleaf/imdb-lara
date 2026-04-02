@@ -31,11 +31,14 @@ class CreateListForm extends Component
     public function render()
     {
         return view('livewire.lists.create-list-form', [
-            'visibilityOptions' => [
-                ['value' => ListVisibility::Private->value, 'label' => 'Private'],
-                ['value' => ListVisibility::Unlisted->value, 'label' => 'Unlisted'],
-                ['value' => ListVisibility::Public->value, 'label' => 'Public'],
-            ],
+            'visibilityOptions' => array_map(
+                static fn (ListVisibility $visibility): array => [
+                    'value' => $visibility->value,
+                    'label' => $visibility->label(),
+                    'icon' => $visibility->icon(),
+                ],
+                ListVisibility::cases(),
+            ),
         ]);
     }
 }

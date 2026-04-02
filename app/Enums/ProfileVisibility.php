@@ -14,4 +14,12 @@ enum ProfileVisibility: string
             self::Private => 'Private',
         };
     }
+
+    public function icon(): string
+    {
+        return match ($this) {
+            self::Public => 'globe-alt',
+            self::Private => 'lock-closed',
+        };
+    }
 }

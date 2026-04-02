@@ -43,4 +43,25 @@ class ProfileSettingsPanelTest extends TestCase
             'show_ratings_on_profile' => false,
         ]);
     }
+
+    public function test_public_profile_is_marked_live_even_without_visible_profile_content(): void
+    {
+        $user = User::factory()->create([
+            'name' => 'Casey North',
+            'username' => 'casey-north',
+            'profile_visibility' => 'public',
+            'show_ratings_on_profile' => false,
+        ]);
+
+        UserList::factory()->watchlist()->for($user)->create([
+            'visibility' => ListVisibility::Private,
+        ]);
+
+        Livewire::actingAs($user)
+            ->test('account.profile-settings-panel')
+            ->assertSet('profileVisibility', 'public')
+            ->assertSet('watchlistVisibility', ListVisibility::Private->value)
+            ->assertSet('showRatingsOnProfile', false)
+            ->assertSet('publicProfileIsLive', true);
+    }
 }

@@ -15,7 +15,7 @@ class ShowUserProfileRequest extends NotFoundFormRequest
             return false;
         }
 
-        return $user->hasVisibleProfileContent();
+        return $user->isProfileVisibleToPublic();
     }
 
     public function profileUser(): User

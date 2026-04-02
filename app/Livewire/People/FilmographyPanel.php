@@ -33,9 +33,9 @@ class FilmographyPanel extends Component
             'groups' => $filmography['groups'],
             'professionOptions' => $filmography['professionOptions'],
             'sortOptions' => collect([
-                ['value' => 'latest', 'label' => 'Newest first'],
-                ['value' => 'oldest', 'label' => 'Oldest first'],
-                ['value' => 'rating', 'label' => 'Highest rated'],
+                ['value' => 'latest', 'label' => 'Newest first', 'icon' => 'calendar-days'],
+                ['value' => 'oldest', 'label' => 'Oldest first', 'icon' => 'clock'],
+                ['value' => 'rating', 'label' => 'Highest rated', 'icon' => 'star'],
             ]),
         ]);
     }

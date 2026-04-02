@@ -12,7 +12,20 @@ class BuildDiscoveryQueryAction
     ) {}
 
     /**
-     * @param  array{search?: string, genre?: string, minimumRating?: int|float|string|null, type?: string|null, sort?: string|null}  $filters
+     * @param  array{
+     *     search?: string,
+     *     genre?: string|null,
+     *     minimumRating?: int|float|string|null,
+     *     type?: string|null,
+     *     sort?: string|null,
+     *     yearFrom?: int|string|null,
+     *     yearTo?: int|string|null,
+     *     votesMin?: int|string|null,
+     *     language?: string|null,
+     *     country?: string|null,
+     *     runtime?: string|null,
+     *     awards?: string|null
+     * }  $filters
      */
     public function handle(array $filters = []): Builder
     {

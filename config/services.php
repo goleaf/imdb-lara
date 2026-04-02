@@ -37,7 +37,24 @@ return [
 
     'imdb' => [
         'base_url' => env('IMDB_API_BASE_URL', 'https://api.imdbapi.dev'),
+        'graphql' => [
+            'enabled' => (bool) env('IMDB_GRAPHQL_ENABLED', false),
+            'url' => env('IMDB_GRAPHQL_URL', 'https://graph.imdbapi.dev/v1'),
+        ],
+        'http_cache' => [
+            'enabled' => (bool) env('IMDB_HTTP_CACHE_ENABLED', false),
+            'ttl_seconds' => max(0, (int) env('IMDB_HTTP_CACHE_TTL_SECONDS', 86400)),
+        ],
         'inter_request_delay_microseconds' => (int) env('IMDB_INTER_REQUEST_DELAY_MICROSECONDS', 1000000),
+        'default_batch_concurrency' => max(1, (int) env('DEFAULT_BATCH_CONCURRENCY', 5)),
+        'title_batch_concurrency' => max(
+            1,
+            (int) env('IMDB_TITLE_BATCH_CONCURRENCY', env('DEFAULT_BATCH_CONCURRENCY', 5)),
+        ),
+        'name_batch_concurrency' => max(
+            1,
+            (int) env('IMDB_NAME_BATCH_CONCURRENCY', env('DEFAULT_BATCH_CONCURRENCY', 5)),
+        ),
         'endpoints' => [
             'chart.starmeter' => '/chart/starmeter',
             'titles.frontier' => '/titles',

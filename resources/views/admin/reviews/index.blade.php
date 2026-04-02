@@ -16,9 +16,67 @@
             </x-ui.text>
         </div>
 
+        <x-ui.card class="!max-w-none">
+            <form method="GET" action="{{ route('admin.reviews.index') }}" class="grid gap-4 xl:grid-cols-[220px,220px,auto,1fr,auto] xl:items-end">
+                <div class="space-y-2">
+                    <x-ui.label>Review status</x-ui.label>
+                    <select
+                        name="status"
+                        class="min-h-10 rounded-box border border-black/10 bg-white px-3 text-sm text-neutral-800 shadow-xs transition focus:border-black/15 focus:outline-none focus:ring-2 focus:ring-neutral-900/15 dark:border-white/15 dark:bg-neutral-900 dark:text-neutral-200 dark:focus:border-white/20 dark:focus:ring-neutral-100/15"
+                    >
+                        <option value="all" @selected(($reviewFilters['status'] ?? 'pending') === 'all')>All statuses</option>
+                        @foreach ($reviewStatuses as $status)
+                            <option value="{{ $status->value }}" @selected(($reviewFilters['status'] ?? 'pending') === $status->value)>
+                                {{ str($status->value)->headline() }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="space-y-2">
+                    <x-ui.label>Sort queue</x-ui.label>
+                    <select
+                        name="sort"
+                        class="min-h-10 rounded-box border border-black/10 bg-white px-3 text-sm text-neutral-800 shadow-xs transition focus:border-black/15 focus:outline-none focus:ring-2 focus:ring-neutral-900/15 dark:border-white/15 dark:bg-neutral-900 dark:text-neutral-200 dark:focus:border-white/20 dark:focus:ring-neutral-100/15"
+                    >
+                        <option value="flagged" @selected(($reviewFilters['sort'] ?? 'flagged') === 'flagged')>Flagged first</option>
+                        <option value="helpful" @selected(($reviewFilters['sort'] ?? 'flagged') === 'helpful')>Most helpful</option>
+                        <option value="oldest" @selected(($reviewFilters['sort'] ?? 'flagged') === 'oldest')>Oldest first</option>
+                    </select>
+                </div>
+
+                <label class="flex min-h-10 items-center gap-2 text-sm text-neutral-600 dark:text-neutral-300">
+                    <input
+                        type="checkbox"
+                        name="flaggedOnly"
+                        value="1"
+                        @checked($reviewFilters['flaggedOnly'] ?? false)
+                        class="rounded border-black/20 dark:border-white/20"
+                    >
+                    <span>Flagged only</span>
+                </label>
+
+                <x-ui.text class="text-sm text-neutral-500 dark:text-neutral-400">
+                    Surface open reports first and narrow the queue when moderators need to act on flagged reviews quickly.
+                </x-ui.text>
+
+                <div class="flex flex-wrap gap-2 xl:justify-end">
+                    <x-ui.button as="a" :href="route('admin.reviews.index')" variant="ghost" icon="arrow-path">
+                        Reset
+                    </x-ui.button>
+                    <x-ui.button type="submit" icon="funnel">
+                        Apply
+                    </x-ui.button>
+                </div>
+            </form>
+        </x-ui.card>
+
         <div class="grid gap-4">
             @forelse ($reviews as $review)
-                <x-ui.card class="!max-w-none">
+                <x-ui.card @class([
+                    '!max-w-none',
+                    'border-red-200/70 dark:border-red-500/40' => $review->open_reports_count > 0,
+                ])>
                     <div class="space-y-4">
                         <div class="flex flex-wrap items-start justify-between gap-4">
                             <div class="space-y-2">
@@ -36,6 +94,11 @@
 
                             <div class="flex flex-wrap gap-2">
                                 <x-ui.badge variant="outline" color="neutral" icon="chat-bubble-left-right">{{ str($review->status->value)->headline() }}</x-ui.badge>
+                                @if ($review->open_reports_count > 0)
+                                    <x-ui.badge variant="outline" color="red" icon="flag">
+                                        {{ number_format($review->open_reports_count) }} open reports
+                                    </x-ui.badge>
+                                @endif
                                 @if ($review->published_at)
                                     <x-ui.badge variant="outline" color="slate" icon="calendar-days">{{ $review->published_at->format('M j, Y') }}</x-ui.badge>
                                 @endif

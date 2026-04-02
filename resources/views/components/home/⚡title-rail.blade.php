@@ -20,13 +20,21 @@ new class extends Component
 
     public string $emptyText = 'This section will populate as the catalog grows.';
 
+    public string $railIcon = 'fire';
+
+    public bool $isPrimaryRail = false;
+
+    public string $gridClasses = 'grid gap-4 md:grid-cols-2 xl:grid-cols-3';
+
+    public string $sectionClasses = 'sb-home-section sb-home-section--secondary space-y-5 rounded-[1.6rem] p-4 sm:p-5';
+
     public EloquentCollection $titles;
 
     public ?string $errorMessage = null;
 
     public function mount(
-        string $rail = 'trending',
         GetHomepageTitleRailAction $getHomepageTitleRail,
+        string $rail = 'trending',
     ): void {
         $this->rail = $rail;
         $this->titles = new EloquentCollection;
@@ -39,6 +47,13 @@ new class extends Component
             'emptyHeading' => $this->emptyHeading,
             'emptyText' => $this->emptyText,
         ] = $this->meta();
+
+        [
+            'railIcon' => $this->railIcon,
+            'isPrimaryRail' => $this->isPrimaryRail,
+            'gridClasses' => $this->gridClasses,
+            'sectionClasses' => $this->sectionClasses,
+        ] = $this->presentation();
 
         try {
             $this->titles = $getHomepageTitleRail->handle($this->rail);
@@ -104,20 +119,35 @@ new class extends Component
             ],
         };
     }
+
+    /**
+     * @return array{railIcon: string, isPrimaryRail: bool, gridClasses: string, sectionClasses: string}
+     */
+    private function presentation(): array
+    {
+        $isPrimaryRail = in_array($this->rail, ['trending', 'top-rated-movies'], true);
+
+        return [
+            'railIcon' => match ($this->rail) {
+                'top-rated-movies' => 'star',
+                'top-rated-series' => 'tv',
+                'coming-soon' => 'calendar-days',
+                'recently-added' => 'plus-circle',
+                default => 'fire',
+            },
+            'isPrimaryRail' => $isPrimaryRail,
+            'gridClasses' => $isPrimaryRail
+                ? 'grid gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4'
+                : 'grid gap-4 md:grid-cols-2 xl:grid-cols-3',
+            'sectionClasses' => $isPrimaryRail
+                ? 'sb-home-section sb-home-section--primary space-y-5 rounded-[1.75rem] p-4 sm:p-5'
+                : 'sb-home-section sb-home-section--secondary space-y-5 rounded-[1.6rem] p-4 sm:p-5',
+        ];
+    }
 };
 ?>
 
 <div>
-    @php
-        $railIcon = match ($rail) {
-            'top-rated-movies' => 'star',
-            'top-rated-series' => 'tv',
-            'coming-soon' => 'calendar-days',
-            'recently-added' => 'plus-circle',
-            default => 'fire',
-        };
-    @endphp
-
     @placeholder
         <div class="space-y-4">
             <div class="flex items-start justify-between gap-4">
@@ -144,14 +174,14 @@ new class extends Component
         </div>
     @endplaceholder
 
-    <div class="space-y-4">
+    <div class="{{ $sectionClasses }}" @if ($isPrimaryRail) data-slot="home-primary-rail" @endif>
         <div class="flex items-start justify-between gap-4">
             <div class="space-y-1">
-                <x-ui.heading level="h2" size="lg" class="inline-flex items-center gap-2">
-                    <x-ui.icon :name="$railIcon" class="size-5 text-neutral-500 dark:text-neutral-400" />
+                <x-ui.heading level="h2" size="lg" class="sb-home-section-heading inline-flex items-center gap-2">
+                    <x-ui.icon :name="$railIcon" class="size-5 text-[#d6b574]" />
                     <span>{{ $heading }}</span>
                 </x-ui.heading>
-                <x-ui.text class="max-w-3xl text-sm text-neutral-600 dark:text-neutral-300">
+                <x-ui.text class="sb-home-section-copy max-w-3xl text-sm">
                     {{ $description }}
                 </x-ui.text>
             </div>
@@ -183,10 +213,10 @@ new class extends Component
                 </x-ui.text>
             </x-ui.empty>
         @else
-            <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <div class="{{ $gridClasses }}">
                 @foreach ($titles as $title)
-                    <div wire:key="home-title-rail-{{ $rail }}-{{ $title->id }}">
-                        <x-catalog.title-card :title="$title" />
+                    <div class="{{ $isPrimaryRail && $loop->first ? 'md:col-span-2 xl:col-span-2' : '' }}" wire:key="home-title-rail-{{ $rail }}-{{ $title->id }}">
+                        <x-catalog.title-card :title="$title" :show-summary="$isPrimaryRail && $loop->first" />
                     </div>
                 @endforeach
             </div>

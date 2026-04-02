@@ -1,5 +1,20 @@
+const registerLivewireMorphInterceptor = (livewireId, callback) => {
+    if (window.Livewire === undefined || !livewireId) {
+        return () => { }
+    }
 
-let LIVEWIRE_ID;
+    return window.Livewire.interceptMessage(({ message, onSuccess }) => {
+        if (message.component.id !== livewireId) {
+            return
+        }
+
+        onSuccess(({ onMorph }) => {
+            onMorph(async () => {
+                callback()
+            })
+        })
+    })
+}
 
 const selectComponent = ({
     livewire,
@@ -14,8 +29,6 @@ const selectComponent = ({
     searchable,
     pillbox
 }) => {
-
-    LIVEWIRE_ID = livewireId;
 
     const $entangle = (prop, live) => {
         const binding = livewire.$entangle(prop)
@@ -35,25 +48,20 @@ const selectComponent = ({
         __previousSelected: undefined,
         __usingExternalSearch: false,
         __selectedTags: [],
+        __unsubscribeMessageInterceptor: () => { },
 
 
         init() {
 
 
-            if (window.Livewire !== undefined) {
-                window.Livewire.hook('commit', ({ component, succeed }) => {
-                    if (component.id === LIVEWIRE_ID) {
-                        succeed(() => {
-                            // we need to wait until alpine finish it process then reconcile 
-                            // the dom with the new coming or deleted nodes
-                            this.$nextTick(() => {
-                                this.$rover.reconcileDom();
-                                this.ensureSelectedMarked();
-                            });
-                        });
-                    }
+            this.__unsubscribeMessageInterceptor = registerLivewireMorphInterceptor(livewireId, () => {
+                // we need to wait until alpine finish it process then reconcile
+                // the dom with the new coming or deleted nodes
+                this.$nextTick(() => {
+                    this.$rover.reconcileDom();
+                    this.ensureSelectedMarked();
                 });
-            }
+            });
             //  handle dom interactions... 
             if (searchable) {
                 let inputManager = this.$rover.input
@@ -331,26 +339,25 @@ const selectComponent = ({
         get selectedTags() {
             return this.__selectedTags
         },
+        destroy() {
+            this.__unsubscribeMessageInterceptor?.()
+        },
     }
 }
 
 const CreateNewOptionActivator = () => ({
+    __unsubscribeMessageInterceptor: () => { },
+
     init() {
+        const rootLivewireId = this.$root.dataset.livewireId;
+
         // defer until Alpine finishes bootstrapping (on the current microtask)
         //  this element's directives
         queueMicrotask(() => this.activate())
 
-        if (window.Livewire !== undefined) {
-            window.Livewire.hook('commit', ({ component, succeed }) => {
-                if (component.id === LIVEWIRE_ID) {
-                    succeed(() => {
-                        // wait for Alpine's scheduler to flush 
-                        // after the Livewire commit
-                        this.$nextTick(() => this.activate());
-                    });
-                }
-            });
-        }
+        this.__unsubscribeMessageInterceptor = registerLivewireMorphInterceptor(rootLivewireId, () => {
+            this.$nextTick(() => this.activate());
+        });
 
         this.$rover.input.on('keydown', (event,) => {
             if (event.key === "Enter") {
@@ -365,6 +372,7 @@ const CreateNewOptionActivator = () => ({
         delete this.$el.dataset.active;
     },
     destroy() {
+        this.__unsubscribeMessageInterceptor?.()
         this.deactivate();
     }
 });

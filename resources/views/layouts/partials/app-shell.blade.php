@@ -1,179 +1,207 @@
-@php
-    $pageShellState = app(\App\Livewire\Pages\Support\PageShellState::class)->all();
-    $pageTitle = $pageShellState['pageTitle'] ?? $pageTitle;
-    $pageDescription = $pageShellState['pageDescription'] ?? $pageDescription;
-    $pageRobots = $pageShellState['pageRobots'] ?? $pageRobots;
-    $canonicalUrl = $pageShellState['canonicalUrl'] ?? $canonicalUrl;
-    $openGraphTitle = $pageShellState['openGraphTitle'] ?? $openGraphTitle;
-    $openGraphDescription = $pageShellState['openGraphDescription'] ?? $openGraphDescription;
-    $openGraphType = $pageShellState['openGraphType'] ?? $openGraphType;
-    $openGraphImage = $pageShellState['openGraphImage'] ?? $openGraphImage;
-    $openGraphImageAlt = $pageShellState['openGraphImageAlt'] ?? $openGraphImageAlt;
-    $twitterCard = $pageShellState['twitterCard'] ?? $twitterCard;
-    $breadcrumbSchema = $pageShellState['breadcrumbSchema'] ?? $breadcrumbSchema;
-    $renderedBreadcrumbs = $pageShellState['breadcrumbs'] ?? $renderedBreadcrumbs;
-    $renderedNavbar = $pageShellState['navbar'] ?? $renderedNavbar;
-    $renderedSidebar = $pageShellState['sidebar'] ?? $renderedSidebar;
-    $renderedNavbarText = strip_tags((string) $renderedNavbar);
-    $hasBreadcrumbs = trim((string) $renderedBreadcrumbs) !== '';
-    $shouldRenderAdminShortcut = auth()->user()?->can('access-admin-area')
-        && ! request()->routeIs('admin.*')
-        && ! str_contains($renderedNavbarText, 'Admin');
-    $shouldRenderWatchlistShortcut = auth()->check()
-        && ! str_contains($renderedNavbarText, 'Watchlist');
-    $shouldRenderSignOutShortcut = auth()->check()
-        && ! str_contains($renderedNavbarText, 'Sign out');
-    $shouldRenderGuestAuthShortcuts = ! auth()->check()
-        && ! str_contains($renderedNavbarText, 'Sign in')
-        && ! str_contains($renderedNavbarText, 'Create account');
-@endphp
-
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full scroll-smooth">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark h-full scroll-smooth [color-scheme:dark]">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>{{ $pageTitle }}</title>
-        <meta name="description" content="{{ $pageDescription }}">
-        <meta name="robots" content="{{ $pageRobots }}">
-        <link rel="canonical" href="{{ $canonicalUrl }}">
+        <title>{{ $shell['pageTitle'] }}</title>
+        <meta name="description" content="{{ $shell['pageDescription'] }}">
+        <meta name="robots" content="{{ $shell['pageRobots'] }}">
+        <link rel="canonical" href="{{ $shell['canonicalUrl'] }}">
         <meta property="og:site_name" content="Screenbase">
-        <meta property="og:type" content="{{ $openGraphType }}">
-        <meta property="og:title" content="{{ $openGraphTitle }}">
-        <meta property="og:description" content="{{ $openGraphDescription }}">
-        <meta property="og:url" content="{{ $canonicalUrl }}">
-        <meta name="twitter:card" content="{{ $twitterCard }}">
-        <meta name="twitter:title" content="{{ $openGraphTitle }}">
-        <meta name="twitter:description" content="{{ $openGraphDescription }}">
-        @if ($openGraphImage)
-            <meta property="og:image" content="{{ $openGraphImage }}">
-            <meta name="twitter:image" content="{{ $openGraphImage }}">
-            @if ($openGraphImageAlt)
-                <meta property="og:image:alt" content="{{ $openGraphImageAlt }}">
+        <meta property="og:type" content="{{ $shell['openGraphType'] }}">
+        <meta property="og:title" content="{{ $shell['openGraphTitle'] }}">
+        <meta property="og:description" content="{{ $shell['openGraphDescription'] }}">
+        <meta property="og:url" content="{{ $shell['canonicalUrl'] }}">
+        <meta name="twitter:card" content="{{ $shell['twitterCard'] }}">
+        <meta name="twitter:title" content="{{ $shell['openGraphTitle'] }}">
+        <meta name="twitter:description" content="{{ $shell['openGraphDescription'] }}">
+        @if ($shell['openGraphImage'])
+            <meta property="og:image" content="{{ $shell['openGraphImage'] }}">
+            <meta name="twitter:image" content="{{ $shell['openGraphImage'] }}">
+            @if ($shell['openGraphImageAlt'])
+                <meta property="og:image:alt" content="{{ $shell['openGraphImageAlt'] }}">
             @endif
         @endif
-        @if ($breadcrumbSchema)
-            <script type="application/ld+json">{!! $breadcrumbSchema !!}</script>
+        @if ($shell['breadcrumbSchema'])
+            <script type="application/ld+json">{!! $shell['breadcrumbSchema'] !!}</script>
         @endif
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @livewireStyles
         @stack('head')
     </head>
-    <body class="min-h-full bg-neutral-50 text-neutral-950 antialiased dark:bg-neutral-950 dark:text-neutral-50">
-        <x-ui.layout variant="header-sidebar">
-            <x-ui.layout.header>
-                <x-slot:brand>
-                    <x-ui.brand
-                        :href="route('public.home')"
-                        name="Screenbase"
-                        class="font-semibold"
-                    />
-                </x-slot:brand>
+    <body @class([
+        'min-h-full antialiased',
+        'bg-[#080707] text-stone-50' => $shell['isAuthShell'],
+        'bg-neutral-950 text-neutral-50' => ! $shell['isAuthShell'],
+    ])>
+        @if ($shell['isAuthShell'])
+            <div class="sb-auth-shell relative min-h-screen overflow-hidden">
+                <div class="pointer-events-none absolute inset-0">
+                    <div class="absolute inset-x-0 top-0 h-64 bg-[radial-gradient(circle_at_top,_rgba(214,181,116,0.22),_transparent_58%)] opacity-90"></div>
+                    <div class="absolute inset-y-0 right-0 w-[28rem] bg-[radial-gradient(circle_at_center,_rgba(84,66,46,0.22),_transparent_62%)]"></div>
+                    <div class="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.025),transparent_38%,rgba(214,181,116,0.02)_72%,transparent)]"></div>
+                </div>
 
-                @unless (request()->routeIs('admin.*') || request()->routeIs('public.search'))
-                    <div class="hidden min-w-0 max-w-2xl flex-1 px-4 xl:block">
-                        <livewire:search.global-search />
-                    </div>
-                @endunless
+                <div class="relative flex min-h-screen flex-col">
+                    <header class="sticky top-0 z-40 border-b border-white/8 bg-black/30 backdrop-blur-xl">
+                        <div class="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
+                            <a href="{{ route('public.home') }}" class="group inline-flex items-center gap-3 text-decoration-none">
+                                <span class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#d6b574]/25 bg-white/4 text-[0.72rem] font-semibold uppercase tracking-[0.3em] text-[#d6b574]">
+                                    SB
+                                </span>
+                                <span class="min-w-0">
+                                    <span class="sb-auth-kicker block">Premium Entertainment Database</span>
+                                    <span class="block text-base font-semibold text-[#f7f1e8] transition-opacity group-hover:opacity-80">
+                                        Screenbase
+                                    </span>
+                                </span>
+                            </a>
 
-                <x-ui.navbar class="ml-auto">
-                    {!! $renderedNavbar !!}
-
-                    @if ($shouldRenderAdminShortcut)
-                        <x-ui.navbar.item
-                            :href="route('admin.dashboard')"
-                            label="Admin"
-                            icon="shield-check"
-                            :active="request()->routeIs('admin.*')"
-                        />
-                    @endif
-
-                    @if ($shouldRenderWatchlistShortcut)
-                        <x-ui.navbar.item
-                            :href="route('account.watchlist')"
-                            label="Watchlist"
-                            icon="bookmark"
-                            :active="request()->routeIs('account.*')"
-                        />
-                    @endif
-
-                    @if ($shouldRenderSignOutShortcut)
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <x-ui.button
-                                type="submit"
-                                variant="ghost"
-                                size="sm"
-                                icon="arrow-right-start-on-rectangle"
+                            <a
+                                href="{{ route('public.discover') }}"
+                                class="sb-auth-header-link inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/4 px-4 py-2 text-sm font-medium"
                             >
-                                Sign out
-                            </x-ui.button>
-                        </form>
-                    @endif
+                                <x-ui.icon name="chevron-left" variant="mini" class="size-4" />
+                                <span>Browse catalog</span>
+                            </a>
+                        </div>
+                    </header>
 
-                    @if ($shouldRenderGuestAuthShortcuts)
-                        <x-ui.button
-                            as="a"
-                            :href="route('login')"
-                            variant="ghost"
-                            size="sm"
-                            icon="arrow-right-end-on-rectangle"
-                        >
-                            Sign in
-                        </x-ui.button>
-                        <x-ui.button
-                            as="a"
-                            :href="route('register')"
-                            size="sm"
-                            icon="user-plus"
-                        >
-                            Create account
-                        </x-ui.button>
-                    @endif
-                </x-ui.navbar>
-            </x-ui.layout.header>
-
-            <x-ui.sidebar>
-                <x-slot:brand>
-                    <x-ui.brand
-                        :href="route('public.home')"
-                        name="Screenbase"
-                        class="font-semibold"
-                    />
-                </x-slot:brand>
-
-                {!! $renderedSidebar !!}
-
-                <x-ui.sidebar.push />
-
-                <div class="px-3 pb-4 pt-2 text-xs text-neutral-500 dark:text-neutral-400">
-                    Built with Laravel 12 and Livewire 4.
+                    <main class="relative flex-1">
+                        <div class="mx-auto flex min-h-[calc(100vh-4.75rem)] w-full max-w-6xl items-center justify-center px-4 py-10 sm:px-6 lg:py-16">
+                            @isset($slot)
+                                {{ $slot }}
+                            @elseif (isset($content))
+                                {!! $content !!}
+                            @else
+                                @yield('content')
+                            @endisset
+                        </div>
+                    </main>
                 </div>
-            </x-ui.sidebar>
-
-            <x-ui.layout.main>
-                <div class="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(15,23,42,0.08),_transparent_38%),linear-gradient(to_bottom,_rgba(255,255,255,0.96),_rgba(248,250,252,1))] dark:bg-[radial-gradient(circle_at_top,_rgba(148,163,184,0.18),_transparent_30%),linear-gradient(to_bottom,_rgba(10,10,10,1),_rgba(23,23,23,1))]">
-                    <div class="mx-auto flex w-full max-w-7xl flex-col gap-6 p-4 md:p-6">
-                        @if ($hasBreadcrumbs)
-                            <x-ui.breadcrumbs class="pt-1">
-                                {!! $renderedBreadcrumbs !!}
-                            </x-ui.breadcrumbs>
-                        @endif
-
-                        @isset($slot)
-                            {{ $slot }}
-                        @else
-                            @yield('content')
-                        @endisset
-                    </div>
-
-                    @unless (request()->routeIs('admin.*') || request()->routeIs('public.search'))
-                        <x-ui.footer class="mx-auto w-full max-w-7xl px-4 pb-6 md:px-6 md:pb-8" />
-                    @endunless
+            </div>
+        @else
+            <div class="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(214,181,116,0.16),_transparent_24%),radial-gradient(circle_at_bottom_left,_rgba(94,73,47,0.2),_transparent_26%),linear-gradient(to_bottom,_rgba(10,10,10,1),_rgba(18,16,14,1))]">
+                <div class="pointer-events-none absolute inset-0">
+                    <div class="absolute inset-x-0 top-0 h-72 bg-[radial-gradient(circle_at_top,_rgba(214,181,116,0.18),_transparent_58%)]"></div>
+                    <div class="absolute inset-y-0 right-0 w-[32rem] bg-[radial-gradient(circle_at_center,_rgba(84,66,46,0.18),_transparent_62%)]"></div>
                 </div>
-            </x-ui.layout.main>
-        </x-ui.layout>
+
+                <div class="relative flex min-h-screen flex-col">
+                    <header class="sticky top-0 z-40 border-b border-white/8 bg-[linear-gradient(180deg,rgba(8,8,8,0.98),rgba(17,15,13,0.94))] shadow-[0_22px_60px_rgba(0,0,0,0.32)] backdrop-blur-xl">
+                        <div class="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-4 md:px-6">
+                            <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+                                <a href="{{ route('public.home') }}" class="group inline-flex items-center gap-3 text-decoration-none xl:pr-4">
+                                    <span class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#d6b574]/25 bg-white/4 text-[0.72rem] font-semibold uppercase tracking-[0.3em] text-[#d6b574]">
+                                        SB
+                                    </span>
+                                    <span class="min-w-0">
+                                        <span class="sb-shell-kicker block">Entertainment Database</span>
+                                        <span class="sb-shell-brand-name block text-[#f7f1e8] transition-opacity group-hover:opacity-80">
+                                            Screenbase
+                                        </span>
+                                    </span>
+                                </a>
+
+                                @unless (request()->routeIs('admin.*') || request()->routeIs('public.search'))
+                                    <div class="hidden min-w-0 max-w-[54rem] flex-1 xl:block">
+                                        <div class="sb-shell-search-stage">
+                                            <div class="sb-shell-search-label">Search The Global Catalog</div>
+                                            <livewire:search.global-search />
+                                        </div>
+                                    </div>
+                                @endunless
+                            </div>
+
+                            <x-ui.navbar class="sb-shell-topnav w-full flex-wrap gap-2 border-t border-white/8 px-0 pt-3" aria-label="Global navigation">
+                                @if (filled(trim((string) $shell['renderedNavbar'])))
+                                    {!! $shell['renderedNavbar'] !!}
+                                @elseif (request()->routeIs('public.*'))
+                                    @include('layouts.partials.public-navbar')
+                                @endif
+
+                                @if ($shell['shouldRenderAdminShortcut'])
+                                    <x-ui.navbar.item
+                                        :href="route('admin.dashboard')"
+                                        label="Admin"
+                                        icon="shield-check"
+                                        class="sb-shell-topnav-item"
+                                        :active="request()->routeIs('admin.*')"
+                                    />
+                                @endif
+
+                                @if ($shell['shouldRenderWatchlistShortcut'])
+                                    <x-ui.navbar.item
+                                        :href="route('account.watchlist')"
+                                        label="Watchlist"
+                                        icon="bookmark"
+                                        class="sb-shell-topnav-item"
+                                        :active="request()->routeIs('account.*')"
+                                    />
+                                @endif
+
+                                @if ($shell['shouldRenderSignOutShortcut'])
+                                    <form method="POST" action="{{ route('logout') }}">
+                                        @csrf
+                                        <x-ui.button
+                                            type="submit"
+                                            variant="ghost"
+                                            size="sm"
+                                            icon="arrow-right-start-on-rectangle"
+                                        >
+                                            Sign out
+                                        </x-ui.button>
+                                    </form>
+                                @endif
+
+                                @if ($shell['shouldRenderGuestAuthShortcuts'])
+                                    <x-ui.button
+                                        as="a"
+                                        :href="route('login')"
+                                        variant="ghost"
+                                        size="sm"
+                                        icon="arrow-right-end-on-rectangle"
+                                    >
+                                        Sign in
+                                    </x-ui.button>
+                                    <x-ui.button
+                                        as="a"
+                                        :href="route('register')"
+                                        size="sm"
+                                        icon="user-plus"
+                                    >
+                                        Create account
+                                    </x-ui.button>
+                                @endif
+                            </x-ui.navbar>
+                        </div>
+                    </header>
+
+                    <main class="relative flex-1">
+                        <div class="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 md:px-6">
+                            @if ($shell['hasBreadcrumbs'])
+                                <x-ui.breadcrumbs class="pt-1">
+                                    {!! $shell['renderedBreadcrumbs'] !!}
+                                </x-ui.breadcrumbs>
+                            @endif
+
+                            @isset($slot)
+                                {{ $slot }}
+                            @elseif (isset($content))
+                                {!! $content !!}
+                            @else
+                                @yield('content')
+                            @endisset
+                        </div>
+                    </main>
+
+                    @if ($shell['showFooter'] && ! request()->routeIs('admin.*') && ! request()->routeIs('public.search'))
+                        <x-ui.footer />
+                    @endif
+                </div>
+            </div>
+        @endif
 
         <x-ui.toast />
 

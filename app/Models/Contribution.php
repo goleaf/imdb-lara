@@ -8,8 +8,10 @@ use Database\Factories\ContributionFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 class Contribution extends Model
 {
@@ -58,6 +60,11 @@ class Contribution extends Model
         return $this->morphTo();
     }
 
+    public function moderationActions(): MorphMany
+    {
+        return $this->morphMany(ModerationAction::class, 'actionable');
+    }
+
     public function getProposedFieldAttribute(): ?string
     {
         $field = $this->payload['field'] ?? null;
@@ -99,5 +106,23 @@ class Contribution extends Model
     public function getReviewNotesAttribute(): ?string
     {
         return $this->reviewed_by !== null && filled($this->notes) ? trim((string) $this->notes) : null;
+    }
+
+    public function contributableAdminUrl(): ?string
+    {
+        return match (true) {
+            $this->contributable instanceof Title => route('admin.titles.edit', $this->contributable),
+            $this->contributable instanceof Person => route('admin.people.edit', $this->contributable),
+            default => null,
+        };
+    }
+
+    public function contributableLabel(): ?string
+    {
+        return match (true) {
+            $this->contributable instanceof Title => $this->contributable->name,
+            $this->contributable instanceof Person => $this->contributable->name,
+            default => filled($this->contributable_type) ? Str::headline(class_basename($this->contributable_type)) : null,
+        };
     }
 }

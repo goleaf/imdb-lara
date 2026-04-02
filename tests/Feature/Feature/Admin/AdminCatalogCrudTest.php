@@ -168,13 +168,15 @@ class AdminCatalogCrudTest extends TestCase
 
         $this->actingAs($editor)
             ->post(route('admin.titles.seasons.store', $series), [
-                'name' => 'Season 1',
-                'slug' => 'season-1',
-                'season_number' => 1,
-                'summary' => 'First season summary.',
-                'release_year' => 2026,
-                'meta_title' => 'Northbound Season 1',
-                'meta_description' => 'Season one metadata.',
+                'season' => [
+                    'name' => 'Season 1',
+                    'slug' => 'season-1',
+                    'season_number' => 1,
+                    'summary' => 'First season summary.',
+                    'release_year' => 2026,
+                    'meta_title' => 'Northbound Season 1',
+                    'meta_description' => 'Season one metadata.',
+                ],
             ])
             ->assertRedirect();
 
@@ -182,22 +184,24 @@ class AdminCatalogCrudTest extends TestCase
 
         $this->actingAs($editor)
             ->post(route('admin.seasons.episodes.store', $season), [
-                'name' => 'Signals in Snow',
-                'slug' => 'signals-in-snow',
-                'plot_outline' => 'Episode outline.',
-                'synopsis' => 'Episode synopsis.',
-                'release_year' => 2026,
-                'release_date' => '2026-01-10',
-                'runtime_minutes' => 54,
-                'age_rating' => 'TV-14',
-                'origin_country' => 'NO',
-                'original_language' => 'en',
-                'is_published' => true,
-                'season_number' => 1,
-                'episode_number' => 1,
-                'absolute_number' => 1,
-                'production_code' => 'NB101',
-                'aired_at' => '2026-01-10',
+                'episode' => [
+                    'name' => 'Signals in Snow',
+                    'slug' => 'signals-in-snow',
+                    'plot_outline' => 'Episode outline.',
+                    'synopsis' => 'Episode synopsis.',
+                    'release_year' => 2026,
+                    'release_date' => '2026-01-10',
+                    'runtime_minutes' => 54,
+                    'age_rating' => 'TV-14',
+                    'origin_country' => 'NO',
+                    'original_language' => 'en',
+                    'is_published' => true,
+                    'season_number' => 1,
+                    'episode_number' => 1,
+                    'absolute_number' => 1,
+                    'production_code' => 'NB101',
+                    'aired_at' => '2026-01-10',
+                ],
             ])
             ->assertRedirect();
 
@@ -317,5 +321,112 @@ class AdminCatalogCrudTest extends TestCase
             ->assertRedirect(route('admin.genres.index'));
 
         $this->assertDatabaseMissing('genres', ['id' => $genre->id]);
+    }
+
+    public function test_editor_cannot_attach_credits_to_an_unrelated_profession_or_episode(): void
+    {
+        $editor = User::factory()->editor()->create();
+        $series = Title::factory()->series()->create();
+        $otherSeries = Title::factory()->series()->create();
+        $person = Person::factory()->create();
+        $otherPerson = Person::factory()->create();
+        $otherProfession = PersonProfession::factory()->for($otherPerson, 'person')->create();
+        $season = Season::factory()->for($otherSeries, 'series')->create();
+        $episode = Episode::factory()->for($otherSeries, 'series')->for($season)->create();
+
+        $this->actingAs($editor)
+            ->from(route('admin.credits.create', ['title' => $series->id, 'person' => $person->id]))
+            ->post(route('admin.credits.store'), [
+                'title_id' => $series->id,
+                'person_id' => $person->id,
+                'person_profession_id' => $otherProfession->id,
+                'department' => 'Cast',
+                'job' => 'Lead',
+                'character_name' => 'Aster Vale',
+                'billing_order' => 1,
+                'credited_as' => 'Aster Vale',
+                'is_principal' => true,
+                'episode_id' => $episode->id,
+            ])
+            ->assertRedirect(route('admin.credits.create', ['title' => $series->id, 'person' => $person->id]))
+            ->assertSessionHasErrors(['person_profession_id', 'episode_id']);
+
+        $this->assertDatabaseCount('credits', 0);
+    }
+
+    public function test_editor_cannot_create_seasons_for_non_series_titles(): void
+    {
+        $editor = User::factory()->editor()->create();
+        $movie = Title::factory()->movie()->create();
+
+        $this->actingAs($editor)
+            ->post(route('admin.titles.seasons.store', $movie), [
+                'season' => [
+                    'name' => 'Season 1',
+                    'slug' => 'season-1',
+                    'season_number' => 1,
+                ],
+            ])
+            ->assertForbidden();
+
+        $this->assertDatabaseCount('seasons', 0);
+    }
+
+    public function test_editor_cannot_change_existing_series_or_episode_titles_to_incompatible_types(): void
+    {
+        $editor = User::factory()->editor()->create();
+        $series = Title::factory()->series()->create();
+        $season = Season::factory()->for($series, 'series')->create();
+        $episode = Episode::factory()->for($series, 'series')->for($season)->create();
+
+        $this->actingAs($editor)
+            ->from(route('admin.titles.edit', $series))
+            ->patch(route('admin.titles.update', $series), [
+                'name' => $series->name,
+                'original_name' => $series->original_name,
+                'slug' => $series->slug,
+                'title_type' => TitleType::Movie->value,
+                'release_year' => $series->release_year,
+                'release_date' => optional($series->release_date)->toDateString(),
+                'runtime_minutes' => $series->runtime_minutes,
+                'age_rating' => $series->age_rating,
+                'plot_outline' => $series->plot_outline,
+                'synopsis' => $series->synopsis,
+                'tagline' => $series->tagline,
+                'origin_country' => $series->origin_country,
+                'original_language' => $series->original_language,
+                'meta_title' => $series->meta_title,
+                'meta_description' => $series->meta_description,
+                'search_keywords' => $series->search_keywords,
+                'is_published' => $series->is_published,
+                'genre_ids' => [],
+            ])
+            ->assertRedirect(route('admin.titles.edit', $series))
+            ->assertSessionHasErrors('title_type');
+
+        $this->actingAs($editor)
+            ->from(route('admin.titles.edit', $episode->title))
+            ->patch(route('admin.titles.update', $episode->title), [
+                'name' => $episode->title->name,
+                'original_name' => $episode->title->original_name,
+                'slug' => $episode->title->slug,
+                'title_type' => TitleType::Movie->value,
+                'release_year' => $episode->title->release_year,
+                'release_date' => optional($episode->title->release_date)->toDateString(),
+                'runtime_minutes' => $episode->title->runtime_minutes,
+                'age_rating' => $episode->title->age_rating,
+                'plot_outline' => $episode->title->plot_outline,
+                'synopsis' => $episode->title->synopsis,
+                'tagline' => $episode->title->tagline,
+                'origin_country' => $episode->title->origin_country,
+                'original_language' => $episode->title->original_language,
+                'meta_title' => $episode->title->meta_title,
+                'meta_description' => $episode->title->meta_description,
+                'search_keywords' => $episode->title->search_keywords,
+                'is_published' => $episode->title->is_published,
+                'genre_ids' => [],
+            ])
+            ->assertRedirect(route('admin.titles.edit', $episode->title))
+            ->assertSessionHasErrors('title_type');
     }
 }

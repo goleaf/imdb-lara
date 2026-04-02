@@ -33,6 +33,8 @@ class PageMetadataTest extends TestCase
 
         $this->get(route('public.titles.show', $title))
             ->assertOk()
+            ->assertSee('<title>Northern Signal | Screenbase</title>', false)
+            ->assertSee('<meta name="description" content="Editorial metadata for Northern Signal.">', false)
             ->assertSee('<link rel="canonical" href="'.route('public.titles.show', $title).'">', false)
             ->assertSee('<meta property="og:type" content="video.movie">', false)
             ->assertSee('<meta property="og:title" content="Northern Signal | Screenbase">', false)
@@ -87,6 +89,7 @@ class PageMetadataTest extends TestCase
             'titles' => 2,
         ]))
             ->assertOk()
+            ->assertSee('<meta name="robots" content="noindex,follow">', false)
             ->assertSee('href="'.e($expectedSearchCanonical).'"', false);
 
         $this->get(route('public.movies.index', ['movies' => 2]))
@@ -141,5 +144,32 @@ class PageMetadataTest extends TestCase
             ->assertSee('<link rel="canonical" href="'.route('public.lists.show', [$owner, $list]).'">', false)
             ->assertSee('<meta property="og:image" content="https://images.example.test/weekend-signal-poster.jpg">', false)
             ->assertSee('"@type":"BreadcrumbList"', false);
+
+        $unlistedList = UserList::factory()->for($owner)->create([
+            'name' => 'Hidden Weekend Marathon',
+            'slug' => 'hidden-weekend-marathon',
+            'visibility' => ListVisibility::Unlisted,
+        ]);
+        ListItem::factory()->for($unlistedList, 'userList')->for($listTitle, 'title')->create([
+            'position' => 1,
+        ]);
+
+        $this->get(route('public.lists.show', [$owner, $unlistedList]))
+            ->assertOk()
+            ->assertSee('<meta name="robots" content="noindex,follow">', false);
+    }
+
+    public function test_auth_and_account_pages_use_centralized_noindex_defaults(): void
+    {
+        $user = User::factory()->create();
+
+        $this->get(route('login'))
+            ->assertOk()
+            ->assertSee('<meta name="robots" content="noindex,nofollow">', false);
+
+        $this->actingAs($user)
+            ->get(route('account.settings'))
+            ->assertOk()
+            ->assertSee('<meta name="robots" content="noindex,nofollow">', false);
     }
 }

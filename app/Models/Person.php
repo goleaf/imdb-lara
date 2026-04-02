@@ -6,11 +6,13 @@ use App\Enums\MediaKind;
 use App\Models\Concerns\GeneratesSlugs;
 use Database\Factories\PersonFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection as SupportCollection;
 
 class Person extends Model
 {
@@ -151,5 +153,82 @@ class Person extends Model
             ->unique()
             ->values()
             ->all();
+    }
+
+    public function preferredHeadshot(): ?MediaAsset
+    {
+        /** @var iterable<array-key, mixed> $assets */
+        $assets = $this->relationLoaded('mediaAssets')
+            ? $this->mediaAssets
+            : ($this->relationLoaded('personImages') ? $this->personImages : []);
+
+        return MediaAsset::preferredFrom(
+            $assets,
+            MediaKind::Headshot,
+            MediaKind::Gallery,
+            MediaKind::Still,
+        );
+    }
+
+    /**
+     * @return EloquentCollection<int, PersonProfession>
+     */
+    public function previewProfessions(int $limit = 2): EloquentCollection
+    {
+        if (! $this->relationLoaded('professions')) {
+            return new EloquentCollection;
+        }
+
+        /** @var EloquentCollection<int, PersonProfession> $professions */
+        $professions = $this->professions
+            ->filter(fn (PersonProfession $profession): bool => filled($profession->profession))
+            ->unique('profession')
+            ->take($limit)
+            ->values();
+
+        return $professions;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function professionLabels(int $limit = 2): array
+    {
+        return $this->previewProfessions($limit)
+            ->pluck('profession')
+            ->filter()
+            ->values()
+            ->all();
+    }
+
+    public function primaryProfessionLabel(): string
+    {
+        return $this->professionLabels(1)[0] ?? ($this->known_for_department ?: 'Screenbase profile');
+    }
+
+    public function secondaryProfessionLabel(): string
+    {
+        return collect($this->professionLabels())
+            ->skip(1)
+            ->implode(' · ');
+    }
+
+    public function summaryText(): ?string
+    {
+        $summary = $this->short_biography ?: $this->biography;
+
+        return filled($summary) ? (string) $summary : null;
+    }
+
+    /**
+     * @return SupportCollection<string, EloquentCollection<int, MediaAsset>>
+     */
+    public function groupedMediaAssetsByKind(): SupportCollection
+    {
+        if (! $this->relationLoaded('mediaAssets')) {
+            return collect();
+        }
+
+        return $this->mediaAssets->groupBy(fn (MediaAsset $mediaAsset): string => $mediaAsset->kind->value);
     }
 }

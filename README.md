@@ -23,27 +23,21 @@ It includes:
 
 ## Local Setup
 
-1. Install PHP and Node dependencies.
+1. Run the baseline setup script.
 
 ```bash
-composer install
-npm install
+composer run setup
 ```
 
-2. Copy the environment file and generate an application key.
+This installs dependencies, prepares `.env`, generates the app key, runs migrations, and builds frontend assets.
+
+2. Seed the demo catalog.
 
 ```bash
-cp .env.example .env
-php artisan key:generate
+php artisan db:seed --force
 ```
 
-3. Run the database migrations and seed the demo catalog.
-
-```bash
-php artisan migrate --seed
-```
-
-4. Start the application and asset pipeline.
+3. Start the application.
 
 ```bash
 composer run dev
@@ -56,9 +50,26 @@ php artisan serve
 npm run dev
 ```
 
+## Default Local Configuration
+
+The repository defaults to an SQLite-first local setup:
+
+- `DB_CONNECTION=sqlite`
+- `CACHE_STORE=database`
+- `SESSION_DRIVER=database`
+- `QUEUE_CONNECTION=database`
+
+If the SQLite file does not exist yet, create it before migrating:
+
+```bash
+touch database/database.sqlite
+```
+
+Database-backed cache, session, and queue tables are created by the standard migrations.
+
 ## Demo Data
 
-The default database seeder runs `Database\\Seeders\\DemoCatalogSeeder`, which creates:
+`Database\\Seeders\\DemoCatalogSeeder` creates:
 
 - a production-style sample title/person catalog
 - demo seasons and episodes
@@ -84,17 +95,24 @@ Public surface:
 - `/`
 - `/discover`
 - `/movies`
-- `/tv`
+- `/tv-shows`
 - `/people`
 - `/search`
 - `/titles/{slug}`
+- `/titles/{slug}/cast`
+- `/titles/{slug}/media`
+- `/titles/{slug}/metadata`
+- `/titles/{slug}/box-office`
+- `/titles/{slug}/trivia`
+- `/titles/{slug}/parents-guide`
 - `/people/{slug}`
+- `/awards`
 - `/u/{username}`
 - `/u/{username}/lists/{slug}`
 
 Account surface:
 
-- `/account/dashboard`
+- `/account`
 - `/account/watchlist`
 - `/account/lists`
 - `/account/settings`
@@ -114,8 +132,8 @@ Admin surface:
 
 ### Public product
 
-- homepage rails for spotlight, trending, top rated, trailers, reviews, public lists, genres, and years
-- advanced search with grouped results for titles, people, and public lists
+- homepage rails for spotlight, trending, top rated, TV discovery, people, trailers, reviews, awards, keywords, genres, and charts
+- advanced search with grouped results for titles and people plus advanced title filters
 - title pages with ratings, reviews, watch-state, custom-list management, awards, media, related titles, and full cast
 - TV hierarchy with series, seasons, episodes, episode ratings, and watched progress
 - people pages with known-for titles, grouped filmography, collaborators, awards, and galleries
@@ -139,8 +157,11 @@ Admin surface:
 
 - shared catalog filters and homepage datasets now use short-lived cache reads for lower repeated query cost
 - non-production environments prevent lazy loading to catch N+1 regressions early
-- major Livewire browse/search/profile surfaces use eager loading and paginated queries
+- awards, discovery, homepage, browse, search, and profile surfaces use eager loading, stable pagination, and lightweight cached reads where the data is low-risk
+- public metadata is centralized through `app/Actions/Seo/PageSeoData.php` and the shared page-shell pipeline for canonical tags, Open Graph tags, breadcrumbs, and pagination-aware titles
+- search, auth, account, and other non-index surfaces can be controlled through the same robots metadata hooks without introducing a third-party SEO package
 - public and admin pages both render through the shared `resources/views/layouts/app.blade.php` shell
+- admin, account, and public navigation all use the same shell styling primitives and shared layout conventions
 
 ## Testing
 
@@ -154,6 +175,12 @@ Run the full suite:
 
 ```bash
 php artisan test --compact
+```
+
+Build production assets:
+
+```bash
+npm run build
 ```
 
 ## Repository Notes

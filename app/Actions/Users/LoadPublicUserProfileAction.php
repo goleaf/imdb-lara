@@ -66,9 +66,11 @@ class LoadPublicUserProfileAction
             ->first();
 
         $publicLists = $user->customLists()
-            ->select(['id', 'user_id', 'name', 'slug', 'description', 'visibility', 'is_watchlist', 'created_at'])
+            ->select(['id', 'user_id', 'name', 'slug', 'description', 'visibility', 'is_watchlist', 'created_at', 'updated_at'])
             ->where('visibility', ListVisibility::Public->value)
             ->withCount('items')
+            ->orderByDesc('updated_at')
+            ->orderByDesc('id')
             ->paginate(12, ['*'], 'lists')
             ->withQueryString();
 

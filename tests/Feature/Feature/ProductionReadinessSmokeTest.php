@@ -56,6 +56,7 @@ class ProductionReadinessSmokeTest extends TestCase
             route('public.movies.index'),
             route('public.series.index'),
             route('public.people.index'),
+            route('public.awards.index'),
             route('public.search', ['q' => 'Signal']),
             route('public.trending'),
             route('public.titles.show', $dataset['title']),
@@ -78,6 +79,7 @@ class ProductionReadinessSmokeTest extends TestCase
 
         $editor = User::query()->where('email', 'editor@example.com')->firstOrFail();
         $moderator = User::query()->where('email', 'moderator@example.com')->firstOrFail();
+        $member = User::query()->where('email', 'member@example.com')->firstOrFail();
 
         $this->actingAs($editor)->get(route('admin.dashboard'))->assertOk()->assertSee('Dashboard');
         $this->actingAs($editor)->get(route('admin.titles.index'))->assertOk()->assertSee('Titles');
@@ -88,5 +90,7 @@ class ProductionReadinessSmokeTest extends TestCase
 
         $this->actingAs($moderator)->get(route('admin.reviews.index'))->assertOk()->assertSee('Reviews');
         $this->actingAs($moderator)->get(route('admin.reports.index'))->assertOk()->assertSee('Reports');
+        $this->actingAs($member)->get(route('account.dashboard'))->assertOk()->assertSee('Dashboard');
+        $this->actingAs($member)->get(route('account.settings'))->assertOk()->assertSee('Profile Settings');
     }
 }

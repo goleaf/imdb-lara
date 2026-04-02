@@ -9,12 +9,22 @@ use Illuminate\Support\Facades\Cache;
 
 class GetDiscoveryFilterOptionsAction
 {
+    public function __construct(
+        protected GetSearchFilterOptionsAction $getSearchFilterOptions,
+    ) {}
+
     /**
      * @return array{
+     *     countries: list<array{value: string, label: string}>,
      *     genres: Collection<int, Genre>,
+     *     languages: list<array{value: string, label: string}>,
      *     titleTypes: list<TitleType>,
      *     minimumRatings: list<int>,
-     *     sortOptions: list<array{value: string, label: string}>
+     *     runtimeOptions: list<array{value: string, label: string}>,
+     *     sortOptions: list<array{value: string, label: string}>,
+     *     voteThresholdOptions: list<array{value: string, label: string}>,
+     *     years: list<int>,
+     *     awardOptions: list<array{value: string, label: string}>
      * }
      */
     public function handle(): array
@@ -22,17 +32,25 @@ class GetDiscoveryFilterOptionsAction
         return Cache::remember(
             'search:discovery-filter-options',
             now()->addMinutes(10),
-            fn (): array => [
-                'genres' => Genre::query()->select(['id', 'name', 'slug'])->orderBy('name')->get(),
-                'titleTypes' => TitleType::cases(),
-                'minimumRatings' => range(10, 1),
-                'sortOptions' => [
-                    ['value' => 'popular', 'label' => 'Popularity'],
-                    ['value' => 'rating', 'label' => 'Rating'],
-                    ['value' => 'year', 'label' => 'Year'],
-                    ['value' => 'name', 'label' => 'Name'],
-                ],
-            ],
+            function (): array {
+                $searchFilterOptions = $this->getSearchFilterOptions->handle();
+
+                return [
+                    'countries' => $searchFilterOptions['countries'],
+                    'genres' => Genre::query()->select(['id', 'name', 'slug'])->orderBy('name')->get(),
+                    'languages' => $searchFilterOptions['languages'],
+                    'titleTypes' => TitleType::cases(),
+                    'minimumRatings' => range(10, 1),
+                    'runtimeOptions' => $searchFilterOptions['runtimeOptions'],
+                    'sortOptions' => $searchFilterOptions['sortOptions'],
+                    'voteThresholdOptions' => $searchFilterOptions['voteThresholdOptions'],
+                    'years' => $searchFilterOptions['years'],
+                    'awardOptions' => [
+                        ['value' => 'winners', 'label' => 'Award winners'],
+                        ['value' => 'nominated', 'label' => 'Award nominated'],
+                    ],
+                ];
+            },
         );
     }
 }

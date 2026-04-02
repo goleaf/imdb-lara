@@ -30,21 +30,13 @@
 
         <div class="grid gap-4 xl:grid-cols-2">
             @forelse ($reviews as $review)
-                @php
-                    $poster = \App\Models\MediaAsset::preferredFrom(
-                        $review->title->mediaAssets,
-                        \App\Enums\MediaKind::Poster,
-                        \App\Enums\MediaKind::Backdrop,
-                    );
-                @endphp
-
                 <x-ui.card class="!max-w-none">
                     <div class="grid gap-4 md:grid-cols-[8rem_minmax(0,1fr)]">
                         <div class="overflow-hidden rounded-box border border-black/5 bg-neutral-100 dark:border-white/10 dark:bg-neutral-800">
-                            @if ($poster)
+                            @if ($review->title->preferredPoster())
                                 <img
-                                    src="{{ $poster->url }}"
-                                    alt="{{ $poster->alt_text ?: $review->title->name }}"
+                                    src="{{ $review->title->preferredPoster()->url }}"
+                                    alt="{{ $review->title->preferredPoster()->alt_text ?: $review->title->name }}"
                                     class="aspect-[2/3] w-full object-cover"
                                 >
                             @else

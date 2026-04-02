@@ -37,9 +37,10 @@ class GetSitemapDataAction
             'public.discover',
             'public.titles.index',
             'public.people.index',
-            'public.search',
+            'public.lists.index',
             'public.movies.index',
             'public.series.index',
+            'public.awards.index',
             'public.rankings.movies',
             'public.rankings.series',
             'public.trending',
@@ -66,8 +67,9 @@ class GetSitemapDataAction
                 ->orderByDesc('release_year')
                 ->pluck('release_year'),
             'titles' => Title::query()
-                ->select(['id', 'slug', 'updated_at'])
+                ->select(['id', 'slug', 'updated_at', 'canonical_title_id'])
                 ->publishedCatalog()
+                ->whereNull('canonical_title_id')
                 ->latest('updated_at')
                 ->get(),
             'episodes' => Route::has('public.episodes.show')

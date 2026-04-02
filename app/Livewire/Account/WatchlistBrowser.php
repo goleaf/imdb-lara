@@ -56,6 +56,16 @@ class WatchlistBrowser extends Component
 
     public ?string $visibilityMessage = null;
 
+    public function clearFilters(): void
+    {
+        $this->genre = null;
+        $this->sort = 'added';
+        $this->state = 'all';
+        $this->type = null;
+        $this->year = null;
+        $this->resetWatchlistPage();
+    }
+
     public function boot(
         BuildAccountWatchlistQueryAction $buildAccountWatchlistQuery,
         EnsureWatchlistAction $ensureWatchlist,
@@ -126,7 +136,9 @@ class WatchlistBrowser extends Component
             : WatchState::Completed;
 
         $this->setUserWatchStateForTitle->handle($user, $title, $targetState);
-        $this->statusMessage = 'Tracking updated.';
+        $this->statusMessage = $targetState === WatchState::Completed
+            ? 'Marked as watched.'
+            : 'Marked as unwatched.';
     }
 
     public function removeFromWatchlist(int $titleId): void
@@ -203,7 +215,16 @@ class WatchlistBrowser extends Component
 
         return view('livewire.account.watchlist-browser', [
             'filterOptions' => $filterOptions,
+            'hasActiveFilters' => (filled($this->state) && $this->state !== 'all')
+                || filled($this->type)
+                || filled($this->genre)
+                || filled($this->year)
+                || $this->sort !== 'added',
             'items' => $items,
+            'visibilityOptions' => [
+                ['value' => ListVisibility::Private->value, 'label' => ListVisibility::Private->label()],
+                ['value' => ListVisibility::Public->value, 'label' => ListVisibility::Public->label()],
+            ],
             'watchlist' => $watchlist,
         ]);
     }

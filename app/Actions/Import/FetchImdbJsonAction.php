@@ -2,14 +2,27 @@
 
 namespace App\Actions\Import;
 
+use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Http\Client\Pool;
+use Illuminate\Http\Client\Response;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Sleep;
+use Illuminate\Support\Str;
 use RuntimeException;
 use Throwable;
 
 class FetchImdbJsonAction
 {
     private const DEFAULT_INTER_REQUEST_DELAY_MICROSECONDS = 1_000_000;
+
+    private const DEFAULT_BATCH_CONCURRENCY = 5;
+
+    private const DEFAULT_HTTP_CACHE_TTL_SECONDS = 86400;
+
+    private const MAX_REQUEST_ATTEMPTS = 5;
+
+    private const TOO_MANY_REQUESTS_DELAY_MILLISECONDS = 1000;
 
     private static ?int $lastRequestFinishedAtMicroseconds = null;
 
@@ -19,26 +32,33 @@ class FetchImdbJsonAction
      */
     public function get(string $url, array $query = [], bool $nullable = false): ?array
     {
+        $query = array_filter($query, fn (mixed $value): bool => $value !== null);
+        $cacheKey = $this->httpCacheKey('GET', $url, [
+            'query' => $query,
+            'nullable' => $nullable,
+        ]);
+        $cachedPayload = $this->getCachedHttpPayload($cacheKey);
+
+        if ($cachedPayload['hit']) {
+            return $cachedPayload['payload'];
+        }
+
         $response = null;
 
-        for ($attempt = 1; $attempt <= 5; $attempt++) {
+        for ($attempt = 1; $attempt <= self::MAX_REQUEST_ATTEMPTS; $attempt++) {
             $this->pauseBeforeRequest();
 
             try {
-                $response = Http::acceptJson()
-                    ->connectTimeout(10)
-                    ->timeout(30)
-                    ->retry([200, 500, 1000], throw: false)
-                    ->get($url, array_filter($query, fn (mixed $value): bool => $value !== null));
+                $response = $this->newRequest()->get($url, $query);
             } finally {
                 $this->markRequestAsFinished();
             }
 
-            if ($response->status() !== 429 || $attempt === 5) {
+            if (! $this->shouldRetryTooManyRequests($response) || $attempt === self::MAX_REQUEST_ATTEMPTS) {
                 break;
             }
 
-            Sleep::for($this->rateLimitDelayMilliseconds($attempt, $response))
+            Sleep::for(self::TOO_MANY_REQUESTS_DELAY_MILLISECONDS)
                 ->milliseconds()
                 ->then(static function (): void {});
         }
@@ -48,6 +68,8 @@ class FetchImdbJsonAction
         }
 
         if ($nullable && $response->status() === 404) {
+            $this->rememberHttpPayload($cacheKey, null);
+
             return null;
         }
 
@@ -59,7 +81,202 @@ class FetchImdbJsonAction
             throw new RuntimeException(sprintf('IMDb API returned a non-object payload for [%s].', $url));
         }
 
+        $this->rememberHttpPayload($cacheKey, $payload);
+
         return $payload;
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     * @return array<string, mixed>
+     */
+    public function post(string $url, array $payload): array
+    {
+        $cacheKey = $this->httpCacheKey('POST', $url, $payload);
+        $cachedPayload = $this->getCachedHttpPayload($cacheKey);
+
+        if ($cachedPayload['hit'] && is_array($cachedPayload['payload'])) {
+            return $cachedPayload['payload'];
+        }
+
+        $response = null;
+
+        for ($attempt = 1; $attempt <= self::MAX_REQUEST_ATTEMPTS; $attempt++) {
+            $this->pauseBeforeRequest();
+
+            try {
+                $response = $this->newRequest()->post($url, $payload);
+            } finally {
+                $this->markRequestAsFinished();
+            }
+
+            if (! $this->shouldRetryTooManyRequests($response) || $attempt === self::MAX_REQUEST_ATTEMPTS) {
+                break;
+            }
+
+            Sleep::for(self::TOO_MANY_REQUESTS_DELAY_MILLISECONDS)
+                ->milliseconds()
+                ->then(static function (): void {});
+        }
+
+        if (! $response instanceof Response) {
+            throw new RuntimeException(sprintf('IMDb API returned no response for [%s].', $url));
+        }
+
+        $response->throw();
+
+        $decodedPayload = $response->json();
+
+        if (! is_array($decodedPayload)) {
+            throw new RuntimeException(sprintf('IMDb API returned a non-object payload for [%s].', $url));
+        }
+
+        $this->rememberHttpPayload($cacheKey, $decodedPayload);
+
+        return $decodedPayload;
+    }
+
+    /**
+     * @param  list<array{
+     *     key: string,
+     *     nullable?: bool,
+     *     query?: array<string, scalar|null>,
+     *     url: string
+     * }>  $requests
+     * @return array<string, array<string, mixed>|null>
+     */
+    public function getConcurrent(array $requests, ?int $concurrency = null): array
+    {
+        if ($requests === []) {
+            return [];
+        }
+
+        $concurrency = max(1, $concurrency ?? $this->defaultBatchConcurrency());
+
+        $pendingRequests = collect($requests)
+            ->mapWithKeys(function (array $request): array {
+                $query = array_filter(
+                    is_array($request['query'] ?? null) ? $request['query'] : [],
+                    fn (mixed $value): bool => $value !== null,
+                );
+
+                return [
+                    $request['key'] => [
+                        'url' => $request['url'],
+                        'query' => $query,
+                        'nullable' => (bool) ($request['nullable'] ?? false),
+                        'cache_key' => $this->httpCacheKey('GET', $request['url'], [
+                            'query' => $query,
+                            'nullable' => (bool) ($request['nullable'] ?? false),
+                        ]),
+                    ],
+                ];
+            })
+            ->all();
+
+        $responses = [];
+        $attempts = array_fill_keys(array_keys($pendingRequests), 0);
+        $batchStarted = false;
+
+        foreach ($pendingRequests as $key => $request) {
+            $cachedPayload = $this->getCachedHttpPayload($request['cache_key']);
+
+            if (! $cachedPayload['hit']) {
+                continue;
+            }
+
+            $responses[$key] = $cachedPayload['payload'];
+            unset($pendingRequests[$key]);
+        }
+
+        while ($pendingRequests !== []) {
+            if (! $batchStarted) {
+                $this->pauseBeforeRequest();
+                $batchStarted = true;
+            }
+
+            try {
+                $roundResponses = Http::pool(function (Pool $pool) use ($pendingRequests): array {
+                    return collect($pendingRequests)
+                        ->map(function (array $request, string $key) use ($pool): mixed {
+                            return $pool->as($key)
+                                ->acceptJson()
+                                ->connectTimeout(10)
+                                ->timeout(1)
+                                ->get(
+                                    $request['url'],
+                                    array_filter($request['query'], fn (mixed $value): bool => $value !== null),
+                                );
+                        })
+                        ->all();
+                }, concurrency: max(1, $concurrency));
+            } finally {
+                $this->markRequestAsFinished();
+            }
+
+            $retryDelayMilliseconds = 0;
+            $retryRequests = [];
+
+            foreach ($pendingRequests as $key => $request) {
+                $attempts[$key]++;
+
+                $response = $roundResponses[$key] ?? null;
+
+                if (! $response instanceof Response) {
+                    throw new RuntimeException(sprintf('IMDb API returned no response for [%s].', $request['url']));
+                }
+
+                if ($request['nullable'] && $response->status() === 404) {
+                    $this->rememberHttpPayload($request['cache_key'], null);
+                    $responses[$key] = null;
+
+                    continue;
+                }
+
+                if ($this->shouldRetryTooManyRequests($response) && $attempts[$key] < self::MAX_REQUEST_ATTEMPTS) {
+                    $retryRequests[$key] = $request;
+                    $retryDelayMilliseconds = max($retryDelayMilliseconds, self::TOO_MANY_REQUESTS_DELAY_MILLISECONDS);
+
+                    continue;
+                }
+
+                if ($request['nullable'] && $response->failed()) {
+                    logger()->warning(sprintf(
+                        'IMDb optional concurrent endpoint failed for [%s]; continuing without this artifact. HTTP %s.',
+                        $request['url'],
+                        $response->status(),
+                    ));
+
+                    $this->rememberHttpPayload($request['cache_key'], null);
+                    $responses[$key] = null;
+
+                    continue;
+                }
+
+                $response->throw();
+
+                $payload = $response->json();
+
+                if (! is_array($payload)) {
+                    throw new RuntimeException(sprintf('IMDb API returned a non-object payload for [%s].', $request['url']));
+                }
+
+                $this->rememberHttpPayload($request['cache_key'], $payload);
+                $responses[$key] = $payload;
+            }
+
+            if ($retryRequests === []) {
+                break;
+            }
+
+            Sleep::for($retryDelayMilliseconds)
+                ->milliseconds()
+                ->then(static function (): void {});
+
+            $pendingRequests = $retryRequests;
+        }
+
+        return $responses;
     }
 
     /**
@@ -71,40 +288,51 @@ class FetchImdbJsonAction
         bool $nullable = false,
         bool $allowPartialOnFailure = false,
     ): ?array {
-        $basePayload = null;
-        $items = [];
-        $pageToken = null;
-        $seenPageTokens = [];
-        $pagesFetched = 0;
+        $initialPayload = $this->get($url, nullable: $nullable);
 
-        do {
+        if ($initialPayload === null) {
+            return null;
+        }
+
+        return $this->completePagination($url, $itemsKey, $initialPayload, $allowPartialOnFailure);
+    }
+
+    /**
+     * @param  array<string, mixed>  $initialPayload
+     * @return array<string, mixed>
+     */
+    public function completePagination(
+        string $url,
+        string $itemsKey,
+        array $initialPayload,
+        bool $allowPartialOnFailure = false,
+    ): array {
+        $basePayload = $initialPayload;
+        $items = $this->normalizeObjectList(data_get($initialPayload, $itemsKey));
+        $pageToken = $this->normalizeNextPageToken($initialPayload);
+        $seenPageTokens = $pageToken === null ? [] : [$pageToken => true];
+        $pagesFetched = 1;
+
+        while ($pageToken !== null) {
             try {
-                $payload = $this->get(
-                    $url,
-                    $this->pageTokenQuery($pageToken),
-                    $nullable && $basePayload === null,
-                );
+                $payload = $this->get($url, $this->pageTokenQuery($pageToken));
             } catch (Throwable $exception) {
-                if (! $allowPartialOnFailure || ($basePayload === null && ! $nullable)) {
+                if (! $allowPartialOnFailure) {
                     throw $exception;
                 }
 
                 logger()->warning(sprintf(
                     'IMDb pagination failed for [%s] at page token [%s]; stopping pagination early. %s',
                     $url,
-                    $pageToken ?? 'initial',
+                    $pageToken,
                     $exception->getMessage(),
                 ));
-
-                if ($basePayload === null) {
-                    return null;
-                }
 
                 break;
             }
 
             if ($payload === null) {
-                return null;
+                break;
             }
 
             $pagesFetched++;
@@ -112,8 +340,6 @@ class FetchImdbJsonAction
             if ($pagesFetched > 250) {
                 throw new RuntimeException(sprintf('IMDb pagination exceeded the safe page limit for [%s].', $url));
             }
-
-            $basePayload ??= $payload;
 
             foreach ($this->normalizeObjectList(data_get($payload, $itemsKey)) as $item) {
                 $items[] = $item;
@@ -131,10 +357,6 @@ class FetchImdbJsonAction
             } elseif ($pageToken !== null) {
                 $seenPageTokens[$pageToken] = true;
             }
-        } while ($pageToken !== null);
-
-        if ($basePayload === null) {
-            return null;
         }
 
         $basePayload[$itemsKey] = $items;
@@ -164,18 +386,24 @@ class FetchImdbJsonAction
         self::$lastRequestFinishedAtMicroseconds = $this->currentTimeMicroseconds();
     }
 
-    private function rateLimitDelayMilliseconds(int $attempt, mixed $response): int
+    private function newRequest(): PendingRequest
     {
-        $retryAfterHeader = method_exists($response, 'header')
-            ? $response->header('Retry-After')
-            : null;
-        $retryAfterSeconds = is_numeric($retryAfterHeader) ? (int) $retryAfterHeader : 0;
+        return Http::acceptJson()
+            ->connectTimeout(10)
+            ->timeout(30)
+            ->retry([200, 500, 1000], throw: false);
+    }
 
-        if ($retryAfterSeconds > 0) {
-            return $retryAfterSeconds * 1000;
+    private function shouldRetryTooManyRequests(Response $response): bool
+    {
+        if ($response->tooManyRequests()) {
+            return true;
         }
 
-        return min(15000, $attempt * 3000);
+        return str_contains(
+            Str::lower(trim($response->body())),
+            'too many requests',
+        );
     }
 
     private function currentTimeMicroseconds(): int
@@ -190,6 +418,33 @@ class FetchImdbJsonAction
             (int) config(
                 'services.imdb.inter_request_delay_microseconds',
                 self::DEFAULT_INTER_REQUEST_DELAY_MICROSECONDS,
+            ),
+        );
+    }
+
+    private function defaultBatchConcurrency(): int
+    {
+        return max(
+            1,
+            (int) config(
+                'services.imdb.default_batch_concurrency',
+                self::DEFAULT_BATCH_CONCURRENCY,
+            ),
+        );
+    }
+
+    private function httpCacheEnabled(): bool
+    {
+        return (bool) config('services.imdb.http_cache.enabled', false);
+    }
+
+    private function httpCacheTtlSeconds(): int
+    {
+        return max(
+            0,
+            (int) config(
+                'services.imdb.http_cache.ttl_seconds',
+                self::DEFAULT_HTTP_CACHE_TTL_SECONDS,
             ),
         );
     }
@@ -236,5 +491,81 @@ class FetchImdbJsonAction
         }
 
         return array_values($items);
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    private function rememberHttpPayload(string $cacheKey, ?array $payload): void
+    {
+        if (! $this->httpCacheEnabled()) {
+            return;
+        }
+
+        $ttlSeconds = $this->httpCacheTtlSeconds();
+
+        if ($ttlSeconds <= 0) {
+            return;
+        }
+
+        Cache::put($cacheKey, [
+            'cached' => true,
+            'payload' => $payload,
+        ], now()->addSeconds($ttlSeconds));
+    }
+
+    /**
+     * @return array{hit: bool, payload: array<string, mixed>|null}
+     */
+    private function getCachedHttpPayload(string $cacheKey): array
+    {
+        if (! $this->httpCacheEnabled()) {
+            return ['hit' => false, 'payload' => null];
+        }
+
+        $cached = Cache::get($cacheKey);
+
+        if (! is_array($cached) || ! array_key_exists('cached', $cached)) {
+            return ['hit' => false, 'payload' => null];
+        }
+
+        $payload = $cached['payload'] ?? null;
+
+        return [
+            'hit' => true,
+            'payload' => is_array($payload) ? $payload : null,
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    private function httpCacheKey(string $method, string $url, array $payload = []): string
+    {
+        $normalizedPayload = $this->normalizeCachePayload($payload);
+
+        return 'imdb:http:'.hash('sha256', json_encode([
+            'method' => $method,
+            'url' => $url,
+            'payload' => $normalizedPayload,
+        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR));
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     * @return array<string, mixed>
+     */
+    private function normalizeCachePayload(array $payload): array
+    {
+        $normalized = $payload;
+        ksort($normalized);
+
+        foreach ($normalized as $key => $value) {
+            if (is_array($value) && ! array_is_list($value)) {
+                $normalized[$key] = $this->normalizeCachePayload($value);
+            }
+        }
+
+        return $normalized;
     }
 }

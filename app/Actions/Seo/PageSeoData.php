@@ -38,6 +38,13 @@ class PageSeoData
             $title .= ' - Page '.$pageNumber;
         }
 
+        if (
+            $title === ''
+            || Str::contains(Str::lower($title), Str::lower($this->siteName))
+        ) {
+            return $title !== '' ? $title : $this->siteName;
+        }
+
         return $title.' · '.$this->siteName;
     }
 

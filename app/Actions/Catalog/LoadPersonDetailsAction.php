@@ -22,9 +22,21 @@ class LoadPersonDetailsAction
      *     professionLabels: Collection<int, string>,
      *     biographyIntro: string|null,
      *     detailItems: Collection<int, array{label: string, value: string}>,
+     *     supplementalProfileItems: Collection<int, array{label: string, value: string}>,
      *     knownForTitles: Collection<int, Title>,
+     *     featuredKnownFor: Title|null,
+     *     secondaryKnownFor: Collection<int, Title>,
      *     relatedTitles: Collection<int, Title>,
      *     awardHighlights: Collection<int, AwardNomination>,
+     *     awardWins: int,
+     *     awardNominationsCount: int,
+     *     publishedCreditCount: int,
+     *     awardBodiesCount: int,
+     *     trademarkItems: Collection<int, string>,
+     *     profileItems: Collection<int, array{label: string, value: string}>,
+     *     heroProfileItems: Collection<int, array{label: string, value: string}>,
+     *     biographyParagraphs: Collection<int, string>,
+     *     personDirectory: Collection<int, array{href: string, label: string}>,
      *     collaborators: Collection<int, array{
      *         person: Person,
      *         sharedTitles: Collection<int, Title>,
@@ -120,7 +132,19 @@ class LoadPersonDetailsAction
             ->take(8)
             ->values();
 
-        $alternateNames = $this->tokenizeList($person->alternate_names);
+        $alternateNames = collect([
+            $person->alternate_names,
+            ...(is_array($person->imdb_alternative_names) ? $person->imdb_alternative_names : []),
+        ])
+            ->flatMap(function (mixed $value): Collection {
+                if (is_string($value)) {
+                    return $this->tokenizeList($value);
+                }
+
+                return collect();
+            })
+            ->unique()
+            ->values();
         $professionLabels = $person->professions
             ->pluck('profession')
             ->filter()
@@ -179,9 +203,43 @@ class LoadPersonDetailsAction
             ['label' => 'Published credits', 'value' => number_format($creditedTitles->count())],
         ])->filter(fn (array $item): bool => filled($item['value']))->values();
 
+        $supplementalProfileItems = $this->buildSupplementalProfileItems($person);
         $awardHighlights = $person->awardNominations
             ->take(8)
             ->values();
+        $trademarkItems = $this->buildTrademarkItems($person);
+        $awardWins = $person->awardNominations->where('is_winner', true)->count();
+        $awardNominationsCount = $person->awardNominations->count();
+        $publishedCreditCount = $creditedTitles->count();
+        $awardBodiesCount = $person->awardNominations
+            ->pluck('awardEvent.award.name')
+            ->filter()
+            ->unique()
+            ->count();
+        $profileItems = $detailItems
+            ->merge($supplementalProfileItems)
+            ->unique('label')
+            ->values();
+        $heroProfileItems = $profileItems->take(4)->values();
+        $biographySource = trim((string) ($person->biography ?: $person->short_biography));
+        $biographyParagraphs = collect(preg_split('/\R{2,}/', $biographySource) ?: [])
+            ->map(fn (string $paragraph): string => trim($paragraph))
+            ->filter()
+            ->values();
+        $featuredKnownFor = $knownForTitles->first();
+        $secondaryKnownFor = $featuredKnownFor
+            ? $knownForTitles->skip(1)->values()
+            : collect();
+        $personDirectory = collect([
+            ['href' => '#person-biography', 'label' => 'Biography'],
+            ['href' => '#person-known-for', 'label' => 'Known for'],
+            ['href' => '#person-awards', 'label' => 'Awards'],
+            ['href' => '#person-trademarks', 'label' => 'Trademarks'],
+            ['href' => '#person-filmography', 'label' => 'Filmography'],
+            ['href' => '#person-gallery', 'label' => 'Gallery'],
+            ['href' => '#person-collaborators', 'label' => 'Collaborators'],
+            ['href' => '#person-related-titles', 'label' => 'Related titles'],
+        ]);
 
         $collaborators = collect();
         $titleIds = $creditedTitles->pluck('id')->all();
@@ -254,6 +312,10 @@ class LoadPersonDetailsAction
             ['label' => $person->name],
         ];
 
+        $defaultDescription = $person->known_for_department
+            ? sprintf('Browse biography, filmography, awards, and credits for %s, known for %s.', $person->name, $person->known_for_department)
+            : sprintf('Browse biography, filmography, awards, and credits for %s.', $person->name);
+
         return [
             'person' => $person,
             'headshot' => $headshot,
@@ -262,13 +324,25 @@ class LoadPersonDetailsAction
             'professionLabels' => $professionLabels,
             'biographyIntro' => $biographyIntro,
             'detailItems' => $detailItems,
+            'supplementalProfileItems' => $supplementalProfileItems,
+            'profileItems' => $profileItems,
+            'heroProfileItems' => $heroProfileItems,
+            'biographyParagraphs' => $biographyParagraphs,
             'knownForTitles' => $knownForTitles,
+            'featuredKnownFor' => $featuredKnownFor,
+            'secondaryKnownFor' => $secondaryKnownFor,
             'relatedTitles' => $relatedTitles,
             'awardHighlights' => $awardHighlights,
+            'awardWins' => $awardWins,
+            'awardNominationsCount' => $awardNominationsCount,
+            'publishedCreditCount' => $publishedCreditCount,
+            'awardBodiesCount' => $awardBodiesCount,
+            'trademarkItems' => $trademarkItems,
+            'personDirectory' => $personDirectory,
             'collaborators' => $collaborators,
             'seo' => new PageSeoData(
-                title: $person->meta_title ?: $person->name,
-                description: $person->meta_description ?: ($biographyIntro ?: 'Browse credits and biography for '.$person->name.'.'),
+                title: $person->meta_title ?: ($person->name.' - Biography, Filmography & Credits'),
+                description: $person->meta_description ?: ($biographyIntro ? str($biographyIntro)->limit(155)->toString() : $defaultDescription),
                 canonical: route('public.people.show', $person),
                 openGraphType: 'profile',
                 openGraphImage: $headshot?->url,
@@ -287,5 +361,78 @@ class LoadPersonDetailsAction
             ->map(fn (string $item): string => str($item)->trim()->toString())
             ->filter()
             ->values();
+    }
+
+    /**
+     * @return Collection<int, array{label: string, value: string}>
+     */
+    private function buildSupplementalProfileItems(Person $person): Collection
+    {
+        $details = $person->imdbPayloadSection('details');
+
+        $height = is_numeric(data_get($details, 'heightCm'))
+            ? (int) data_get($details, 'heightCm')
+            : null;
+        $meterDifference = is_numeric(data_get($details, 'meterRanking.difference'))
+            ? abs((int) data_get($details, 'meterRanking.difference'))
+            : null;
+        $meterDirection = $this->nullableString(data_get($details, 'meterRanking.changeDirection'));
+
+        return collect([
+            ['label' => 'Birth name', 'value' => $this->nullableString(data_get($details, 'birthName'))],
+            ['label' => 'Height', 'value' => $height ? $height.' cm' : null],
+            [
+                'label' => 'Meter movement',
+                'value' => $meterDirection && $meterDifference
+                    ? sprintf('%s %d place%s', str($meterDirection)->lower()->headline()->toString(), $meterDifference, $meterDifference === 1 ? '' : 's')
+                    : null,
+            ],
+            ['label' => 'Meter rank', 'value' => $person->popularity_rank ? '#'.number_format($person->popularity_rank) : null],
+        ])
+            ->filter(fn (array $item): bool => filled($item['value']))
+            ->values();
+    }
+
+    /**
+     * @return Collection<int, string>
+     */
+    private function buildTrademarkItems(Person $person): Collection
+    {
+        $details = $person->imdbPayloadSection('details');
+
+        return collect([
+            data_get($details, 'trademarks'),
+            data_get($details, 'tradeMarks'),
+            data_get($details, 'nameTrademarks'),
+            data_get($details, 'personalDetails.trademarks'),
+        ])
+            ->filter(fn (mixed $value): bool => is_array($value))
+            ->flatMap(function (array $items): Collection {
+                return collect($items)->map(function (mixed $item): ?string {
+                    if (is_array($item)) {
+                        return $this->nullableString(data_get($item, 'text'))
+                            ?? $this->nullableString(data_get($item, 'plainText'))
+                            ?? $this->nullableString(data_get($item, 'trademark'))
+                            ?? $this->nullableString(data_get($item, 'name'));
+                    }
+
+                    return is_string($item) ? trim($item) : null;
+                });
+            })
+            ->filter()
+            ->unique()
+            ->take(6)
+            ->values();
+    }
+
+    private function nullableString(mixed $value): ?string
+    {
+        if (! is_string($value)) {
+            return null;
+        }
+
+        $value = trim($value);
+
+        return $value === '' ? null : $value;
     }
 }

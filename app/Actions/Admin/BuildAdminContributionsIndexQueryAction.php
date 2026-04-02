@@ -2,6 +2,7 @@
 
 namespace App\Actions\Admin;
 
+use App\Enums\ContributionStatus;
 use App\Models\Contribution;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -28,6 +29,20 @@ class BuildAdminContributionsIndexQueryAction
                 'reviewer:id,name,username',
                 'contributable',
             ])
-            ->latest('created_at');
+            ->orderByRaw(
+                'case status
+                    when ? then 0
+                    when ? then 1
+                    when ? then 2
+                    else 3
+                end',
+                [
+                    ContributionStatus::Submitted->value,
+                    ContributionStatus::Approved->value,
+                    ContributionStatus::Rejected->value,
+                ],
+            )
+            ->latest('created_at')
+            ->latest('id');
     }
 }

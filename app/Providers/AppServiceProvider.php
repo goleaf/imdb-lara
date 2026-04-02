@@ -37,7 +37,7 @@ class AppServiceProvider extends ServiceProvider
         RedirectIfAuthenticated::redirectUsing(static fn () => route('public.discover'));
         Model::preventLazyLoading(! $this->app->isProduction());
 
-        Gate::before(static fn (User $user, string $ability): ?bool => $user->isSuperAdmin() ? true : null);
+        Gate::before(static fn (User $user, string $ability): ?bool => $user->isActive() && $user->isSuperAdmin() ? true : null);
 
         Gate::define('access-admin-area', static fn (User $user): bool => $user->canAccessAdminPanel());
         Gate::define('manage-catalog', static fn (User $user): bool => $user->canManageCatalog());

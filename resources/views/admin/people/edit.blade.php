@@ -60,19 +60,22 @@
                     @csrf
                     <x-ui.field>
                         <x-ui.label>Department</x-ui.label>
-                        <x-ui.input name="department" placeholder="Cast" />
+                        <x-ui.input name="department" :value="old('department')" placeholder="Cast" />
+                        <x-ui.error name="department" />
                     </x-ui.field>
                     <x-ui.field>
                         <x-ui.label>Profession</x-ui.label>
-                        <x-ui.input name="profession" placeholder="Actor" />
+                        <x-ui.input name="profession" :value="old('profession')" placeholder="Actor" />
+                        <x-ui.error name="profession" />
                     </x-ui.field>
                     <x-ui.field>
                         <x-ui.label>Sort order</x-ui.label>
-                        <x-ui.input name="sort_order" type="number" min="0" value="0" />
+                        <x-ui.input name="sort_order" type="number" min="0" :value="old('sort_order', 0)" />
+                        <x-ui.error name="sort_order" />
                     </x-ui.field>
                     <label class="flex items-center gap-2 text-sm md:self-end">
                         <input type="hidden" name="is_primary" value="0">
-                        <input type="checkbox" name="is_primary" value="1" class="rounded border-black/20 dark:border-white/20 dark:bg-neutral-900">
+                        <input type="checkbox" name="is_primary" value="1" class="rounded border-black/20 dark:border-white/20 dark:bg-neutral-900" @checked(old('is_primary'))>
                         <span>Primary profession</span>
                     </label>
                     <div class="md:col-span-2">
@@ -183,7 +186,7 @@
                         name="kind"
                         class="min-h-10 rounded-box border border-black/10 bg-white px-3 text-sm text-neutral-800 shadow-xs transition focus:border-black/15 focus:outline-none focus:ring-2 focus:ring-neutral-900/15 dark:border-white/15 dark:bg-neutral-900 dark:text-neutral-200 dark:focus:border-white/20 dark:focus:ring-neutral-100/15"
                     >
-                        @foreach (\App\Enums\MediaKind::cases() as $mediaKind)
+                        @foreach (\App\Enums\MediaKind::allowedForMediable($person) as $mediaKind)
                             <option value="{{ $mediaKind->value }}">{{ str($mediaKind->value)->headline() }}</option>
                         @endforeach
                     </select>
@@ -200,7 +203,7 @@
                     <x-ui.label>URL</x-ui.label>
                     <x-ui.input name="url" type="url" placeholder="https://..." />
                     <x-ui.text class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-                        Use a remote URL for trailers or externally hosted assets.
+                        Use a remote URL for externally hosted portrait or gallery assets.
                     </x-ui.text>
                     <x-ui.error name="url" />
                 </x-ui.field>
@@ -224,57 +227,71 @@
                 </div>
             </form>
 
-            <div class="grid gap-3 lg:grid-cols-2">
-                @forelse ($person->mediaAssets as $mediaAsset)
-                    <div class="rounded-box border border-black/10 p-3 dark:border-white/10">
-                        <div class="flex flex-wrap items-center justify-between gap-3">
-                            <div class="flex items-center gap-3">
-                                <div class="overflow-hidden rounded-box border border-black/5 bg-neutral-100 dark:border-white/10 dark:bg-neutral-800">
-                                    @if (! in_array($mediaAsset->kind, [\App\Enums\MediaKind::Trailer, \App\Enums\MediaKind::Clip, \App\Enums\MediaKind::Featurette], true))
-                                        <img
-                                            src="{{ $mediaAsset->url }}"
-                                            alt="{{ $mediaAsset->alt_text ?: $person->name }}"
-                                            class="size-14 object-cover"
-                                        >
-                                    @else
-                                        <div class="flex size-14 items-center justify-center text-neutral-500 dark:text-neutral-400">
-                                            <x-ui.icon name="play-circle" class="size-6" />
-                                        </div>
-                                    @endif
-                                </div>
-
-                                <div>
-                                    <div class="font-medium">{{ str($mediaAsset->kind->value)->headline() }}</div>
-                                    <div class="text-sm text-neutral-500 dark:text-neutral-400">
-                                        {{ $mediaAsset->provider ?: 'Direct URL' }} · Position {{ $mediaAsset->position }}
-                                        @if ($mediaAsset->is_primary)
-                                            · Primary
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="flex gap-2">
-                                <x-ui.button as="a" :href="route('admin.media-assets.edit', $mediaAsset)" size="sm" variant="outline" icon="pencil-square">
-                                    Edit
-                                </x-ui.button>
-                                <form method="POST" action="{{ route('admin.media-assets.destroy', $mediaAsset) }}">
-                                    @csrf
-                                    @method('DELETE')
-                                    <x-ui.button type="submit" size="sm" variant="ghost" icon="trash">
-                                        Delete
-                                    </x-ui.button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                @empty
+            <div class="space-y-4">
+                @if ($person->mediaAssets->isEmpty())
                     <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10 lg:col-span-2">
                         <x-ui.empty.media>
                             <x-ui.icon name="photo" class="size-8 text-neutral-400 dark:text-neutral-500" />
                         </x-ui.empty.media>
                         <x-ui.heading level="h3">No media assets attached yet.</x-ui.heading>
                     </x-ui.empty>
-                @endforelse
+                @endif
+
+                @foreach (\App\Enums\MediaKind::allowedForMediable($person) as $mediaKind)
+                    @continue(($person->groupedMediaAssetsByKind()->get($mediaKind->value, collect()))->isEmpty())
+
+                    <div class="space-y-3">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <x-ui.heading level="h3" size="md">{{ str($mediaKind->value)->headline() }}</x-ui.heading>
+                            <x-ui.badge variant="outline" color="neutral" icon="photo">
+                                {{ number_format(($person->groupedMediaAssetsByKind()->get($mediaKind->value, collect()))->count()) }} assets
+                            </x-ui.badge>
+                        </div>
+
+                        <div class="grid gap-3 lg:grid-cols-2">
+                            @foreach ($person->groupedMediaAssetsByKind()->get($mediaKind->value, collect()) as $mediaAsset)
+                                <div class="rounded-box border border-black/10 p-3 dark:border-white/10">
+                                    <div class="flex flex-wrap items-center justify-between gap-3">
+                                        <div class="flex items-center gap-3">
+                                            <div class="overflow-hidden rounded-box border border-black/5 bg-neutral-100 dark:border-white/10 dark:bg-neutral-800">
+                                                <img
+                                                    src="{{ $mediaAsset->url }}"
+                                                    alt="{{ $mediaAsset->alt_text ?: $person->name }}"
+                                                    class="size-14 object-cover"
+                                                >
+                                            </div>
+
+                                            <div>
+                                                <div class="font-medium">{{ $mediaAsset->caption ?: str($mediaAsset->kind->value)->headline() }}</div>
+                                                <div class="text-sm text-neutral-500 dark:text-neutral-400">
+                                                    {{ $mediaAsset->provider ?: 'Direct URL' }} · Position {{ $mediaAsset->position }}
+                                                    @if ($mediaAsset->is_primary)
+                                                        · Primary
+                                                    @endif
+                                                    @if ($mediaAsset->width && $mediaAsset->height)
+                                                        · {{ number_format($mediaAsset->width) }} × {{ number_format($mediaAsset->height) }}
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <x-ui.button as="a" :href="route('admin.media-assets.edit', $mediaAsset)" size="sm" variant="outline" icon="pencil-square">
+                                                Edit
+                                            </x-ui.button>
+                                            <form method="POST" action="{{ route('admin.media-assets.destroy', $mediaAsset) }}">
+                                                @csrf
+                                                @method('DELETE')
+                                                <x-ui.button type="submit" size="sm" variant="ghost" icon="trash">
+                                                    Delete
+                                                </x-ui.button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endforeach
             </div>
         </x-ui.card>
 

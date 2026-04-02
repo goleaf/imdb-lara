@@ -48,14 +48,14 @@ new class extends Component
         </div>
     @endplaceholder
 
-    <div class="space-y-4">
+    <div class="sb-home-section space-y-4 rounded-[1.6rem] p-4 sm:p-5">
         <div class="flex items-start justify-between gap-4">
             <div class="space-y-1">
-                <x-ui.heading level="h2" size="lg" class="inline-flex items-center gap-2">
-                    <x-ui.icon name="calendar-days" class="size-5 text-neutral-500 dark:text-neutral-400" />
+                <x-ui.heading level="h2" size="lg" class="sb-home-section-heading inline-flex items-center gap-2">
+                    <x-ui.icon name="calendar-days" class="size-5 text-[#d6b574]" />
                     <span>Browse by Year</span>
                 </x-ui.heading>
-                <x-ui.text class="max-w-3xl text-sm text-neutral-600 dark:text-neutral-300">
+                <x-ui.text class="sb-home-section-copy max-w-3xl text-sm">
                     Fast entry points into the busiest release years currently represented on Screenbase.
                 </x-ui.text>
             </div>

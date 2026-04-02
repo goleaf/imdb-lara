@@ -5,6 +5,7 @@
 
 @section('breadcrumbs')
     <x-ui.breadcrumbs.item :href="route('public.home')">Home</x-ui.breadcrumbs.item>
+    <x-ui.breadcrumbs.item :href="route('public.lists.index')">Public Lists</x-ui.breadcrumbs.item>
     <x-ui.breadcrumbs.item>{{ $owner->name }}</x-ui.breadcrumbs.item>
     <x-ui.breadcrumbs.item>{{ $list->name }}</x-ui.breadcrumbs.item>
 @endsection
@@ -24,6 +25,9 @@
                     </div>
 
                     <div class="flex flex-wrap gap-2">
+                        <x-ui.link :href="route('public.lists.index')" variant="ghost">
+                            Browse public lists
+                        </x-ui.link>
                         <a href="{{ route('public.users.show', $owner) }}">
                             <x-ui.badge variant="outline" color="neutral" icon="user">{{ $owner->name }}</x-ui.badge>
                         </a>

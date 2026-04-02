@@ -6,6 +6,7 @@ use App\Enums\ListVisibility;
 use App\Models\Concerns\GeneratesSlugs;
 use Database\Factories\UserListFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -91,5 +92,54 @@ class UserList extends Model
     public function moderationActions(): MorphMany
     {
         return $this->morphMany(ModerationAction::class, 'actionable');
+    }
+
+    public function previewTitle(): ?Title
+    {
+        if (! $this->relationLoaded('items')) {
+            return null;
+        }
+
+        /** @var ListItem|null $item */
+        $item = $this->items->first();
+
+        return $item?->title;
+    }
+
+    /**
+     * @return EloquentCollection<int, ListItem>
+     */
+    public function previewItems(int $limit = 3): EloquentCollection
+    {
+        if (! $this->relationLoaded('items')) {
+            return new EloquentCollection;
+        }
+
+        /** @var EloquentCollection<int, ListItem> $items */
+        $items = $this->items
+            ->filter(fn (ListItem $item): bool => $item->title !== null)
+            ->take($limit)
+            ->values();
+
+        return $items;
+    }
+
+    public function previewPoster(): ?MediaAsset
+    {
+        return $this->previewTitle()?->preferredPoster();
+    }
+
+    protected function slugConflictQuery(string $slug): Builder
+    {
+        return static::query()
+            ->where('slug', $slug)
+            ->when(
+                $this->exists,
+                fn (Builder $query) => $query->whereKeyNot($this->getKey()),
+            )
+            ->when(
+                filled($this->user_id),
+                fn (Builder $query) => $query->where('user_id', $this->user_id),
+            );
     }
 }

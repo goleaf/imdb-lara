@@ -19,6 +19,7 @@ class GetUserReviewForTitleAction
                 'body',
                 'contains_spoilers',
                 'status',
+                'created_at',
                 'published_at',
                 'moderated_at',
                 'edited_at',

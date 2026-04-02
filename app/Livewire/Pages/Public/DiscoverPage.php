@@ -27,12 +27,12 @@ class DiscoverPage extends Component
             'featuredTitles' => $getFeaturedTitles->handle(3),
             'seo' => new PageSeoData(
                 title: 'Discovery',
-                description: 'Use Screenbase discovery filters to browse titles by genre, type, popularity, and rating.',
+                description: 'Use Screenbase advanced discovery filters to explore titles by type, release date, awards, ratings, votes, language, runtime, and country.',
                 canonical: route('public.discover'),
                 breadcrumbs: $breadcrumbs,
                 paginationPageName: 'discover',
                 preserveQueryString: true,
-                allowedQueryParameters: ['q', 'genre', 'type', 'sort', 'minimumRating'],
+                allowedQueryParameters: ['q', 'genre', 'type', 'sort', 'minimumRating', 'yearFrom', 'yearTo', 'votesMin', 'language', 'country', 'runtime', 'awards'],
             ),
         ]);
     }

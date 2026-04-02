@@ -16,12 +16,19 @@ class ReviewsPage extends Component
 
     public function render(BuildAdminReviewsIndexQueryAction $buildAdminReviewsIndexQuery): View
     {
+        $reviewFilters = [
+            'status' => request()->string('status')->toString() ?: 'pending',
+            'sort' => request()->string('sort')->toString() ?: 'flagged',
+            'flaggedOnly' => request()->boolean('flaggedOnly'),
+        ];
+
         return $this->renderPageView('admin.reviews.index', [
             'reviews' => $buildAdminReviewsIndexQuery
-                ->handle()
+                ->handle($reviewFilters)
                 ->simplePaginate(20)
                 ->withQueryString(),
             'reviewStatuses' => ReviewStatus::cases(),
+            'reviewFilters' => $reviewFilters,
         ]);
     }
 }

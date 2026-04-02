@@ -130,4 +130,29 @@ class AdminAccessTest extends TestCase
             ->assertOk()
             ->assertSeeHtml('data-slot="alert-description"');
     }
+
+    public function test_suspended_staff_cannot_access_admin_routes_or_see_the_admin_shortcut(): void
+    {
+        $title = Title::factory()->create();
+        $editor = User::factory()->editor()->suspended()->create();
+        $moderator = User::factory()->moderator()->suspended()->create();
+        $superAdmin = User::factory()->superAdmin()->suspended()->create();
+
+        $this->actingAs($editor)
+            ->get(route('admin.dashboard'))
+            ->assertForbidden();
+
+        $this->actingAs($moderator)
+            ->get(route('admin.reviews.index'))
+            ->assertForbidden();
+
+        $this->actingAs($superAdmin)
+            ->get(route('admin.titles.edit', $title))
+            ->assertForbidden();
+
+        $this->actingAs($editor)
+            ->get(route('public.discover'))
+            ->assertOk()
+            ->assertDontSee('Admin');
+    }
 }

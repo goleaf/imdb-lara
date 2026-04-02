@@ -1,5 +1,5 @@
-<x-ui.card class="!max-w-none">
-    <form wire:submit="save" class="space-y-4" id="title-rating">
+<x-ui.card class="!max-w-none" :id="$anchorId">
+    <form wire:submit="save" class="space-y-4">
         <div class="flex flex-wrap items-start justify-between gap-4">
             <div class="space-y-2">
                 <x-ui.heading level="h3" size="md">Your rating</x-ui.heading>
@@ -13,7 +13,7 @@
                     <x-ui.badge variant="outline" :color="$score !== null ? 'amber' : 'neutral'">
                         {{ $score !== null ? sprintf('Saved as %d/10', $score) : 'Not rated yet' }}
                     </x-ui.badge>
-                    <span>{{ number_format((int) ($title->statistic?->rating_count ?? 0)) }} votes</span>
+                    <span>{{ number_format($ratingCount) }} votes</span>
                 </div>
             @endauth
         </div>
@@ -71,8 +71,44 @@
                 {{ $title->statistic?->average_rating ? number_format((float) $title->statistic->average_rating, 1) : 'Not enough data yet' }}
             </span>
             <span class="ml-2">
-                from {{ number_format((int) ($title->statistic?->rating_count ?? 0)) }} ratings
+                from {{ number_format($ratingCount) }} ratings
             </span>
+        </div>
+
+        <div class="space-y-3 rounded-box border border-black/5 p-4 dark:border-white/10">
+            <div class="flex items-center justify-between gap-4">
+                <div>
+                    <x-ui.heading level="h4" size="sm">Audience distribution</x-ui.heading>
+                    <x-ui.text class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+                        A compact score breakdown that updates with every saved rating.
+                    </x-ui.text>
+                </div>
+
+                <x-ui.badge variant="outline" color="neutral" icon="chart-bar">
+                    {{ number_format($ratingCount) }} total ratings
+                </x-ui.badge>
+            </div>
+
+            @if ($ratingCount > 0)
+                <div class="space-y-2">
+                    @foreach ($ratingsBreakdown as $bucket)
+                        <div class="grid grid-cols-[1.75rem_minmax(0,1fr)_2.75rem] items-center gap-3" wire:key="rating-bucket-{{ $bucket['score'] }}">
+                            <div class="text-sm font-medium text-neutral-700 dark:text-neutral-200">{{ $bucket['score'] }}</div>
+                            <div class="h-2 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-800">
+                                <div
+                                    class="h-full rounded-full bg-amber-500 dark:bg-amber-400"
+                                    style="width: {{ $bucket['percentage'] }}%;"
+                                ></div>
+                            </div>
+                            <div class="text-right text-sm text-neutral-500 dark:text-neutral-400">{{ $bucket['count'] }}</div>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <x-ui.text class="text-sm text-neutral-500 dark:text-neutral-400">
+                    No audience distribution yet.
+                </x-ui.text>
+            @endif
         </div>
     </form>
 </x-ui.card>

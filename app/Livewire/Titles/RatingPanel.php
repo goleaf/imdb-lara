@@ -7,11 +7,15 @@ use App\Actions\Titles\GetUserRatingForTitleAction;
 use App\Actions\Titles\UpsertRatingAction;
 use App\Livewire\Forms\Titles\RatingForm;
 use App\Models\Title;
+use App\Models\TitleStatistic;
+use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
 class RatingPanel extends Component
 {
     public Title $title;
+
+    public string $anchorId = 'title-rating';
 
     public ?int $score = null;
 
@@ -21,16 +25,11 @@ class RatingPanel extends Component
 
     public function mount(Title $title, GetUserRatingForTitleAction $getUserRatingForTitle): void
     {
-        $this->title = $title->loadMissing('statistic:id,title_id,average_rating,rating_count');
+        $this->title = $title->loadMissing('statistic:id,title_id,average_rating,rating_count,rating_distribution');
         $this->score = auth()->check()
             ? $getUserRatingForTitle->handle(auth()->user(), $title)
             : null;
         $this->form->score = $this->score;
-    }
-
-    public function updatedScore(?int $value): void
-    {
-        $this->form->score = $value;
     }
 
     public function save(UpsertRatingAction $upsertRating): void
@@ -45,6 +44,7 @@ class RatingPanel extends Component
 
         $this->refreshTitleState($rating->score);
         $this->statusMessage = sprintf('Saved as %d/10.', $rating->score);
+        $this->dispatch('title-personal-tracking-updated');
     }
 
     public function remove(DeleteRatingAction $deleteRating): void
@@ -67,13 +67,31 @@ class RatingPanel extends Component
 
     private function refreshTitleState(?int $score): void
     {
-        $this->title = $this->title->fresh(['statistic:id,title_id,average_rating,rating_count']) ?? $this->title;
+        $this->title = $this->title->fresh(['statistic:id,title_id,average_rating,rating_count,rating_distribution']) ?? $this->title;
         $this->score = $score;
         $this->form->score = $score;
     }
 
-    public function render()
+    public function render(): View
     {
-        return view('livewire.titles.rating-panel');
+        $ratingDistribution = $this->title->statistic?->normalizedRatingDistribution()
+            ?? TitleStatistic::normalizeRatingDistribution();
+        $maxDistributionCount = max(1, max($ratingDistribution));
+        $ratingsBreakdown = collect($ratingDistribution)
+            ->map(function (int $count, string $score) use ($maxDistributionCount): array {
+                return [
+                    'score' => (int) $score,
+                    'count' => $count,
+                    'percentage' => $count > 0
+                        ? max(8, (int) round(($count / $maxDistributionCount) * 100))
+                        : 0,
+                ];
+            })
+            ->values();
+
+        return view('livewire.titles.rating-panel', [
+            'ratingCount' => (int) ($this->title->statistic?->rating_count ?? 0),
+            'ratingsBreakdown' => $ratingsBreakdown,
+        ]);
     }
 }

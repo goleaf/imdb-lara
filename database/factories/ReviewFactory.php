@@ -41,4 +41,20 @@ class ReviewFactory extends Factory
             'published_at' => now(),
         ]);
     }
+
+    public function draft(): static
+    {
+        return $this->state(fn (): array => [
+            'status' => ReviewStatus::Draft,
+            'published_at' => null,
+        ]);
+    }
+
+    public function pending(): static
+    {
+        return $this->state(fn (): array => [
+            'status' => ReviewStatus::Pending,
+            'published_at' => null,
+        ]);
+    }
 }

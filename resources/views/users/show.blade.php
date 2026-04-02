@@ -9,10 +9,6 @@
 @endsection
 
 @section('content')
-    @php
-        $watchlistVisibilityLabel = $publicWatchlist ? 'Public watchlist' : 'Watchlist private';
-    @endphp
-
     <section class="space-y-6">
         <x-seo.pagination-links :paginator="$publicLists" />
 
@@ -40,9 +36,11 @@
                             <div class="flex flex-wrap gap-2">
                                 <x-ui.badge variant="outline" color="neutral" icon="calendar-days">Member since {{ $user->created_at->format('M Y') }}</x-ui.badge>
                                 <x-ui.badge variant="outline" color="neutral" icon="globe-alt">Profile public</x-ui.badge>
-                                <x-ui.badge variant="outline" color="neutral" :icon="$publicWatchlist ? 'bookmark' : 'lock-closed'">{{ $watchlistVisibilityLabel }}</x-ui.badge>
-                                <x-ui.badge variant="outline" color="neutral" icon="star">
-                                    Ratings {{ $user->showsRatingsOnProfile() ? 'visible' : 'private' }}
+                                <x-ui.badge variant="outline" color="neutral" :icon="$publicWatchlist ? 'bookmark' : 'lock-closed'">
+                                    {{ $publicWatchlist ? 'Public watchlist' : 'Watchlist private' }}
+                                </x-ui.badge>
+                                <x-ui.badge variant="outline" color="neutral" :icon="$user->showsRatingsOnProfile() ? 'star' : 'lock-closed'">
+                                    {{ $user->showsRatingsOnProfile() ? 'Ratings visible' : 'Ratings private' }}
                                 </x-ui.badge>
                             </div>
                         </div>
@@ -151,92 +149,144 @@
             </x-ui.card>
         </section>
 
-        @if ($recentRatings->isNotEmpty())
+        <section class="grid gap-6 xl:grid-cols-2">
             <section class="space-y-4">
                 <div class="flex items-center justify-between gap-4">
                     <x-ui.heading level="h2" size="lg" class="inline-flex items-center gap-2">
                         <x-ui.icon name="star" class="size-5 text-neutral-500 dark:text-neutral-400" />
                         <span>Recent ratings</span>
                     </x-ui.heading>
-                    <x-ui.badge variant="outline" color="neutral" icon="star">{{ number_format($user->ratings_count) }} ratings</x-ui.badge>
+                    @if ($user->showsRatingsOnProfile())
+                        <x-ui.badge variant="outline" color="neutral" icon="star">{{ number_format($user->ratings_count) }} ratings</x-ui.badge>
+                    @else
+                        <x-ui.badge variant="outline" color="neutral" icon="lock-closed">Private</x-ui.badge>
+                    @endif
                 </div>
 
-                <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                    @foreach ($recentRatings as $rating)
-                        <x-ui.card class="!max-w-none h-full">
-                            <div class="flex h-full flex-col gap-3">
-                                <div class="flex items-start justify-between gap-3">
-                                    <div class="space-y-1">
-                                        <x-ui.heading level="h3" size="md">
-                                            <a href="{{ route('public.titles.show', $rating->title) }}" class="hover:opacity-80">
-                                                {{ $rating->title->name }}
-                                            </a>
-                                        </x-ui.heading>
-                                        <x-ui.text class="text-sm text-neutral-500 dark:text-neutral-400">
-                                            {{ str($rating->title->title_type->value)->headline() }}
-                                            @if ($rating->title->release_year)
-                                                · {{ $rating->title->release_year }}
-                                            @endif
+                @if ($user->showsRatingsOnProfile())
+                    @if ($recentRatings->isNotEmpty())
+                        <div class="grid gap-4 md:grid-cols-2">
+                            @foreach ($recentRatings as $rating)
+                                <x-ui.card class="!max-w-none h-full">
+                                    <div class="flex h-full flex-col gap-3">
+                                        <div class="flex items-start justify-between gap-3">
+                                            <div class="space-y-1">
+                                                <x-ui.heading level="h3" size="md">
+                                                    <a href="{{ route('public.titles.show', $rating->title) }}" class="hover:opacity-80">
+                                                        {{ $rating->title->name }}
+                                                    </a>
+                                                </x-ui.heading>
+                                                <x-ui.text class="text-sm text-neutral-500 dark:text-neutral-400">
+                                                    {{ str($rating->title->title_type->value)->headline() }}
+                                                    @if ($rating->title->release_year)
+                                                        · {{ $rating->title->release_year }}
+                                                    @endif
+                                                </x-ui.text>
+                                            </div>
+
+                                            <x-ui.badge variant="outline" color="neutral" icon="star">{{ $rating->score }}/10</x-ui.badge>
+                                        </div>
+
+                                        <x-ui.text class="text-sm text-neutral-600 dark:text-neutral-300">
+                                            {{ str($rating->title->plot_outline)->limit(140) }}
+                                        </x-ui.text>
+
+                                        <x-ui.text class="mt-auto text-xs uppercase tracking-[0.2em] text-neutral-400 dark:text-neutral-500">
+                                            Rated {{ $rating->created_at->diffForHumans() }}
                                         </x-ui.text>
                                     </div>
-
-                                    <x-ui.badge variant="outline" color="neutral" icon="star">{{ $rating->score }}/10</x-ui.badge>
-                                </div>
-
-                                <x-ui.text class="text-sm text-neutral-600 dark:text-neutral-300">
-                                    {{ str($rating->title->plot_outline)->limit(140) }}
-                                </x-ui.text>
-
-                                <x-ui.text class="mt-auto text-xs uppercase tracking-[0.2em] text-neutral-400 dark:text-neutral-500">
-                                    Rated {{ $rating->created_at->diffForHumans() }}
-                                </x-ui.text>
-                            </div>
-                        </x-ui.card>
-                    @endforeach
-                </div>
+                                </x-ui.card>
+                            @endforeach
+                        </div>
+                    @else
+                        <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                            <x-ui.empty.media>
+                                <x-ui.icon name="star" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                            </x-ui.empty.media>
+                            <x-ui.heading level="h3">No public ratings yet.</x-ui.heading>
+                            <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
+                                This member has not surfaced any rating activity on their profile yet.
+                            </x-ui.text>
+                        </x-ui.empty>
+                    @endif
+                @else
+                    <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                        <x-ui.empty.media>
+                            <x-ui.icon name="lock-closed" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                        </x-ui.empty.media>
+                        <x-ui.heading level="h3">Ratings are private on this profile.</x-ui.heading>
+                        <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
+                            Lists, reviews, and watchlist sharing continue to follow their own visibility settings.
+                        </x-ui.text>
+                    </x-ui.empty>
+                @endif
             </section>
-        @endif
 
-        @if ($publicWatchlist)
             <section class="space-y-4">
                 <div class="flex items-center justify-between gap-4">
                     <x-ui.heading level="h2" size="lg" class="inline-flex items-center gap-2">
                         <x-ui.icon name="bookmark" class="size-5 text-neutral-500 dark:text-neutral-400" />
-                        <span>Public watchlist</span>
+                        <span>Watchlist visibility</span>
                     </x-ui.heading>
-                    <x-ui.link :href="route('public.lists.show', [$user, $publicWatchlist])" variant="ghost" iconAfter="arrow-right">
-                        Open watchlist
-                    </x-ui.link>
+
+                    @if ($publicWatchlist)
+                        <x-ui.link :href="route('public.lists.show', [$user, $publicWatchlist])" variant="ghost" iconAfter="arrow-right">
+                            Open watchlist
+                        </x-ui.link>
+                    @else
+                        <x-ui.badge variant="outline" color="neutral" icon="lock-closed">Private</x-ui.badge>
+                    @endif
                 </div>
 
-                <x-ui.card class="!max-w-none">
-                    <div class="space-y-4">
-                        <div class="flex flex-wrap items-start justify-between gap-4">
-                            <div>
-                                <x-ui.heading level="h3" size="md">
-                                    <a href="{{ route('public.lists.show', [$user, $publicWatchlist]) }}" class="hover:opacity-80">
-                                        {{ $publicWatchlist->name }}
-                                    </a>
-                                </x-ui.heading>
-                                <x-ui.text class="mt-1 text-neutral-600 dark:text-neutral-300">
-                                    {{ $publicWatchlist->description ?: 'A public snapshot of what this member plans to watch next.' }}
-                                </x-ui.text>
+                @if ($publicWatchlist)
+                    <x-ui.card class="!max-w-none">
+                        <div class="space-y-4">
+                            <div class="flex flex-wrap items-start justify-between gap-4">
+                                <div>
+                                    <x-ui.heading level="h3" size="md">
+                                        <a href="{{ route('public.lists.show', [$user, $publicWatchlist]) }}" class="hover:opacity-80">
+                                            {{ $publicWatchlist->name }}
+                                        </a>
+                                    </x-ui.heading>
+                                    <x-ui.text class="mt-1 text-neutral-600 dark:text-neutral-300">
+                                        {{ $publicWatchlist->description ?: 'A public snapshot of what this member plans to watch next.' }}
+                                    </x-ui.text>
+                                </div>
+
+                                <x-ui.badge variant="outline" color="neutral" icon="bookmark">
+                                    {{ number_format($publicWatchlist->items_count) }} saved
+                                </x-ui.badge>
                             </div>
 
-                            <x-ui.badge variant="outline" color="neutral" icon="bookmark">
-                                {{ number_format($publicWatchlist->items_count) }} saved
-                            </x-ui.badge>
+                            @if ($publicWatchlist->items->isNotEmpty())
+                                <div class="grid gap-4 md:grid-cols-2">
+                                    @foreach ($publicWatchlist->items as $item)
+                                        <x-catalog.title-card :title="$item->title" :show-summary="false" />
+                                    @endforeach
+                                </div>
+                            @else
+                                <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                    <x-ui.empty.media>
+                                        <x-ui.icon name="bookmark" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                                    </x-ui.empty.media>
+                                    <x-ui.heading level="h3">No titles saved yet.</x-ui.heading>
+                                </x-ui.empty>
+                            @endif
                         </div>
-
-                        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                            @foreach ($publicWatchlist->items as $item)
-                                <x-catalog.title-card :title="$item->title" :show-summary="false" />
-                            @endforeach
-                        </div>
-                    </div>
-                </x-ui.card>
+                    </x-ui.card>
+                @else
+                    <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                        <x-ui.empty.media>
+                            <x-ui.icon name="lock-closed" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                        </x-ui.empty.media>
+                        <x-ui.heading level="h3">Watchlist is private on this profile.</x-ui.heading>
+                        <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
+                            This member keeps their watchlist sharing turned off.
+                        </x-ui.text>
+                    </x-ui.empty>
+                @endif
             </section>
-        @endif
+        </section>
 
         <section class="space-y-4">
             <div class="flex items-center justify-between gap-4">
@@ -244,7 +294,12 @@
                     <x-ui.icon name="queue-list" class="size-5 text-neutral-500 dark:text-neutral-400" />
                     <span>Public Lists</span>
                 </x-ui.heading>
-                <x-ui.badge variant="outline" color="neutral" icon="eye">{{ number_format($publicLists->total()) }} visible</x-ui.badge>
+                <div class="flex flex-wrap items-center gap-3">
+                    <x-ui.badge variant="outline" color="neutral" icon="eye">{{ number_format($publicLists->total()) }} visible</x-ui.badge>
+                    <x-ui.link :href="route('public.lists.index')" variant="ghost" iconAfter="arrow-right">
+                        Browse all public lists
+                    </x-ui.link>
+                </div>
             </div>
 
             <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">

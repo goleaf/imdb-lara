@@ -2,15 +2,17 @@
 
 namespace App\Actions\Search;
 
-use App\Enums\ListVisibility;
 use App\Models\Person;
 use App\Models\Title;
 use App\Models\UserList;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
 class GetGlobalSearchSuggestionsAction
 {
+    public function __construct(
+        protected BuildSearchPublicListsQueryAction $buildSearchPublicListsQuery,
+    ) {}
+
     /**
      * @return array{
      *     lists: Collection<int, UserList>,
@@ -33,25 +35,8 @@ class GetGlobalSearchSuggestionsAction
         $limit = max(1, min($perGroup, 6));
 
         return [
-            'lists' => UserList::query()
-                ->select(['id', 'user_id', 'name', 'slug', 'description', 'visibility', 'is_watchlist'])
-                ->custom()
-                ->where('visibility', ListVisibility::Public)
-                ->where(function (Builder $listQuery) use ($query): void {
-                    $listQuery
-                        ->where('name', 'like', '%'.$query.'%')
-                        ->orWhere('slug', 'like', '%'.$query.'%')
-                        ->orWhere('description', 'like', '%'.$query.'%')
-                        ->orWhereHas('user', function (Builder $userQuery) use ($query): void {
-                            $userQuery
-                                ->where('name', 'like', '%'.$query.'%')
-                                ->orWhere('username', 'like', '%'.$query.'%');
-                        });
-                })
-                ->with(['user:id,name,username'])
-                ->withCount('items')
-                ->orderByDesc('items_count')
-                ->orderBy('name')
+            'lists' => $this->buildSearchPublicListsQuery
+                ->handle($query)
                 ->limit($limit)
                 ->get(),
             'people' => Person::query()
@@ -67,6 +52,10 @@ class GetGlobalSearchSuggestionsAction
                 ])
                 ->published()
                 ->matchingSearch($query)
+                ->with([
+                    'mediaAssets:id,mediable_type,mediable_id,kind,url,alt_text,is_primary,position,published_at',
+                    'professions:id,person_id,profession,is_primary,sort_order',
+                ])
                 ->orderBy('popularity_rank')
                 ->orderBy('name')
                 ->limit($limit)
@@ -83,6 +72,9 @@ class GetGlobalSearchSuggestionsAction
                 ])
                 ->publishedCatalog()
                 ->matchingSearch($query)
+                ->with([
+                    'mediaAssets:id,mediable_type,mediable_id,kind,url,alt_text,is_primary,position,published_at',
+                ])
                 ->orderBy('popularity_rank')
                 ->orderBy('name')
                 ->limit($limit)

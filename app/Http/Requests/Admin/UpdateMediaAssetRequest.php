@@ -53,6 +53,7 @@ class UpdateMediaAssetRequest extends FormRequest
     {
         return [
             function (Validator $validator): void {
+                $this->validateAllowedKind($validator);
                 $this->validateSourceRequirements($validator);
             },
         ];
@@ -62,6 +63,21 @@ class UpdateMediaAssetRequest extends FormRequest
     {
         /** @var MediaAsset */
         return $this->route('mediaAsset');
+    }
+
+    private function validateAllowedKind(Validator $validator): void
+    {
+        $kind = MediaKind::tryFrom((string) $this->input('kind'));
+
+        if ($kind === null) {
+            return;
+        }
+
+        $mediable = $this->mediaAsset()->mediable ?? $this->mediaAsset()->mediable_type;
+
+        if (! in_array($kind->value, MediaKind::allowedValuesForMediable($mediable), true)) {
+            $validator->errors()->add('kind', 'That media type is not supported for this record.');
+        }
     }
 
     private function validateSourceRequirements(Validator $validator): void

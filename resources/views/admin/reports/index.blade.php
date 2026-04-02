@@ -18,14 +18,6 @@
 
         <div class="grid gap-4">
             @forelse ($reports as $report)
-                @php
-                    $reportable = $report->reportable;
-                    $reportableOwner = match (true) {
-                        $reportable instanceof \App\Models\Review => $reportable->author,
-                        $reportable instanceof \App\Models\UserList => $reportable->user,
-                        default => null,
-                    };
-                @endphp
                 <x-ui.card class="!max-w-none">
                     <div class="space-y-4">
                         <div class="flex flex-wrap items-start justify-between gap-4">
@@ -52,55 +44,55 @@
                         </div>
 
                         <div class="grid gap-3">
-                            @if ($reportable instanceof \App\Models\Review)
+                            @if ($report->reportable instanceof \App\Models\Review)
                                 <div class="rounded-box border border-black/5 px-4 py-3 dark:border-white/10">
                                     <div class="flex flex-wrap items-start justify-between gap-3">
                                         <div class="space-y-1">
                                             <div class="font-medium">
-                                                <a href="{{ route('public.titles.show', $reportable->title) }}" class="hover:opacity-80">
-                                                    {{ $reportable->headline ?: 'Untitled review' }}
+                                                <a href="{{ route('public.titles.show', $report->reportable->title) }}" class="hover:opacity-80">
+                                                    {{ $report->reportable->headline ?: 'Untitled review' }}
                                                 </a>
                                             </div>
                                             <div class="text-sm text-neutral-500 dark:text-neutral-400">
-                                                {{ $reportable->author->name }} on {{ $reportable->title->name }}
+                                                {{ $report->reportable->author->name }} on {{ $report->reportable->title->name }}
                                             </div>
                                         </div>
 
                                         <x-ui.badge variant="outline" color="neutral" icon="chat-bubble-left-right">
-                                            {{ str($reportable->status->value)->headline() }}
+                                            {{ $report->reportable->status->label() }}
                                         </x-ui.badge>
                                     </div>
 
                                     <x-ui.text class="mt-3 text-sm text-neutral-600 dark:text-neutral-300">
-                                        {{ str($reportable->body)->limit(220) }}
+                                        {{ str($report->reportable->body)->limit(220) }}
                                     </x-ui.text>
                                 </div>
-                            @elseif ($reportable instanceof \App\Models\UserList)
+                            @elseif ($report->reportable instanceof \App\Models\UserList)
                                 <div class="rounded-box border border-black/5 px-4 py-3 dark:border-white/10">
                                     <div class="flex flex-wrap items-start justify-between gap-3">
                                         <div class="space-y-1">
                                             <div class="font-medium">
-                                                @if ($reportable->isShareable())
-                                                    <a href="{{ route('public.lists.show', ['user' => $reportable->user, 'list' => $reportable]) }}" class="hover:opacity-80">
-                                                        {{ $reportable->name }}
+                                                @if ($report->reportable->isShareable())
+                                                    <a href="{{ route('public.lists.show', ['user' => $report->reportable->user, 'list' => $report->reportable]) }}" class="hover:opacity-80">
+                                                        {{ $report->reportable->name }}
                                                     </a>
                                                 @else
-                                                    {{ $reportable->name }}
+                                                    {{ $report->reportable->name }}
                                                 @endif
                                             </div>
                                             <div class="text-sm text-neutral-500 dark:text-neutral-400">
-                                                {{ $reportable->user->name }} · {{ str($reportable->visibility->value)->headline() }} visibility
+                                                {{ $report->reportable->user->name }} · {{ $report->reportable->visibility->label() }} visibility
                                             </div>
                                         </div>
 
                                         <x-ui.badge variant="outline" color="neutral" icon="queue-list">
-                                            {{ number_format((int) ($reportable->items_count ?? 0)) }} titles
+                                            {{ number_format((int) ($report->reportable->items_count ?? 0)) }} titles
                                         </x-ui.badge>
                                     </div>
 
-                                    @if (filled($reportable->description))
+                                    @if (filled($report->reportable->description))
                                         <x-ui.text class="mt-3 text-sm text-neutral-600 dark:text-neutral-300">
-                                            {{ str($reportable->description)->limit(220) }}
+                                            {{ str($report->reportable->description)->limit(220) }}
                                         </x-ui.text>
                                     @endif
                                 </div>
@@ -141,13 +133,22 @@
                                 Update
                             </x-ui.button>
 
-                            @if ($reportableOwner && ! $reportableOwner->canAccessAdminPanel())
+                            @if ($report->reportableOwner() && ! $report->reportableOwner()->canAccessAdminPanel())
                                 <label class="xl:col-span-4 flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-300">
                                     <input type="checkbox" name="suspend_owner" value="1" class="rounded border-black/20 dark:border-white/20">
-                                    <span>Suspend {{ $reportableOwner->name }} from public activity.</span>
+                                    <span>Suspend {{ $report->reportableOwner()->name }} from public activity.</span>
                                 </label>
                             @endif
                         </form>
+
+                        @if ($report->reviewer)
+                            <div class="text-sm text-neutral-500 dark:text-neutral-400">
+                                Reviewed by {{ $report->reviewer->name }}
+                                @if ($report->reviewed_at)
+                                    · {{ $report->reviewed_at->format('M j, Y') }}
+                                @endif
+                            </div>
+                        @endif
                     </div>
                 </x-ui.card>
             @empty

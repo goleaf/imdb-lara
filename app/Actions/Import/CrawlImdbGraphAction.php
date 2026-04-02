@@ -19,6 +19,7 @@ class CrawlImdbGraphAction
         private readonly DownloadImdbTitlePayloadAction $downloadImdbTitlePayloadAction,
         private readonly DownloadImdbNamePayloadAction $downloadImdbNamePayloadAction,
         private readonly DownloadImdbInterestPayloadAction $downloadImdbInterestPayloadAction,
+        private readonly FetchImdbGraphqlAction $fetchImdbGraphqlAction,
         private readonly ImportImdbTitlePayloadAction $importImdbTitlePayloadAction,
         private readonly ImportImdbNamePayloadAction $importImdbNamePayloadAction,
         private readonly FetchImdbJsonAction $fetchImdbJsonAction,
@@ -257,6 +258,7 @@ class CrawlImdbGraphAction
             );
             $afterSnapshot = $this->snapshotTitle($imdbId);
             $discoveredNodes = $this->discoverNodesFromTitlePayload($download['payload']);
+            $this->warmGraphqlTitleArtifacts($discoveredNodes, 'title discovery');
 
             foreach ($discoveredNodes as $discoveredNode) {
                 $this->enqueueNode($queue, $enqueued, $discoveredNode);
@@ -335,6 +337,7 @@ class CrawlImdbGraphAction
             );
             $afterSnapshot = $this->snapshotPerson($imdbId);
             $discoveredNodes = $this->discoverNodesFromNamePayload($download['payload']);
+            $this->warmGraphqlTitleArtifacts($discoveredNodes, 'name discovery');
 
             foreach ($discoveredNodes as $discoveredNode) {
                 $this->enqueueNode($queue, $enqueued, $discoveredNode);
@@ -581,6 +584,17 @@ class CrawlImdbGraphAction
             ->values()
             ->all();
 
+        $this->warmGraphqlTitleArtifacts(
+            collect($pageTitleIds)
+                ->map(fn (string $titleId): array => [
+                    'type' => 'title',
+                    'imdb_id' => $titleId,
+                    'source' => 'frontier:titles',
+                ])
+                ->all(),
+            sprintf('titles frontier page %d', $page),
+        );
+
         foreach ($pageTitleIds as $titleId) {
             $this->enqueueNode($queue, $enqueued, [
                 'type' => 'title',
@@ -813,6 +827,37 @@ class CrawlImdbGraphAction
     }
 
     /**
+     * @param  list<array{type: string, imdb_id: string, source: string|null}>  $nodes
+     */
+    private function warmGraphqlTitleArtifacts(array $nodes, string $context): void
+    {
+        if (! $this->fetchImdbGraphqlAction->enabled()) {
+            return;
+        }
+
+        $titleIds = collect($nodes)
+            ->where('type', 'title')
+            ->map(fn (array $node): string => $node['imdb_id'])
+            ->unique()
+            ->values()
+            ->all();
+
+        if ($titleIds === []) {
+            return;
+        }
+
+        try {
+            $this->fetchImdbGraphqlAction->preloadTitleCores($titleIds);
+        } catch (Throwable $exception) {
+            logger()->warning(sprintf(
+                'IMDb GraphQL batch title preload failed during [%s]; falling back to per-title fetches. %s',
+                $context,
+                $exception->getMessage(),
+            ));
+        }
+    }
+
+    /**
      * @param  array<string, mixed>  $payload
      * @return list<array{type: string, imdb_id: string, source: string|null}>
      */
@@ -856,39 +901,11 @@ class CrawlImdbGraphAction
             }
         }
 
-        foreach (is_iterable(data_get($payload, 'names')) ? data_get($payload, 'names') : [] as $nameId => $namePayload) {
-            if (is_string($nameId) && preg_match('/^nm\d+$/', $nameId) === 1) {
-                $nodes[] = ['type' => 'name', 'imdb_id' => $nameId, 'source' => 'title:names'];
-            }
-
-            foreach ($this->normalizeObjectList(data_get($namePayload, 'relationships.relationships')) as $relationshipPayload) {
-                $relatedNameId = $this->nullableString(data_get($relationshipPayload, 'name.id'));
-
-                if ($relatedNameId !== null && preg_match('/^nm\d+$/', $relatedNameId) === 1) {
-                    $nodes[] = ['type' => 'name', 'imdb_id' => $relatedNameId, 'source' => 'title:name-relationships'];
-                }
-            }
-        }
-
         foreach ($this->normalizeObjectList(data_get($payload, 'title.interests')) as $interestPayload) {
             $interestId = $this->nullableString(data_get($interestPayload, 'id'));
 
             if ($interestId !== null) {
                 $nodes[] = ['type' => 'interest', 'imdb_id' => $interestId, 'source' => 'title:interests'];
-            }
-        }
-
-        foreach (is_iterable(data_get($payload, 'interests')) ? data_get($payload, 'interests') : [] as $interestId => $interestPayload) {
-            if (is_string($interestId) && preg_match('/^in[\w-]+$/', $interestId) === 1) {
-                $nodes[] = ['type' => 'interest', 'imdb_id' => $interestId, 'source' => 'title:interest-bundles'];
-            }
-
-            foreach ($this->normalizeObjectList(data_get($interestPayload, 'similarInterests')) as $similarInterestPayload) {
-                $similarInterestId = $this->nullableString(data_get($similarInterestPayload, 'id'));
-
-                if ($similarInterestId !== null) {
-                    $nodes[] = ['type' => 'interest', 'imdb_id' => $similarInterestId, 'source' => 'title:similar-interests'];
-                }
             }
         }
 
@@ -1350,7 +1367,10 @@ class CrawlImdbGraphAction
             $storageRoot = (string) config('services.imdb.storage_root', 'storage/app/private/imdb-temp');
         }
 
-        if (preg_match('/^(?:[A-Za-z]:[\\\\\/]|\\\\\\\\)/', $storageRoot) === 1) {
+        if (
+            Str::startsWith($storageRoot, DIRECTORY_SEPARATOR)
+            || preg_match('/^(?:[A-Za-z]:[\\\\\/]|\\\\\\\\)/', $storageRoot) === 1
+        ) {
             return $storageRoot;
         }
 

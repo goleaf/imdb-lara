@@ -1,21 +1,9 @@
-@php
-    $currentKind = old('kind', $mediaAsset->kind?->value);
-    $imageKindValues = [
-        \App\Enums\MediaKind::Poster->value,
-        \App\Enums\MediaKind::Backdrop->value,
-        \App\Enums\MediaKind::Gallery->value,
-        \App\Enums\MediaKind::Still->value,
-        \App\Enums\MediaKind::Headshot->value,
-    ];
-    $supportsImageUpload = in_array($currentKind, $imageKindValues, true);
-@endphp
-
 @if ($mediaAsset->exists)
     <div class="rounded-box border border-black/10 bg-neutral-50 p-4 dark:border-white/10 dark:bg-neutral-900/60">
         <div class="grid gap-4 md:grid-cols-[12rem_minmax(0,1fr)]">
             <div class="overflow-hidden rounded-box border border-black/5 bg-white dark:border-white/10 dark:bg-neutral-950">
                 @if ($mediaAsset->url)
-                    @if (in_array($mediaAsset->kind, [\App\Enums\MediaKind::Trailer, \App\Enums\MediaKind::Clip, \App\Enums\MediaKind::Featurette], true))
+                    @if ($mediaAsset->isVideo())
                         <div class="flex aspect-video items-center justify-center text-neutral-500 dark:text-neutral-400">
                             <x-ui.icon name="play-circle" class="size-12" />
                         </div>
@@ -35,7 +23,7 @@
 
             <div class="space-y-3">
                 <div class="flex flex-wrap items-center gap-2">
-                    <x-ui.badge variant="outline" icon="photo">{{ str($mediaAsset->kind->value)->headline() }}</x-ui.badge>
+                    <x-ui.badge variant="outline" :icon="$mediaAsset->isVideo() ? 'play-circle' : 'photo'">{{ $mediaAsset->kindLabel() }}</x-ui.badge>
                     @if ($mediaAsset->is_primary)
                         <x-ui.badge color="amber" icon="star">Primary</x-ui.badge>
                     @endif
@@ -51,14 +39,12 @@
                         <div>
                             <dt class="font-medium text-neutral-900 dark:text-white">Attached to</dt>
                             <dd>
-                                @if ($mediaAsset->mediable instanceof \App\Models\Title)
-                                    <a href="{{ route('admin.titles.edit', $mediaAsset->mediable) }}" class="hover:opacity-80">
-                                        {{ $mediaAsset->mediable->name }}
+                                @if ($mediaAsset->adminAttachedEditUrl())
+                                    <a href="{{ $mediaAsset->adminAttachedEditUrl() }}" class="hover:opacity-80">
+                                        {{ $mediaAsset->adminAttachedLabel() }}
                                     </a>
-                                @elseif ($mediaAsset->mediable instanceof \App\Models\Person)
-                                    <a href="{{ route('admin.people.edit', $mediaAsset->mediable) }}" class="hover:opacity-80">
-                                        {{ $mediaAsset->mediable->name }}
-                                    </a>
+                                @else
+                                    {{ $mediaAsset->adminAttachedLabel() }}
                                 @endif
                             </dd>
                         </div>
@@ -97,9 +83,9 @@
             name="kind"
             class="min-h-10 rounded-box border border-black/10 bg-white px-3 text-sm text-neutral-800 shadow-xs transition focus:border-black/15 focus:outline-none focus:ring-2 focus:ring-neutral-900/15 dark:border-white/15 dark:bg-neutral-900 dark:text-neutral-200 dark:focus:border-white/20 dark:focus:ring-neutral-100/15"
         >
-            @foreach (\App\Enums\MediaKind::cases() as $mediaKind)
+            @foreach (\App\Enums\MediaKind::allowedForMediable($mediaAsset->mediable ?? $mediaAsset->mediable_type) as $mediaKind)
                 <option value="{{ $mediaKind->value }}" @selected(old('kind', $mediaAsset->kind?->value) === $mediaKind->value)>
-                    {{ str($mediaKind->value)->headline() }}
+                    {{ $mediaKind->label() }}
                 </option>
             @endforeach
         </select>
@@ -117,7 +103,11 @@
         <x-ui.label>URL</x-ui.label>
         <x-ui.input name="url" type="url" :value="old('url', $mediaAsset->url)" />
         <x-ui.text class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-            Required for trailers, clips, and featurettes. Optional for image assets when you upload a file.
+            @if (collect(\App\Enums\MediaKind::allowedForMediable($mediaAsset->mediable ?? $mediaAsset->mediable_type))->contains(fn (\App\Enums\MediaKind $mediaKind): bool => $mediaKind->isVideo()))
+                Required for trailers, clips, and featurettes. Optional for image assets when you upload a file.
+            @else
+                Optional for externally hosted images. Uploads still populate local storage metadata automatically.
+            @endif
         </x-ui.text>
         <x-ui.error name="url" />
     </x-ui.field>
@@ -130,7 +120,11 @@
         <x-ui.label>Provider</x-ui.label>
         <x-ui.input name="provider" :value="old('provider', $mediaAsset->provider)" />
         <x-ui.text class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-            Leave blank for uploads. Use this for external sources like YouTube, Vimeo, or internal video providers.
+            @if (collect(\App\Enums\MediaKind::allowedForMediable($mediaAsset->mediable ?? $mediaAsset->mediable_type))->contains(fn (\App\Enums\MediaKind $mediaKind): bool => $mediaKind->isVideo()))
+                Leave blank for uploads. Use this for external sources like YouTube, Vimeo, or internal video providers.
+            @else
+                Leave blank for uploads. Use this only when you need to label a remote image source.
+            @endif
         </x-ui.text>
         <x-ui.error name="provider" />
     </x-ui.field>
@@ -157,7 +151,7 @@
     <x-ui.field>
         <x-ui.label>Duration (seconds)</x-ui.label>
         <x-ui.input name="duration_seconds" type="number" min="1" :value="old('duration_seconds', $mediaAsset->duration_seconds)" />
-        @if ($supportsImageUpload)
+        @if (in_array(old('kind', $mediaAsset->kind?->value), \App\Enums\MediaKind::imageValues(), true))
             <x-ui.text class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
                 Leave empty for still images. Video kinds keep using remote metadata.
             </x-ui.text>

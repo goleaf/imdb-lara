@@ -6,44 +6,17 @@
     'trackingWatchedAt' => null,
 ])
 
-@php
-    $poster = $title->relationLoaded('mediaAssets')
-        ? \App\Models\MediaAsset::preferredFrom(
-            $title->mediaAssets,
-            \App\Enums\MediaKind::Poster,
-            \App\Enums\MediaKind::Backdrop,
-        )
-        : null;
-    $genres = $title->relationLoaded('genres') ? $title->genres->take(3) : collect();
-    $statistic = $title->relationLoaded('statistic') ? $title->statistic : null;
-    $hasActions = trim((string) $slot) !== '';
-    $titleTypeIcon = match ($title->title_type) {
-        \App\Enums\TitleType::Series, \App\Enums\TitleType::MiniSeries => 'tv',
-        \App\Enums\TitleType::Documentary => 'camera',
-        \App\Enums\TitleType::Special => 'sparkles',
-        \App\Enums\TitleType::Episode => 'rectangle-stack',
-        default => 'film',
-    };
-    $trackingStateIcon = $trackingState instanceof \App\Enums\WatchState ? match ($trackingState) {
-        \App\Enums\WatchState::Planned => 'bookmark',
-        \App\Enums\WatchState::Watching => 'play-circle',
-        \App\Enums\WatchState::Completed => 'check-circle',
-        \App\Enums\WatchState::Paused => 'pause-circle',
-        \App\Enums\WatchState::Dropped => 'x-circle',
-    } : null;
-@endphp
-
-<x-ui.card class="!max-w-none h-full overflow-hidden">
+<x-ui.card class="sb-poster-card !max-w-none h-full overflow-hidden rounded-[1.4rem] p-3">
     <div class="flex h-full flex-col gap-4">
         <a
             href="{{ route('public.titles.show', $title) }}"
-            class="group block overflow-hidden rounded-box border border-black/5 bg-neutral-100 shadow-sm dark:border-white/10 dark:bg-neutral-800"
+            class="group sb-poster-frame block overflow-hidden rounded-[1.1rem]"
         >
-            @if ($poster)
+            @if ($title->preferredPoster())
                 <img
-                    src="{{ $poster->url }}"
-                    alt="{{ $poster->alt_text ?: $title->name }}"
-                    class="aspect-[2/3] w-full object-cover transition duration-300 group-hover:scale-[1.02]"
+                    src="{{ $title->preferredPoster()->url }}"
+                    alt="{{ $title->preferredPoster()->alt_text ?: $title->name }}"
+                    class="aspect-[2/3] w-full object-cover transition duration-500 group-hover:scale-[1.035]"
                     loading="lazy"
                 >
             @else
@@ -55,7 +28,7 @@
 
         <div class="flex flex-1 flex-col gap-3">
             <div class="flex flex-wrap items-center gap-2">
-                <x-ui.badge variant="outline" :icon="$titleTypeIcon">{{ str($title->title_type->value)->headline() }}</x-ui.badge>
+                <x-ui.badge variant="outline" :icon="$title->typeIcon()">{{ $title->typeLabel() }}</x-ui.badge>
 
                 @if ($title->release_year)
                     <a href="{{ route('public.years.show', ['year' => $title->release_year]) }}">
@@ -63,30 +36,30 @@
                     </a>
                 @endif
 
-                @if ($statistic?->average_rating)
+                @if ($title->displayAverageRating())
                     <x-ui.badge icon="star" color="amber">
-                        {{ number_format((float) $statistic->average_rating, 1) }}
+                        {{ number_format($title->displayAverageRating(), 1) }}
                     </x-ui.badge>
                 @endif
             </div>
 
             <div class="space-y-2">
-                <x-ui.heading level="h3" size="md">
+                <x-ui.heading level="h3" size="md" class="font-[family-name:var(--font-editorial)] text-[1.28rem] font-semibold tracking-[-0.03em] text-[#f4eee5]">
                     <a href="{{ route('public.titles.show', $title) }}" class="hover:opacity-80">
                         {{ $title->name }}
                     </a>
                 </x-ui.heading>
 
                 @if ($showSummary && filled($title->plot_outline))
-                    <x-ui.text class="text-sm text-neutral-600 dark:text-neutral-300">
+                    <x-ui.text class="text-sm leading-6 text-[#aca293] dark:text-[#aca293]">
                         {{ str($title->plot_outline)->limit(140) }}
                     </x-ui.text>
                 @endif
             </div>
 
-            @if ($genres->isNotEmpty())
+            @if ($title->previewGenres()->isNotEmpty())
                 <div class="flex flex-wrap gap-2">
-                    @foreach ($genres as $genre)
+                    @foreach ($title->previewGenres() as $genre)
                         <a href="{{ route('public.genres.show', $genre) }}">
                             <x-ui.badge variant="outline" color="neutral" icon="tag">{{ $genre->name }}</x-ui.badge>
                         </a>
@@ -99,10 +72,10 @@
                     @if ($trackingState instanceof \App\Enums\WatchState)
                         <x-ui.badge
                             variant="outline"
-                            :color="$trackingState === \App\Enums\WatchState::Completed ? 'green' : 'neutral'"
-                            :icon="$trackingStateIcon"
+                            :color="$trackingState->color()"
+                            :icon="$trackingState->icon()"
                         >
-                            {{ str($trackingState->value)->headline() }}
+                            {{ $trackingState->label() }}
                         </x-ui.badge>
                     @endif
 
@@ -120,14 +93,14 @@
                 </div>
             @endif
 
-            <div class="mt-auto flex items-center justify-between gap-3 text-sm text-neutral-500 dark:text-neutral-400">
-                <span>{{ number_format((int) ($statistic?->review_count ?? 0)) }} reviews</span>
+            <div class="mt-auto flex items-center justify-between gap-3 text-sm text-[#988f82] dark:text-[#988f82]">
+                <span>{{ number_format($title->displayReviewCount()) }} reviews</span>
                 <x-ui.link :href="route('public.titles.show', $title)" variant="ghost" iconAfter="arrow-right">
                     View title
                 </x-ui.link>
             </div>
 
-            @if ($hasActions)
+            @if ($slot->isNotEmpty())
                 <div class="flex flex-wrap gap-2">
                     {{ $slot }}
                 </div>

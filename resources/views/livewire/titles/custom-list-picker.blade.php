@@ -1,11 +1,3 @@
-@php
-    $visibilityIcons = [
-        'private' => 'lock-closed',
-        'unlisted' => 'eye-slash',
-        'public' => 'globe-alt',
-    ];
-@endphp
-
 <x-ui.card class="!max-w-none" id="title-lists">
     <form wire:submit="save" class="space-y-4">
         <div class="space-y-2">
@@ -27,6 +19,32 @@
                 <x-ui.alerts variant="success" icon="check-circle">
                     <x-ui.alerts.description>{{ $statusMessage }}</x-ui.alerts.description>
                 </x-ui.alerts>
+            @endif
+
+            @if ($selectedLists->isNotEmpty())
+                <div class="space-y-2">
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <x-ui.text class="text-sm font-medium text-neutral-700 dark:text-neutral-200">
+                            Already saved in your lists
+                        </x-ui.text>
+                        <x-ui.badge variant="outline" color="neutral" icon="queue-list">
+                            {{ number_format($selectedLists->count()) }} {{ str('list')->plural($selectedLists->count()) }}
+                        </x-ui.badge>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2">
+                        @foreach ($selectedLists as $selectedList)
+                            <x-ui.badge
+                                wire:key="selected-title-list-{{ $selectedList->id }}"
+                                variant="outline"
+                                color="amber"
+                                :icon="$selectedList->visibility->icon()"
+                            >
+                                {{ $selectedList->name }}
+                            </x-ui.badge>
+                        @endforeach
+                    </div>
+                </div>
             @endif
 
             <x-ui.field>
@@ -110,7 +128,7 @@
                                     <x-ui.combobox.option
                                         wire:key="inline-list-visibility-{{ $visibilityOption['value'] }}"
                                         value="{{ $visibilityOption['value'] }}"
-                                        :icon="$visibilityIcons[$visibilityOption['value']] ?? 'globe-alt'"
+                                        :icon="$visibilityOption['icon']"
                                     >
                                         {{ $visibilityOption['label'] }}
                                     </x-ui.combobox.option>

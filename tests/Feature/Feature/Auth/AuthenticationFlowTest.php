@@ -16,8 +16,21 @@ class AuthenticationFlowTest extends TestCase
 
     public function test_guest_can_view_auth_pages_register_and_login(): void
     {
-        $this->get(route('login'))->assertOk()->assertSee('Sign in');
-        $this->get(route('register'))->assertOk()->assertSee('Create account');
+        $this->get(route('login'))
+            ->assertOk()
+            ->assertSee('Sign in to Screenbase')
+            ->assertSee('Continue with Apple')
+            ->assertSee('Browse catalog')
+            ->assertDontSee('Search titles, people, and public lists')
+            ->assertDontSee('Movies');
+
+        $this->get(route('register'))
+            ->assertOk()
+            ->assertSee('Create your Screenbase account')
+            ->assertSee('Continue with Google')
+            ->assertSee('Browse catalog')
+            ->assertDontSee('Search titles, people, and public lists')
+            ->assertDontSee('Movies');
 
         Livewire::test(RegisterForm::class)
             ->set('form.name', 'Dana Viewer')

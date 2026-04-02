@@ -29,6 +29,8 @@ class PeopleBrowserTest extends TestCase
         $actor = Person::factory()->create([
             'name' => 'Ava Mercer',
             'alternate_names' => 'A. Mercer',
+            'imdb_alternative_names' => ['Ava L. Mercer'],
+            'slug' => 'ava-mercer',
         ]);
         $director = Person::factory()->create([
             'name' => 'Talia Rowe',
@@ -47,9 +49,16 @@ class PeopleBrowserTest extends TestCase
             ->set('search', 'Ava')
             ->assertSee('Ava Mercer')
             ->assertDontSee('Talia Rowe')
+            ->set('search', 'Ava L. Mercer')
+            ->assertSee('Ava Mercer')
+            ->assertDontSee('Talia Rowe')
+            ->set('search', 'ava-mercer')
+            ->assertSee('Ava Mercer')
+            ->assertDontSee('Talia Rowe')
             ->set('search', '')
             ->set('profession', 'Director')
             ->assertSee('Talia Rowe')
-            ->assertDontSee('Ava Mercer');
+            ->assertDontSee('Ava Mercer')
+            ->assertSee(route('public.people.show', $director), false);
     }
 }

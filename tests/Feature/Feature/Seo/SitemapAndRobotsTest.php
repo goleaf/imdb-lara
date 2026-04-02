@@ -30,6 +30,11 @@ class SitemapAndRobotsTest extends TestCase
             'slug' => 'northern-signal',
             'release_year' => 2024,
         ]);
+        $alternateTitle = Title::factory()->create([
+            'name' => 'Northern Signal Alternate',
+            'slug' => 'northern-signal-alternate',
+            'canonical_title_id' => $title->id,
+        ]);
         $title->genres()->attach($genre);
         MediaAsset::factory()->for($title, 'mediable')->poster()->create();
         $person = Person::factory()->create([
@@ -47,12 +52,16 @@ class SitemapAndRobotsTest extends TestCase
         $this->get('/sitemap.xml')
             ->assertOk()
             ->assertSee(route('public.home'), false)
+            ->assertSee(route('public.awards.index'), false)
+            ->assertSee(route('public.lists.index'), false)
             ->assertSee(route('public.genres.show', $genre), false)
             ->assertSee(route('public.years.show', ['year' => 2024]), false)
             ->assertSee(route('public.titles.show', $title), false)
+            ->assertDontSee(route('public.titles.show', $alternateTitle), false)
             ->assertSee(route('public.people.show', $person), false)
             ->assertSee(route('public.users.show', $user), false)
-            ->assertSee(route('public.lists.show', [$user, $list]), false);
+            ->assertSee(route('public.lists.show', [$user, $list]), false)
+            ->assertDontSee(route('public.search'), false);
 
         $this->get('/robots.txt')
             ->assertOk()

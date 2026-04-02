@@ -1,9 +1,3 @@
-@php
-    $selectedGenreIds = collect(old('genre_ids', $title->genres?->modelKeys() ?? []))
-        ->map(fn ($genreId) => (int) $genreId)
-        ->all();
-@endphp
-
 <div class="grid gap-4 lg:grid-cols-2">
     <x-ui.field>
         <x-ui.label>Name</x-ui.label>
@@ -103,7 +97,7 @@
                     name="genre_ids[]"
                     value="{{ $genre->id }}"
                     class="rounded border-black/20 text-neutral-900 focus:ring-neutral-900/20 dark:border-white/20 dark:bg-neutral-900 dark:text-neutral-100 dark:focus:ring-neutral-100/20"
-                    @checked(in_array($genre->id, $selectedGenreIds, true))
+                    @checked(collect(old('genre_ids', $title->genres?->modelKeys() ?? []))->map(fn ($genreId) => (int) $genreId)->contains($genre->id))
                 >
                 <span>{{ $genre->name }}</span>
             </label>

@@ -16,8 +16,9 @@ class SearchPage extends Component
         return $this->renderPageView('search.index', [
             'seo' => new PageSeoData(
                 title: 'Search',
-                description: 'Run advanced title discovery across keywords, genre, title type, and minimum ratings.',
+                description: 'Search titles, people, and public lists with top matches, poster-first results, and focused title discovery filters.',
                 canonical: route('public.search'),
+                robots: 'noindex,follow',
                 breadcrumbs: [
                     ['label' => 'Home', 'href' => route('public.home')],
                     ['label' => 'Search'],

@@ -70,7 +70,7 @@ class ListManagementTest extends TestCase
             ->value('id');
 
         $component
-            ->call('moveItemUp', $titleBItemId)
+            ->call('sortItems', $titleBItemId, 0)
             ->call('removeTitle', $titleA->id)
             ->assertHasNoErrors();
 
@@ -95,6 +95,76 @@ class ListManagementTest extends TestCase
             ->all());
     }
 
+    public function test_sortable_reorder_respects_the_current_paginated_page_offset(): void
+    {
+        $user = User::factory()->create();
+        $list = UserList::factory()->for($user)->create([
+            'name' => 'Long Weekend Queue',
+            'slug' => 'long-weekend-queue',
+        ]);
+
+        $titleIds = collect(range(1, 14))->map(function (int $position) use ($list): int {
+            $title = Title::factory()->create([
+                'name' => sprintf('Queue Entry %02d', $position),
+            ]);
+
+            ListItem::factory()
+                ->for($list, 'userList')
+                ->for($title, 'title')
+                ->create([
+                    'position' => $position,
+                ]);
+
+            return $title->id;
+        });
+
+        $lastPageItemId = ListItem::query()
+            ->where('user_list_id', $list->id)
+            ->where('title_id', $titleIds->last())
+            ->value('id');
+
+        Livewire::withQueryParams(['items' => 2])
+            ->actingAs($user)
+            ->test(ManageList::class, ['list' => $list])
+            ->call('sortItems', $lastPageItemId, 0)
+            ->assertSet('statusMessage', 'List order updated.');
+
+        $this->assertSame([
+            $titleIds[0],
+            $titleIds[1],
+            $titleIds[2],
+            $titleIds[3],
+            $titleIds[4],
+            $titleIds[5],
+            $titleIds[6],
+            $titleIds[7],
+            $titleIds[8],
+            $titleIds[9],
+            $titleIds[10],
+            $titleIds[11],
+            $titleIds[13],
+            $titleIds[12],
+        ], ListItem::query()
+            ->where('user_list_id', $list->id)
+            ->orderBy('position')
+            ->pluck('title_id')
+            ->all());
+    }
+
+    public function test_non_owner_cannot_mount_the_manage_list_component(): void
+    {
+        $owner = User::factory()->create();
+        $intruder = User::factory()->create();
+        $list = UserList::factory()->for($owner)->create([
+            'name' => 'Members Only Mix',
+            'slug' => 'members-only-mix',
+        ]);
+
+        Livewire::actingAs($intruder)
+            ->test(ManageList::class, ['list' => $list])
+            ->assertForbidden();
+    }
+
     public function test_owner_can_delete_a_custom_list(): void
     {
         $user = User::factory()->create();
@@ -110,6 +180,113 @@ class ListManagementTest extends TestCase
         $this->assertSoftDeleted('user_lists', [
             'id' => $list->id,
         ]);
+    }
+
+    public function test_public_lists_index_only_shows_public_custom_lists_and_supports_search(): void
+    {
+        $alpha = User::factory()->create([
+            'name' => 'Alpha Curator',
+            'username' => 'alpha-curator',
+        ]);
+        $beta = User::factory()->create([
+            'name' => 'Beta Curator',
+            'username' => 'beta-curator',
+        ]);
+
+        $alphaList = UserList::factory()->public()->for($alpha)->create([
+            'name' => 'Friday Night Futures',
+            'slug' => 'friday-night-futures',
+        ]);
+        $betaList = UserList::factory()->public()->for($beta)->create([
+            'name' => 'Deep Space Essentials',
+            'slug' => 'deep-space-essentials',
+        ]);
+        $privateList = UserList::factory()->for($alpha)->create([
+            'name' => 'Secret Sequels',
+            'slug' => 'secret-sequels',
+            'visibility' => ListVisibility::Private,
+        ]);
+        $unlistedList = UserList::factory()->for($alpha)->create([
+            'name' => 'Hidden Vault',
+            'slug' => 'hidden-vault',
+            'visibility' => ListVisibility::Unlisted,
+        ]);
+        $publicWatchlist = UserList::factory()->watchlist()->for($alpha)->create([
+            'visibility' => ListVisibility::Public,
+        ]);
+
+        foreach ([$alphaList, $betaList, $privateList, $unlistedList, $publicWatchlist] as $index => $list) {
+            $title = Title::factory()->create([
+                'name' => 'List Title '.($index + 1),
+            ]);
+
+            ListItem::factory()
+                ->for($list, 'userList')
+                ->for($title, 'title')
+                ->create([
+                    'position' => 1,
+                ]);
+        }
+
+        $this->get(route('public.lists.index'))
+            ->assertOk()
+            ->assertSee('Friday Night Futures')
+            ->assertSee('Deep Space Essentials')
+            ->assertDontSee('Secret Sequels')
+            ->assertDontSee('Hidden Vault')
+            ->assertDontSee('Watchlist');
+
+        $this->get(route('public.lists.index', ['q' => 'beta-curator']))
+            ->assertOk()
+            ->assertSee('Deep Space Essentials')
+            ->assertDontSee('Friday Night Futures');
+    }
+
+    public function test_public_lists_index_can_sort_by_list_size(): void
+    {
+        $user = User::factory()->create([
+            'username' => 'ranked-curator',
+        ]);
+
+        $smallerList = UserList::factory()->public()->for($user)->create([
+            'name' => 'Single Feature List',
+        ]);
+        $largerList = UserList::factory()->public()->for($user)->create([
+            'name' => 'Triple Feature List',
+        ]);
+
+        foreach (range(1, 1) as $position) {
+            $title = Title::factory()->create([
+                'name' => 'Small Entry '.$position,
+            ]);
+
+            ListItem::factory()
+                ->for($smallerList, 'userList')
+                ->for($title, 'title')
+                ->create([
+                    'position' => $position,
+                ]);
+        }
+
+        foreach (range(1, 3) as $position) {
+            $title = Title::factory()->create([
+                'name' => 'Large Entry '.$position,
+            ]);
+
+            ListItem::factory()
+                ->for($largerList, 'userList')
+                ->for($title, 'title')
+                ->create([
+                    'position' => $position,
+                ]);
+        }
+
+        $this->get(route('public.lists.index', ['sort' => 'most_titles']))
+            ->assertOk()
+            ->assertSeeInOrder([
+                'Triple Feature List',
+                'Single Feature List',
+            ]);
     }
 
     public function test_unlisted_lists_are_directly_viewable_but_not_shown_on_public_profile(): void

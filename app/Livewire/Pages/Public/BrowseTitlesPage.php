@@ -51,7 +51,7 @@ class BrowseTitlesPage extends Component
             ['label' => 'Browse Titles'],
         ];
 
-        return $this->renderPageView('catalog.browse', [
+        return $this->renderBrowseView([
             'pageTitle' => 'Browse Titles',
             'metaDescription' => 'Browse published Screenbase titles across movies, series, documentaries, shorts, and specials.',
             'heading' => 'Browse Titles',
@@ -89,7 +89,7 @@ class BrowseTitlesPage extends Component
             ['label' => 'Movies'],
         ];
 
-        return $this->renderPageView('catalog.browse', [
+        return $this->renderBrowseView([
             'pageTitle' => 'Browse Movies',
             'metaDescription' => 'Browse published movies on Screenbase with ratings, reviews, and genre links.',
             'heading' => 'Browse Movies',
@@ -124,7 +124,7 @@ class BrowseTitlesPage extends Component
             ['label' => 'TV Shows'],
         ];
 
-        return $this->renderPageView('catalog.browse', [
+        return $this->renderBrowseView([
             'pageTitle' => 'Browse TV Shows',
             'metaDescription' => 'Browse published TV series and mini-series on Screenbase.',
             'heading' => 'Browse TV Shows',
@@ -162,7 +162,7 @@ class BrowseTitlesPage extends Component
             ['label' => $this->genre->name],
         ];
 
-        return $this->renderPageView('catalog.browse', [
+        return $this->renderBrowseView([
             'pageTitle' => $this->genre->name,
             'metaDescription' => $this->genre->description ?: 'Browse '.$this->genre->name.' titles, reviews, and discovery pages on Screenbase.',
             'heading' => $this->genre->name,
@@ -200,7 +200,7 @@ class BrowseTitlesPage extends Component
             ['label' => (string) $this->year],
         ];
 
-        return $this->renderPageView('catalog.browse', [
+        return $this->renderBrowseView([
             'pageTitle' => 'Titles from '.$this->year,
             'metaDescription' => 'Browse public title pages released in '.$this->year.' on Screenbase.',
             'heading' => (string) $this->year,
@@ -235,7 +235,7 @@ class BrowseTitlesPage extends Component
             ['label' => 'Top Rated Movies'],
         ];
 
-        return $this->renderPageView('catalog.browse', [
+        return $this->renderBrowseView([
             'pageTitle' => 'Top Rated Movies',
             'metaDescription' => 'Browse Screenbase movies ordered by rating and rating volume.',
             'heading' => 'Top Rated Movies',
@@ -250,6 +250,7 @@ class BrowseTitlesPage extends Component
                 'types' => [TitleType::Movie->value],
                 'sort' => 'rating',
                 'pageName' => 'top-rated-movies',
+                'displayMode' => 'chart',
                 'emptyHeading' => 'No rated movies are available yet.',
                 'emptyText' => 'As ratings arrive, this page will surface the strongest films.',
             ],
@@ -270,7 +271,7 @@ class BrowseTitlesPage extends Component
             ['label' => 'Top Rated Series'],
         ];
 
-        return $this->renderPageView('catalog.browse', [
+        return $this->renderBrowseView([
             'pageTitle' => 'Top Rated Series',
             'metaDescription' => 'Browse Screenbase series and mini-series ordered by audience rating.',
             'heading' => 'Top Rated Series',
@@ -285,6 +286,7 @@ class BrowseTitlesPage extends Component
                 'types' => [TitleType::Series->value, TitleType::MiniSeries->value],
                 'sort' => 'rating',
                 'pageName' => 'top-rated-series',
+                'displayMode' => 'chart',
                 'emptyHeading' => 'No rated series are available yet.',
                 'emptyText' => 'Once ratings accumulate, this page will rank the strongest series.',
             ],
@@ -305,7 +307,7 @@ class BrowseTitlesPage extends Component
             ['label' => 'Trending'],
         ];
 
-        return $this->renderPageView('catalog.browse', [
+        return $this->renderBrowseView([
             'pageTitle' => 'Trending',
             'metaDescription' => 'Browse titles trending on Screenbase by watchlist activity and review momentum.',
             'heading' => 'Trending Now',
@@ -319,6 +321,7 @@ class BrowseTitlesPage extends Component
             'browserProps' => [
                 'sort' => 'trending',
                 'pageName' => 'trending',
+                'displayMode' => 'chart',
                 'emptyHeading' => 'No trending titles are available yet.',
                 'emptyText' => 'As the community adds watchlists and reviews, this page will update.',
             ],
@@ -329,6 +332,64 @@ class BrowseTitlesPage extends Component
                 breadcrumbs: $breadcrumbs,
                 paginationPageName: 'trending',
             ),
+        ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    private function renderBrowseView(array $payload): View
+    {
+        $browserProps = is_array($payload['browserProps'] ?? null) ? $payload['browserProps'] : [];
+        $displayMode = (string) ($browserProps['displayMode'] ?? 'catalog');
+        $pageName = (string) ($browserProps['pageName'] ?? 'titles');
+        $countryCode = str((string) request()->query('country', ''))
+            ->trim()
+            ->upper()
+            ->toString();
+        $countryLabel = null;
+
+        if ($countryCode !== '' && class_exists(\Locale::class)) {
+            $resolvedCountryLabel = \Locale::getDisplayRegion('-'.$countryCode, app()->getLocale());
+
+            if (filled($resolvedCountryLabel)) {
+                $countryLabel = $resolvedCountryLabel;
+            }
+        }
+
+        $countryLabel ??= $countryCode !== '' ? $countryCode : null;
+
+        return $this->renderPageView('catalog.browse', [
+            ...$payload,
+            'browserProps' => $browserProps,
+            'displayMode' => $displayMode,
+            'heroSlot' => $pageName === 'titles' ? 'browse-titles-hero' : 'catalog-browse-hero',
+            'isChartPage' => $displayMode === 'chart',
+            'countryCode' => $countryCode,
+            'countryLabel' => $countryLabel,
+            'badgeItems' => collect($payload['badges'] ?? [])
+                ->map(function (string $badge): array {
+                    $normalizedBadge = str($badge)->lower();
+                    $badgeIcon = collect([
+                        'film' => 'film',
+                        'movie' => 'film',
+                        'tv' => 'tv',
+                        'series' => 'tv',
+                        'rating' => 'star',
+                        'review' => 'chat-bubble-left-right',
+                        'discover' => 'sparkles',
+                        'genre' => 'tag',
+                        'year' => 'calendar-days',
+                        'people' => 'users',
+                        'search' => 'magnifying-glass',
+                    ])->first(fn (string $icon, string $keyword): bool => $normalizedBadge->contains($keyword));
+
+                    return [
+                        'label' => $badge,
+                        'icon' => $badgeIcon,
+                    ];
+                })
+                ->values(),
         ]);
     }
 }

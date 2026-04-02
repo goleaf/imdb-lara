@@ -88,4 +88,27 @@ class RoleAuthorizationTest extends TestCase
         $this->assertTrue($superAdmin->can('forceDelete', $report));
         $this->assertTrue($superAdmin->can('forceDelete', $mediaAsset));
     }
+
+    public function test_suspended_staff_users_lose_role_capabilities_and_policy_access(): void
+    {
+        $contributor = User::factory()->contributor()->suspended()->create();
+        $editor = User::factory()->editor()->suspended()->create();
+        $moderator = User::factory()->moderator()->suspended()->create();
+        $superAdmin = User::factory()->superAdmin()->suspended()->create();
+
+        $title = Title::factory()->create();
+        $review = Review::factory()->for(User::factory()->create(), 'author')->create();
+        $report = Report::factory()->for(User::factory()->create(), 'reporter')->for($review, 'reportable')->create();
+
+        $this->assertFalse($contributor->can('submit-contribution'));
+        $this->assertFalse($editor->can('access-admin-area'));
+        $this->assertFalse($editor->can('manage-catalog'));
+        $this->assertFalse($editor->can('viewAny', Title::class));
+        $this->assertFalse($moderator->can('moderate-content'));
+        $this->assertFalse($moderator->can('viewAny', Review::class));
+        $this->assertFalse($moderator->can('viewAny', Report::class));
+        $this->assertFalse($superAdmin->can('access-admin-area'));
+        $this->assertFalse($superAdmin->can('viewAny', Title::class));
+        $this->assertFalse($superAdmin->can('forceDelete', $report));
+    }
 }

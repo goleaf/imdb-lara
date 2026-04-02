@@ -3,6 +3,7 @@
 namespace Tests;
 
 use App\Actions\Import\DownloadImdbTitlePayloadAction;
+use App\Actions\Import\FetchImdbGraphqlAction;
 use App\Actions\Import\FetchImdbJsonAction;
 use App\Actions\Import\ImportImdbNamePayloadAction;
 use App\Actions\Import\ImportImdbTitlePayloadAction;
@@ -11,6 +12,7 @@ use App\Actions\Import\WriteImdbTitleVerificationReportAction;
 use App\Models\Person;
 use App\Models\Title;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Sleep;
 use ReflectionClass;
@@ -23,6 +25,11 @@ abstract class TestCase extends BaseTestCase
         parent::setUp();
 
         Sleep::fake();
+        Cache::flush();
+
+        config()->set('services.imdb.graphql.enabled', false);
+        config()->set('services.imdb.http_cache.enabled', false);
+        FetchImdbGraphqlAction::flushMemoryCache();
 
         $property = (new ReflectionClass(FetchImdbJsonAction::class))
             ->getProperty('lastRequestFinishedAtMicroseconds');

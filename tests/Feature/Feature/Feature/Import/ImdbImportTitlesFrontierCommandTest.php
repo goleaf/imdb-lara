@@ -161,6 +161,14 @@ class ImdbImportTitlesFrontierCommandTest extends TestCase
         $this->assertIsInt($pageTwoRequestIndex);
         $this->assertIsInt($firstTitleRequestIndex);
         $this->assertGreaterThan($firstTitleRequestIndex, $pageTwoRequestIndex);
+        $this->assertSame(
+            1,
+            collect($requestedUrls)->filter(fn (string $url): bool => $url === 'https://api.imdbapi.dev/names/nm3000001')->count(),
+        );
+        $this->assertSame(
+            1,
+            collect($requestedUrls)->filter(fn (string $url): bool => $url === 'https://api.imdbapi.dev/names/nm3000002')->count(),
+        );
 
         $runReports = collect(File::glob($directory.DIRECTORY_SEPARATOR.'reports'.DIRECTORY_SEPARATOR.'crawl-*.json'))
             ->map(function (string $path): array {
@@ -254,6 +262,128 @@ class ImdbImportTitlesFrontierCommandTest extends TestCase
         $this->assertFileExists($directory.DIRECTORY_SEPARATOR.'frontiers'.DIRECTORY_SEPARATOR.'titles'.DIRECTORY_SEPARATOR.'page-0001.json');
         $this->assertFileExists($directory.DIRECTORY_SEPARATOR.'frontiers'.DIRECTORY_SEPARATOR.'titles'.DIRECTORY_SEPARATOR.'page-0002.json');
         $this->assertFileDoesNotExist($directory.DIRECTORY_SEPARATOR.'frontiers'.DIRECTORY_SEPARATOR.'titles'.DIRECTORY_SEPARATOR.'page-0003.json');
+    }
+
+    public function test_command_batches_graphql_title_artifacts_for_frontier_titles(): void
+    {
+        $directory = storage_path('framework/testing/imdb-frontier-graphql-preload');
+        File::deleteDirectory($directory);
+        $graphqlRequests = 0;
+
+        config()->set('services.imdb.storage_root', $directory);
+        config()->set('services.imdb.graphql.enabled', true);
+        config()->set('services.imdb.graphql.url', 'https://graph.imdbapi.dev/v1');
+        config()->set('services.imdb.title_batch_concurrency', 5);
+
+        Http::preventStrayRequests();
+        Http::fake(function (Request $request) use (&$graphqlRequests) {
+            $url = $request->url();
+
+            if ($url === 'https://graph.imdbapi.dev/v1') {
+                $graphqlRequests++;
+
+                $query = (string) data_get($request->data(), 'query', '');
+
+                $this->assertStringContainsString('title_0: title(id: "tt3000001")', $query);
+                $this->assertStringContainsString('title_1: title(id: "tt3000002")', $query);
+
+                return Http::response([
+                    'data' => [
+                        'title_0' => [
+                            'credits' => [
+                                [
+                                    'category' => 'actor',
+                                    'characters' => ['Pilot Lead'],
+                                    'name' => [
+                                        'id' => 'nm3000001',
+                                        'display_name' => 'Frontier Lead',
+                                        'avatars' => [],
+                                    ],
+                                ],
+                            ],
+                            'certificates' => [],
+                        ],
+                        'title_1' => [
+                            'credits' => [
+                                [
+                                    'category' => 'actor',
+                                    'characters' => ['Relay'],
+                                    'name' => [
+                                        'id' => 'nm3000002',
+                                        'display_name' => 'Relay Star',
+                                        'avatars' => [],
+                                    ],
+                                ],
+                            ],
+                            'certificates' => [],
+                        ],
+                    ],
+                ], 200);
+            }
+
+            if (str_ends_with($url, '/credits') || str_ends_with($url, '/certificates')) {
+                $this->fail('REST credits and certificates endpoints should not be called when GraphQL batching is enabled.');
+            }
+
+            return match ($url) {
+                'https://api.imdbapi.dev/titles' => Http::response([
+                    'titles' => [
+                        ['id' => 'tt3000001', 'primaryTitle' => 'Frontier One'],
+                        ['id' => 'tt3000002', 'primaryTitle' => 'Frontier Two'],
+                    ],
+                ], 200),
+                'https://api.imdbapi.dev/interests' => Http::response([
+                    'categories' => [],
+                ], 200),
+                'https://api.imdbapi.dev/chart/starmeter' => Http::response([
+                    'names' => [],
+                ], 200),
+
+                'https://api.imdbapi.dev/titles/tt3000001' => Http::response($this->titlePayload('tt3000001', 'Frontier One', 'nm3000001'), 200),
+                'https://api.imdbapi.dev/titles/tt3000001/releaseDates' => Http::response($this->releaseDatesPayload(2024, 4, 1), 200),
+                'https://api.imdbapi.dev/titles/tt3000001/akas' => Http::response(['akas' => []], 200),
+                'https://api.imdbapi.dev/titles/tt3000001/seasons' => Http::response(['seasons' => []], 200),
+                'https://api.imdbapi.dev/titles/tt3000001/episodes' => Http::response(['episodes' => [], 'totalCount' => 0], 200),
+                'https://api.imdbapi.dev/titles/tt3000001/images' => Http::response(['images' => []], 200),
+                'https://api.imdbapi.dev/titles/tt3000001/videos' => Http::response(['videos' => []], 200),
+                'https://api.imdbapi.dev/titles/tt3000001/awardNominations' => Http::response(['awardNominations' => [], 'stats' => []], 200),
+                'https://api.imdbapi.dev/titles/tt3000001/parentsGuide' => Http::response(['advisories' => []], 200),
+                'https://api.imdbapi.dev/titles/tt3000001/companyCredits' => Http::response(['companyCredits' => []], 200),
+                'https://api.imdbapi.dev/titles/tt3000001/boxOffice' => Http::response([], 200),
+
+                'https://api.imdbapi.dev/titles/tt3000002' => Http::response($this->titlePayload('tt3000002', 'Frontier Two', 'nm3000002'), 200),
+                'https://api.imdbapi.dev/titles/tt3000002/releaseDates' => Http::response($this->releaseDatesPayload(2024, 4, 8), 200),
+                'https://api.imdbapi.dev/titles/tt3000002/akas' => Http::response(['akas' => []], 200),
+                'https://api.imdbapi.dev/titles/tt3000002/seasons' => Http::response(['seasons' => []], 200),
+                'https://api.imdbapi.dev/titles/tt3000002/episodes' => Http::response(['episodes' => [], 'totalCount' => 0], 200),
+                'https://api.imdbapi.dev/titles/tt3000002/images' => Http::response(['images' => []], 200),
+                'https://api.imdbapi.dev/titles/tt3000002/videos' => Http::response(['videos' => []], 200),
+                'https://api.imdbapi.dev/titles/tt3000002/awardNominations' => Http::response(['awardNominations' => [], 'stats' => []], 200),
+                'https://api.imdbapi.dev/titles/tt3000002/parentsGuide' => Http::response(['advisories' => []], 200),
+                'https://api.imdbapi.dev/titles/tt3000002/companyCredits' => Http::response(['companyCredits' => []], 200),
+                'https://api.imdbapi.dev/titles/tt3000002/boxOffice' => Http::response([], 200),
+
+                'https://api.imdbapi.dev/names/nm3000001' => Http::response($this->nameDetailsPayload('nm3000001', 'Frontier Lead'), 200),
+                'https://api.imdbapi.dev/names/nm3000001/images' => Http::response(['images' => []], 200),
+                'https://api.imdbapi.dev/names/nm3000001/relationships' => Http::response(['relationships' => []], 200),
+                'https://api.imdbapi.dev/names/nm3000001/trivia' => Http::response(['triviaEntries' => []], 200),
+                'https://api.imdbapi.dev/names/nm3000001/filmography' => Http::response(['credits' => [], 'totalCount' => 0], 200),
+
+                'https://api.imdbapi.dev/names/nm3000002' => Http::response($this->nameDetailsPayload('nm3000002', 'Relay Star'), 200),
+                'https://api.imdbapi.dev/names/nm3000002/images' => Http::response(['images' => []], 200),
+                'https://api.imdbapi.dev/names/nm3000002/relationships' => Http::response(['relationships' => []], 200),
+                'https://api.imdbapi.dev/names/nm3000002/trivia' => Http::response(['triviaEntries' => []], 200),
+                'https://api.imdbapi.dev/names/nm3000002/filmography' => Http::response(['credits' => [], 'totalCount' => 0], 200),
+
+                default => $this->fail('Unexpected HTTP request: '.$url),
+            };
+        });
+
+        $this->artisan('imdb:import-titles-frontier')->assertSuccessful();
+
+        $this->assertSame(1, $graphqlRequests);
+        $this->assertDatabaseHas('titles', ['imdb_id' => 'tt3000001']);
+        $this->assertDatabaseHas('titles', ['imdb_id' => 'tt3000002']);
     }
 
     /**

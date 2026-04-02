@@ -25,6 +25,14 @@
         ]]);
     }
 
+    if (\Illuminate\Support\Facades\Route::has('public.lists.index')) {
+        array_splice($exploreLinks, 6, 0, [[
+            'label' => 'Public Lists',
+            'href' => route('public.lists.index'),
+            'icon' => 'queue-list',
+        ]]);
+    }
+
     $signalLinks = [];
 
     if (\Illuminate\Support\Facades\Route::has('public.trending')) {
@@ -61,8 +69,8 @@
     ];
 @endphp
 
-<footer {{ $attributes->class('mt-8') }} data-slot="site-footer">
-    <div class="overflow-hidden rounded-[1.75rem] border border-black/10 bg-[radial-gradient(circle_at_top_right,rgba(251,191,36,0.12),transparent_24%),radial-gradient(circle_at_bottom_left,rgba(14,165,233,0.1),transparent_28%),linear-gradient(180deg,rgba(255,255,255,0.98),rgba(244,244,245,0.98))] p-5 shadow-sm dark:border-white/10 dark:bg-[radial-gradient(circle_at_top_right,rgba(251,191,36,0.12),transparent_24%),radial-gradient(circle_at_bottom_left,rgba(14,165,233,0.14),transparent_28%),linear-gradient(180deg,rgba(23,23,23,0.98),rgba(10,10,10,0.98))] md:p-6">
+<footer {{ $attributes->class('mt-10 w-full border-t border-white/8 bg-[radial-gradient(circle_at_top_right,rgba(251,191,36,0.12),transparent_20%),radial-gradient(circle_at_bottom_left,rgba(14,165,233,0.12),transparent_24%),linear-gradient(180deg,rgba(18,18,18,0.98),rgba(6,6,6,1))]') }} data-slot="site-footer">
+    <div class="mx-auto w-full max-w-7xl px-4 py-8 md:px-6 md:py-10">
         <div class="grid gap-8 xl:grid-cols-[minmax(0,1.2fr)_repeat(3,minmax(0,0.75fr))]">
             <div class="space-y-4">
                 <x-ui.brand
@@ -71,7 +79,7 @@
                     class="justify-start text-left"
                 />
 
-                <x-ui.text class="max-w-md text-sm leading-7 text-neutral-600 dark:text-neutral-300">
+                <x-ui.text class="max-w-md text-sm leading-7 text-neutral-300">
                     Discover titles, people, reviews, and curated lists from one public catalog built for browsing, rating, and community writing.
                 </x-ui.text>
 
@@ -84,7 +92,7 @@
 
             @foreach ($footerSections as $section)
                 <div class="space-y-3">
-                    <div class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500 dark:text-neutral-400">
+                    <div class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-neutral-400">
                         <x-ui.icon name="chevron-right" class="size-4" />
                         <span>{{ $section['heading'] }}</span>
                     </div>
@@ -106,8 +114,8 @@
             @endforeach
         </div>
 
-        <div class="mt-6 flex flex-col gap-3 border-t border-black/10 pt-4 text-sm text-neutral-500 dark:border-white/10 dark:text-neutral-400 md:flex-row md:items-center md:justify-between">
-            <x-ui.text class="text-sm text-neutral-500 dark:text-neutral-400">
+        <div class="mt-6 flex flex-col gap-3 border-t border-white/8 pt-4 text-sm text-neutral-400 md:flex-row md:items-center md:justify-between">
+            <x-ui.text class="text-sm text-neutral-400">
                 © {{ $currentYear }} Screenbase. Built for title discovery, public curation, and IMDb-style browsing.
             </x-ui.text>
 

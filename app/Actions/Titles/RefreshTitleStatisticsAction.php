@@ -11,9 +11,10 @@ class RefreshTitleStatisticsAction
     public function handle(Title $title): TitleStatistic
     {
         $ratingsByScore = $title->ratings()
-            ->select(['score'])
-            ->get()
-            ->countBy(fn ($rating): string => (string) $rating->score);
+            ->toBase()
+            ->selectRaw('score, count(*) as aggregate')
+            ->groupBy('score')
+            ->pluck('aggregate', 'score');
 
         $ratingDistribution = TitleStatistic::normalizeRatingDistribution(
             collect(range(10, 1))

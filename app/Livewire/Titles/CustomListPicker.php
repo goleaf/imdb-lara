@@ -114,15 +114,30 @@ class CustomListPicker extends Component
 
     public function render()
     {
+        $selectedListIds = collect($this->selectedListIds)
+            ->map(fn (string $listId): int => (int) $listId)
+            ->filter(fn (int $listId): bool => $listId > 0)
+            ->values()
+            ->all();
+
         return view('livewire.titles.custom-list-picker', [
             'lists' => auth()->check()
                 ? $this->buildOwnedCustomListsQuery->handle(auth()->user(), $this->listQuery)->get()
                 : collect(),
-            'visibilityOptions' => [
-                ['value' => ListVisibility::Private->value, 'label' => 'Private'],
-                ['value' => ListVisibility::Unlisted->value, 'label' => 'Unlisted'],
-                ['value' => ListVisibility::Public->value, 'label' => 'Public'],
-            ],
+            'selectedLists' => auth()->check() && $selectedListIds !== []
+                ? $this->buildOwnedCustomListsQuery
+                    ->handle(auth()->user())
+                    ->whereIn('id', $selectedListIds)
+                    ->get()
+                : collect(),
+            'visibilityOptions' => array_map(
+                static fn (ListVisibility $visibility): array => [
+                    'value' => $visibility->value,
+                    'label' => $visibility->label(),
+                    'icon' => $visibility->icon(),
+                ],
+                ListVisibility::cases(),
+            ),
         ]);
     }
 }

@@ -63,6 +63,22 @@ class PublicRouteArchitectureTest extends TestCase
             ->assertSee('Actors')
             ->assertSee($person->name);
 
+        $this->get(route('public.awards.index'))
+            ->assertOk()
+            ->assertSee('Awards Archive')
+            ->assertSee('2025 Celestial Screen Awards')
+            ->assertSee('Best Picture')
+            ->assertSee('Winner')
+            ->assertSee('Northern Signal')
+            ->assertSee('Ava Mercer');
+
+        $this->get(route('public.lists.index'))
+            ->assertOk()
+            ->assertSee('Browse Public Lists')
+            ->assertSeeHtml('data-slot="public-lists-shell"')
+            ->assertSee('Weekend Marathon')
+            ->assertSee($publicList->user->name);
+
         $this->get(route('public.genres.show', $genre))
             ->assertOk()
             ->assertSee($genre->name)
@@ -79,32 +95,97 @@ class PublicRouteArchitectureTest extends TestCase
             ->assertSee('Ava Mercer')
             ->assertSee('Elegant and sharp.')
             ->assertSee('Ratings breakdown')
-            ->assertSee('Where to watch');
+            ->assertSee('Quick facts');
 
         $this->get(route('public.titles.cast', $movie))
             ->assertOk()
-            ->assertSee('Full Cast')
-            ->assertSee('Ava Mercer');
+            ->assertSee($movie->name)
+            ->assertSee('Archive record')
+            ->assertSee('Principal cast')
+            ->assertSee('Ava Mercer')
+            ->assertSee('Dr. Mara Elling')
+            ->assertSee('Creative leads')
+            ->assertSee('Technical departments')
+            ->assertSee('Director');
+
+        $this->get(route('public.titles.cast', $series))
+            ->assertOk()
+            ->assertSee($series->name)
+            ->assertSee('Archive record')
+            ->assertSee('Creative leads')
+            ->assertSee('Writing')
+            ->assertSee('Micah Stone')
+            ->assertSee('Episode Writer')
+            ->assertSee('Episode-specific credit')
+            ->assertSee('Static Bloom: Switchback');
+
+        $this->get(route('public.titles.media', $movie))
+            ->assertOk()
+            ->assertSee($movie->name)
+            ->assertSee('Media Gallery')
+            ->assertSeeHtml('data-slot="title-media-hero"')
+            ->assertSee('Posters')
+            ->assertSee('Backdrops')
+            ->assertSee('Trailers');
+
+        $this->get(route('public.titles.metadata', $movie))
+            ->assertOk()
+            ->assertSee($movie->name)
+            ->assertSee('Keywords & Connections')
+            ->assertSeeHtml('data-slot="title-keyword-map"')
+            ->assertSeeHtml('data-slot="title-connection-map"')
+            ->assertSee('Keyword Map')
+            ->assertSee('Title Connections');
+
+        $this->get(route('public.titles.box-office', $movie))
+            ->assertOk()
+            ->assertSee($movie->name)
+            ->assertSee('Box Office Report')
+            ->assertSeeHtml('data-slot="title-box-office-hero"')
+            ->assertSeeHtml('data-slot="title-box-office-metrics"')
+            ->assertSeeHtml('data-slot="title-box-office-ranks"')
+            ->assertSeeHtml('data-slot="title-box-office-markets"');
+
+        $this->get(route('public.titles.parents-guide', $movie))
+            ->assertOk()
+            ->assertSee($movie->name)
+            ->assertSee('Parents Guide')
+            ->assertSeeHtml('data-slot="title-parent-advisories"')
+            ->assertSee('Content Concerns')
+            ->assertSee('Certification');
+
+        $this->get(route('public.titles.trivia', $movie))
+            ->assertOk()
+            ->assertSee($movie->name)
+            ->assertSee('Trivia & Goofs')
+            ->assertSeeHtml('data-slot="title-trivia-tabs"')
+            ->assertSeeHtml('data-slot="title-goof-cards"');
 
         $this->get(route('public.people.show', $person))
             ->assertOk()
             ->assertSee($person->name)
             ->assertSee('Known for')
+            ->assertSee('Awards summary')
+            ->assertSee('Trademarks')
             ->assertSee('Filmography')
             ->assertSee('Northern Signal');
 
         $this->get(route('public.seasons.show', ['series' => $series, 'season' => $season]))
             ->assertOk()
             ->assertSee($season->name)
+            ->assertSeeHtml('data-slot="season-browser-hero"')
+            ->assertSeeHtml('data-slot="season-browser-episodes"')
             ->assertSee('Static Bloom: Pilot')
-            ->assertSee('Episode guide')
+            ->assertSee('Episode browser')
             ->assertSee('Top-rated episodes this season');
 
         $this->get(route('public.episodes.show', ['series' => $series, 'season' => $season, 'episode' => $episode]))
             ->assertOk()
             ->assertSee($episode->name)
             ->assertSee($series->name)
+            ->assertSeeHtml('data-slot="episode-detail-hero"')
             ->assertSee('Episode navigation')
+            ->assertSee('Parents guide preview')
             ->assertSee('Season lineup');
 
         $this->get(route('public.search', ['q' => 'Signal']))
@@ -116,17 +197,30 @@ class PublicRouteArchitectureTest extends TestCase
         $this->get(route('public.rankings.movies'))
             ->assertOk()
             ->assertSee('Top Rated Movies')
+            ->assertSeeHtml('data-slot="chart-legend"')
+            ->assertSeeHtml('data-slot="chart-rank-number"')
             ->assertSee($movie->name);
 
         $this->get(route('public.rankings.series'))
             ->assertOk()
             ->assertSee('Top Rated Series')
+            ->assertSeeHtml('data-slot="chart-rank-number"')
             ->assertSee($series->name);
 
         $this->get(route('public.trending'))
             ->assertOk()
             ->assertSee('Trending')
+            ->assertSeeHtml('data-slot="chart-movement"')
             ->assertSee('Northern Signal');
+
+        $this->get(route('public.rankings.movies', ['country' => $movie->origin_country]))
+            ->assertOk()
+            ->assertSee('Local Charts')
+            ->assertSeeHtml('data-slot="chart-location-banner"')
+            ->assertSeeHtml('data-slot="chart-context-shell"')
+            ->assertSee('Compared with global')
+            ->assertSeeHtml('data-flag-type="country"')
+            ->assertSee($movie->name);
 
         $this->get(route('public.trailers.latest'))
             ->assertOk()
@@ -164,5 +258,25 @@ class PublicRouteArchitectureTest extends TestCase
                 'season' => $episode->episodeMeta->season,
                 'episode' => $episode,
             ]));
+    }
+
+    public function test_chart_country_lens_links_preserve_existing_pagination_query_parameters(): void
+    {
+        $this->seed(DemoCatalogSeeder::class);
+
+        $movie = Title::query()
+            ->publishedCatalog()
+            ->whereNotNull('origin_country')
+            ->orderBy('popularity_rank')
+            ->firstOrFail();
+
+        $response = $this->get(route('public.rankings.movies', [
+            'top-rated-movies' => 2,
+            'country' => $movie->origin_country,
+        ]));
+
+        $response
+            ->assertOk()
+            ->assertSee(route('public.rankings.movies', ['top-rated-movies' => 2]), false);
     }
 }

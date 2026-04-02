@@ -2,6 +2,7 @@
 
 namespace App\Actions\Admin;
 
+use App\Enums\ReportStatus;
 use App\Models\Report;
 use App\Models\Review;
 use App\Models\UserList;
@@ -38,6 +39,22 @@ class BuildAdminReportsIndexQueryAction
                     ]);
                 },
             ])
-            ->latest('created_at');
+            ->orderByRaw(
+                'case status
+                    when ? then 0
+                    when ? then 1
+                    when ? then 2
+                    when ? then 3
+                    else 4
+                end',
+                [
+                    ReportStatus::Open->value,
+                    ReportStatus::Investigating->value,
+                    ReportStatus::Resolved->value,
+                    ReportStatus::Dismissed->value,
+                ],
+            )
+            ->latest('created_at')
+            ->latest('id');
     }
 }

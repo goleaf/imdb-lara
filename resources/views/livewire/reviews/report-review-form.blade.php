@@ -1,14 +1,3 @@
-@php
-    $modalId = 'report-review-'.$review->id;
-    $reasonIcons = [
-        'spoiler' => 'exclamation-triangle',
-        'spam' => 'no-symbol',
-        'abuse' => 'shield-exclamation',
-        'harassment' => 'shield-exclamation',
-        'inaccurate' => 'information-circle',
-    ];
-@endphp
-
 <div class="space-y-3">
     <x-ui.alerts :variant="$statusMessage ? 'success' : 'info'" :icon="$statusMessage ? 'check-circle' : 'information-circle'">
         <x-ui.alerts.description>
@@ -44,7 +33,7 @@
                         <x-ui.combobox.option
                             wire:key="report-reason-{{ $review->id }}-{{ $reportReason['value'] }}"
                             value="{{ $reportReason['value'] }}"
-                            :icon="$reasonIcons[$reportReason['value']] ?? 'flag'"
+                            :icon="$reportReason['icon']"
                         >
                             {{ $reportReason['label'] }}
                         </x-ui.combobox.option>

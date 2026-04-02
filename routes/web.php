@@ -39,6 +39,7 @@ use App\Http\Requests\Admin\UpdateTitleRequest;
 use App\Http\Requests\Auth\LogoutRequest;
 use App\Livewire\Pages\Account\DashboardPage as AccountDashboardPage;
 use App\Livewire\Pages\Account\ListsPage as AccountListsPage;
+use App\Livewire\Pages\Account\SettingsPage as AccountSettingsPage;
 use App\Livewire\Pages\Account\WatchlistPage as AccountWatchlistPage;
 use App\Livewire\Pages\Admin\ContributionsPage as AdminContributionsPage;
 use App\Livewire\Pages\Admin\CreditsPage as AdminCreditsPage;
@@ -52,12 +53,14 @@ use App\Livewire\Pages\Admin\ReviewsPage as AdminReviewsPage;
 use App\Livewire\Pages\Admin\SeasonsPage as AdminSeasonsPage;
 use App\Livewire\Pages\Admin\TitlesPage as AdminTitlesPage;
 use App\Livewire\Pages\Auth\AuthPage;
+use App\Livewire\Pages\Public\AwardsPage;
 use App\Livewire\Pages\Public\BrowseTitlesPage;
 use App\Livewire\Pages\Public\DiscoverPage;
 use App\Livewire\Pages\Public\EpisodeShowPage;
 use App\Livewire\Pages\Public\HomePage;
 use App\Livewire\Pages\Public\LatestReviewsPage;
 use App\Livewire\Pages\Public\LatestTrailersPage;
+use App\Livewire\Pages\Public\ListsPage as PublicListsPage;
 use App\Livewire\Pages\Public\PeoplePage;
 use App\Livewire\Pages\Public\SearchPage;
 use App\Livewire\Pages\Public\SeasonShowPage;
@@ -97,9 +100,15 @@ Route::name('public.')->group(function (): void {
     Route::livewire('/tv-shows', BrowseTitlesPage::class)->name('series.index');
     Route::livewire('/titles', BrowseTitlesPage::class)->name('titles.index');
     Route::livewire('/titles/{title:slug}/cast', TitlePage::class)->name('titles.cast');
+    Route::livewire('/titles/{title:slug}/media', TitlePage::class)->name('titles.media');
+    Route::livewire('/titles/{title:slug}/metadata', TitlePage::class)->name('titles.metadata');
+    Route::livewire('/titles/{title:slug}/box-office', TitlePage::class)->name('titles.box-office');
+    Route::livewire('/titles/{title:slug}/trivia', TitlePage::class)->name('titles.trivia');
+    Route::livewire('/titles/{title:slug}/parents-guide', TitlePage::class)->name('titles.parents-guide');
     Route::livewire('/titles/{title:slug}', TitlePage::class)->name('titles.show');
     Route::livewire('/people', PeoplePage::class)->name('people.index');
     Route::livewire('/people/{person:slug}', PeoplePage::class)->name('people.show');
+    Route::livewire('/awards', AwardsPage::class)->name('awards.index');
     Route::livewire('/genres/{genre:slug}', BrowseTitlesPage::class)->name('genres.show');
     Route::livewire('/years/{year}', BrowseTitlesPage::class)->whereNumber('year')->name('years.show');
     Route::livewire('/top-rated/movies', BrowseTitlesPage::class)->name('rankings.movies');
@@ -108,6 +117,7 @@ Route::name('public.')->group(function (): void {
     Route::livewire('/trailers/latest', LatestTrailersPage::class)->name('trailers.latest');
     Route::livewire('/reviews/latest', LatestReviewsPage::class)->name('reviews.latest');
     Route::livewire('/search', SearchPage::class)->name('search');
+    Route::livewire('/lists', PublicListsPage::class)->name('lists.index');
     Route::livewire('/u/{user:username}', UserPage::class)->name('users.show');
 
     Route::withoutScopedBindings()->group(function (): void {
@@ -139,6 +149,7 @@ Route::middleware(['auth', 'active'])->group(function (): void {
         Route::livewire('/watchlist', AccountWatchlistPage::class)->name('watchlist');
         Route::livewire('/lists', AccountListsPage::class)->name('lists.index');
         Route::livewire('/lists/{list}', AccountListsPage::class)->name('lists.show');
+        Route::livewire('/settings', AccountSettingsPage::class)->name('settings');
     });
 });
 
@@ -191,7 +202,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'active', 'admin'])-
             Title $title,
             SaveSeasonAction $saveSeason,
         ): RedirectResponse {
-            $season = $saveSeason->handle(new Season, $title, $request->validated());
+            $season = $saveSeason->handle(new Season, $title, $request->validated('season'));
 
             return redirect()
                 ->route('admin.seasons.edit', $season)
@@ -387,7 +398,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'active', 'admin'])-
             Season $season,
             SaveEpisodeAction $saveEpisode,
         ): RedirectResponse {
-            $episode = $saveEpisode->handle(new Episode, $season, $request->validated());
+            $episode = $saveEpisode->handle(new Episode, $season, $request->validated('episode'));
 
             return redirect()
                 ->route('admin.episodes.edit', $episode)

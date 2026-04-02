@@ -26,7 +26,7 @@ class UserPage extends Component
     public function mount(User $user, ?UserList $list = null): void
     {
         if (request()->routeIs('public.users.show')) {
-            abort_unless($user->hasVisibleProfileContent(), 404);
+            abort_unless($user->isProfileVisibleToPublic(), 404);
         }
 
         if (request()->routeIs('public.lists.show')) {
@@ -59,6 +59,7 @@ class UserPage extends Component
                 : null;
             $breadcrumbs = [
                 ['label' => 'Home', 'href' => route('public.home')],
+                ['label' => 'Public Lists', 'href' => route('public.lists.index')],
                 ['label' => $this->user->name, 'href' => route('public.users.show', $this->user)],
                 ['label' => $list->name],
             ];
@@ -71,6 +72,7 @@ class UserPage extends Component
                     title: $list->meta_title ?: $list->name,
                     description: $list->meta_description ?: ($list->description ?: 'Browse the curated Screenbase list '.$list->name.'.'),
                     canonical: route('public.lists.show', [$this->user, $list]),
+                    robots: $list->isPublic() ? 'index,follow' : 'noindex,follow',
                     openGraphImage: $listPreviewImage?->url,
                     openGraphImageAlt: $listPreviewImage?->alt_text ?: $listPreviewTitle?->name,
                     breadcrumbs: $breadcrumbs,

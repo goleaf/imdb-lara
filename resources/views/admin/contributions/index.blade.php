@@ -18,9 +18,6 @@
 
         <div class="grid gap-4">
             @forelse ($contributions as $contribution)
-                @php
-                    $contributable = $contribution->contributable;
-                @endphp
                 <x-ui.card class="!max-w-none">
                     <div class="space-y-4">
                         <div class="flex flex-wrap items-start justify-between gap-4">
@@ -29,16 +26,15 @@
                                 <div class="text-sm text-neutral-500 dark:text-neutral-400">
                                     {{ $contribution->user->name }} · {{ class_basename($contribution->contributable_type) }} suggestion
                                 </div>
-                                @if ($contributable instanceof \App\Models\Title)
+                                @if ($contribution->created_at)
                                     <div class="text-sm text-neutral-500 dark:text-neutral-400">
-                                        <a href="{{ route('admin.titles.edit', $contributable) }}" class="hover:opacity-80">
-                                            {{ $contributable->name }}
-                                        </a>
+                                        Submitted {{ $contribution->created_at->format('M j, Y') }}
                                     </div>
-                                @elseif ($contributable instanceof \App\Models\Person)
+                                @endif
+                                @if ($contribution->contributableAdminUrl() && $contribution->contributableLabel())
                                     <div class="text-sm text-neutral-500 dark:text-neutral-400">
-                                        <a href="{{ route('admin.people.edit', $contributable) }}" class="hover:opacity-80">
-                                            {{ $contributable->name }}
+                                        <a href="{{ $contribution->contributableAdminUrl() }}" class="hover:opacity-80">
+                                            {{ $contribution->contributableLabel() }}
                                         </a>
                                     </div>
                                 @endif
@@ -97,6 +93,15 @@
                         @if ($contribution->review_notes)
                             <div class="rounded-box border border-black/5 px-4 py-3 text-sm text-neutral-600 dark:border-white/10 dark:text-neutral-300">
                                 {{ $contribution->review_notes }}
+                            </div>
+                        @endif
+
+                        @if ($contribution->reviewer)
+                            <div class="text-sm text-neutral-500 dark:text-neutral-400">
+                                Reviewed by {{ $contribution->reviewer->name }}
+                                @if ($contribution->reviewed_at)
+                                    · {{ $contribution->reviewed_at->format('M j, Y') }}
+                                @endif
                             </div>
                         @endif
                     </div>

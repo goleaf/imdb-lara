@@ -23,6 +23,8 @@ class ManageList extends Component
     use AuthorizesRequests;
     use WithPagination;
 
+    private const ITEMS_PER_PAGE = 12;
+
     protected AttachTitleToUserListAction $attachTitleToUserList;
 
     protected BuildUserListItemsQueryAction $buildUserListItemsQuery;
@@ -123,6 +125,17 @@ class ManageList extends Component
         $this->statusMessage = 'Title removed from the list.';
     }
 
+    public function sortItems(int $itemId, int $pagePosition): void
+    {
+        $this->authorize('update', $this->list);
+
+        $currentPage = max(1, $this->getPage(pageName: 'items'));
+        $absolutePosition = (($currentPage - 1) * self::ITEMS_PER_PAGE) + $pagePosition + 1;
+
+        $this->moveUserListItem->reorder($this->list, $itemId, $absolutePosition);
+        $this->statusMessage = 'List order updated.';
+    }
+
     public function moveItemUp(int $itemId): void
     {
         $this->authorize('update', $this->list);
@@ -158,7 +171,7 @@ class ManageList extends Component
 
         $items = $this->buildUserListItemsQuery
             ->handle($list)
-            ->simplePaginate(12, pageName: 'items')
+            ->simplePaginate(self::ITEMS_PER_PAGE, pageName: 'items')
             ->withQueryString();
 
         return view('livewire.lists.manage-list', [

@@ -1,11 +1,3 @@
-@php
-    $visibilityIcons = [
-        'private' => 'lock-closed',
-        'unlisted' => 'eye-slash',
-        'public' => 'globe-alt',
-    ];
-@endphp
-
 <x-ui.card class="!max-w-none">
     <form wire:submit="save" class="space-y-4">
         <div class="space-y-2">
@@ -46,7 +38,7 @@
                         <x-ui.combobox.option
                             wire:key="list-visibility-{{ $visibilityOption['value'] }}"
                             value="{{ $visibilityOption['value'] }}"
-                            :icon="$visibilityIcons[$visibilityOption['value']] ?? 'globe-alt'"
+                            :icon="$visibilityOption['icon']"
                         >
                             {{ $visibilityOption['label'] }}
                         </x-ui.combobox.option>

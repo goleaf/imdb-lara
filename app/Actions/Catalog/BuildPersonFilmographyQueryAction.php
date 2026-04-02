@@ -62,6 +62,7 @@ class BuildPersonFilmographyQueryAction
                     ])
                     ->published()
                     ->with([
+                        'mediaAssets:id,mediable_type,mediable_id,kind,url,alt_text,position,is_primary',
                         'statistic:id,title_id,average_rating,rating_count,review_count',
                     ]),
             ])

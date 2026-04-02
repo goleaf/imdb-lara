@@ -55,14 +55,14 @@ new class extends Component
         </div>
     @endplaceholder
 
-    <div class="space-y-4">
+    <div class="sb-home-section space-y-4 rounded-[1.6rem] p-4 sm:p-5">
         <div class="flex items-start justify-between gap-4">
             <div class="space-y-1">
-                <x-ui.heading level="h2" size="lg" class="inline-flex items-center gap-2">
-                    <x-ui.icon name="chat-bubble-left-right" class="size-5 text-neutral-500 dark:text-neutral-400" />
+                <x-ui.heading level="h2" size="lg" class="sb-home-section-heading inline-flex items-center gap-2">
+                    <x-ui.icon name="chat-bubble-left-right" class="size-5 text-[#d6b574]" />
                     <span>Latest Reviews</span>
                 </x-ui.heading>
-                <x-ui.text class="max-w-3xl text-sm text-neutral-600 dark:text-neutral-300">
+                <x-ui.text class="sb-home-section-copy max-w-3xl text-sm">
                     Freshly published audience reviews across movies, TV, and documentaries.
                 </x-ui.text>
             </div>
@@ -94,21 +94,13 @@ new class extends Component
         @else
             <div class="grid gap-4 xl:grid-cols-2">
                 @foreach ($reviews as $review)
-                    @php
-                        $poster = \App\Models\MediaAsset::preferredFrom(
-                            $review->title->mediaAssets,
-                            \App\Enums\MediaKind::Poster,
-                            \App\Enums\MediaKind::Backdrop,
-                        );
-                    @endphp
-
-                    <x-ui.card class="!max-w-none" wire:key="home-review-{{ $review->id }}">
+                    <x-ui.card class="sb-poster-card !max-w-none rounded-[1.35rem]" wire:key="home-review-{{ $review->id }}">
                         <div class="grid gap-4 md:grid-cols-[8rem_minmax(0,1fr)]">
                             <div class="overflow-hidden rounded-box border border-black/5 bg-neutral-100 dark:border-white/10 dark:bg-neutral-800">
-                                @if ($poster)
+                                @if ($review->title->preferredPoster())
                                     <img
-                                        src="{{ $poster->url }}"
-                                        alt="{{ $poster->alt_text ?: $review->title->name }}"
+                                        src="{{ $review->title->preferredPoster()->url }}"
+                                        alt="{{ $review->title->preferredPoster()->alt_text ?: $review->title->name }}"
                                         class="aspect-[2/3] w-full object-cover"
                                     >
                                 @else

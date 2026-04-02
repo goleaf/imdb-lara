@@ -1,6 +1,7 @@
 <?php
 
 use App\Actions\Home\GetPopularPeopleAction;
+use App\Models\Person;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Livewire\Component;
 
@@ -8,14 +9,21 @@ new class extends Component
 {
     public EloquentCollection $people;
 
+    public ?Person $featuredPerson = null;
+
+    public EloquentCollection $supportingPeople;
+
     public ?string $errorMessage = null;
 
     public function mount(GetPopularPeopleAction $getPopularPeople): void
     {
         $this->people = new EloquentCollection;
+        $this->supportingPeople = new EloquentCollection;
 
         try {
             $this->people = $getPopularPeople->handle();
+            $this->featuredPerson = $this->people->first();
+            $this->supportingPeople = $this->people->slice(1)->values();
         } catch (\Throwable $throwable) {
             report($throwable);
 
@@ -26,11 +34,6 @@ new class extends Component
 ?>
 
 <div>
-    @php
-        $featuredPerson = $people->first();
-        $supportingPeople = $people->slice(1)->values();
-    @endphp
-
     @placeholder
         <div class="space-y-4">
             <div class="flex items-start justify-between gap-4">
@@ -77,14 +80,14 @@ new class extends Component
         </div>
     @endplaceholder
 
-    <div class="space-y-4">
+    <div class="sb-home-section space-y-4 rounded-[1.6rem] p-4 sm:p-5">
         <div class="flex items-start justify-between gap-4">
             <div class="space-y-1">
-                <x-ui.heading level="h2" size="lg" class="inline-flex items-center gap-2">
-                    <x-ui.icon name="users" class="size-5 text-neutral-500 dark:text-neutral-400" />
+                <x-ui.heading level="h2" size="lg" class="sb-home-section-heading inline-flex items-center gap-2">
+                    <x-ui.icon name="users" class="size-5 text-[#d6b574]" />
                     <span>Popular People</span>
                 </x-ui.heading>
-                <x-ui.text class="max-w-3xl text-sm text-neutral-600 dark:text-neutral-300">
+                <x-ui.text class="sb-home-section-copy max-w-3xl text-sm">
                     Actors, directors, writers, and producers with strong catalog presence right now.
                 </x-ui.text>
             </div>
@@ -116,28 +119,13 @@ new class extends Component
         @else
             <div class="grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
                 @if ($featuredPerson)
-                    @php
-                        $featuredHeadshot = $featuredPerson->relationLoaded('mediaAssets')
-                            ? \App\Models\MediaAsset::preferredFrom(
-                                $featuredPerson->mediaAssets,
-                                \App\Enums\MediaKind::Headshot,
-                                \App\Enums\MediaKind::Gallery,
-                                \App\Enums\MediaKind::Still,
-                            )
-                            : null;
-                        $featuredProfessionLabels = $featuredPerson->relationLoaded('professions')
-                            ? $featuredPerson->professions->pluck('profession')->filter()->unique()->take(3)
-                            : collect();
-                        $featuredSummary = $featuredPerson->short_biography ?: $featuredPerson->biography;
-                    @endphp
-
-                    <x-ui.card class="!max-w-none h-full overflow-hidden border-black/5 bg-[radial-gradient(circle_at_top_right,rgba(251,191,36,0.18),transparent_34%),linear-gradient(145deg,rgba(250,250,250,0.98),rgba(245,245,245,0.98))] dark:border-white/10 dark:bg-[radial-gradient(circle_at_top_right,rgba(56,189,248,0.16),transparent_28%),linear-gradient(145deg,rgba(23,23,23,0.98),rgba(10,10,10,0.98))]">
+                    <x-ui.card class="sb-home-side-card !max-w-none h-full overflow-hidden text-white">
                         <div class="grid h-full gap-5 md:grid-cols-[11rem_minmax(0,1fr)]">
                             <div class="overflow-hidden rounded-box border border-black/5 bg-neutral-100 shadow-sm dark:border-white/10 dark:bg-neutral-800">
-                                @if ($featuredHeadshot)
+                                @if ($featuredPerson->preferredHeadshot())
                                     <img
-                                        src="{{ $featuredHeadshot->url }}"
-                                        alt="{{ $featuredHeadshot->alt_text ?: $featuredPerson->name }}"
+                                        src="{{ $featuredPerson->preferredHeadshot()->url }}"
+                                        alt="{{ $featuredPerson->preferredHeadshot()->alt_text ?: $featuredPerson->name }}"
                                         class="aspect-[3/4] h-full w-full object-cover"
                                         loading="lazy"
                                     >
@@ -168,17 +156,17 @@ new class extends Component
                                         </a>
                                     </x-ui.heading>
 
-                                    @if ($featuredProfessionLabels->isNotEmpty())
+                                    @if ($featuredPerson->professionLabels(3) !== [])
                                         <div class="flex flex-wrap gap-2">
-                                            @foreach ($featuredProfessionLabels as $professionLabel)
+                                            @foreach ($featuredPerson->professionLabels(3) as $professionLabel)
                                                 <x-ui.badge variant="outline" color="neutral" icon="sparkles">{{ $professionLabel }}</x-ui.badge>
                                             @endforeach
                                         </div>
                                     @endif
 
-                                    @if (filled($featuredSummary))
+                                    @if (filled($featuredPerson->summaryText()))
                                         <x-ui.text class="max-w-2xl text-sm leading-7 text-neutral-600 dark:text-neutral-300">
-                                            {{ str($featuredSummary)->limit(240) }}
+                                            {{ str($featuredPerson->summaryText())->limit(240) }}
                                         </x-ui.text>
                                     @endif
                                 </div>
@@ -231,27 +219,13 @@ new class extends Component
 
                 <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
                     @foreach ($supportingPeople as $person)
-                        @php
-                            $headshot = $person->relationLoaded('mediaAssets')
-                                ? \App\Models\MediaAsset::preferredFrom(
-                                    $person->mediaAssets,
-                                    \App\Enums\MediaKind::Headshot,
-                                    \App\Enums\MediaKind::Gallery,
-                                    \App\Enums\MediaKind::Still,
-                                )
-                                : null;
-                            $professionLabel = $person->relationLoaded('professions')
-                                ? $person->professions->pluck('profession')->filter()->first()
-                                : null;
-                        @endphp
-
-                        <x-ui.card class="!max-w-none h-full overflow-hidden" wire:key="home-people-{{ $person->id }}">
+                        <x-ui.card class="sb-poster-card !max-w-none h-full overflow-hidden rounded-[1.35rem]" wire:key="home-people-{{ $person->id }}">
                             <div class="flex h-full items-start gap-4">
                                 <div class="overflow-hidden rounded-box border border-black/5 bg-neutral-100 shadow-sm dark:border-white/10 dark:bg-neutral-800">
-                                    @if ($headshot)
+                                    @if ($person->preferredHeadshot())
                                         <img
-                                            src="{{ $headshot->url }}"
-                                            alt="{{ $headshot->alt_text ?: $person->name }}"
+                                            src="{{ $person->preferredHeadshot()->url }}"
+                                            alt="{{ $person->preferredHeadshot()->alt_text ?: $person->name }}"
                                             class="size-20 object-cover"
                                             loading="lazy"
                                         >
@@ -275,8 +249,8 @@ new class extends Component
                                                 <x-ui.badge variant="outline" icon="briefcase">{{ $person->known_for_department }}</x-ui.badge>
                                             @endif
 
-                                            @if ($professionLabel)
-                                                <x-ui.badge variant="outline" color="neutral" icon="sparkles">{{ $professionLabel }}</x-ui.badge>
+                                            @if ($person->primaryProfessionLabel() !== 'Screenbase profile' || filled($person->known_for_department))
+                                                <x-ui.badge variant="outline" color="neutral" icon="sparkles">{{ $person->primaryProfessionLabel() }}</x-ui.badge>
                                             @endif
                                         </div>
                                     </div>

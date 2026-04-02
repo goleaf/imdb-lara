@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Feature\Database;
 
+use App\Enums\UserRole;
 use App\Models\AwardNomination;
 use App\Models\Contribution;
 use App\Models\Episode;
@@ -34,14 +35,27 @@ class ImdbCatalogSeederTest extends TestCase
         $superAdmin = User::query()->where('email', 'superadmin@example.com')->first();
         $admin = User::query()->where('email', 'admin@example.com')->first();
         $editor = User::query()->where('email', 'editor@example.com')->first();
+        $moderator = User::query()->where('email', 'moderator@example.com')->first();
         $contributor = User::query()->where('email', 'contributor@example.com')->first();
         $member = User::query()->where('email', 'member@example.com')->first();
 
         $this->assertNotNull($superAdmin);
         $this->assertNotNull($admin);
         $this->assertNotNull($editor);
+        $this->assertNotNull($moderator);
         $this->assertNotNull($contributor);
         $this->assertNotNull($member);
+        $this->assertSame(UserRole::SuperAdmin, $superAdmin?->role);
+        $this->assertSame(UserRole::Admin, $admin?->role);
+        $this->assertSame(UserRole::Editor, $editor?->role);
+        $this->assertSame(UserRole::Moderator, $moderator?->role);
+        $this->assertSame(UserRole::Contributor, $contributor?->role);
+        $this->assertSame(UserRole::RegularUser, $member?->role);
+        $this->assertTrue($superAdmin?->can('access-admin-area') ?? false);
+        $this->assertTrue($admin?->can('access-admin-area') ?? false);
+        $this->assertTrue($editor?->can('manage-catalog') ?? false);
+        $this->assertTrue($moderator?->can('moderate-content') ?? false);
+        $this->assertTrue($contributor?->can('submit-contribution') ?? false);
         $this->assertNotNull($member?->watchlist);
         $this->assertGreaterThanOrEqual(1, $member?->notifications()->count() ?? 0);
     }

@@ -1,6 +1,6 @@
 @php
 $classes = [
-    'flex items-center gap-x-2',
+    'flex flex-wrap items-center gap-x-2 gap-y-2',
     'py-1 px-2'
 ];
 @endphp

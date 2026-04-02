@@ -23,17 +23,19 @@ class ViewServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        View::composer(['layouts.public', 'home'], function (ViewInstance $view): void {
+        View::composer(['layouts.public', 'layouts.partials.public-navbar', 'home'], function (ViewInstance $view): void {
             $view->with([
                 'hasPublicMoviesRoute' => Route::has('public.movies.index'),
                 'hasPublicSeriesRoute' => Route::has('public.series.index'),
+                'hasPublicListsRoute' => Route::has('public.lists.index'),
+                'hasPublicAwardsRoute' => Route::has('public.awards.index'),
                 'hasPublicTrendingRoute' => Route::has('public.trending'),
                 'hasPublicLatestTrailersRoute' => Route::has('public.trailers.latest'),
                 'hasPublicLatestReviewsRoute' => Route::has('public.reviews.latest'),
             ]);
         });
 
-        View::composer('layouts.admin', function (ViewInstance $view): void {
+        View::composer(['layouts.admin', 'layouts.partials.admin-navbar'], function (ViewInstance $view): void {
             $user = auth()->user();
 
             $view->with([

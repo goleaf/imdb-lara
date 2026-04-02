@@ -7,6 +7,7 @@ use App\Enums\TitleType;
 use App\Models\Concerns\GeneratesSlugs;
 use Database\Factories\TitleFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection as SupportCollection;
 
 class Title extends Model
 {
@@ -282,6 +284,165 @@ class Title extends Model
         $payload = data_get($this->imdb_payload, $key);
 
         return is_array($payload) ? $payload : null;
+    }
+
+    public function typeLabel(): string
+    {
+        return $this->title_type->label();
+    }
+
+    public function typeIcon(): string
+    {
+        return $this->title_type->icon();
+    }
+
+    public function preferredPoster(): ?MediaAsset
+    {
+        /** @var iterable<array-key, mixed> $assets */
+        $assets = $this->relationLoaded('mediaAssets')
+            ? $this->mediaAssets
+            : ($this->relationLoaded('titleImages') ? $this->titleImages : []);
+
+        return MediaAsset::preferredFrom(
+            $assets,
+            MediaKind::Poster,
+            MediaKind::Backdrop,
+            MediaKind::Gallery,
+            MediaKind::Still,
+        );
+    }
+
+    public function preferredBackdrop(): ?MediaAsset
+    {
+        /** @var iterable<array-key, mixed> $assets */
+        $assets = $this->relationLoaded('mediaAssets')
+            ? $this->mediaAssets
+            : ($this->relationLoaded('titleImages') ? $this->titleImages : []);
+
+        return MediaAsset::preferredFrom(
+            $assets,
+            MediaKind::Backdrop,
+            MediaKind::Poster,
+            MediaKind::Gallery,
+            MediaKind::Still,
+        );
+    }
+
+    public function preferredDisplayImage(): ?MediaAsset
+    {
+        /** @var iterable<array-key, mixed> $assets */
+        $assets = $this->relationLoaded('mediaAssets')
+            ? $this->mediaAssets
+            : ($this->relationLoaded('titleImages') ? $this->titleImages : []);
+
+        return MediaAsset::preferredFrom(
+            $assets,
+            MediaKind::Still,
+            MediaKind::Backdrop,
+            MediaKind::Poster,
+            MediaKind::Gallery,
+        );
+    }
+
+    /**
+     * @return EloquentCollection<int, Genre>
+     */
+    public function previewGenres(int $limit = 3): EloquentCollection
+    {
+        if (! $this->relationLoaded('genres')) {
+            return new EloquentCollection;
+        }
+
+        /** @var EloquentCollection<int, Genre> $genres */
+        $genres = $this->genres->take($limit);
+
+        return $genres;
+    }
+
+    public function displayAverageRating(): ?float
+    {
+        if (! $this->relationLoaded('statistic') || ! $this->statistic?->average_rating) {
+            return null;
+        }
+
+        return (float) $this->statistic->average_rating;
+    }
+
+    public function displayRatingCount(): int
+    {
+        if (! $this->relationLoaded('statistic') || ! $this->statistic) {
+            return 0;
+        }
+
+        return (int) $this->statistic->rating_count;
+    }
+
+    public function displayReviewCount(): int
+    {
+        if ($this->relationLoaded('statistic') && $this->statistic) {
+            return (int) $this->statistic->review_count;
+        }
+
+        return (int) ($this->published_reviews_count ?? 0);
+    }
+
+    public function originCountryCode(): ?string
+    {
+        if (! filled($this->origin_country)) {
+            return null;
+        }
+
+        return str($this->origin_country)
+            ->before(',')
+            ->trim()
+            ->upper()
+            ->toString();
+    }
+
+    public function preferredVideo(): ?MediaAsset
+    {
+        /** @var iterable<array-key, mixed> $assets */
+        $assets = $this->relationLoaded('titleVideos')
+            ? $this->titleVideos
+            : ($this->relationLoaded('mediaAssets') ? $this->mediaAssets : []);
+
+        return MediaAsset::preferredFrom(
+            $assets,
+            MediaKind::Trailer,
+            MediaKind::Featurette,
+            MediaKind::Clip,
+        );
+    }
+
+    public function summaryText(): ?string
+    {
+        $summary = $this->tagline ?: $this->synopsis ?: $this->plot_outline;
+
+        return filled($summary) ? (string) $summary : null;
+    }
+
+    public function leadAwardNomination(): ?AwardNomination
+    {
+        if (! $this->relationLoaded('awardNominations')) {
+            return null;
+        }
+
+        /** @var AwardNomination|null $nomination */
+        $nomination = $this->awardNominations->sortByDesc('is_winner')->first();
+
+        return $nomination;
+    }
+
+    /**
+     * @return SupportCollection<string, EloquentCollection<int, MediaAsset>>
+     */
+    public function groupedMediaAssetsByKind(): SupportCollection
+    {
+        if (! $this->relationLoaded('mediaAssets')) {
+            return collect();
+        }
+
+        return $this->mediaAssets->groupBy(fn (MediaAsset $mediaAsset): string => $mediaAsset->kind->value);
     }
 
     private static function statisticColumnSubquery(string $column): Builder

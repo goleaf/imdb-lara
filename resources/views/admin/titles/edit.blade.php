@@ -119,7 +119,7 @@
                             name="kind"
                             class="min-h-10 rounded-box border border-black/10 bg-white px-3 text-sm text-neutral-800 shadow-xs transition focus:border-black/15 focus:outline-none focus:ring-2 focus:ring-neutral-900/15 dark:border-white/15 dark:bg-neutral-900 dark:text-neutral-200 dark:focus:border-white/20 dark:focus:ring-neutral-100/15"
                         >
-                            @foreach (\App\Enums\MediaKind::cases() as $mediaKind)
+                            @foreach (\App\Enums\MediaKind::allowedForMediable($title) as $mediaKind)
                                 <option value="{{ $mediaKind->value }}">{{ str($mediaKind->value)->headline() }}</option>
                             @endforeach
                         </select>
@@ -184,62 +184,79 @@
                     </div>
                 </form>
 
-                <div class="space-y-3">
-                    @forelse ($title->mediaAssets as $mediaAsset)
-                        <div class="rounded-box border border-black/10 p-3 dark:border-white/10">
-                            <div class="flex flex-wrap items-center justify-between gap-3">
-                                <div class="flex items-center gap-3">
-                                    @php
-                                        $mediaPreview = \App\Models\MediaAsset::preferredFrom([$mediaAsset]);
-                                    @endphp
-
-                                    <div class="overflow-hidden rounded-box border border-black/5 bg-neutral-100 dark:border-white/10 dark:bg-neutral-800">
-                                        @if ($mediaPreview && ! in_array($mediaAsset->kind, [\App\Enums\MediaKind::Trailer, \App\Enums\MediaKind::Clip, \App\Enums\MediaKind::Featurette], true))
-                                            <img
-                                                src="{{ $mediaPreview->url }}"
-                                                alt="{{ $mediaPreview->alt_text ?: $title->name }}"
-                                                class="size-14 object-cover"
-                                            >
-                                        @else
-                                            <div class="flex size-14 items-center justify-center text-neutral-500 dark:text-neutral-400">
-                                                <x-ui.icon :name="in_array($mediaAsset->kind, [\App\Enums\MediaKind::Trailer, \App\Enums\MediaKind::Clip, \App\Enums\MediaKind::Featurette], true) ? 'play-circle' : 'photo'" class="size-6" />
-                                            </div>
-                                        @endif
-                                    </div>
-
-                                    <div>
-                                        <div class="font-medium">{{ str($mediaAsset->kind->value)->headline() }}</div>
-                                        <div class="text-sm text-neutral-500 dark:text-neutral-400">
-                                            {{ $mediaAsset->provider ?: 'Direct URL' }} · Position {{ $mediaAsset->position }}
-                                            @if ($mediaAsset->is_primary)
-                                                · Primary
-                                            @endif
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="flex gap-2">
-                                    <x-ui.button as="a" :href="route('admin.media-assets.edit', $mediaAsset)" size="sm" variant="outline" icon="pencil-square">
-                                        Edit
-                                    </x-ui.button>
-                                    <form method="POST" action="{{ route('admin.media-assets.destroy', $mediaAsset) }}">
-                                        @csrf
-                                        @method('DELETE')
-                                        <x-ui.button type="submit" size="sm" variant="ghost" icon="trash">
-                                            Delete
-                                        </x-ui.button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    @empty
+                <div class="space-y-4">
+                    @if ($title->mediaAssets->isEmpty())
                         <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
                             <x-ui.empty.media>
                                 <x-ui.icon name="photo" class="size-8 text-neutral-400 dark:text-neutral-500" />
                             </x-ui.empty.media>
                             <x-ui.heading level="h3">No media assets attached yet.</x-ui.heading>
                         </x-ui.empty>
-                    @endforelse
+                    @endif
+
+                    @foreach (\App\Enums\MediaKind::allowedForMediable($title) as $mediaKind)
+                        @continue(($title->groupedMediaAssetsByKind()->get($mediaKind->value, collect()))->isEmpty())
+
+                        <div class="space-y-3">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <x-ui.heading level="h3" size="md">{{ str($mediaKind->value)->headline() }}</x-ui.heading>
+                                <x-ui.badge variant="outline" color="neutral" icon="{{ $mediaKind->isVideo() ? 'play-circle' : 'photo' }}">
+                                    {{ number_format(($title->groupedMediaAssetsByKind()->get($mediaKind->value, collect()))->count()) }} assets
+                                </x-ui.badge>
+                            </div>
+
+                            @foreach ($title->groupedMediaAssetsByKind()->get($mediaKind->value, collect()) as $mediaAsset)
+                                <div class="rounded-box border border-black/10 p-3 dark:border-white/10">
+                                    <div class="flex flex-wrap items-center justify-between gap-3">
+                                        <div class="flex items-center gap-3">
+                                            <div class="overflow-hidden rounded-box border border-black/5 bg-neutral-100 dark:border-white/10 dark:bg-neutral-800">
+                                                @if ($mediaAsset->url && ! $mediaAsset->isVideo())
+                                                    <img
+                                                        src="{{ $mediaAsset->url }}"
+                                                        alt="{{ $mediaAsset->alt_text ?: $title->name }}"
+                                                        class="size-14 object-cover"
+                                                    >
+                                                @else
+                                                    <div class="flex size-14 items-center justify-center text-neutral-500 dark:text-neutral-400">
+                                                        <x-ui.icon :name="$mediaAsset->isVideo() ? 'play-circle' : 'photo'" class="size-6" />
+                                                    </div>
+                                                @endif
+                                            </div>
+
+                                            <div>
+                                                <div class="font-medium">{{ $mediaAsset->caption ?: str($mediaAsset->kind->value)->headline() }}</div>
+                                                <div class="text-sm text-neutral-500 dark:text-neutral-400">
+                                                    {{ $mediaAsset->provider ?: 'Direct URL' }} · Position {{ $mediaAsset->position }}
+                                                    @if ($mediaAsset->is_primary)
+                                                        · Primary
+                                                    @endif
+                                                    @if ($mediaAsset->width && $mediaAsset->height)
+                                                        · {{ number_format($mediaAsset->width) }} × {{ number_format($mediaAsset->height) }}
+                                                    @endif
+                                                    @if ($mediaAsset->duration_seconds)
+                                                        · {{ number_format($mediaAsset->duration_seconds) }} sec
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="flex gap-2">
+                                            <x-ui.button as="a" :href="route('admin.media-assets.edit', $mediaAsset)" size="sm" variant="outline" icon="pencil-square">
+                                                Edit
+                                            </x-ui.button>
+                                            <form method="POST" action="{{ route('admin.media-assets.destroy', $mediaAsset) }}">
+                                                @csrf
+                                                @method('DELETE')
+                                                <x-ui.button type="submit" size="sm" variant="ghost" icon="trash">
+                                                    Delete
+                                                </x-ui.button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endforeach
                 </div>
             </x-ui.card>
         </div>
@@ -259,19 +276,23 @@
                     @csrf
                     <x-ui.field>
                         <x-ui.label>Season name</x-ui.label>
-                        <x-ui.input name="name" placeholder="Season 1" />
+                        <x-ui.input name="season[name]" :value="old('season.name')" placeholder="Season 1" />
+                        <x-ui.error name="season.name" />
                     </x-ui.field>
                     <x-ui.field>
                         <x-ui.label>Slug</x-ui.label>
-                        <x-ui.input name="slug" placeholder="season-1" />
+                        <x-ui.input name="season[slug]" :value="old('season.slug')" placeholder="season-1" />
+                        <x-ui.error name="season.slug" />
                     </x-ui.field>
                     <x-ui.field>
                         <x-ui.label>Season number</x-ui.label>
-                        <x-ui.input name="season_number" type="number" min="1" />
+                        <x-ui.input name="season[season_number]" type="number" min="1" :value="old('season.season_number')" />
+                        <x-ui.error name="season.season_number" />
                     </x-ui.field>
                     <x-ui.field class="lg:col-span-3">
                         <x-ui.label>Summary</x-ui.label>
-                        <x-ui.textarea name="summary" rows="2"></x-ui.textarea>
+                        <x-ui.textarea name="season[summary]" rows="2">{{ old('season.summary') }}</x-ui.textarea>
+                        <x-ui.error name="season.summary" />
                     </x-ui.field>
                     <div class="lg:col-span-3">
                         <x-ui.button type="submit" icon="plus">Add season</x-ui.button>

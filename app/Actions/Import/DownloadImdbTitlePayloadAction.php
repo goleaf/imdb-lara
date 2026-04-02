@@ -18,6 +18,7 @@ class DownloadImdbTitlePayloadAction
 
     public function __construct(
         private readonly FetchImdbJsonAction $fetchImdbJsonAction,
+        private readonly FetchImdbGraphqlAction $fetchImdbGraphqlAction,
         private readonly ResolveImdbApiUrlAction $resolveImdbApiUrlAction,
     ) {}
 
@@ -109,6 +110,7 @@ class DownloadImdbTitlePayloadAction
     {
         $artifacts = [];
         $downloadedAt = now()->toIso8601String();
+
         $titlePayload = $this->downloadArtifact(
             $artifactDirectory,
             'title.json',
@@ -121,122 +123,23 @@ class DownloadImdbTitlePayloadAction
             throw new RuntimeException(sprintf('IMDb API returned an unexpected payload for [%s].', $imdbId));
         }
 
-        $credits = $this->downloadArtifact(
-            $artifactDirectory,
-            'credits.json',
-            $this->titleEndpoint('title.credits', $imdbId),
-            $artifacts,
-            'credits',
-            itemsKey: 'credits',
-            nullable: true,
-        );
-        $releaseDates = $this->downloadArtifact(
-            $artifactDirectory,
-            'release-dates.json',
-            $this->titleEndpoint('title.release_dates', $imdbId),
-            $artifacts,
-            'releaseDates',
-            itemsKey: 'releaseDates',
-            nullable: true,
-        );
-        $akas = $this->downloadArtifact(
-            $artifactDirectory,
-            'akas.json',
-            $this->titleEndpoint('title.akas', $imdbId),
-            $artifacts,
-            'akas',
-            itemsKey: 'akas',
-            nullable: true,
-        );
-        $seasons = $this->downloadArtifact(
-            $artifactDirectory,
-            'seasons.json',
-            $this->titleEndpoint('title.seasons', $imdbId),
-            $artifacts,
-            'seasons',
-            itemsKey: 'seasons',
-            nullable: true,
-        );
-        $episodes = $this->downloadArtifact(
-            $artifactDirectory,
-            'episodes.json',
-            $this->titleEndpoint('title.episodes', $imdbId),
-            $artifacts,
-            'episodes',
-            itemsKey: 'episodes',
-            nullable: true,
-        );
-        $images = $this->downloadArtifact(
-            $artifactDirectory,
-            'images.json',
-            $this->titleEndpoint('title.images', $imdbId),
-            $artifacts,
-            'images',
-            itemsKey: 'images',
-            nullable: true,
-        );
-        $videos = $this->downloadArtifact(
-            $artifactDirectory,
-            'videos.json',
-            $this->titleEndpoint('title.videos', $imdbId),
-            $artifacts,
-            'videos',
-            itemsKey: 'videos',
-            nullable: true,
-        );
-        $awardNominations = $this->downloadArtifact(
-            $artifactDirectory,
-            'award-nominations.json',
-            $this->titleEndpoint('title.award_nominations', $imdbId),
-            $artifacts,
-            'awardNominations',
-            itemsKey: 'awardNominations',
-            nullable: true,
-        );
-        $parentsGuide = $this->downloadArtifact(
-            $artifactDirectory,
-            'parents-guide.json',
-            $this->titleEndpoint('title.parents_guide', $imdbId),
-            $artifacts,
-            'parentsGuide',
-            nullable: true,
-        );
-        $certificates = $this->downloadArtifact(
-            $artifactDirectory,
-            'certificates.json',
-            $this->titleEndpoint('title.certificates', $imdbId),
-            $artifacts,
-            'certificates',
-            itemsKey: 'certificates',
-            nullable: true,
-        );
-        $companyCredits = $this->downloadArtifact(
-            $artifactDirectory,
-            'company-credits.json',
-            $this->titleEndpoint('title.company_credits', $imdbId),
-            $artifacts,
-            'companyCredits',
-            itemsKey: 'companyCredits',
-            nullable: true,
-        );
-        $boxOffice = $this->downloadArtifact(
-            $artifactDirectory,
-            'box-office.json',
-            $this->titleEndpoint('title.box_office', $imdbId),
-            $artifacts,
-            'boxOffice',
-            nullable: true,
-        );
-        $names = $this->downloadNames(
-            $this->collectNameIds($titlePayload, $credits, $awardNominations),
-            $artifactDirectory,
-            $artifacts,
-        );
-        $interests = $this->downloadInterests(
-            $this->collectInterestIds($titlePayload),
-            $artifactDirectory,
-            $artifacts,
-        );
+        $graphqlArtifacts = $this->downloadGraphqlTitleArtifacts($imdbId, $artifactDirectory, $artifacts);
+
+        $titleArtifacts = $this->downloadArtifactsConcurrently($artifactDirectory, $artifacts, [
+            ...$this->titleArtifactRequests($imdbId, $titlePayload, array_keys($graphqlArtifacts)),
+        ], $this->titleBatchConcurrency());
+        $credits = $graphqlArtifacts['credits'] ?? ($titleArtifacts['credits'] ?? null);
+        $releaseDates = $titleArtifacts['releaseDates'] ?? null;
+        $akas = $titleArtifacts['akas'] ?? null;
+        $seasons = $titleArtifacts['seasons'] ?? null;
+        $episodes = $titleArtifacts['episodes'] ?? null;
+        $images = $titleArtifacts['images'] ?? null;
+        $videos = $titleArtifacts['videos'] ?? null;
+        $awardNominations = $titleArtifacts['awardNominations'] ?? null;
+        $parentsGuide = $titleArtifacts['parentsGuide'] ?? null;
+        $certificates = $graphqlArtifacts['certificates'] ?? ($titleArtifacts['certificates'] ?? null);
+        $companyCredits = $titleArtifacts['companyCredits'] ?? null;
+        $boxOffice = $titleArtifacts['boxOffice'] ?? null;
 
         $manifest = [
             'schemaVersion' => 1,
@@ -266,139 +169,163 @@ class DownloadImdbTitlePayloadAction
             'certificates' => $certificates,
             'companyCredits' => $companyCredits,
             'boxOffice' => $boxOffice,
-            'names' => $names,
-            'interests' => $interests,
+            'names' => [],
+            'interests' => [],
             'artifacts' => $artifacts,
         ];
     }
 
     /**
-     * @param  array<string, mixed>|null  $credits
-     * @param  array<string, mixed>|null  $awardNominations
-     * @return list<string>
+     * @param  array<string, mixed>  $titlePayload
+     * @return list<array{
+     *     artifact_key: string,
+     *     items_key?: string,
+     *     nullable?: bool,
+     *     relative_path: string,
+     *     url: string
+     * }>
      */
-    private function collectNameIds(array $titlePayload, ?array $credits, ?array $awardNominations): array
+    private function titleArtifactRequests(string $imdbId, array $titlePayload, array $excludedArtifactKeys = []): array
     {
-        $ids = [];
+        $requests = [
+            [
+                'artifact_key' => 'credits',
+                'relative_path' => 'credits.json',
+                'url' => $this->titleEndpoint('title.credits', $imdbId),
+                'items_key' => 'credits',
+                'nullable' => true,
+            ],
+            [
+                'artifact_key' => 'releaseDates',
+                'relative_path' => 'release-dates.json',
+                'url' => $this->titleEndpoint('title.release_dates', $imdbId),
+                'items_key' => 'releaseDates',
+                'nullable' => true,
+            ],
+            [
+                'artifact_key' => 'akas',
+                'relative_path' => 'akas.json',
+                'url' => $this->titleEndpoint('title.akas', $imdbId),
+                'items_key' => 'akas',
+                'nullable' => true,
+            ],
+            [
+                'artifact_key' => 'images',
+                'relative_path' => 'images.json',
+                'url' => $this->titleEndpoint('title.images', $imdbId),
+                'items_key' => 'images',
+                'nullable' => true,
+            ],
+            [
+                'artifact_key' => 'videos',
+                'relative_path' => 'videos.json',
+                'url' => $this->titleEndpoint('title.videos', $imdbId),
+                'items_key' => 'videos',
+                'nullable' => true,
+            ],
+            [
+                'artifact_key' => 'awardNominations',
+                'relative_path' => 'award-nominations.json',
+                'url' => $this->titleEndpoint('title.award_nominations', $imdbId),
+                'items_key' => 'awardNominations',
+                'nullable' => true,
+            ],
+            [
+                'artifact_key' => 'parentsGuide',
+                'relative_path' => 'parents-guide.json',
+                'url' => $this->titleEndpoint('title.parents_guide', $imdbId),
+                'nullable' => true,
+            ],
+            [
+                'artifact_key' => 'certificates',
+                'relative_path' => 'certificates.json',
+                'url' => $this->titleEndpoint('title.certificates', $imdbId),
+                'items_key' => 'certificates',
+                'nullable' => true,
+            ],
+            [
+                'artifact_key' => 'companyCredits',
+                'relative_path' => 'company-credits.json',
+                'url' => $this->titleEndpoint('title.company_credits', $imdbId),
+                'items_key' => 'companyCredits',
+                'nullable' => true,
+            ],
+            [
+                'artifact_key' => 'boxOffice',
+                'relative_path' => 'box-office.json',
+                'url' => $this->titleEndpoint('title.box_office', $imdbId),
+                'nullable' => true,
+            ],
+        ];
 
-        foreach (['directors', 'writers', 'stars'] as $key) {
-            foreach ($this->normalizeObjectList(data_get($titlePayload, $key)) as $personPayload) {
-                $imdbId = $this->nullableString(data_get($personPayload, 'id'));
+        $requests = array_values(array_filter(
+            $requests,
+            fn (array $request): bool => ! in_array($request['artifact_key'], $excludedArtifactKeys, true),
+        ));
 
-                if ($imdbId !== null) {
-                    $ids[] = $imdbId;
-                }
-            }
+        if (! $this->shouldDownloadSeriesArtifacts($titlePayload)) {
+            return $requests;
         }
 
-        foreach ($this->normalizeObjectList(data_get($credits, 'credits')) as $creditPayload) {
-            $imdbId = $this->nullableString(data_get($creditPayload, 'name.id'));
-
-            if ($imdbId !== null) {
-                $ids[] = $imdbId;
-            }
-        }
-
-        foreach ($this->normalizeObjectList(data_get($awardNominations, 'awardNominations')) as $nominationPayload) {
-            foreach ($this->normalizeObjectList(data_get($nominationPayload, 'nominees')) as $nomineePayload) {
-                $imdbId = $this->nullableString(data_get($nomineePayload, 'id'));
-
-                if ($imdbId !== null) {
-                    $ids[] = $imdbId;
-                }
-            }
-        }
-
-        return collect($ids)
-            ->filter(fn (mixed $value): bool => is_string($value) && preg_match('/^nm\d+$/', $value) === 1)
-            ->unique()
-            ->values()
-            ->all();
+        return [
+            ...array_slice($requests, 0, 3),
+            [
+                'artifact_key' => 'seasons',
+                'relative_path' => 'seasons.json',
+                'url' => $this->titleEndpoint('title.seasons', $imdbId),
+                'items_key' => 'seasons',
+                'nullable' => true,
+            ],
+            [
+                'artifact_key' => 'episodes',
+                'relative_path' => 'episodes.json',
+                'url' => $this->titleEndpoint('title.episodes', $imdbId),
+                'items_key' => 'episodes',
+                'nullable' => true,
+            ],
+            ...array_slice($requests, 3),
+        ];
     }
 
     /**
-     * @param  list<string>  $nameIds
+     * @param  array<string, mixed>  $artifacts
      * @return array<string, array<string, mixed>>
      */
-    private function downloadNames(array $nameIds, string $artifactDirectory, array &$artifacts): array
+    private function downloadGraphqlTitleArtifacts(string $imdbId, string $artifactDirectory, array &$artifacts): array
     {
-        $names = [];
-
-        foreach ($nameIds as $nameId) {
-            $nameUrl = $this->resolveImdbApiUrlAction->handle(
-                $this->resolveImdbApiUrlAction->endpoint('name'),
-                ['nameId' => $nameId],
-            );
-
-            $names[$nameId] = array_filter([
-                'details' => $this->downloadArtifact(
-                    $artifactDirectory,
-                    'names/'.$nameId.'/details.json',
-                    $nameUrl,
-                    $artifacts,
-                    'names.'.$nameId.'.details',
-                    nullable: true,
-                ),
-                'images' => $this->downloadArtifact(
-                    $artifactDirectory,
-                    'names/'.$nameId.'/images.json',
-                    $nameUrl.'/images',
-                    $artifacts,
-                    'names.'.$nameId.'.images',
-                    itemsKey: 'images',
-                    nullable: true,
-                ),
-                'relationships' => $this->downloadArtifact(
-                    $artifactDirectory,
-                    'names/'.$nameId.'/relationships.json',
-                    $nameUrl.'/relationships',
-                    $artifacts,
-                    'names.'.$nameId.'.relationships',
-                    nullable: true,
-                ),
-                'trivia' => $this->downloadArtifact(
-                    $artifactDirectory,
-                    'names/'.$nameId.'/trivia.json',
-                    $nameUrl.'/trivia',
-                    $artifacts,
-                    'names.'.$nameId.'.trivia',
-                    itemsKey: 'triviaEntries',
-                    nullable: true,
-                ),
-            ], fn (mixed $value): bool => $value !== null);
+        if (! $this->fetchImdbGraphqlAction->enabled()) {
+            return [];
         }
 
-        return $names;
-    }
+        try {
+            $payloads = $this->fetchImdbGraphqlAction->fetchTitleCore($imdbId);
+        } catch (Throwable $exception) {
+            logger()->warning(sprintf(
+                'IMDb GraphQL title optimization failed for [%s]; falling back to REST title endpoints. %s',
+                $imdbId,
+                $exception->getMessage(),
+            ));
 
-    /**
-     * @param  list<string>  $interestIds
-     * @return array<string, array<string, mixed>>
-     */
-    private function downloadInterests(array $interestIds, string $artifactDirectory, array &$artifacts): array
-    {
-        $interests = [];
+            return [];
+        }
 
-        foreach ($interestIds as $interestId) {
-            $interestUrl = $this->resolveImdbApiUrlAction->handle(
-                $this->resolveImdbApiUrlAction->endpoint('interest'),
-                ['interestId' => $interestId],
-            );
-            $interestPayload = $this->downloadArtifact(
-                $artifactDirectory,
-                'interests/'.$interestId.'.json',
-                $interestUrl,
-                $artifacts,
-                'interests.'.$interestId,
-                nullable: true,
-            );
-
-            if ($interestPayload !== null) {
-                $interests[$interestId] = $interestPayload;
+        foreach ([
+            'credits' => 'credits.json',
+            'certificates' => 'certificates.json',
+        ] as $artifactKey => $relativePath) {
+            if (! array_key_exists($artifactKey, $payloads)) {
+                continue;
             }
+
+            $this->writeJsonArtifact($artifactDirectory, $relativePath, $payloads[$artifactKey]);
+            data_set($artifacts, $artifactKey, [
+                'path' => $relativePath,
+                'url' => (string) config('services.imdb.graphql.url', 'https://graph.imdbapi.dev/v1'),
+                'has_payload' => true,
+            ]);
         }
 
-        return $interests;
+        return $payloads;
     }
 
     private function titleEndpoint(string $endpointKey, string $imdbId): string
@@ -482,6 +409,119 @@ class DownloadImdbTitlePayloadAction
 
             return null;
         }
+    }
+
+    /**
+     * @param  array<string, mixed>  $artifacts
+     * @param  list<array{
+     *     artifact_key: string,
+     *     items_key?: string,
+     *     nullable?: bool,
+     *     relative_path: string,
+     *     url: string
+     * }>  $requests
+     * @return array<string, array<string, mixed>|null>
+     */
+    private function downloadArtifactsConcurrently(
+        string $artifactDirectory,
+        array &$artifacts,
+        array $requests,
+        int $concurrency,
+    ): array {
+        if ($requests === []) {
+            return [];
+        }
+
+        $concurrency = max(1, $concurrency);
+
+        $payloads = [];
+        $batchRequests = [];
+
+        foreach ($requests as $request) {
+            $url = $request['url'];
+
+            if (array_key_exists($url, $this->artifactPayloadCache)) {
+                $payloads[$request['artifact_key']] = $this->artifactPayloadCache[$url];
+
+                continue;
+            }
+
+            $batchRequests[] = [
+                'key' => $request['artifact_key'],
+                'url' => $url,
+                'nullable' => (bool) ($request['nullable'] ?? false),
+            ];
+        }
+
+        $initialPayloads = $this->fetchImdbJsonAction->getConcurrent($batchRequests, $concurrency);
+
+        foreach ($requests as $request) {
+            $artifactKey = $request['artifact_key'];
+            $url = $request['url'];
+
+            if (! array_key_exists($artifactKey, $payloads)) {
+                $payload = $this->normalizeConcurrentPayload(
+                    $url,
+                    $artifactKey,
+                    $initialPayloads[$artifactKey] ?? null,
+                    $request['items_key'] ?? null,
+                    (bool) ($request['nullable'] ?? false),
+                );
+
+                $this->artifactPayloadCache[$url] = $payload;
+                $payloads[$artifactKey] = $payload;
+            }
+
+            $this->writeJsonArtifact($artifactDirectory, $request['relative_path'], $payloads[$artifactKey]);
+            data_set($artifacts, $artifactKey, [
+                'path' => str_replace(DIRECTORY_SEPARATOR, '/', $request['relative_path']),
+                'url' => $url,
+                'has_payload' => $payloads[$artifactKey] !== null,
+            ]);
+        }
+
+        return $payloads;
+    }
+
+    private function defaultBatchConcurrency(): int
+    {
+        return max(1, (int) config('services.imdb.default_batch_concurrency', 5));
+    }
+
+    private function titleBatchConcurrency(): int
+    {
+        return max(
+            1,
+            (int) config('services.imdb.title_batch_concurrency', $this->defaultBatchConcurrency()),
+        );
+    }
+
+    private function normalizeConcurrentPayload(
+        string $url,
+        string $artifactKey,
+        ?array $payload,
+        ?string $itemsKey,
+        bool $nullable,
+    ): ?array {
+        if ($payload === null) {
+            return null;
+        }
+
+        if ($itemsKey !== null) {
+            return $this->fetchImdbJsonAction->completePagination($url, $itemsKey, $payload, $nullable);
+        }
+
+        if (! $this->hasNextPageToken($payload)) {
+            return $payload;
+        }
+
+        $detectedItemsKey = $this->detectPaginatedItemsKey($payload, $artifactKey);
+
+        if ($detectedItemsKey === null) {
+            return $payload;
+        }
+
+        return $this->fetchImdbJsonAction->completePagination($url, $detectedItemsKey, $payload, $nullable);
     }
 
     /**
@@ -569,16 +609,18 @@ class DownloadImdbTitlePayloadAction
     }
 
     /**
-     * @return list<string>
+     * @param  array<string, mixed>  $titlePayload
      */
-    private function collectInterestIds(array $titlePayload): array
+    private function shouldDownloadSeriesArtifacts(array $titlePayload): bool
     {
-        return collect($this->normalizeObjectList(data_get($titlePayload, 'interests')))
-            ->map(fn (array $interestPayload): ?string => $this->nullableString(data_get($interestPayload, 'id')))
-            ->filter(fn (mixed $value): bool => is_string($value) && $value !== '')
-            ->unique()
-            ->values()
-            ->all();
+        $imdbType = Str::lower($this->nullableString(data_get($titlePayload, 'type')) ?? '');
+
+        if ($imdbType === '') {
+            return false;
+        }
+
+        return in_array($imdbType, ['tvminiseries', 'tvpilot', 'tvseries', 'tvshortseries'], true)
+            || str_contains($imdbType, 'series');
     }
 
     /**

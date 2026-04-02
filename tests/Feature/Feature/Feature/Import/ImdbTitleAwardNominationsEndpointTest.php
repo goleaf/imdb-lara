@@ -41,13 +41,6 @@ class ImdbTitleAwardNominationsEndpointTest extends TestCase
                 'https://api.imdbapi.dev/titles/tt7654321/akas' => Http::response([
                     'akas' => [],
                 ], 200),
-                'https://api.imdbapi.dev/titles/tt7654321/seasons' => Http::response([
-                    'seasons' => [],
-                ], 200),
-                'https://api.imdbapi.dev/titles/tt7654321/episodes' => Http::response([
-                    'episodes' => [],
-                    'totalCount' => 0,
-                ], 200),
                 'https://api.imdbapi.dev/titles/tt7654321/images' => Http::response([
                     'images' => [],
                 ], 200),
@@ -119,36 +112,6 @@ class ImdbTitleAwardNominationsEndpointTest extends TestCase
                     'companyCredits' => [],
                 ], 200),
                 'https://api.imdbapi.dev/titles/tt7654321/boxOffice' => Http::response([], 200),
-                'https://api.imdbapi.dev/names/nm1000001' => Http::response([
-                    'id' => 'nm1000001',
-                    'displayName' => 'Ava Stone',
-                    'primaryProfessions' => ['actor'],
-                    'biography' => 'Ava Stone is an actor from Seattle.',
-                ], 200),
-                'https://api.imdbapi.dev/names/nm1000001/images' => Http::response([
-                    'images' => [],
-                ], 200),
-                'https://api.imdbapi.dev/names/nm1000001/relationships' => Http::response([
-                    'relationships' => [],
-                ], 200),
-                'https://api.imdbapi.dev/names/nm1000001/trivia' => Http::response([
-                    'triviaEntries' => [],
-                ], 200),
-                'https://api.imdbapi.dev/names/nm1000002' => Http::response([
-                    'id' => 'nm1000002',
-                    'displayName' => 'Noah Flint',
-                    'primaryProfessions' => ['director'],
-                    'biography' => 'Noah Flint directs speculative dramas.',
-                ], 200),
-                'https://api.imdbapi.dev/names/nm1000002/images' => Http::response([
-                    'images' => [],
-                ], 200),
-                'https://api.imdbapi.dev/names/nm1000002/relationships' => Http::response([
-                    'relationships' => [],
-                ], 200),
-                'https://api.imdbapi.dev/names/nm1000002/trivia' => Http::response([
-                    'triviaEntries' => [],
-                ], 200),
                 default => $this->fail('Unexpected HTTP request: '.$url),
             };
         });
@@ -163,7 +126,10 @@ class ImdbTitleAwardNominationsEndpointTest extends TestCase
 
         $this->assertCount(2, data_get($bundle, 'awardNominations.awardNominations', []));
         $this->assertArrayNotHasKey('nextPageToken', $bundle['awardNominations']);
+        $this->assertSame([], $bundle['names']);
+        $this->assertSame([], $bundle['interests']);
         $this->assertFileExists($directory.DIRECTORY_SEPARATOR.'tt7654321'.DIRECTORY_SEPARATOR.'award-nominations.json');
+        Http::assertSentCount(12);
 
         $this->importImdbTitlePayloadFromPath($directory.DIRECTORY_SEPARATOR.'tt7654321.json');
 

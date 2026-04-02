@@ -222,6 +222,7 @@ class DemoCatalogSeeder extends Seeder
                 'plot_outline' => 'A stranded research crew intercepts a transmission from beneath Arctic ice.',
                 'synopsis' => 'When a glaciology mission goes dark, a linguist and a systems engineer uncover a decades-old station and a signal nobody can explain.',
                 'tagline' => 'The ice was listening first.',
+                'search_keywords' => 'arctic mystery, buried signal, ensemble thriller',
             ]),
             'afterlight_protocol' => Title::factory()->movie()->create([
                 'name' => 'Afterlight Protocol',
@@ -233,6 +234,7 @@ class DemoCatalogSeeder extends Seeder
                 'popularity_rank' => 2,
                 'release_year' => 2023,
                 'plot_outline' => 'A covert rescue mission spirals into a conspiracy across low-earth orbit.',
+                'search_keywords' => 'orbital rescue, conspiracy thriller, space mission',
             ]),
             'glass_atlas' => Title::factory()->movie()->create([
                 'name' => 'The Glass Atlas',
@@ -244,6 +246,7 @@ class DemoCatalogSeeder extends Seeder
                 'popularity_rank' => 3,
                 'release_year' => 2022,
                 'plot_outline' => 'Cartographers race to rebuild a world archive after a climate data breach.',
+                'search_keywords' => 'climate archive, global conspiracy, prestige drama',
             ]),
             'harbor_nine' => Title::factory()->miniSeries()->create([
                 'name' => 'Harbor Nine',
@@ -255,6 +258,7 @@ class DemoCatalogSeeder extends Seeder
                 'popularity_rank' => 4,
                 'release_year' => 2025,
                 'plot_outline' => 'A missing submarine case forces an exhausted port city back into the spotlight.',
+                'search_keywords' => 'port conspiracy, missing submarine, prestige thriller',
             ]),
             'static_bloom' => Title::factory()->series()->create([
                 'name' => 'Static Bloom',
@@ -266,6 +270,7 @@ class DemoCatalogSeeder extends Seeder
                 'popularity_rank' => 5,
                 'release_year' => 2021,
                 'plot_outline' => 'A near-future telecom crew keeps a failing city connected one district at a time.',
+                'search_keywords' => 'network sabotage, infrastructure drama, ensemble thriller',
             ]),
             'worlds_beneath_ice' => Title::factory()->documentary()->create([
                 'name' => 'Worlds Beneath Ice',
@@ -277,6 +282,7 @@ class DemoCatalogSeeder extends Seeder
                 'popularity_rank' => 6,
                 'release_year' => 2024,
                 'plot_outline' => 'Marine biologists map thriving ecosystems sealed beneath Antarctic shelves.',
+                'search_keywords' => 'antarctic expedition, hidden ecosystems, science documentary',
             ]),
             'signal_to_summit' => Title::factory()->short()->create([
                 'name' => 'Signal to Summit',
@@ -288,6 +294,7 @@ class DemoCatalogSeeder extends Seeder
                 'popularity_rank' => 7,
                 'release_year' => 2020,
                 'plot_outline' => 'A mountain radio operator relays a final call through a storm.',
+                'search_keywords' => 'survival short, storm signal, mountain thriller',
             ]),
             'midwinter_broadcast' => Title::factory()->special()->create([
                 'name' => 'Midwinter Broadcast',
@@ -299,6 +306,7 @@ class DemoCatalogSeeder extends Seeder
                 'popularity_rank' => 8,
                 'release_year' => 2023,
                 'plot_outline' => 'A live charity special reunites a legendary ensemble for one uneasy night.',
+                'search_keywords' => 'ensemble drama, live television, reunion special',
             ]),
             'aurora_run' => Title::factory()->movie()->create([
                 'name' => 'Aurora Run',
@@ -313,6 +321,7 @@ class DemoCatalogSeeder extends Seeder
                 'plot_outline' => 'A test pilot chases a vanished spacecraft through the aurora corridor.',
                 'synopsis' => 'An atmospheric rescue thriller set above the Arctic circle, where a prototype launch disappears after re-entry and the only pilot willing to chase it has unfinished history with the crew on board.',
                 'tagline' => 'The rescue window closes at dawn.',
+                'search_keywords' => 'orbital rescue, aurora corridor, test pilot',
             ]),
         ]);
 

@@ -55,14 +55,14 @@ new class extends Component
         </div>
     @endplaceholder
 
-    <div class="space-y-4">
+    <div class="sb-home-section space-y-4 rounded-[1.6rem] p-4 sm:p-5">
         <div class="flex items-start justify-between gap-4">
             <div class="space-y-1">
-                <x-ui.heading level="h2" size="lg" class="inline-flex items-center gap-2">
-                    <x-ui.icon name="play" class="size-5 text-neutral-500 dark:text-neutral-400" />
+                <x-ui.heading level="h2" size="lg" class="sb-home-section-heading inline-flex items-center gap-2">
+                    <x-ui.icon name="play" class="size-5 text-[#d6b574]" />
                     <span>Latest Trailers</span>
                 </x-ui.heading>
-                <x-ui.text class="max-w-3xl text-sm text-neutral-600 dark:text-neutral-300">
+                <x-ui.text class="sb-home-section-copy max-w-3xl text-sm">
                     Trailer, clip, and featurette uploads from the public catalog, ordered by publish time.
                 </x-ui.text>
             </div>
@@ -94,22 +94,13 @@ new class extends Component
         @else
             <div class="grid gap-4 xl:grid-cols-2">
                 @foreach ($titles as $title)
-                    @php
-                        $poster = \App\Models\MediaAsset::preferredFrom(
-                            $title->mediaAssets,
-                            \App\Enums\MediaKind::Poster,
-                            \App\Enums\MediaKind::Backdrop,
-                        );
-                        $trailer = $title->titleVideos->first();
-                    @endphp
-
-                    <x-ui.card class="!max-w-none" wire:key="home-trailer-{{ $title->id }}">
+                    <x-ui.card class="sb-poster-card !max-w-none rounded-[1.35rem]" wire:key="home-trailer-{{ $title->id }}">
                         <div class="grid gap-4 md:grid-cols-[9rem_minmax(0,1fr)]">
                             <div class="overflow-hidden rounded-box border border-black/5 bg-neutral-100 dark:border-white/10 dark:bg-neutral-800">
-                                @if ($poster)
+                                @if ($title->preferredPoster())
                                     <img
-                                        src="{{ $poster->url }}"
-                                        alt="{{ $poster->alt_text ?: $title->name }}"
+                                        src="{{ $title->preferredPoster()->url }}"
+                                        alt="{{ $title->preferredPoster()->alt_text ?: $title->name }}"
                                         class="aspect-[2/3] w-full object-cover"
                                     >
                                 @else
@@ -137,21 +128,21 @@ new class extends Component
                                         </a>
                                     </x-ui.heading>
                                     <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                        {{ $trailer?->caption ?: $title->plot_outline ?: 'No public trailer copy is attached yet.' }}
+                                        {{ $title->preferredVideo()?->caption ?: $title->plot_outline ?: 'No public trailer copy is attached yet.' }}
                                     </x-ui.text>
                                 </div>
 
                                 <div class="flex flex-wrap gap-2 text-sm text-neutral-500 dark:text-neutral-400">
-                                    @if ($trailer?->provider)
+                                    @if ($title->preferredVideo()?->provider)
                                         <span class="inline-flex items-center gap-1.5">
                                             <x-ui.icon name="video-camera" class="size-4 text-neutral-400 dark:text-neutral-500" />
-                                            <span>{{ str($trailer->provider)->headline() }}</span>
+                                            <span>{{ str($title->preferredVideo()->provider)->headline() }}</span>
                                         </span>
                                     @endif
-                                    @if ($trailer?->published_at)
+                                    @if ($title->preferredVideo()?->published_at)
                                         <span class="inline-flex items-center gap-1.5">
                                             <x-ui.icon name="calendar-days" class="size-4 text-neutral-400 dark:text-neutral-500" />
-                                            <span>{{ $trailer->published_at->format('M j, Y') }}</span>
+                                            <span>{{ $title->preferredVideo()->published_at->format('M j, Y') }}</span>
                                         </span>
                                     @endif
                                 </div>
@@ -160,8 +151,8 @@ new class extends Component
                                     <x-ui.button as="a" :href="route('public.titles.show', $title)" variant="outline" icon="film">
                                         View title
                                     </x-ui.button>
-                                    @if (filled($trailer?->url))
-                                        <x-ui.link :href="$trailer->url" open-in-new-tab variant="ghost">
+                                    @if (filled($title->preferredVideo()?->url))
+                                        <x-ui.link :href="$title->preferredVideo()->url" open-in-new-tab variant="ghost">
                                             Open trailer
                                         </x-ui.link>
                                     @endif

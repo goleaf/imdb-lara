@@ -30,22 +30,13 @@
 
         <div class="grid gap-4 xl:grid-cols-2">
             @forelse ($titles as $title)
-                @php
-                    $poster = \App\Models\MediaAsset::preferredFrom(
-                        $title->mediaAssets,
-                        \App\Enums\MediaKind::Poster,
-                        \App\Enums\MediaKind::Backdrop,
-                    );
-                    $trailer = $title->titleVideos->first();
-                @endphp
-
                 <x-ui.card class="!max-w-none">
                     <div class="grid gap-4 md:grid-cols-[9rem_minmax(0,1fr)]">
                         <div class="overflow-hidden rounded-box border border-black/5 bg-neutral-100 dark:border-white/10 dark:bg-neutral-800">
-                            @if ($poster)
+                            @if ($title->preferredPoster())
                                 <img
-                                    src="{{ $poster->url }}"
-                                    alt="{{ $poster->alt_text ?: $title->name }}"
+                                    src="{{ $title->preferredPoster()->url }}"
+                                    alt="{{ $title->preferredPoster()->alt_text ?: $title->name }}"
                                     class="aspect-[2/3] w-full object-cover"
                                 >
                             @else
@@ -73,16 +64,16 @@
                                     </a>
                                 </x-ui.heading>
                                 <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                    {{ $trailer?->caption ?: $title->plot_outline ?: 'No public trailer copy is attached yet.' }}
+                                    {{ $title->preferredVideo()?->caption ?: $title->plot_outline ?: 'No public trailer copy is attached yet.' }}
                                 </x-ui.text>
                             </div>
 
                             <div class="flex flex-wrap gap-2 text-sm text-neutral-500 dark:text-neutral-400">
-                                @if ($trailer?->provider)
-                                    <span>{{ str($trailer->provider)->headline() }}</span>
+                                @if ($title->preferredVideo()?->provider)
+                                    <span>{{ str($title->preferredVideo()->provider)->headline() }}</span>
                                 @endif
-                                @if ($trailer?->published_at)
-                                    <span>{{ $trailer->published_at->format('M j, Y') }}</span>
+                                @if ($title->preferredVideo()?->published_at)
+                                    <span>{{ $title->preferredVideo()->published_at->format('M j, Y') }}</span>
                                 @endif
                             </div>
 
@@ -90,8 +81,8 @@
                                 <x-ui.button as="a" :href="route('public.titles.show', $title)" variant="outline" icon="film">
                                     View title
                                 </x-ui.button>
-                                @if (filled($trailer?->url))
-                                    <x-ui.link :href="$trailer->url" open-in-new-tab variant="ghost" iconAfter="arrow-top-right-on-square">
+                                @if (filled($title->preferredVideo()?->url))
+                                    <x-ui.link :href="$title->preferredVideo()->url" open-in-new-tab variant="ghost" iconAfter="arrow-top-right-on-square">
                                         Open trailer
                                     </x-ui.link>
                                 @endif

@@ -4,6 +4,7 @@ namespace App\Actions\Catalog;
 
 use App\Actions\Seo\PageSeoData;
 use App\Enums\MediaKind;
+use App\Enums\WatchState;
 use App\Models\Episode;
 use App\Models\MediaAsset;
 use App\Models\Season;
@@ -20,12 +21,14 @@ class LoadSeasonDetailsAction
      *     seasonNavigation: Collection<int, Season>,
      *     episodeRows: Collection<int, Episode>,
      *     topRatedEpisodes: Collection<int, Episode>,
-     *     watchStatesByTitle: Collection<int, string>,
+     *     watchStatesByTitle: Collection<int, WatchState>,
      *     previousSeason: Season|null,
      *     nextSeason: Season|null,
      *     poster: MediaAsset|null,
      *     backdrop: MediaAsset|null,
-     *     airedRangeLabel: string|null
+     *     airedRangeLabel: string|null,
+     *     episodeCount: int,
+     *     currentSeasonRuntimeAverage: float|int|null
      * }
      */
     public function handle(Title $series, Season $season, ?User $user = null): array
@@ -69,6 +72,20 @@ class LoadSeasonDetailsAction
                         ])
                         ->with([
                             'statistic:id,title_id,average_rating,rating_count,review_count,watchlist_count',
+                            'mediaAssets' => fn ($mediaQuery) => $mediaQuery
+                                ->select([
+                                    'id',
+                                    'mediable_type',
+                                    'mediable_id',
+                                    'kind',
+                                    'url',
+                                    'alt_text',
+                                    'caption',
+                                    'position',
+                                    'is_primary',
+                                ])
+                                ->whereIn('kind', [MediaKind::Still, MediaKind::Backdrop, MediaKind::Poster, MediaKind::Gallery])
+                                ->ordered(),
                             'credits' => fn ($creditQuery) => $creditQuery
                                 ->select([
                                     'id',
@@ -119,7 +136,7 @@ class LoadSeasonDetailsAction
                 ->select(['list_items.title_id', 'list_items.watch_state'])
                 ->whereIn('list_items.title_id', $episodeRows->pluck('title_id'))
                 ->get()
-                ->mapWithKeys(fn ($entry): array => [$entry->title_id => (string) $entry->watch_state?->value]);
+                ->mapWithKeys(fn ($entry): array => [$entry->title_id => $entry->watch_state]);
         }
 
         $airedEpisodes = $episodeRows->filter(fn ($episodeMeta): bool => $episodeMeta->aired_at !== null);
@@ -154,6 +171,8 @@ class LoadSeasonDetailsAction
             'poster' => $poster,
             'backdrop' => $backdrop,
             'airedRangeLabel' => $airedRangeLabel,
+            'episodeCount' => $episodeRows->count(),
+            'currentSeasonRuntimeAverage' => $episodeRows->avg(fn ($episodeMeta) => $episodeMeta->title?->runtime_minutes),
             'seo' => new PageSeoData(
                 title: $season->meta_title ?: ($season->name.' · '.$series->name),
                 description: $season->meta_description ?: ($season->summary ?: 'Browse episode records for '.$season->name.' of '.$series->name.'.'),

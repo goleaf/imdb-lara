@@ -163,7 +163,7 @@ class LoadAccountDashboardAction
             'recentReviews' => $recentReviews,
             'quickLinks' => $quickLinks,
             'recentActivity' => $recentActivity,
-            'publicProfileIsLive' => $user->hasVisibleProfileContent(),
+            'publicProfileIsLive' => $user->isProfileVisibleToPublic(),
         ];
     }
 }

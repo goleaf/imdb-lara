@@ -19,19 +19,23 @@ class ReportReviewForm extends Component
 
     public ?string $statusMessage = null;
 
+    public string $modalId = '';
+
     /**
-     * @var list<array{value: string, label: string}>
+     * @var list<array{value: string, label: string, icon: string}>
      */
     public array $reportReasons = [];
 
     public function mount(Review $review): void
     {
         $this->review = $review;
+        $this->modalId = 'report-review-'.$review->id;
         $this->form->reason = ReportReason::Spoiler->value;
         $this->reportReasons = array_map(
             static fn (ReportReason $reportReason): array => [
                 'value' => $reportReason->value,
-                'label' => str($reportReason->value)->headline()->toString(),
+                'label' => $reportReason->label(),
+                'icon' => $reportReason->icon(),
             ],
             ReportReason::cases(),
         );

@@ -7,6 +7,7 @@ use App\Models\Title;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class UpdateTitleRequest extends FormRequest
 {
@@ -46,6 +47,33 @@ class UpdateTitleRequest extends FormRequest
             'is_published' => ['required', 'boolean'],
             'genre_ids' => ['nullable', 'array'],
             'genre_ids.*' => ['integer', 'exists:genres,id'],
+        ];
+    }
+
+    /**
+     * @return array<int, callable(Validator): void>
+     */
+    public function after(): array
+    {
+        return [
+            function (Validator $validator): void {
+                $nextType = TitleType::tryFrom((string) $this->input('title_type', $this->title()->title_type?->value));
+
+                if ($nextType === null) {
+                    return;
+                }
+
+                if ($this->title()->episodeMeta()->exists() && $nextType !== TitleType::Episode) {
+                    $validator->errors()->add('title_type', 'Episode records must keep the episode title type. Use the season and episode editor for hierarchy changes.');
+                }
+
+                if (
+                    ($this->title()->seasons()->exists() || $this->title()->seriesEpisodes()->exists())
+                    && ! in_array($nextType, [TitleType::Series, TitleType::MiniSeries], true)
+                ) {
+                    $validator->errors()->add('title_type', 'Series with seasons or episodes must keep a TV-compatible title type.');
+                }
+            },
         ];
     }
 

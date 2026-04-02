@@ -56,4 +56,13 @@ class Report extends Model
     {
         return $this->morphTo();
     }
+
+    public function reportableOwner(): ?User
+    {
+        return match (true) {
+            $this->reportable instanceof Review => $this->reportable->author,
+            $this->reportable instanceof UserList => $this->reportable->user,
+            default => null,
+        };
+    }
 }

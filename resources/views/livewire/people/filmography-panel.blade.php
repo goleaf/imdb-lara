@@ -1,79 +1,67 @@
-@php
-    $filmographySortIcons = [
-        'latest' => 'calendar-days',
-        'oldest' => 'clock',
-        'rating' => 'star',
-    ];
+<div id="person-filmography" class="space-y-4">
+    <x-ui.card class="sb-detail-section sb-person-filmography-shell !max-w-none">
+        <div class="space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                    <x-ui.heading level="h2" size="lg">Filmography</x-ui.heading>
+                    <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                        Structured credit groups with poster-first rows and filters for a tighter view of the public career record.
+                    </x-ui.text>
+                </div>
 
-    $titleTypeIcons = [
-        'movie' => 'film',
-        'series' => 'tv',
-        'mini_series' => 'tv',
-        'documentary' => 'camera',
-        'short' => 'film',
-        'special' => 'sparkles',
-        'episode' => 'rectangle-stack',
-    ];
-@endphp
-
-<div class="space-y-4">
-    <x-ui.card class="!max-w-none">
-        <div class="flex flex-wrap items-center justify-between gap-4">
-            <div>
-                <x-ui.heading level="h2" size="lg">Filmography</x-ui.heading>
-                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                    Credits grouped by profession, with filters for a tighter view of the public record.
-                </x-ui.text>
+                <x-ui.badge variant="outline" color="neutral" icon="film">
+                    {{ number_format($groups->sum(fn (array $group): int => $group['rows']->count())) }} titles
+                </x-ui.badge>
             </div>
-        </div>
 
-        <div class="mt-4 grid gap-4 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,0.8fr)]">
-            <x-ui.field>
-                <x-ui.label>Profession</x-ui.label>
-                <x-ui.combobox
-                    wire:model.live="profession"
-                    class="w-full"
-                    size="sm"
-                    placeholder="All professions"
-                    clearable
-                >
-                    @foreach ($professionOptions as $professionOption)
-                        <x-ui.combobox.option
-                            wire:key="filmography-profession-{{ str($professionOption)->slug()->value() }}"
-                            value="{{ $professionOption }}"
-                            icon="briefcase"
-                        >
-                            {{ $professionOption }}
-                        </x-ui.combobox.option>
-                    @endforeach
-                </x-ui.combobox>
-            </x-ui.field>
+            <div class="sb-person-filmography-toolbar">
+                <x-ui.field>
+                    <x-ui.label>Profession</x-ui.label>
+                    <x-ui.combobox
+                        wire:model.live="profession"
+                        class="w-full"
+                        size="sm"
+                        placeholder="All professions"
+                        clearable
+                    >
+                        @foreach ($professionOptions as $professionOption)
+                            <x-ui.combobox.option
+                                wire:key="filmography-profession-{{ str($professionOption)->slug()->value() }}"
+                                value="{{ $professionOption }}"
+                                icon="briefcase"
+                            >
+                                {{ $professionOption }}
+                            </x-ui.combobox.option>
+                        @endforeach
+                    </x-ui.combobox>
+                </x-ui.field>
 
-            <x-ui.field>
-                <x-ui.label>Sort</x-ui.label>
-                <x-ui.combobox
-                    wire:model.live="sort"
-                    class="w-full"
-                    size="sm"
-                    placeholder="Sort credits"
-                >
-                    @foreach ($sortOptions as $sortOption)
-                        <x-ui.combobox.option
-                            wire:key="filmography-sort-{{ $sortOption['value'] }}"
-                            value="{{ $sortOption['value'] }}"
-                            :icon="$filmographySortIcons[$sortOption['value']] ?? 'bars-arrow-down'"
-                        >
-                            {{ $sortOption['label'] }}
-                        </x-ui.combobox.option>
-                    @endforeach
-                </x-ui.combobox>
-            </x-ui.field>
+                <x-ui.field>
+                    <x-ui.label>Sort</x-ui.label>
+                    <x-ui.combobox
+                        wire:model.live="sort"
+                        class="w-full"
+                        size="sm"
+                        placeholder="Sort credits"
+                    >
+                        @foreach ($sortOptions as $sortOption)
+                            <x-ui.combobox.option
+                                wire:key="filmography-sort-{{ $sortOption['value'] }}"
+                                value="{{ $sortOption['value'] }}"
+                                :icon="$sortOption['icon']"
+                            >
+                                {{ $sortOption['label'] }}
+                            </x-ui.combobox.option>
+                        @endforeach
+                    </x-ui.combobox>
+                </x-ui.field>
+            </div>
         </div>
     </x-ui.card>
 
     <div wire:loading.delay class="space-y-4">
         @foreach (range(1, 2) as $groupIndex)
-            <x-ui.card class="!max-w-none" wire:key="filmography-skeleton-group-{{ $groupIndex }}">
+            <x-ui.card class="sb-detail-section sb-person-filmography-group !max-w-none" wire:key="filmography-skeleton-group-{{ $groupIndex }}">
                 <div class="space-y-4">
                     <div class="flex items-center justify-between gap-4">
                         <x-ui.skeleton.text class="w-1/4" />
@@ -82,7 +70,8 @@
 
                     <div class="grid gap-3">
                         @foreach (range(1, 3) as $rowIndex)
-                            <div class="rounded-box border border-black/5 px-4 py-3 dark:border-white/10" wire:key="filmography-skeleton-row-{{ $groupIndex }}-{{ $rowIndex }}">
+                            <div class="sb-person-filmography-row" wire:key="filmography-skeleton-row-{{ $groupIndex }}-{{ $rowIndex }}">
+                                <x-ui.skeleton class="aspect-[2/3] w-full rounded-[1rem] sm:max-w-[5rem]" />
                                 <div class="space-y-3">
                                     <x-ui.skeleton.text class="w-1/3" />
                                     <x-ui.skeleton.text class="w-5/6" />
@@ -98,33 +87,53 @@
 
     <div wire:loading.remove class="space-y-4">
         @forelse ($groups as $group)
-            <x-ui.card class="!max-w-none">
+            <x-ui.card class="sb-detail-section sb-person-filmography-group !max-w-none">
                 <div class="space-y-4">
-                    <div class="flex items-center justify-between gap-4">
-                        <x-ui.heading level="h3" size="md">{{ $group['label'] }}</x-ui.heading>
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <x-ui.heading level="h3" size="md">{{ $group['label'] }}</x-ui.heading>
+                            <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                {{ number_format($group['rows']->count()) }} title{{ $group['rows']->count() === 1 ? '' : 's' }} in this profession grouping.
+                            </x-ui.text>
+                        </div>
                         <x-ui.badge variant="outline" color="neutral" icon="film">{{ number_format($group['rows']->count()) }} titles</x-ui.badge>
                     </div>
 
                     <div class="grid gap-3">
                         @foreach ($group['rows'] as $row)
-                            <div class="rounded-box border border-black/5 px-4 py-3 dark:border-white/10">
-                                <div class="flex flex-wrap items-start justify-between gap-3">
+                            <div class="sb-person-filmography-row">
+                                <a href="{{ route('public.titles.show', $row['title']) }}" class="sb-person-filmography-poster">
+                                    @if ($row['title']->preferredPoster())
+                                        <img
+                                            src="{{ $row['title']->preferredPoster()->url }}"
+                                            alt="{{ $row['title']->preferredPoster()->alt_text ?: $row['title']->name }}"
+                                            class="aspect-[2/3] w-full object-cover"
+                                            loading="lazy"
+                                        >
+                                    @else
+                                        <div class="flex aspect-[2/3] items-center justify-center bg-neutral-200 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400">
+                                            <x-ui.icon name="film" class="size-8" />
+                                        </div>
+                                    @endif
+                                </a>
+
+                                <div class="min-w-0 space-y-3">
                                     <div class="space-y-2">
                                         <div class="flex flex-wrap items-center gap-2">
-                                            <x-ui.heading level="h4" size="md">
+                                            <x-ui.heading level="h4" size="md" class="font-[family-name:var(--font-editorial)] text-[1.2rem] font-semibold tracking-[-0.03em] text-[#f4eee5]">
                                                 <a href="{{ route('public.titles.show', $row['title']) }}" class="hover:opacity-80">
                                                     {{ $row['title']->name }}
                                                 </a>
                                             </x-ui.heading>
-                                            <x-ui.badge variant="outline" :icon="$titleTypeIcons[$row['title']->title_type->value] ?? 'film'">{{ str($row['title']->title_type->value)->headline() }}</x-ui.badge>
+                                            <x-ui.badge variant="outline" :icon="$row['title']->typeIcon()">{{ $row['title']->typeLabel() }}</x-ui.badge>
                                             @if ($row['title']->release_year)
                                                 <a href="{{ route('public.years.show', ['year' => $row['title']->release_year]) }}">
                                                     <x-ui.badge variant="outline" color="slate" icon="calendar-days">{{ $row['title']->release_year }}</x-ui.badge>
                                                 </a>
                                             @endif
-                                            @if ($row['title']->statistic?->average_rating)
+                                            @if ($row['title']->displayAverageRating())
                                                 <x-ui.badge icon="star" color="amber">
-                                                    {{ number_format((float) $row['title']->statistic->average_rating, 1) }}
+                                                    {{ number_format($row['title']->displayAverageRating(), 1) }}
                                                 </x-ui.badge>
                                             @endif
                                         </div>
@@ -141,7 +150,9 @@
                                             </div>
                                         @endif
                                     </div>
+                                </div>
 
+                                <div class="sb-person-filmography-side">
                                     <x-ui.badge variant="outline" color="neutral" icon="identification">
                                         {{ number_format($row['creditCount']) }} credit{{ $row['creditCount'] === 1 ? '' : 's' }}
                                     </x-ui.badge>

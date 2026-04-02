@@ -98,6 +98,40 @@ class AdminModerationQueuesTest extends TestCase
         ]);
     }
 
+    public function test_moderator_can_dismiss_a_report_without_hiding_the_review(): void
+    {
+        $moderator = User::factory()->moderator()->create();
+        $author = User::factory()->create();
+        $reporter = User::factory()->create();
+        $title = Title::factory()->create();
+        $review = Review::factory()->published()->for($author, 'author')->for($title)->create();
+        $report = Report::factory()->for($reporter, 'reporter')->for($review, 'reportable')->create([
+            'status' => ReportStatus::Open,
+        ]);
+
+        $this->actingAs($moderator)
+            ->patch(route('admin.reports.update', $report), [
+                'status' => ReportStatus::Dismissed->value,
+                'content_action' => 'none',
+                'resolution_notes' => 'Insufficient evidence to act.',
+            ])
+            ->assertRedirect(route('admin.reports.index'));
+
+        $review->refresh();
+        $report->refresh();
+
+        $this->assertSame(ReviewStatus::Published, $review->status);
+        $this->assertSame(ReportStatus::Dismissed, $report->status);
+        $this->assertSame('Insufficient evidence to act.', $report->resolution_notes);
+
+        $this->assertDatabaseHas('moderation_actions', [
+            'report_id' => $report->id,
+            'actionable_type' => Review::class,
+            'actionable_id' => $review->id,
+            'action' => 'dismiss-report',
+        ]);
+    }
+
     public function test_editor_and_moderator_can_review_contributions_queue_but_contributor_cannot_access_it(): void
     {
         $editor = User::factory()->editor()->create();
@@ -135,5 +169,12 @@ class AdminModerationQueuesTest extends TestCase
         $this->assertSame($moderator->id, $contribution->reviewed_by);
         $this->assertSame('Approved by moderation review.', $contribution->notes);
         $this->assertNotNull($contribution->reviewed_at);
+
+        $this->assertDatabaseHas('moderation_actions', [
+            'report_id' => null,
+            'actionable_type' => Contribution::class,
+            'actionable_id' => $contribution->id,
+            'action' => 'approve-contribution',
+        ]);
     }
 }

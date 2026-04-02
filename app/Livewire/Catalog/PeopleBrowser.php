@@ -60,11 +60,22 @@ class PeopleBrowser extends Component
             ->withQueryString();
 
         $filterOptions = $this->getPublicPeopleFilterOptions->handle();
+        $sortOptions = collect($filterOptions['sortOptions'])
+            ->map(fn (array $option): array => [
+                ...$option,
+                'icon' => match ($option['value']) {
+                    'popular' => 'fire',
+                    'credits' => 'film',
+                    'awards' => 'trophy',
+                    default => 'bars-arrow-down',
+                },
+            ])
+            ->all();
 
         return view('livewire.catalog.people-browser', [
             'people' => $people,
             'professions' => $filterOptions['professions'],
-            'sortOptions' => $filterOptions['sortOptions'],
+            'sortOptions' => $sortOptions,
         ]);
     }
 }

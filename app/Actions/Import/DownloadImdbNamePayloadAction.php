@@ -90,42 +90,40 @@ class DownloadImdbNamePayloadAction
             throw new RuntimeException(sprintf('IMDb API returned an unexpected payload for name [%s].', $imdbId));
         }
 
-        $images = $this->downloadArtifact(
-            $artifactDirectory,
-            'images.json',
-            $sourceUrl.'/images',
-            $artifacts,
-            'images',
-            itemsKey: 'images',
-            nullable: true,
-        );
-        $filmography = $this->downloadArtifact(
-            $artifactDirectory,
-            'filmography.json',
-            $sourceUrl.'/filmography',
-            $artifacts,
-            'filmography',
-            itemsKey: 'credits',
-            nullable: true,
-        );
-        $relationships = $this->downloadArtifact(
-            $artifactDirectory,
-            'relationships.json',
-            $sourceUrl.'/relationships',
-            $artifacts,
-            'relationships',
-            itemsKey: 'relationships',
-            nullable: true,
-        );
-        $trivia = $this->downloadArtifact(
-            $artifactDirectory,
-            'trivia.json',
-            $sourceUrl.'/trivia',
-            $artifacts,
-            'trivia',
-            itemsKey: 'triviaEntries',
-            nullable: true,
-        );
+        $artifactsPayload = $this->downloadArtifactsConcurrently($artifactDirectory, $artifacts, [
+            [
+                'artifact_key' => 'images',
+                'relative_path' => 'images.json',
+                'url' => $sourceUrl.'/images',
+                'items_key' => 'images',
+                'nullable' => true,
+            ],
+            [
+                'artifact_key' => 'filmography',
+                'relative_path' => 'filmography.json',
+                'url' => $sourceUrl.'/filmography',
+                'items_key' => 'credits',
+                'nullable' => true,
+            ],
+            [
+                'artifact_key' => 'relationships',
+                'relative_path' => 'relationships.json',
+                'url' => $sourceUrl.'/relationships',
+                'items_key' => 'relationships',
+                'nullable' => true,
+            ],
+            [
+                'artifact_key' => 'trivia',
+                'relative_path' => 'trivia.json',
+                'url' => $sourceUrl.'/trivia',
+                'items_key' => 'triviaEntries',
+                'nullable' => true,
+            ],
+        ], $this->nameBatchConcurrency());
+        $images = $artifactsPayload['images'] ?? null;
+        $filmography = $artifactsPayload['filmography'] ?? null;
+        $relationships = $artifactsPayload['relationships'] ?? null;
+        $trivia = $artifactsPayload['trivia'] ?? null;
 
         $manifest = [
             'schemaVersion' => 1,
@@ -232,6 +230,120 @@ class DownloadImdbNamePayloadAction
 
             return null;
         }
+    }
+
+    /**
+     * @param  array<string, mixed>  $artifacts
+     * @param  list<array{
+     *     artifact_key: string,
+     *     items_key?: string,
+     *     nullable?: bool,
+     *     relative_path: string,
+     *     url: string
+     * }>  $requests
+     * @return array<string, array<string, mixed>|null>
+     */
+    private function downloadArtifactsConcurrently(
+        string $artifactDirectory,
+        array &$artifacts,
+        array $requests,
+        int $concurrency,
+    ): array {
+        if ($requests === []) {
+            return [];
+        }
+
+        $concurrency = max(1, $concurrency);
+
+        $payloads = [];
+        $batchRequests = [];
+
+        foreach ($requests as $request) {
+            $url = $request['url'];
+
+            if (array_key_exists($url, $this->artifactPayloadCache)) {
+                $payloads[$request['artifact_key']] = $this->artifactPayloadCache[$url];
+
+                continue;
+            }
+
+            $batchRequests[] = [
+                'key' => $request['artifact_key'],
+                'url' => $url,
+                'nullable' => (bool) ($request['nullable'] ?? false),
+            ];
+        }
+
+        $initialPayloads = $this->fetchImdbJsonAction->getConcurrent($batchRequests, $concurrency);
+
+        foreach ($requests as $request) {
+            $artifactKey = $request['artifact_key'];
+            $url = $request['url'];
+
+            if (! array_key_exists($artifactKey, $payloads)) {
+                $payload = $this->normalizeConcurrentPayload(
+                    $url,
+                    $artifactKey,
+                    $initialPayloads[$artifactKey] ?? null,
+                    $request['items_key'] ?? null,
+                    (bool) ($request['nullable'] ?? false),
+                );
+
+                $this->artifactPayloadCache[$url] = $payload;
+                $payloads[$artifactKey] = $payload;
+            }
+
+            $this->writeJsonArtifact($artifactDirectory, $request['relative_path'], $payloads[$artifactKey]);
+            data_set($artifacts, $artifactKey, [
+                'path' => str_replace(DIRECTORY_SEPARATOR, '/', $request['relative_path']),
+                'url' => $url,
+                'has_payload' => $payloads[$artifactKey] !== null,
+            ]);
+        }
+
+        return $payloads;
+    }
+
+    private function nameBatchConcurrency(): int
+    {
+        return max(
+            1,
+            (int) config(
+                'services.imdb.name_batch_concurrency',
+                config('services.imdb.default_batch_concurrency', 5),
+            ),
+        );
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function normalizeConcurrentPayload(
+        string $url,
+        string $artifactKey,
+        ?array $payload,
+        ?string $itemsKey,
+        bool $nullable,
+    ): ?array {
+        if ($payload === null) {
+            return null;
+        }
+
+        if ($itemsKey !== null) {
+            return $this->fetchImdbJsonAction->completePagination($url, $itemsKey, $payload, $nullable);
+        }
+
+        if (! $this->hasNextPageToken($payload)) {
+            return $payload;
+        }
+
+        $detectedItemsKey = $this->detectPaginatedItemsKey($payload, $artifactKey);
+
+        if ($detectedItemsKey === null) {
+            return $payload;
+        }
+
+        return $this->fetchImdbJsonAction->completePagination($url, $detectedItemsKey, $payload, $nullable);
     }
 
     /**

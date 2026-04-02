@@ -107,7 +107,7 @@ class WatchlistBrowserTest extends TestCase
         Livewire::actingAs($user)
             ->test(WatchlistBrowser::class)
             ->call('toggleWatched', $title->id)
-            ->assertSet('statusMessage', 'Tracking updated.')
+            ->assertSet('statusMessage', 'Marked as watched.')
             ->set('visibility', ListVisibility::Public->value)
             ->call('saveVisibility')
             ->assertSet('visibilityMessage', 'Watchlist visibility updated.');
@@ -125,7 +125,8 @@ class WatchlistBrowserTest extends TestCase
 
         Livewire::actingAs($user)
             ->test(WatchlistBrowser::class)
-            ->call('toggleWatched', $title->id);
+            ->call('toggleWatched', $title->id)
+            ->assertSet('statusMessage', 'Marked as unwatched.');
 
         $this->assertDatabaseHas('list_items', [
             'user_list_id' => $watchlist->id,
@@ -133,5 +134,35 @@ class WatchlistBrowserTest extends TestCase
             'watch_state' => WatchState::Planned->value,
             'watched_at' => null,
         ]);
+    }
+
+    public function test_member_can_clear_watchlist_filters_back_to_the_default_tracking_view(): void
+    {
+        $user = User::factory()->create();
+        $watchlist = UserList::factory()->watchlist()->for($user)->create();
+        $genre = Genre::factory()->create(['name' => 'Mystery', 'slug' => 'mystery']);
+        $title = Title::factory()->movie()->create([
+            'release_year' => 2024,
+        ]);
+
+        $title->genres()->attach($genre);
+
+        ListItem::factory()->for($watchlist, 'userList')->for($title, 'title')->create([
+            'watch_state' => WatchState::Completed,
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(WatchlistBrowser::class)
+            ->set('state', 'watched')
+            ->set('type', TitleType::Movie->value)
+            ->set('genre', $genre->slug)
+            ->set('year', '2024')
+            ->set('sort', 'rating')
+            ->call('clearFilters')
+            ->assertSet('state', 'all')
+            ->assertSet('type', null)
+            ->assertSet('genre', null)
+            ->assertSet('year', null)
+            ->assertSet('sort', 'added');
     }
 }

@@ -23,8 +23,6 @@ class ImdbTitleDownloadCommandTest extends TestCase
             'api.imdbapi.dev/titles/tt0133093/credits*' => Http::response($this->creditsPayload(), 200),
             'api.imdbapi.dev/titles/tt0133093/releaseDates*' => Http::response($this->releaseDatesPayload(), 200),
             'api.imdbapi.dev/titles/tt0133093/akas*' => Http::response($this->akasPayload(), 200),
-            'api.imdbapi.dev/titles/tt0133093/seasons*' => Http::response(['seasons' => []], 200),
-            'api.imdbapi.dev/titles/tt0133093/episodes*' => Http::response(['episodes' => [], 'totalCount' => 0], 200),
             'api.imdbapi.dev/titles/tt0133093/images*' => Http::response($this->imagesPayload(), 200),
             'api.imdbapi.dev/titles/tt0133093/videos*' => Http::response($this->videosPayload(), 200),
             'api.imdbapi.dev/titles/tt0133093/awardNominations*' => Http::response($this->awardPayload(), 200),
@@ -32,11 +30,6 @@ class ImdbTitleDownloadCommandTest extends TestCase
             'api.imdbapi.dev/titles/tt0133093/certificates*' => Http::response($this->certificatesPayload(), 200),
             'api.imdbapi.dev/titles/tt0133093/companyCredits*' => Http::response($this->companyCreditsPayload(), 200),
             'api.imdbapi.dev/titles/tt0133093/boxOffice*' => Http::response($this->boxOfficePayload(), 200),
-            'api.imdbapi.dev/interests/in0000001*' => Http::response($this->interestPayload(), 200),
-            'api.imdbapi.dev/names/nm0000206' => Http::response($this->nameDetailsPayload(), 200),
-            'api.imdbapi.dev/names/nm0000206/images*' => Http::response($this->nameImagesPayload(), 200),
-            'api.imdbapi.dev/names/nm0000206/relationships*' => Http::response(['relationships' => []], 200),
-            'api.imdbapi.dev/names/nm0000206/trivia*' => Http::response(['triviaEntries' => []], 200),
         ]);
 
         $this->downloadImdbTitlePayload('tt0133093', $directory);
@@ -48,17 +41,108 @@ class ImdbTitleDownloadCommandTest extends TestCase
         $this->assertSame(3, $savedPayload['schemaVersion']);
         $this->assertSame('The Matrix', $savedPayload['title']['primaryTitle']);
         $this->assertSame('Theatrical Trailer', $savedPayload['videos']['videos'][0]['name']);
-        $this->assertSame('Keanu Reeves', $savedPayload['names']['nm0000206']['details']['displayName']);
-        $this->assertSame('Action Epic', $savedPayload['interests']['in0000001']['description']);
+        $this->assertSame([], $savedPayload['names']);
+        $this->assertSame([], $savedPayload['interests']);
+        $this->assertNull($savedPayload['seasons']);
+        $this->assertNull($savedPayload['episodes']);
         $this->assertFileExists($directory.DIRECTORY_SEPARATOR.'tt0133093'.DIRECTORY_SEPARATOR.'title.json');
         $this->assertFileExists($directory.DIRECTORY_SEPARATOR.'tt0133093'.DIRECTORY_SEPARATOR.'credits.json');
         $this->assertFileExists($directory.DIRECTORY_SEPARATOR.'tt0133093'.DIRECTORY_SEPARATOR.'release-dates.json');
-        $this->assertFileExists($directory.DIRECTORY_SEPARATOR.'tt0133093'.DIRECTORY_SEPARATOR.'names'.DIRECTORY_SEPARATOR.'nm0000206'.DIRECTORY_SEPARATOR.'details.json');
-        $this->assertFileExists($directory.DIRECTORY_SEPARATOR.'tt0133093'.DIRECTORY_SEPARATOR.'interests'.DIRECTORY_SEPARATOR.'in0000001.json');
+        $this->assertFileDoesNotExist($directory.DIRECTORY_SEPARATOR.'tt0133093'.DIRECTORY_SEPARATOR.'seasons.json');
+        $this->assertFileDoesNotExist($directory.DIRECTORY_SEPARATOR.'tt0133093'.DIRECTORY_SEPARATOR.'episodes.json');
+        $this->assertFileDoesNotExist($directory.DIRECTORY_SEPARATOR.'tt0133093'.DIRECTORY_SEPARATOR.'names'.DIRECTORY_SEPARATOR.'nm0000206'.DIRECTORY_SEPARATOR.'details.json');
+        $this->assertFileDoesNotExist($directory.DIRECTORY_SEPARATOR.'tt0133093'.DIRECTORY_SEPARATOR.'interests'.DIRECTORY_SEPARATOR.'in0000001.json');
         $this->assertFileExists($directory.DIRECTORY_SEPARATOR.'tt0133093'.DIRECTORY_SEPARATOR.'manifest.json');
+        Http::assertSentCount(11);
         $this->assertDatabaseHas('imdb_title_imports', [
             'imdb_id' => 'tt0133093',
         ]);
+    }
+
+    public function test_command_uses_graphql_to_replace_rest_credits_and_certificates_requests(): void
+    {
+        $directory = storage_path('framework/testing/imdb-download-graphql');
+        File::deleteDirectory($directory);
+
+        config()->set('services.imdb.graphql.enabled', true);
+        config()->set('services.imdb.graphql.url', 'https://graph.imdbapi.dev/v1');
+
+        Http::preventStrayRequests();
+        Http::fake(function (Request $request) {
+            $url = $request->url();
+
+            if ($url === 'https://graph.imdbapi.dev/v1') {
+                $this->assertSame('tt0133093', data_get($request->data(), 'variables.id'));
+
+                return Http::response([
+                    'data' => [
+                        'title' => [
+                            'credits' => [
+                                [
+                                    'category' => 'actor',
+                                    'characters' => ['Neo'],
+                                    'name' => [
+                                        'id' => 'nm0000206',
+                                        'display_name' => 'Keanu Reeves',
+                                        'avatars' => [
+                                            [
+                                                'url' => 'https://example.com/keanu-avatar.jpg',
+                                                'width' => 800,
+                                                'height' => 1200,
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                            'certificates' => [
+                                [
+                                    'rating' => 'R',
+                                    'country' => [
+                                        'code' => 'US',
+                                        'name' => 'United States',
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ], 200);
+            }
+
+            if ($url === 'https://api.imdbapi.dev/titles/tt0133093/credits') {
+                $this->fail('REST credits endpoint should not be called when GraphQL optimization is enabled.');
+            }
+
+            if ($url === 'https://api.imdbapi.dev/titles/tt0133093/certificates') {
+                $this->fail('REST certificates endpoint should not be called when GraphQL optimization is enabled.');
+            }
+
+            return match ($url) {
+                'https://api.imdbapi.dev/titles/tt0133093' => Http::response($this->titlePayload(), 200),
+                'https://api.imdbapi.dev/titles/tt0133093/releaseDates' => Http::response($this->releaseDatesPayload(), 200),
+                'https://api.imdbapi.dev/titles/tt0133093/akas' => Http::response($this->akasPayload(), 200),
+                'https://api.imdbapi.dev/titles/tt0133093/images' => Http::response($this->imagesPayload(), 200),
+                'https://api.imdbapi.dev/titles/tt0133093/videos' => Http::response($this->videosPayload(), 200),
+                'https://api.imdbapi.dev/titles/tt0133093/awardNominations' => Http::response($this->awardPayload(), 200),
+                'https://api.imdbapi.dev/titles/tt0133093/parentsGuide' => Http::response(['advisories' => []], 200),
+                'https://api.imdbapi.dev/titles/tt0133093/companyCredits' => Http::response($this->companyCreditsPayload(), 200),
+                'https://api.imdbapi.dev/titles/tt0133093/boxOffice' => Http::response($this->boxOfficePayload(), 200),
+                default => $this->fail('Unexpected HTTP request: '.$url),
+            };
+        });
+
+        $this->downloadImdbTitlePayload('tt0133093', $directory);
+
+        $savedPayload = json_decode(
+            File::get($directory.DIRECTORY_SEPARATOR.'tt0133093.json'),
+            true,
+            flags: JSON_THROW_ON_ERROR,
+        );
+
+        $this->assertSame('Keanu Reeves', data_get($savedPayload, 'credits.credits.0.name.displayName'));
+        $this->assertSame('R', data_get($savedPayload, 'certificates.certificates.0.rating'));
+        $this->assertSame('https://graph.imdbapi.dev/v1', data_get($savedPayload, 'artifacts.credits.url'));
+        $this->assertSame('https://graph.imdbapi.dev/v1', data_get($savedPayload, 'artifacts.certificates.url'));
+        Http::assertSentCount(10);
     }
 
     public function test_command_follows_next_page_token_by_sending_it_back_as_page_token_query_param(): void
@@ -121,14 +205,6 @@ class ImdbTitleDownloadCommandTest extends TestCase
                 return Http::response($this->akasPayload(), 200);
             }
 
-            if ($url === 'https://api.imdbapi.dev/titles/tt0133093/seasons') {
-                return Http::response(['seasons' => []], 200);
-            }
-
-            if ($url === 'https://api.imdbapi.dev/titles/tt0133093/episodes') {
-                return Http::response(['episodes' => [], 'totalCount' => 0], 200);
-            }
-
             if ($url === 'https://api.imdbapi.dev/titles/tt0133093/images') {
                 return Http::response($this->imagesPayload(), 200);
             }
@@ -155,46 +231,6 @@ class ImdbTitleDownloadCommandTest extends TestCase
 
             if ($url === 'https://api.imdbapi.dev/titles/tt0133093/boxOffice') {
                 return Http::response($this->boxOfficePayload(), 200);
-            }
-
-            if ($url === 'https://api.imdbapi.dev/interests/in0000001') {
-                return Http::response($this->interestPayload(), 200);
-            }
-
-            if ($url === 'https://api.imdbapi.dev/names/nm0000206') {
-                return Http::response($this->nameDetailsPayload(), 200);
-            }
-
-            if ($url === 'https://api.imdbapi.dev/names/nm0000206/images') {
-                return Http::response($this->nameImagesPayload(), 200);
-            }
-
-            if ($url === 'https://api.imdbapi.dev/names/nm0000206/relationships') {
-                return Http::response(['relationships' => []], 200);
-            }
-
-            if ($url === 'https://api.imdbapi.dev/names/nm0000206/trivia') {
-                return Http::response(['triviaEntries' => []], 200);
-            }
-
-            if ($url === 'https://api.imdbapi.dev/names/nm0005251') {
-                return Http::response([
-                    'id' => 'nm0005251',
-                    'displayName' => 'Carrie-Anne Moss',
-                    'primaryProfessions' => ['actress'],
-                ], 200);
-            }
-
-            if ($url === 'https://api.imdbapi.dev/names/nm0005251/images') {
-                return Http::response(['images' => []], 200);
-            }
-
-            if ($url === 'https://api.imdbapi.dev/names/nm0005251/relationships') {
-                return Http::response(['relationships' => []], 200);
-            }
-
-            if ($url === 'https://api.imdbapi.dev/names/nm0005251/trivia') {
-                return Http::response(['triviaEntries' => []], 200);
             }
 
             $this->fail('Unexpected HTTP request: '.$url);
@@ -237,14 +273,6 @@ class ImdbTitleDownloadCommandTest extends TestCase
 
             if ($url === 'https://api.imdbapi.dev/titles/tt0133093/akas') {
                 return Http::response($this->akasPayload(), 200);
-            }
-
-            if ($url === 'https://api.imdbapi.dev/titles/tt0133093/seasons') {
-                return Http::response(['seasons' => []], 200);
-            }
-
-            if ($url === 'https://api.imdbapi.dev/titles/tt0133093/episodes') {
-                return Http::response(['episodes' => [], 'totalCount' => 0], 200);
             }
 
             if ($url === 'https://api.imdbapi.dev/titles/tt0133093/images') {
@@ -292,29 +320,6 @@ class ImdbTitleDownloadCommandTest extends TestCase
                 return Http::response($this->boxOfficePayload(), 200);
             }
 
-            if ($url === 'https://api.imdbapi.dev/interests/in0000001') {
-                return Http::response($this->interestPayload(), 200);
-            }
-
-            if ($url === 'https://api.imdbapi.dev/names/nm0000206') {
-                return Http::response($this->nameDetailsPayload(), 200);
-            }
-
-            if ($url === 'https://api.imdbapi.dev/names/nm0000206/images') {
-                return Http::response($this->nameImagesPayload(), 200);
-            }
-
-            if ($url === 'https://api.imdbapi.dev/names/nm0000206/relationships') {
-                return Http::response([
-                    'code' => 13,
-                    'message' => 'upstream relationships parser failed',
-                ], 500);
-            }
-
-            if ($url === 'https://api.imdbapi.dev/names/nm0000206/trivia') {
-                return Http::response(['triviaEntries' => []], 200);
-            }
-
             $this->fail('Unexpected HTTP request: '.$url);
         });
 
@@ -328,6 +333,8 @@ class ImdbTitleDownloadCommandTest extends TestCase
 
         $this->assertCount(1, data_get($savedPayload, 'images.images', []));
         $this->assertArrayNotHasKey('nextPageToken', $savedPayload['images']);
+        $this->assertSame([], $savedPayload['names']);
+        $this->assertSame([], $savedPayload['interests']);
         $this->assertArrayNotHasKey('relationships', data_get($savedPayload, 'names.nm0000206', []));
     }
 

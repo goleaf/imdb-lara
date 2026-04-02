@@ -43,10 +43,11 @@ class PublicWatchlistVisibilityTest extends TestCase
             ->assertSee($title->name);
     }
 
-    public function test_private_watchlist_does_not_expose_a_public_profile_or_list_route(): void
+    public function test_private_watchlist_keeps_the_profile_live_but_hides_the_list_route(): void
     {
         $user = User::factory()->create([
             'username' => 'private-curator',
+            'profile_visibility' => 'public',
         ]);
 
         $watchlist = UserList::factory()->watchlist()->for($user)->create([
@@ -55,7 +56,11 @@ class PublicWatchlistVisibilityTest extends TestCase
 
         ListItem::factory()->for($watchlist, 'userList')->create();
 
-        $this->get(route('public.users.show', $user))->assertNotFound();
+        $this->get(route('public.users.show', $user))
+            ->assertOk()
+            ->assertSee('Watchlist visibility')
+            ->assertSee('Watchlist is private on this profile.');
+
         $this->get(route('public.lists.show', [$user, $watchlist]))->assertNotFound();
     }
 }
