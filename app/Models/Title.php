@@ -28,15 +28,18 @@ class Title extends Model
      * @var list<string>
      */
     protected $fillable = [
+        'imdb_id',
         'name',
         'original_name',
         'slug',
         'sort_title',
         'title_type',
+        'imdb_type',
         'release_year',
         'end_year',
         'release_date',
         'runtime_minutes',
+        'runtime_seconds',
         'age_rating',
         'plot_outline',
         'synopsis',
@@ -48,6 +51,11 @@ class Title extends Model
         'meta_title',
         'meta_description',
         'search_keywords',
+        'imdb_genres',
+        'imdb_interests',
+        'imdb_origin_countries',
+        'imdb_spoken_languages',
+        'imdb_payload',
         'is_published',
     ];
 
@@ -56,6 +64,11 @@ class Title extends Model
         return [
             'title_type' => TitleType::class,
             'release_date' => 'date',
+            'imdb_genres' => 'array',
+            'imdb_interests' => 'array',
+            'imdb_origin_countries' => 'array',
+            'imdb_spoken_languages' => 'array',
+            'imdb_payload' => 'array',
             'is_published' => 'boolean',
         ];
     }
@@ -91,6 +104,7 @@ class Title extends Model
         return $query->where(function (Builder $titleQuery) use ($search): void {
             $titleQuery
                 ->where('name', 'like', "%{$search}%")
+                ->orWhere('imdb_id', 'like', "%{$search}%")
                 ->orWhere('original_name', 'like', "%{$search}%")
                 ->orWhere('slug', 'like', "%{$search}%")
                 ->orWhere('sort_title', 'like', "%{$search}%")
@@ -220,6 +234,11 @@ class Title extends Model
         return $this->hasOne(TitleStatistic::class);
     }
 
+    public function imdbImport(): HasOne
+    {
+        return $this->hasOne(ImdbTitleImport::class, 'imdb_id', 'imdb_id');
+    }
+
     public function ratings(): HasMany
     {
         return $this->hasMany(Rating::class);
@@ -253,6 +272,16 @@ class Title extends Model
     public function contributions(): MorphMany
     {
         return $this->morphMany(Contribution::class, 'contributable');
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    public function imdbPayloadSection(string $key): ?array
+    {
+        $payload = data_get($this->imdb_payload, $key);
+
+        return is_array($payload) ? $payload : null;
     }
 
     private static function statisticColumnSubquery(string $column): Builder

@@ -6,6 +6,7 @@ use Database\Factories\AwardNominationFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use JsonException;
 
 class AwardNomination extends Model
 {
@@ -63,5 +64,36 @@ class AwardNomination extends Model
     public function episode(): BelongsTo
     {
         return $this->belongsTo(Episode::class);
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    public function detailsPayload(): ?array
+    {
+        if (! is_string($this->details) || trim($this->details) === '') {
+            return null;
+        }
+
+        try {
+            $payload = json_decode($this->details, true, flags: JSON_THROW_ON_ERROR);
+        } catch (JsonException) {
+            return null;
+        }
+
+        return is_array($payload) ? $payload : null;
+    }
+
+    public function detailSummary(): ?string
+    {
+        $text = data_get($this->detailsPayload(), 'text');
+
+        if (is_string($text) && trim($text) !== '') {
+            return trim($text);
+        }
+
+        return is_string($this->details) && trim($this->details) !== ''
+            ? trim($this->details)
+            : null;
     }
 }

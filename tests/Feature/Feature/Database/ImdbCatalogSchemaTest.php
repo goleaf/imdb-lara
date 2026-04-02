@@ -43,6 +43,7 @@ class ImdbCatalogSchemaTest extends TestCase
             'credits',
             'seasons',
             'episodes',
+            'imdb_title_imports',
             'media_assets',
             'title_statistics',
             'ratings',
@@ -66,11 +67,19 @@ class ImdbCatalogSchemaTest extends TestCase
         }
 
         $this->assertTrue(Schema::hasColumns('titles', [
+            'imdb_id',
+            'imdb_type',
+            'runtime_seconds',
             'sort_title',
             'canonical_title_id',
             'meta_title',
             'meta_description',
             'search_keywords',
+            'imdb_genres',
+            'imdb_interests',
+            'imdb_origin_countries',
+            'imdb_spoken_languages',
+            'imdb_payload',
             'deleted_at',
         ]));
 
@@ -86,6 +95,7 @@ class ImdbCatalogSchemaTest extends TestCase
             'person_profession_id',
             'episode_id',
             'credited_as',
+            'imdb_source_group',
             'deleted_at',
         ]));
 
@@ -108,6 +118,25 @@ class ImdbCatalogSchemaTest extends TestCase
 
         $this->assertTrue(Schema::hasColumns('title_statistics', [
             'rating_distribution',
+            'metacritic_score',
+            'metacritic_review_count',
+        ]));
+
+        $this->assertTrue(Schema::hasColumns('people', [
+            'imdb_id',
+            'imdb_alternative_names',
+            'imdb_primary_professions',
+            'imdb_payload',
+        ]));
+
+        $this->assertTrue(Schema::hasColumns('imdb_title_imports', [
+            'imdb_id',
+            'source_url',
+            'storage_path',
+            'payload_hash',
+            'payload',
+            'downloaded_at',
+            'imported_at',
         ]));
     }
 
