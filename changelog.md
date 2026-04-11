@@ -6,15 +6,18 @@ Hey! Here is what changed today in this project:
 Screenbase now has a public `Changes` page that renders straight from the root `changelog.md`, so release notes finally live inside the product instead of only in the repository. The public surface also now formally includes latest reviews, public lists, and public user pages, and the footer points people to the changelog so they can actually discover what shipped.
 
 ### What Was Improved
-Breadcrumbs got much smarter: shared breadcrumb items can now infer the right icon from the label or URL, which removes a lot of repetitive view wiring while making navigation feel more polished. The long-form changelog page also received dedicated editorial styling, the public list detail page now links its owner breadcrumb back to the public profile route, and the auth entry screens now reuse the shared button component for their placeholder social controls. Account and admin shell data is also cleaner now, with explicit portal-shell flags and flattened navbar items shared from one place.
+Breadcrumbs got much smarter: shared breadcrumb items can now infer the right icon from the label or URL, which removes a lot of repetitive view wiring while making navigation feel more polished. The long-form changelog page also received dedicated editorial styling, the public list detail page now links its owner breadcrumb back to the public profile route, and the auth entry screens now reuse the shared button component for their placeholder social controls. Account and admin shell data is also cleaner now, with explicit portal-shell flags and flattened navbar items shared from one place so the Blade layer does less recomputing on its own. Public review and list queries now reuse the shared title card loading helpers too, which keeps those catalog surfaces consistent and easier to maintain.
 
 ### What Was Removed or Cleaned Up
 The route layer is less crowded now that auth, account, and admin definitions were split out of `routes/web.php` into dedicated files. The test harness also stopped guessing whether the app is running in catalog-only mode by inspecting route registration, and the lockfile dropped an unnecessary root package name entry.
 
 ### Files That Changed
 - `app/Actions/Content/LoadChangelogPageAction.php` — added the action that reads `changelog.md`, splits it into dated entries, converts markdown to safe HTML, and builds the public changes-page payload.
+- `app/Actions/Home/GetLatestReviewFeedAction.php` — switched the latest reviews feed over to shared title card query helpers.
 - `app/Actions/Layout/BuildFooterAction.php` — added footer legal-link data so the site footer can expose the new Changes page.
 - `app/Actions/Layout/ResolveBreadcrumbIconAction.php` — added a shared icon resolver for breadcrumb labels and paths.
+- `app/Actions/Lists/BuildPublicListsIndexQueryAction.php` — simplified public list loading and reused the shared title card query helpers.
+- `app/Actions/Lists/BuildUserListItemsQueryAction.php` — switched user list item title loading over to the shared title card query helpers.
 - `app/Actions/Seo/ResolvePageShellViewDataAction.php` — added explicit auth and portal shell state flags so layouts can react without guessing.
 - `app/Providers/ViewServiceProvider.php` — started sharing flattened account and admin navbar items plus the current portal user with shell views.
 - `changelog.md` — added this new top-of-file release note entry for the current update.
@@ -23,6 +26,11 @@ The route layer is less crowded now that auth, account, and admin definitions we
 - `resources/views/auth/login.blade.php` — switched the login page’s placeholder social entry buttons over to the shared button component.
 - `resources/views/auth/register.blade.php` — switched the register page’s placeholder social entry buttons over to the shared button component.
 - `resources/views/changes/index.blade.php` — added the public Blade view that renders the changelog as a readable editorial stream.
+- `resources/views/layouts/partials/account-navbar.blade.php` — switched the account top navbar to the pre-flattened shared navigation items.
+- `resources/views/layouts/partials/account-sidebar.blade.php` — switched the account sidebar to the shared portal user payload instead of fetching auth data inline.
+- `resources/views/layouts/partials/admin-navbar.blade.php` — switched the admin top navbar to the pre-flattened shared navigation items.
+- `resources/views/layouts/partials/admin-sidebar.blade.php` — switched the admin sidebar to the shared portal user payload instead of fetching auth data inline.
+- `resources/views/layouts/partials/app-shell.blade.php` — switched the shell template over to explicit shell-state flags instead of recomputing them in Blade.
 - `resources/views/components/ui/breadcrumbs/item.blade.php` — taught breadcrumb items to auto-resolve icons when no explicit icon is passed.
 - `resources/views/components/ui/footer.blade.php` — added footer rendering for the new legal link group, including Changes.
 - `resources/views/lists/show.blade.php` — linked the list-owner breadcrumb back to the public user page.

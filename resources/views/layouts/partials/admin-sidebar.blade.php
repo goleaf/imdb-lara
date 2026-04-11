@@ -1,7 +1,3 @@
-@php
-    $user = auth()->user();
-@endphp
-
 <x-ui.sidebar
     class="border-r border-black/5 bg-white/80 backdrop-blur-xl dark:border-white/5 dark:bg-neutral-950/85"
     scrollable
@@ -22,21 +18,21 @@
         </div>
     </x-slot:brand>
 
-    @if ($user)
+    @if ($portalUser)
         <div class="px-3 pb-3 pt-2 [:has([data-collapsed]_&)_&]:hidden">
             <x-ui.card class="!max-w-none border border-black/5 bg-white/70 shadow-sm dark:border-white/10 dark:bg-white/[0.03]">
                 <div class="space-y-3">
                     <div class="flex items-center gap-3">
                         <x-ui.avatar
-                            :src="$user->avatar_url"
-                            :name="$user->name"
+                            :src="$portalUser->avatar_url"
+                            :name="$portalUser->name"
                             color="auto"
                             size="md"
                             circle
                         />
 
                         <div class="min-w-0">
-                            <div class="truncate text-sm font-semibold text-neutral-900 dark:text-neutral-50">{{ $user->name }}</div>
+                            <div class="truncate text-sm font-semibold text-neutral-900 dark:text-neutral-50">{{ $portalUser->name }}</div>
                             <x-ui.text size="sm" class="truncate text-neutral-500 dark:text-neutral-400">Staff workspace</x-ui.text>
                         </div>
                     </div>
@@ -64,21 +60,21 @@
 
     <x-ui.sidebar.push />
 
-    @if ($user)
+    @if ($portalUser)
         <div class="px-3 pb-3">
             <x-ui.dropdown portal position="top-start">
                 <x-slot:button>
                     <x-ui.button variant="none" class="!h-auto w-full justify-start rounded-box border border-black/5 bg-white/70 px-3 py-2 text-left shadow-sm transition hover:bg-white dark:border-white/10 dark:bg-white/[0.03] dark:hover:bg-white/[0.05]">
                         <x-ui.avatar
-                            :src="$user->avatar_url"
-                            :name="$user->name"
+                            :src="$portalUser->avatar_url"
+                            :name="$portalUser->name"
                             color="auto"
                             size="sm"
                             circle
                         />
 
                         <div class="min-w-0 flex-1 [:has([data-collapsed]_&)_&]:hidden">
-                            <div class="truncate text-sm font-semibold text-neutral-900 dark:text-neutral-50">{{ $user->name }}</div>
+                            <div class="truncate text-sm font-semibold text-neutral-900 dark:text-neutral-50">{{ $portalUser->name }}</div>
                             <x-ui.text size="sm" class="truncate text-neutral-500 dark:text-neutral-400">Operations menu</x-ui.text>
                         </div>
 

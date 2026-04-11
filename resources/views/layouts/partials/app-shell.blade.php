@@ -1,15 +1,11 @@
-@php
-    $isPortalShell = in_array($shell['shellVariant'], ['account', 'admin'], true);
-@endphp
-
 <!DOCTYPE html>
 <html
     lang="{{ str_replace('_', '-', app()->getLocale()) }}"
     @class([
         'h-full scroll-smooth',
-        'dark [color-scheme:dark]' => ! $isPortalShell,
+        'dark [color-scheme:dark]' => ! $shell['isPortalShell'],
     ])
-    @if ($isPortalShell)
+    @if ($shell['isPortalShell'])
         data-theme-enabled="true"
     @endif
 >
@@ -39,7 +35,7 @@
             <script type="application/ld+json">{!! $shell['breadcrumbSchema'] !!}</script>
         @endif
 
-        @if ($isPortalShell)
+        @if ($shell['isPortalShell'])
             <script>
                 (() => {
                     const storedTheme = localStorage.getItem('theme') ?? 'dark';
@@ -60,8 +56,8 @@
     <body @class([
         'min-h-full antialiased',
         'bg-[#080707] text-stone-50' => $shell['isAuthShell'],
-        'bg-stone-100 text-stone-950 dark:bg-neutral-950 dark:text-neutral-50' => $isPortalShell,
-        'bg-neutral-950 text-neutral-50' => ! $shell['isAuthShell'] && ! $isPortalShell,
+        'bg-stone-100 text-stone-950 dark:bg-neutral-950 dark:text-neutral-50' => $shell['isPortalShell'],
+        'bg-neutral-950 text-neutral-50' => ! $shell['isAuthShell'] && ! $shell['isPortalShell'],
     ])>
         @if ($shell['isAuthShell'])
             <div class="sb-auth-shell relative min-h-screen overflow-hidden">
@@ -113,7 +109,7 @@
                     @endif
                 </div>
             </div>
-        @elseif ($isPortalShell)
+        @elseif ($shell['isPortalShell'])
             <div class="min-h-screen bg-[radial-gradient(circle_at_top_right,_rgba(245,158,11,0.14),_transparent_24%),radial-gradient(circle_at_bottom_left,_rgba(14,165,233,0.12),_transparent_20%)] dark:bg-[radial-gradient(circle_at_top_right,_rgba(245,158,11,0.16),_transparent_26%),radial-gradient(circle_at_bottom_left,_rgba(37,99,235,0.18),_transparent_24%),linear-gradient(180deg,_rgba(10,10,10,1),_rgba(15,18,25,1))]">
                 <x-ui.layout>
                     {!! $shell['renderedSidebar'] !!}
@@ -123,7 +119,7 @@
                             <x-ui.layout.header class="gap-3 border-b border-black/5 bg-white/75 px-4 backdrop-blur-xl dark:border-white/5 dark:bg-neutral-950/75">
                                 <x-ui.sidebar.toggle class="md:hidden" />
 
-                                @if (filled(trim((string) $shell['renderedNavbar'])))
+                                @if ($shell['hasRenderedNavbar'])
                                     {!! $shell['renderedNavbar'] !!}
                                 @endif
 
@@ -225,7 +221,7 @@
                             </div>
 
                             <div class="sb-shell-topnav" aria-label="Global navigation">
-                                @if (filled(trim((string) $shell['renderedNavbar'])))
+                                @if ($shell['hasRenderedNavbar'])
                                     {!! $shell['renderedNavbar'] !!}
                                 @elseif (request()->routeIs('public.*'))
                                     @include('layouts.partials.public-navbar')

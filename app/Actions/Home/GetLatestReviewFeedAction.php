@@ -2,9 +2,9 @@
 
 namespace App\Actions\Home;
 
-use App\Enums\MediaKind;
 use App\Enums\ReviewStatus;
 use App\Models\Review;
+use App\Models\Title;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -26,21 +26,10 @@ class GetLatestReviewFeedAction
             ->where('status', ReviewStatus::Published)
             ->with([
                 'author:id,name,username',
-                'title:id,name,slug,title_type,release_year,plot_outline',
-                'title.mediaAssets' => fn ($mediaQuery) => $mediaQuery
-                    ->select([
-                        'id',
-                        'mediable_type',
-                        'mediable_id',
-                        'kind',
-                        'url',
-                        'alt_text',
-                        'position',
-                        'is_primary',
-                    ])
-                    ->where('kind', MediaKind::Poster)
-                    ->orderBy('position')
-                    ->limit(1),
+                'title' => fn ($titleQuery) => $titleQuery
+                    ->select(Title::catalogCardColumns())
+                    ->publishedCatalog()
+                    ->withCatalogCardRelations(),
             ])
             ->latest('published_at');
     }
