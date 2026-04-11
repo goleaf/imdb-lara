@@ -84,6 +84,16 @@ class LoadTitleDetailsAction
      *     movieCertificateAttributeRows: Collection<int, MovieCertificateAttribute>,
      *     movieCompanyCreditRows: Collection<int, MovieCompanyCredit>,
      *     movieCompanyCreditAttributeRows: Collection<int, MovieCompanyCreditAttribute>,
+     *     movieCompanyCreditAttributeEntries: Collection<int, array{
+     *         companyLabel: string|null,
+     *         companyHref: string|null,
+     *         categoryLabel: string|null,
+     *         categoryHref: string|null,
+     *         attributeLabel: string|null,
+     *         attributeHref: string|null,
+     *         activeYearsLabel: string|null,
+     *         countryBadges: Collection<int, array{code: string, label: string}>
+     *     }>,
      *     movieCompanyCreditCountryRows: Collection<int, MovieCompanyCreditCountry>,
      *     movieCompanyCreditSummaryRows: Collection<int, MovieCompanyCreditSummary>,
      *     movieDirectorRows: Collection<int, MovieDirector>,
@@ -217,6 +227,7 @@ class LoadTitleDetailsAction
         $movieCertificateAttributeRows = $title->resolvedMovieCertificateAttributes();
         $movieCompanyCreditRows = $title->resolvedMovieCompanyCredits();
         $movieCompanyCreditAttributeRows = $title->resolvedMovieCompanyCreditAttributes();
+        $movieCompanyCreditAttributeEntries = $this->buildMovieCompanyCreditAttributeEntries($movieCompanyCreditAttributeRows);
         $movieCompanyCreditCountryRows = $title->resolvedMovieCompanyCreditCountries();
         $movieCompanyCreditSummaryRows = $title->resolvedMovieCompanyCreditSummaries();
         $movieDirectorRows = $title->resolvedMovieDirectors();
@@ -487,6 +498,7 @@ class LoadTitleDetailsAction
             'movieCertificateAttributeRows' => $movieCertificateAttributeRows,
             'movieCompanyCreditRows' => $movieCompanyCreditRows,
             'movieCompanyCreditAttributeRows' => $movieCompanyCreditAttributeRows,
+            'movieCompanyCreditAttributeEntries' => $movieCompanyCreditAttributeEntries,
             'movieCompanyCreditCountryRows' => $movieCompanyCreditCountryRows,
             'movieCompanyCreditSummaryRows' => $movieCompanyCreditSummaryRows,
             'movieDirectorRows' => $movieDirectorRows,
@@ -869,6 +881,64 @@ class LoadTitleDetailsAction
                     'attributes' => $attributes,
                 ];
             })
+            ->values();
+    }
+
+    /**
+     * @param  Collection<int, MovieCompanyCreditAttribute>  $movieCompanyCreditAttributeRows
+     * @return Collection<int, array{
+     *     companyLabel: string|null,
+     *     companyHref: string|null,
+     *     categoryLabel: string|null,
+     *     categoryHref: string|null,
+     *     attributeLabel: string|null,
+     *     attributeHref: string|null,
+     *     activeYearsLabel: string|null,
+     *     countryBadges: Collection<int, array{code: string, label: string}>
+     * }>
+     */
+    private function buildMovieCompanyCreditAttributeEntries(Collection $movieCompanyCreditAttributeRows): Collection
+    {
+        return $movieCompanyCreditAttributeRows
+            ->map(function (MovieCompanyCreditAttribute $movieCompanyCreditAttribute): ?array {
+                $movieCompanyCredit = $movieCompanyCreditAttribute->movieCompanyCredit;
+                $company = $movieCompanyCredit?->company;
+                $category = $movieCompanyCredit?->companyCreditCategory;
+                $attribute = $movieCompanyCreditAttribute->companyCreditAttribute;
+
+                if (! $movieCompanyCredit instanceof MovieCompanyCredit || ! $attribute instanceof CompanyCreditAttribute || ! filled($attribute->name)) {
+                    return null;
+                }
+
+                $countryBadges = $movieCompanyCredit->relationLoaded('movieCompanyCreditCountries')
+                    ? $movieCompanyCredit->movieCompanyCreditCountries
+                        ->map(function (MovieCompanyCreditCountry $movieCompanyCreditCountry): ?array {
+                            if (! filled($movieCompanyCreditCountry->country_code)) {
+                                return null;
+                            }
+
+                            return [
+                                'code' => strtoupper((string) $movieCompanyCreditCountry->country_code),
+                                'label' => $movieCompanyCreditCountry->resolvedCountryLabel() ?? strtoupper((string) $movieCompanyCreditCountry->country_code),
+                            ];
+                        })
+                        ->filter()
+                        ->unique('code')
+                        ->values()
+                    : collect();
+
+                return [
+                    'companyLabel' => $company?->name,
+                    'companyHref' => $company ? route('public.companies.show', $company) : null,
+                    'categoryLabel' => $category?->name,
+                    'categoryHref' => $company && $category ? route('public.companies.show', ['company' => $company, 'category' => (string) $category->getKey()]) : null,
+                    'attributeLabel' => (string) $attribute->name,
+                    'attributeHref' => route('public.company-credit-attributes.show', $attribute),
+                    'activeYearsLabel' => $movieCompanyCredit->activeYearsLabel(),
+                    'countryBadges' => $countryBadges,
+                ];
+            })
+            ->filter()
             ->values();
     }
 

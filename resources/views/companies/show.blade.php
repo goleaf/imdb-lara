@@ -189,9 +189,12 @@
                                         <div class="text-xs uppercase tracking-[0.18em] text-neutral-500 dark:text-neutral-400">Attributes</div>
                                         <div class="flex flex-wrap gap-2">
                                             @forelse ($archiveRecord['attributeBadges'] as $attributeBadge)
-                                                <span class="inline-flex items-center rounded-full border border-black/8 px-2.5 py-1 text-xs font-medium text-neutral-700 dark:border-white/10 dark:text-neutral-200">
+                                                <a
+                                                    href="{{ $attributeBadge['href'] }}"
+                                                    class="inline-flex items-center rounded-full border border-black/8 px-2.5 py-1 text-xs font-medium text-neutral-700 transition hover:bg-white dark:border-white/10 dark:text-neutral-200 dark:hover:bg-white/[0.05]"
+                                                >
                                                     {{ $attributeBadge['label'] }}
-                                                </span>
+                                                </a>
                                             @empty
                                                 <span class="text-sm text-neutral-500 dark:text-neutral-400">No attribute rows recorded.</span>
                                             @endforelse

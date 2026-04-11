@@ -1311,43 +1311,101 @@
                     </x-ui.card>
                 @endif
 
-                @if ($movieCompanyCreditAttributeRows->isNotEmpty())
+                @if ($movieCompanyCreditAttributeEntries->isNotEmpty())
                     <x-ui.card data-slot="title-detail-movie-company-credit-attributes" class="sb-detail-section !max-w-none">
                         <div class="space-y-4">
                             <div>
                                 <x-ui.heading level="h2" size="lg">Movie company credit attributes</x-ui.heading>
                                 <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                    Company credit attributes linked to this title's company records.
+                                    Company credit attributes linked to this title's company records, with direct paths into the related company and attribute archives.
                                 </x-ui.text>
                             </div>
 
-                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
-                                <div class="overflow-x-auto">
-                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
-                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
-                                            <tr>
-                                                <th scope="col" class="px-4 py-3 font-medium">Company</th>
-                                                <th scope="col" class="px-4 py-3 font-medium">Category</th>
-                                                <th scope="col" class="px-4 py-3 font-medium">Attribute</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
-                                            @foreach ($movieCompanyCreditAttributeRows as $movieCompanyCreditAttributeRow)
-                                                <tr>
-                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
-                                                        {{ $movieCompanyCreditAttributeRow->movieCompanyCredit?->company?->name ?? '—' }}
-                                                    </td>
-                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
-                                                        {{ $movieCompanyCreditAttributeRow->movieCompanyCredit?->companyCreditCategory?->name ?? '—' }}
-                                                    </td>
-                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
-                                                        {{ $movieCompanyCreditAttributeRow->companyCreditAttribute?->name ?? $movieCompanyCreditAttributeRow->company_credit_attribute_id }}
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
+                            <div class="grid auto-rows-fr gap-3 sm:grid-cols-2">
+                                @foreach ($movieCompanyCreditAttributeEntries as $movieCompanyCreditAttributeEntry)
+                                    <x-ui.card class="!max-w-none h-full rounded-[1.35rem]">
+                                        <div class="flex h-full flex-col gap-4">
+                                            <div class="flex items-start gap-3">
+                                                <div class="flex size-11 shrink-0 items-center justify-center rounded-[1rem] border border-black/5 bg-neutral-100 text-neutral-600 dark:border-white/10 dark:bg-neutral-800 dark:text-neutral-300">
+                                                    <x-ui.icon name="building-office-2" class="size-5" />
+                                                </div>
+
+                                                <div class="min-w-0 flex-1 space-y-3">
+                                                    <div class="flex flex-wrap gap-2">
+                                                        @if ($movieCompanyCreditAttributeEntry['companyHref'] && $movieCompanyCreditAttributeEntry['companyLabel'])
+                                                            <a href="{{ $movieCompanyCreditAttributeEntry['companyHref'] }}">
+                                                                <x-ui.badge variant="outline" color="neutral" icon="building-office-2">
+                                                                    {{ $movieCompanyCreditAttributeEntry['companyLabel'] }}
+                                                                </x-ui.badge>
+                                                            </a>
+                                                        @elseif ($movieCompanyCreditAttributeEntry['companyLabel'])
+                                                            <x-ui.badge variant="outline" color="neutral" icon="building-office-2">
+                                                                {{ $movieCompanyCreditAttributeEntry['companyLabel'] }}
+                                                            </x-ui.badge>
+                                                        @endif
+
+                                                        @if ($movieCompanyCreditAttributeEntry['categoryHref'] && $movieCompanyCreditAttributeEntry['categoryLabel'])
+                                                            <a href="{{ $movieCompanyCreditAttributeEntry['categoryHref'] }}">
+                                                                <x-ui.badge variant="outline" color="slate" icon="tag">
+                                                                    {{ $movieCompanyCreditAttributeEntry['categoryLabel'] }}
+                                                                </x-ui.badge>
+                                                            </a>
+                                                        @elseif ($movieCompanyCreditAttributeEntry['categoryLabel'])
+                                                            <x-ui.badge variant="outline" color="slate" icon="tag">
+                                                                {{ $movieCompanyCreditAttributeEntry['categoryLabel'] }}
+                                                            </x-ui.badge>
+                                                        @endif
+
+                                                        @if ($movieCompanyCreditAttributeEntry['activeYearsLabel'])
+                                                            <x-ui.badge variant="outline" color="amber" icon="calendar-days">
+                                                                {{ $movieCompanyCreditAttributeEntry['activeYearsLabel'] }}
+                                                            </x-ui.badge>
+                                                        @endif
+                                                    </div>
+
+                                                    <div class="space-y-2">
+                                                        <a
+                                                            href="{{ $movieCompanyCreditAttributeEntry['attributeHref'] }}"
+                                                            class="block text-lg font-semibold text-neutral-900 transition hover:opacity-80 dark:text-neutral-100"
+                                                        >
+                                                            {{ $movieCompanyCreditAttributeEntry['attributeLabel'] }}
+                                                        </a>
+
+                                                        <x-ui.text class="text-sm text-neutral-600 dark:text-neutral-300">
+                                                            Attribute archive for company records matching this title, with links back into other related titles and companies.
+                                                        </x-ui.text>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            @if ($movieCompanyCreditAttributeEntry['countryBadges']->isNotEmpty())
+                                                <div class="space-y-2">
+                                                    <div class="text-xs uppercase tracking-[0.18em] text-neutral-500 dark:text-neutral-400">Countries</div>
+                                                    <div class="flex flex-wrap gap-2">
+                                                        @foreach ($movieCompanyCreditAttributeEntry['countryBadges'] as $countryBadge)
+                                                            <span class="inline-flex items-center gap-2 rounded-full border border-black/8 px-2.5 py-1 text-xs font-medium dark:border-white/10">
+                                                                <x-ui.flag type="country" :code="$countryBadge['code']" class="size-3.5" />
+                                                                <span>{{ $countryBadge['label'] }}</span>
+                                                            </span>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            @endif
+
+                                            <div class="mt-auto flex flex-wrap justify-end gap-2">
+                                                @if ($movieCompanyCreditAttributeEntry['companyHref'])
+                                                    <x-ui.button.light-outline :href="$movieCompanyCreditAttributeEntry['companyHref']" size="sm" icon="building-office-2">
+                                                        Open company
+                                                    </x-ui.button.light-outline>
+                                                @endif
+
+                                                <x-ui.button.light-outline :href="$movieCompanyCreditAttributeEntry['attributeHref']" size="sm" iconAfter="arrow-right">
+                                                    Open attribute archive
+                                                </x-ui.button.light-outline>
+                                            </div>
+                                        </div>
+                                    </x-ui.card>
+                                @endforeach
                             </div>
                         </div>
                     </x-ui.card>

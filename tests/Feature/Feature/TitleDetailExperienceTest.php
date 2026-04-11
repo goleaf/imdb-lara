@@ -1123,18 +1123,21 @@ class TitleDetailExperienceTest extends TestCase
         $response = $this->get(route('public.titles.show', $title))
             ->assertOk()
             ->assertSeeHtml('data-slot="title-detail-movie-company-credit-attributes"')
+            ->assertSee('Company credit attributes linked to this title\'s company records, with direct paths into the related company and attribute archives.')
             ->assertSee($movieCompanyCreditAttribute->movieCompanyCredit->company->name)
             ->assertSee($movieCompanyCreditAttribute->movieCompanyCredit->companyCreditCategory->name)
-            ->assertSee($movieCompanyCreditAttribute->companyCreditAttribute->name);
+            ->assertSee($movieCompanyCreditAttribute->companyCreditAttribute->name)
+            ->assertSee('Open company')
+            ->assertSee('Open attribute archive')
+            ->assertSee(route('public.companies.show', $movieCompanyCreditAttribute->movieCompanyCredit->company), false)
+            ->assertSee(route('public.company-credit-attributes.show', $movieCompanyCreditAttribute->companyCreditAttribute), false);
 
-        $sectionMarkup = $this->sectionMarkup($response, 'title-detail-movie-company-credit-attributes');
+        $categoryHref = route('public.companies.show', [
+            'company' => $movieCompanyCreditAttribute->movieCompanyCredit->company,
+            'category' => (string) $movieCompanyCreditAttribute->movieCompanyCredit->companyCreditCategory->getKey(),
+        ]);
 
-        $this->assertStringContainsString('>Company</th>', $sectionMarkup);
-        $this->assertStringContainsString('>Category</th>', $sectionMarkup);
-        $this->assertStringContainsString('>Attribute</th>', $sectionMarkup);
-        $this->assertStringNotContainsString('>movie_company_credit_id</th>', $sectionMarkup);
-        $this->assertStringNotContainsString('>company_credit_attribute_id</th>', $sectionMarkup);
-        $this->assertStringNotContainsString('>position</th>', $sectionMarkup);
+        $response->assertSee($categoryHref, false);
     }
 
     public function test_title_page_surfaces_raw_movie_company_credit_country_rows_when_available(): void

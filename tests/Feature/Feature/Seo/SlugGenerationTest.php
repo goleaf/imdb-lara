@@ -167,6 +167,7 @@ class SlugGenerationTest extends TestCase
             'movieCertificateAttributeRows' => collect(),
             'movieCompanyCreditRows' => collect(),
             'movieCompanyCreditAttributeRows' => collect(),
+            'movieCompanyCreditAttributeEntries' => collect(),
             'movieCompanyCreditCountryRows' => collect(),
             'movieCompanyCreditSummaryRows' => collect(),
             'movieDirectorRows' => collect(),
