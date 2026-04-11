@@ -47,7 +47,7 @@
                 <x-ui.error name="form.score" />
             </x-ui.field>
 
-            <x-ui.button type="submit" icon="star" wire:target="save,remove" wire:loading.attr="disabled">
+            <x-ui.button type="submit" icon="star" wire:target="save,remove">
                 Save rating
             </x-ui.button>
 
@@ -58,7 +58,6 @@
                     icon="trash"
                     wire:click="remove"
                     wire:target="save,remove"
-                    wire:loading.attr="disabled"
                 >
                     Remove
                 </x-ui.button>

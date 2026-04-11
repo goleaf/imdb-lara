@@ -69,7 +69,6 @@
                             icon="trash"
                             wire:click="delete"
                             wire:target="save,saveDraft,delete"
-                            wire:loading.attr="disabled"
                         >
                             Delete review
                         </x-ui.button>
@@ -85,7 +84,6 @@
                     icon="pencil-square"
                     wire:click="saveDraft"
                     wire:target="save,saveDraft,delete"
-                    wire:loading.attr="disabled"
                 >
                     Save draft
                 </x-ui.button>
@@ -94,7 +92,6 @@
                     type="submit"
                     icon="chat-bubble-left-right"
                     wire:target="save,saveDraft,delete"
-                    wire:loading.attr="disabled"
                 >
                     {{ $review ? 'Update review' : 'Submit review' }}
                 </x-ui.button>

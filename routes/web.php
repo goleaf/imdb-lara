@@ -2,6 +2,7 @@
 
 use App\Actions\Seo\GetSitemapDataAction;
 use App\Enums\TitleMediaArchiveKind;
+use App\Livewire\Pages\Public\AkaAttributePage;
 use App\Livewire\Pages\Public\AwardNominationPage;
 use App\Livewire\Pages\Public\AwardsPage;
 use App\Livewire\Pages\Public\BrowseTitlesPage;
@@ -9,6 +10,7 @@ use App\Livewire\Pages\Public\CatalogExplorerPage;
 use App\Livewire\Pages\Public\CertificateAttributePage;
 use App\Livewire\Pages\Public\CertificateRatingPage;
 use App\Livewire\Pages\Public\CompanyPage;
+use App\Livewire\Pages\Public\CompanyCreditAttributePage;
 use App\Livewire\Pages\Public\DiscoverPage;
 use App\Livewire\Pages\Public\EpisodeShowPage;
 use App\Livewire\Pages\Public\HomePage;
@@ -62,10 +64,12 @@ Route::name('public.')->group(function (): void {
     Route::livewire('/people', PeoplePage::class)->name('people.index');
     Route::livewire('/people/{person:slug}', PeoplePage::class)->name('people.show');
     Route::livewire('/companies/{company:slug}', CompanyPage::class)->name('companies.show');
+    Route::livewire('/company-credit-attributes/{companyCreditAttribute:slug}', CompanyCreditAttributePage::class)->name('company-credit-attributes.show');
     Route::livewire('/interest-categories', InterestCategoriesPage::class)->name('interest-categories.index');
     Route::livewire('/interest-categories/{interestCategory:slug}', InterestCategoriesPage::class)->name('interest-categories.show');
     Route::livewire('/awards', AwardsPage::class)->name('awards.index');
     Route::livewire('/awards/nominations/{awardNomination:slug}', AwardNominationPage::class)->name('awards.nominations.show');
+    Route::livewire('/aka-attributes/{akaAttribute:slug}', AkaAttributePage::class)->name('aka-attributes.show');
     Route::livewire('/certificate-ratings/{certificateRating:slug}', CertificateRatingPage::class)->name('certificate-ratings.show');
     Route::livewire('/certificate-attributes/{certificateAttribute:slug}', CertificateAttributePage::class)->name('certificate-attributes.show');
     Route::livewire('/trailers', LatestTrailersPage::class)->name('trailers.latest');

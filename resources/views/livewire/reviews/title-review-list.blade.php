@@ -1,5 +1,5 @@
 <div class="space-y-4">
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between has-data-loading:[&_[data-slot=review-list-loading]]:inline-flex">
         <div class="flex flex-wrap items-center gap-2">
             @foreach ($sortOptions as $sortOption)
                 <x-ui.button
@@ -10,7 +10,6 @@
                     wire:key="title-review-sort-{{ $sortOption['value'] }}"
                     wire:click="setSort('{{ $sortOption['value'] }}')"
                     wire:target="setSort"
-                    wire:loading.attr="disabled"
                 >
                     {{ $sortOption['label'] }}
                 </x-ui.button>
@@ -19,7 +18,7 @@
 
         <div class="flex items-center gap-3 text-sm text-neutral-500 dark:text-neutral-400">
             <span>{{ number_format($reviews->total()) }} published reviews</span>
-            <span wire:loading.delay wire:target="setSort,toggleHelpful" class="inline-flex items-center gap-2">
+            <span data-slot="review-list-loading" class="hidden items-center gap-2">
                 <x-ui.icon.loading variant="mini" class="size-4" />
                 <span>Updating…</span>
             </span>
@@ -82,7 +81,6 @@
                                         icon="hand-thumb-up"
                                         wire:click="toggleHelpful({{ $review->id }})"
                                         wire:target="toggleHelpful"
-                                        wire:loading.attr="disabled"
                                     >
                                         {{ ($helpfulVoteStates[$review->id] ?? false) ? 'Helpful saved' : 'Mark helpful' }}
                                     </x-ui.button>

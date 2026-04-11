@@ -47,6 +47,7 @@ use App\Models\Title;
 use App\Models\TitleStatistic;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Number;
 use Illuminate\Support\Str;
 
 class LoadTitleDetailsAction
@@ -63,6 +64,14 @@ class LoadTitleDetailsAction
      *     movieAkaRows: Collection<int, MovieAka>,
      *     movieAkaAttributeRows: Collection<int, MovieAkaAttribute>,
      *     akaAttributeRows: Collection<int, AkaAttribute>,
+     *     akaAttributeEntries: Collection<int, array{
+     *         id: int,
+     *         label: string,
+     *         description: string,
+     *         href: string,
+     *         linkedAkaCount: int,
+     *         linkedAkas: Collection<int, array{text: string, meta: string|null}>
+     *     }>,
      *     akaTypeRows: Collection<int, AkaType>,
      *     awardCategoryRows: Collection<int, AwardCategory>,
      *     awardEventRows: Collection<int, AwardEvent>,
@@ -96,6 +105,12 @@ class LoadTitleDetailsAction
      *         countries: Collection<int, array{code: string, label: string}>,
      *         attributes: Collection<int, CertificateAttribute>
      *     }>,
+     *     certificateTitleEntries: Collection<int, array{
+     *         rating: CertificateRating|null,
+     *         meaning: string,
+     *         country: array{code: string, label: string}|null,
+     *         attributes: Collection<int, CertificateAttribute>
+     *     }>,
      *     companyEntries: Collection<int, array{
      *         company: Company,
      *         creditCount: int,
@@ -111,8 +126,25 @@ class LoadTitleDetailsAction
      *     currencyRows: Collection<int, Currency>,
      *     countryRows: Collection<int, Country>,
      *     genreRows: Collection<int, Genre>,
+     *     genreEntries: Collection<int, array{
+     *         genre: Genre,
+     *         href: string,
+     *         description: string,
+     *         titleCountLabel: string|null,
+     *         previewUrl: string|null,
+     *         previewAlt: string|null
+     *     }>,
      *     interestRows: Collection<int, Interest>,
      *     interestCategoryRows: Collection<int, InterestCategory>,
+     *     interestCategoryEntries: Collection<int, array{
+     *         interestCategory: InterestCategory,
+     *         matchedInterestCountLabel: string,
+     *         matchedInterests: Collection<int, array{
+     *             name: string,
+     *             href: string,
+     *             isSubgenre: bool
+     *         }>
+     *     }>,
      *     interestPrimaryImageRows: Collection<int, InterestPrimaryImage>,
      *     interestSimilarInterestRows: Collection<int, InterestSimilarInterest>,
      *     detailItems: Collection<int, array{label: string, value: string}>,
@@ -172,6 +204,7 @@ class LoadTitleDetailsAction
             ->filter(fn (mixed $akaAttribute): bool => $akaAttribute instanceof AkaAttribute && filled($akaAttribute->name))
             ->unique('id')
             ->values();
+        $akaAttributeEntries = $this->buildAkaAttributeEntries($movieAkaRows, $movieAkaAttributeRows);
         $akaTypeRows = $title->resolvedAkaTypes();
         $awardCategoryRows = $title->resolvedAwardCategories();
         $awardEventRows = $title->resolvedAwardEvents();
@@ -226,6 +259,7 @@ class LoadTitleDetailsAction
             $certificateRatingRows,
             $movieCertificateRows,
         );
+        $certificateTitleEntries = $this->buildCertificateTitleEntries($movieCertificateRows);
         $companyEntries = $this->buildCompanyEntries($movieCompanyCreditRows);
         $companyRows = $title->resolvedCompanies();
         $companyCreditAttributeRows = $title->resolvedCompanyCreditAttributes();
@@ -234,8 +268,10 @@ class LoadTitleDetailsAction
         $currencyRows = $title->resolvedCurrencies();
         $countryRows = $title->resolvedCountries();
         $genreRows = $title->resolvedGenres();
+        $genreEntries = $this->buildGenreEntries($title, $movieGenreRows, $poster, $backdrop);
         $interestRows = $title->resolvedInterests();
         $interestCategoryRows = $title->resolvedInterestCategories();
+        $interestCategoryEntries = $this->buildInterestCategoryEntries($title, $interestCategoryRows);
         $interestPrimaryImageRows = $title->resolvedInterestPrimaryImages();
         $interestSimilarInterestRows = $title->resolvedInterestSimilarInterests();
         $countries = $countryRows
@@ -438,6 +474,7 @@ class LoadTitleDetailsAction
             'movieAkaRows' => $movieAkaRows,
             'movieAkaAttributeRows' => $movieAkaAttributeRows,
             'akaAttributeRows' => $akaAttributeRows,
+            'akaAttributeEntries' => $akaAttributeEntries,
             'akaTypeRows' => $akaTypeRows,
             'awardCategoryRows' => $awardCategoryRows,
             'awardEventRows' => $awardEventRows,
@@ -461,6 +498,7 @@ class LoadTitleDetailsAction
             'certificateRatingRows' => $certificateRatingRows,
             'certificateAttributeEntries' => $certificateAttributeEntries,
             'certificateRatingEntries' => $certificateRatingEntries,
+            'certificateTitleEntries' => $certificateTitleEntries,
             'companyEntries' => $companyEntries,
             'companyRows' => $companyRows,
             'companyCreditAttributeRows' => $companyCreditAttributeRows,
@@ -469,8 +507,10 @@ class LoadTitleDetailsAction
             'currencyRows' => $currencyRows,
             'countryRows' => $countryRows,
             'genreRows' => $genreRows,
+            'genreEntries' => $genreEntries,
             'interestRows' => $interestRows,
             'interestCategoryRows' => $interestCategoryRows,
+            'interestCategoryEntries' => $interestCategoryEntries,
             'interestPrimaryImageRows' => $interestPrimaryImageRows,
             'interestSimilarInterestRows' => $interestSimilarInterestRows,
             'detailItems' => $detailItems,
@@ -505,6 +545,60 @@ class LoadTitleDetailsAction
                 ],
             ),
         ];
+    }
+
+    /**
+     * @param  Collection<int, MovieAka>  $movieAkaRows
+     * @param  Collection<int, MovieAkaAttribute>  $movieAkaAttributeRows
+     * @return Collection<int, array{
+     *     id: int,
+     *     label: string,
+     *     description: string,
+     *     href: string,
+     *     linkedAkaCount: int,
+     *     linkedAkas: Collection<int, array{text: string, meta: string|null}>
+     * }>
+     */
+    private function buildAkaAttributeEntries(Collection $movieAkaRows, Collection $movieAkaAttributeRows): Collection
+    {
+        $movieAkasById = $movieAkaRows->keyBy('id');
+
+        return $movieAkaAttributeRows
+            ->map(fn (MovieAkaAttribute $movieAkaAttribute): ?AkaAttribute => $movieAkaAttribute->akaAttribute)
+            ->filter(fn (mixed $akaAttribute): bool => $akaAttribute instanceof AkaAttribute && filled($akaAttribute->name))
+            ->unique('id')
+            ->map(function (AkaAttribute $akaAttribute) use ($movieAkaAttributeRows, $movieAkasById): array {
+                $linkedAkas = $movieAkaAttributeRows
+                    ->filter(fn (MovieAkaAttribute $movieAkaAttribute): bool => (int) $movieAkaAttribute->aka_attribute_id === (int) $akaAttribute->getKey())
+                    ->map(fn (MovieAkaAttribute $movieAkaAttribute): ?MovieAka => $movieAkasById->get($movieAkaAttribute->movie_aka_id))
+                    ->filter(fn (mixed $movieAka): bool => $movieAka instanceof MovieAka && filled($movieAka->text))
+                    ->unique(fn (MovieAka $movieAka): string => implode('|', [
+                        $movieAka->text,
+                        $movieAka->country_code,
+                        $movieAka->language_code,
+                    ]))
+                    ->sortBy('position')
+                    ->values();
+
+                return [
+                    'id' => (int) $akaAttribute->getKey(),
+                    'label' => $akaAttribute->resolvedLabel(),
+                    'description' => $akaAttribute->shortDescription(),
+                    'href' => route('public.aka-attributes.show', $akaAttribute),
+                    'linkedAkaCount' => $linkedAkas->count(),
+                    'linkedAkas' => $linkedAkas
+                        ->map(fn (MovieAka $movieAka): array => [
+                            'text' => (string) $movieAka->text,
+                            'meta' => collect([
+                                $movieAka->resolvedCountryLabel(),
+                                $movieAka->resolvedLanguageLabel(),
+                            ])->filter()->implode(' · ') ?: null,
+                        ])
+                        ->values(),
+                ];
+            })
+            ->sortBy('label')
+            ->values();
     }
 
     private function hydrateMovieCompanyCreditRelations(Title $title): void
@@ -738,6 +832,122 @@ class LoadTitleDetailsAction
                     'usageCount' => $matchingRows->count(),
                     'countries' => $countries,
                     'attributes' => $attributes,
+                ];
+            })
+            ->values();
+    }
+
+    private function buildCertificateTitleEntries(Collection $movieCertificateRows): Collection
+    {
+        return $movieCertificateRows
+            ->map(function (MovieCertificate $movieCertificate): array {
+                $country = filled($movieCertificate->country_code)
+                    ? [
+                        'code' => strtoupper((string) $movieCertificate->country_code),
+                        'label' => $movieCertificate->resolvedCountryLabel() ?? strtoupper((string) $movieCertificate->country_code),
+                    ]
+                    : null;
+
+                $attributes = $movieCertificate->relationLoaded('movieCertificateAttributes')
+                    ? $movieCertificate->movieCertificateAttributes
+                        ->map(function (MovieCertificateAttribute $movieCertificateAttribute): ?CertificateAttribute {
+                            if (! $movieCertificateAttribute->relationLoaded('certificateAttribute')) {
+                                return null;
+                            }
+
+                            return $movieCertificateAttribute->certificateAttribute;
+                        })
+                        ->filter(fn (mixed $certificateAttribute): bool => $certificateAttribute instanceof CertificateAttribute && filled($certificateAttribute->name))
+                        ->unique('id')
+                        ->values()
+                    : collect();
+
+                return [
+                    'rating' => $movieCertificate->relationLoaded('certificateRating') ? $movieCertificate->certificateRating : null,
+                    'meaning' => $movieCertificate->ratingDescription() ?? 'Regional age classification attached to this title.',
+                    'country' => $country,
+                    'attributes' => $attributes,
+                ];
+            })
+            ->values();
+    }
+
+    /**
+     * @param  Collection<int, MovieGenre>  $movieGenreRows
+     * @return Collection<int, array{
+     *     genre: Genre,
+     *     href: string,
+     *     description: string,
+     *     titleCountLabel: string|null,
+     *     previewUrl: string|null,
+     *     previewAlt: string|null
+     * }>
+     */
+    private function buildGenreEntries(Title $title, Collection $movieGenreRows, mixed $poster, mixed $backdrop): Collection
+    {
+        $previewAsset = $backdrop ?? $poster;
+        $previewUrl = filled($previewAsset?->url) ? (string) $previewAsset->url : null;
+        $previewAlt = $previewUrl !== null
+            ? (filled($previewAsset?->alt_text) ? (string) $previewAsset->alt_text : $title->name.' preview image')
+            : null;
+
+        return $movieGenreRows
+            ->map(fn (MovieGenre $movieGenre): ?Genre => $movieGenre->genre)
+            ->filter(fn (mixed $genre): bool => $genre instanceof Genre && filled($genre->name))
+            ->unique('id')
+            ->values()
+            ->map(function (Genre $genre) use ($previewAlt, $previewUrl): array {
+                return [
+                    'genre' => $genre,
+                    'href' => route('public.genres.show', $genre),
+                    'description' => $genre->descriptionText(),
+                    'titleCountLabel' => $genre->publishedTitleCount() > 0 ? $genre->publishedTitleCountBadgeLabel() : null,
+                    'previewUrl' => $previewUrl,
+                    'previewAlt' => $previewAlt,
+                ];
+            })
+            ->values();
+    }
+
+    /**
+     * @param  Collection<int, InterestCategory>  $interestCategoryRows
+     * @return Collection<int, array{
+     *     interestCategory: InterestCategory,
+     *     matchedInterestCountLabel: string,
+     *     matchedInterests: Collection<int, array{
+     *         name: string,
+     *         href: string,
+     *         isSubgenre: bool
+     *     }>
+     * }>
+     */
+    private function buildInterestCategoryEntries(Title $title, Collection $interestCategoryRows): Collection
+    {
+        $interestRows = $title->resolvedInterests();
+
+        return $interestCategoryRows
+            ->map(function (InterestCategory $interestCategory) use ($interestRows): array {
+                $matchedInterests = $interestRows
+                    ->filter(function (Interest $interest) use ($interestCategory): bool {
+                        if (! $interest->relationLoaded('interestCategoryInterests')) {
+                            return false;
+                        }
+
+                        return $interest->interestCategoryInterests->contains(
+                            fn ($interestCategoryInterest): bool => (int) $interestCategoryInterest->interest_category_id === (int) $interestCategory->getKey(),
+                        );
+                    })
+                    ->map(fn (Interest $interest): array => [
+                        'name' => (string) $interest->name,
+                        'href' => route('public.search', ['q' => (string) $interest->name]),
+                        'isSubgenre' => (bool) $interest->is_subgenre,
+                    ])
+                    ->values();
+
+                return [
+                    'interestCategory' => $interestCategory,
+                    'matchedInterestCountLabel' => Number::format($matchedInterests->count()).' matched '.Str::plural('interest', $matchedInterests->count()),
+                    'matchedInterests' => $matchedInterests->take(3)->values(),
                 ];
             })
             ->values();

@@ -119,6 +119,19 @@ class AdminAccessTest extends TestCase
             ->assertSee('Admin');
     }
 
+    public function test_admin_pages_render_the_portal_sidebar_shell(): void
+    {
+        $editor = User::factory()->editor()->create();
+
+        $this->actingAs($editor)
+            ->get(route('admin.dashboard'))
+            ->assertOk()
+            ->assertSeeHtml('data-theme-enabled="true"')
+            ->assertSeeHtml('data-slot="layout"')
+            ->assertSee('Catalog control')
+            ->assertSee('Admin area');
+    }
+
     public function test_admin_title_edit_flash_message_uses_alert_description_markup(): void
     {
         $title = Title::factory()->create();

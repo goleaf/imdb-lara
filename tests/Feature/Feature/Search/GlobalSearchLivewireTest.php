@@ -27,6 +27,8 @@ class GlobalSearchLivewireTest extends TestCase
         Livewire::test(GlobalSearch::class)
             ->set('query', $this->searchTermFor($title))
             ->assertSee('Find titles, people, and themes fast')
+            ->assertSeeHtml('data-slot="global-search-loading"')
+            ->assertSeeHtml('data-slot="global-search-results"')
             ->assertSee('Top suggestion')
             ->assertSee($title->name)
             ->assertDontSee('Lists')

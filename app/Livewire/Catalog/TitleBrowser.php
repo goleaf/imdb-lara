@@ -88,15 +88,10 @@ class TitleBrowser extends Component
 
         if ($isChartMode) {
             foreach ($titleItems as $index => $title) {
-                $chartRows[$title->id] = [
-                    'comparisonLabel' => $title->displayRatingCount() > 0
-                        ? number_format($title->displayRatingCount()).' votes'
-                        : 'Catalog rank',
-                    'movementAmount' => 0,
-                    'movementDirection' => 'steady',
-                    'movementNote' => null,
-                    'rank' => $pageOffset + $index + 1,
-                ];
+                $chartRows[$title->id] = $this->chartRow(
+                    $title,
+                    $pageOffset + $index + 1,
+                );
             }
         }
 
@@ -121,6 +116,81 @@ class TitleBrowser extends Component
             'titles' => $titles,
             'showSummary' => $this->showSummary,
         ];
+    }
+
+    /**
+     * @return array{
+     *     comparisonLabel: string,
+     *     comparisonToken: string|null,
+     *     genres: Collection<int, mixed>,
+     *     movementAmount: int,
+     *     movementDirection: string,
+     *     movementIcon: string,
+     *     movementLabel: string,
+     *     movementNote: string|null,
+     *     originCountryCode: string|null,
+     *     originCountryLabel: string|null,
+     *     originalTitle: string|null,
+     *     poster: mixed,
+     *     rank: int,
+     *     releaseYear: int|null,
+     *     runtimeLabel: string|null,
+     *     summaryText: string|null,
+     *     titleUrl: string,
+     *     voteLabel: string|null
+     * }
+     */
+    private function chartRow(Title $title, int $rank): array
+    {
+        $comparisonLabel = $title->displayRatingCount() > 0
+            ? number_format($title->displayRatingCount()).' votes'
+            : 'Catalog rank';
+        $movementDirection = 'steady';
+        $movementAmount = 0;
+        $voteLabel = $title->displayRatingCount() > 0 ? number_format($title->displayRatingCount()).' votes' : null;
+
+        return [
+            'comparisonLabel' => $comparisonLabel,
+            'comparisonToken' => filled($comparisonLabel) && $comparisonLabel !== $voteLabel
+                ? $comparisonLabel
+                : null,
+            'genres' => $title->resolvedGenres(),
+            'movementAmount' => $movementAmount,
+            'movementDirection' => $movementDirection,
+            'movementIcon' => $this->chartMovementIcon($movementDirection),
+            'movementLabel' => $this->chartMovementLabel($movementDirection, $movementAmount),
+            'movementNote' => null,
+            'originCountryCode' => $title->originCountryCode(),
+            'originCountryLabel' => $title->originCountryLabel(),
+            'originalTitle' => filled($title->original_name) && $title->original_name !== $title->name
+                ? $title->original_name
+                : null,
+            'poster' => $title->preferredPoster(),
+            'rank' => $rank,
+            'releaseYear' => $title->release_year,
+            'runtimeLabel' => $title->runtimeMinutesLabel(),
+            'summaryText' => $title->summaryText(),
+            'titleUrl' => route('public.titles.show', $title),
+            'voteLabel' => $voteLabel,
+        ];
+    }
+
+    private function chartMovementIcon(string $movementDirection): string
+    {
+        return match ($movementDirection) {
+            'up' => 'arrow-trending-up',
+            'down' => 'arrow-trending-down',
+            default => 'minus',
+        };
+    }
+
+    private function chartMovementLabel(string $movementDirection, int $movementAmount): string
+    {
+        return match ($movementDirection) {
+            'up' => 'Up '.$movementAmount,
+            'down' => 'Down '.$movementAmount,
+            default => 'Steady',
+        };
     }
 
     public function render(): View

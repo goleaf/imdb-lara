@@ -11,47 +11,6 @@
 @endsection
 
 @section('content')
-    @php
-        $posterArchiveHref = $posterAssetsPagination->total() > 1
-            ? route('public.titles.media.archive', ['title' => $title, 'archive' => App\Enums\TitleMediaArchiveKind::Posters->value])
-            : null;
-        $stillArchiveHref = $stillAssetsPagination->total() > 1
-            ? route('public.titles.media.archive', ['title' => $title, 'archive' => App\Enums\TitleMediaArchiveKind::Stills->value])
-            : null;
-        $backdropArchiveHref = $backdropAssetsPagination->total() > 1
-            ? route('public.titles.media.archive', ['title' => $title, 'archive' => App\Enums\TitleMediaArchiveKind::Backdrops->value])
-            : null;
-        $trailerArchiveHref = $trailerAssets->count() > 1
-            ? route('public.titles.media.archive', ['title' => $title, 'archive' => App\Enums\TitleMediaArchiveKind::Trailers->value])
-            : null;
-        $heroArchiveCards = collect([
-            [
-                'label' => 'Posters',
-                'count' => $posterAssetsPagination->total(),
-                'copy' => 'Campaign art and primary sheets',
-                'href' => '#title-media-posters',
-            ],
-            [
-                'label' => 'Stills',
-                'count' => $stillAssetsPagination->total(),
-                'copy' => 'Scene captures and editorial frames',
-                'href' => '#title-media-stills',
-            ],
-            [
-                'label' => 'Backdrops',
-                'count' => $backdropAssetsPagination->total(),
-                'copy' => 'Wide artwork for hero surfaces',
-                'href' => '#title-media-backdrops',
-            ],
-            [
-                'label' => 'Trailers',
-                'count' => $trailerAssets->count(),
-                'copy' => 'IMDb video records and links',
-                'href' => '#title-media-trailers',
-            ],
-        ]);
-    @endphp
-
     <x-catalog.media-lightbox-shell :groups="$imageLightboxGroups" modal-id="title-media-lightbox" class="space-y-6">
         <x-ui.card class="sb-detail-hero sb-media-hero !max-w-none overflow-hidden p-0" data-slot="title-media-hero">
             <div class="relative">
@@ -113,7 +72,7 @@
                                         class="rounded-[1.2rem] border border-white/10 bg-white/[0.035] p-4 transition hover:border-white/18 hover:bg-white/[0.06]"
                                     >
                                         <div class="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-[#cbbb9c]">
-                                            {{ $heroArchiveCard['label'] }}
+                                            {{ $heroArchiveCard['kind']->label() }}
                                         </div>
                                         <div class="mt-2 text-[1.95rem] font-semibold leading-none tracking-[-0.05em] text-[#f7f1e8]">
                                             {{ number_format($heroArchiveCard['count']) }}
@@ -200,10 +159,11 @@
         </x-ui.card>
 
         <nav class="sb-media-subnav" aria-label="Media sections">
-            <a href="#title-media-posters" class="sb-media-subnav-link">Posters ({{ number_format($posterAssetsPagination->total()) }})</a>
-            <a href="#title-media-stills" class="sb-media-subnav-link">Stills ({{ number_format($stillAssetsPagination->total()) }})</a>
-            <a href="#title-media-backdrops" class="sb-media-subnav-link">Backdrops ({{ number_format($backdropAssetsPagination->total()) }})</a>
-            <a href="#title-media-trailers" class="sb-media-subnav-link">Trailers ({{ number_format($trailerAssets->count()) }})</a>
+            @foreach ($mediaSectionLinks as $mediaSectionLink)
+                <a href="{{ $mediaSectionLink['href'] }}" class="sb-media-subnav-link">
+                    {{ $mediaSectionLink['label'] }} ({{ number_format($mediaSectionLink['count']) }})
+                </a>
+            @endforeach
         </nav>
 
         <x-ui.card id="title-media-posters" class="sb-detail-section sb-media-section !max-w-none" data-slot="title-media-posters">
@@ -226,13 +186,12 @@
                 </div>
 
                 @if ($posterAssetsPagination->total() > 0)
-                    @php($posterOffset = ($posterAssetsPagination->currentPage() - 1) * $posterAssetsPagination->perPage())
                     <div class="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
                         @foreach ($posterAssetsPagination as $mediaAsset)
                             <button
                                 type="button"
                                 class="sb-media-lightbox-trigger"
-                                x-on:click="openLightbox('posters', {{ $posterOffset + $loop->index }})"
+                                x-on:click="openLightbox('posters', {{ $posterLightboxOffset + $loop->index }})"
                             >
                                 <figure class="sb-media-image-card sb-media-image-card--poster">
                                     <img
@@ -294,13 +253,12 @@
                 </div>
 
                 @if ($stillAssetsPagination->total() > 0)
-                    @php($stillOffset = ($stillAssetsPagination->currentPage() - 1) * $stillAssetsPagination->perPage())
                     <div class="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
                         @foreach ($stillAssetsPagination as $mediaAsset)
                             <button
                                 type="button"
                                 class="sb-media-lightbox-trigger"
-                                x-on:click="openLightbox('stills', {{ $stillOffset + $loop->index }})"
+                                x-on:click="openLightbox('stills', {{ $stillLightboxOffset + $loop->index }})"
                             >
                                 <figure class="sb-media-image-card">
                                     <img
@@ -365,13 +323,12 @@
                 </div>
 
                 @if ($backdropAssetsPagination->total() > 0)
-                    @php($backdropOffset = ($backdropAssetsPagination->currentPage() - 1) * $backdropAssetsPagination->perPage())
                     <div class="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
                         @foreach ($backdropAssetsPagination as $mediaAsset)
                             <button
                                 type="button"
                                 class="sb-media-lightbox-trigger"
-                                x-on:click="openLightbox('backdrops', {{ $backdropOffset + $loop->index }})"
+                                x-on:click="openLightbox('backdrops', {{ $backdropLightboxOffset + $loop->index }})"
                             >
                                 <figure class="sb-media-image-card sb-media-image-card--backdrop">
                                     <img
@@ -414,17 +371,13 @@
         </x-ui.card>
 
         <x-ui.card id="title-media-trailers" class="sb-detail-section sb-media-section !max-w-none" data-slot="title-media-trailers">
-            @php($trailerPreviewAsset = $backdrop ?? $viewerAsset ?? $poster)
-            @php($trailerListAssets = $trailerArchive->isNotEmpty() ? $trailerArchive : $trailerAssets)
-            @php($trailerListIndexOffset = $trailerAssets->count() === $trailerListAssets->count() ? 0 : 1)
-
             <div class="space-y-4">
                 <div class="flex flex-wrap items-center justify-between gap-4">
                     <div>
                         <x-ui.heading level="h2" size="lg">Trailers</x-ui.heading>
                     </div>
                     <div class="flex items-center gap-3">
-                        <x-ui.badge variant="outline" color="neutral" icon="play">{{ number_format($trailerListAssets->count()) }} videos</x-ui.badge>
+                        <x-ui.badge variant="outline" color="neutral" icon="play">{{ number_format($trailerListItems->count()) }} videos</x-ui.badge>
                         @if ($trailerArchiveHref)
                             <x-ui.link :href="$trailerArchiveHref" iconAfter="arrow-right">
                                 View all trailers
@@ -436,11 +389,9 @@
                     </div>
                 </div>
 
-                @if ($trailerListAssets->isNotEmpty())
+                @if ($trailerListItems->isNotEmpty())
                     <div class="sb-media-trailer-list" data-slot="title-media-trailer-list">
-                        @foreach ($trailerListAssets as $video)
-                            @php($videoLabel = $video->meaningfulCaption() ?? str($video->kind->value)->headline())
-
+                        @foreach ($trailerListItems as $trailerListItem)
                             <article class="sb-media-trailer-item" data-slot="title-media-trailer-item">
                                 <div class="sb-media-trailer-item-media">
                                     @if ($trailerPreviewAsset)
@@ -457,26 +408,26 @@
                                     @endif
 
                                     <div class="sb-media-trailer-item-index">
-                                        {{ str_pad((string) ($loop->iteration + $trailerListIndexOffset), 2, '0', STR_PAD_LEFT) }}
+                                        {{ $trailerListItem['indexLabel'] }}
                                     </div>
                                 </div>
 
                                 <div class="sb-media-trailer-item-body">
-                                    <div class="sb-media-trailer-item-copy">{{ $videoLabel }}</div>
+                                    <div class="sb-media-trailer-item-copy">{{ $trailerListItem['label'] }}</div>
                                     <div class="sb-media-trailer-meta">
-                                        <span>{{ str($video->kind->value)->headline() }}</span>
-                                        @if ($video->durationMinutesLabel())
-                                            <span>{{ $video->durationMinutesLabel() }}</span>
+                                        <span>{{ $trailerListItem['kindLabel'] }}</span>
+                                        @if ($trailerListItem['video']->durationMinutesLabel())
+                                            <span>{{ $trailerListItem['video']->durationMinutesLabel() }}</span>
                                         @endif
-                                        @if ($video->published_at)
-                                            <span>{{ $video->published_at->format('M j, Y') }}</span>
+                                        @if ($trailerListItem['video']->published_at)
+                                            <span>{{ $trailerListItem['video']->published_at->format('M j, Y') }}</span>
                                         @endif
                                     </div>
                                 </div>
 
-                                @if (filled($video->url))
+                                @if (filled($trailerListItem['video']->url))
                                     <div class="sb-media-trailer-item-actions">
-                                        <x-ui.button.light-action :href="$video->url" icon="play" open-in-new-tab>
+                                        <x-ui.button.light-action :href="$trailerListItem['video']->url" icon="play" open-in-new-tab>
                                             Open video
                                         </x-ui.button.light-action>
                                     </div>

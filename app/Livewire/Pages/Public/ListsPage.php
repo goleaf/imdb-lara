@@ -6,6 +6,7 @@ use App\Actions\Lists\BuildPublicListsIndexQueryAction;
 use App\Actions\Seo\PageSeoData;
 use App\Livewire\Pages\Concerns\RendersPageView;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -16,6 +17,8 @@ class ListsPage extends Component
     use WithPagination;
 
     private const SORT_OPTIONS = ['recent', 'most_titles', 'title'];
+
+    protected BuildPublicListsIndexQueryAction $buildPublicListsIndexQuery;
 
     #[Url(as: 'q')]
     public string $search = '';
@@ -28,6 +31,11 @@ class ListsPage extends Component
         if (! in_array($this->sort, self::SORT_OPTIONS, true)) {
             $this->sort = 'recent';
         }
+    }
+
+    public function boot(BuildPublicListsIndexQueryAction $buildPublicListsIndexQuery): void
+    {
+        $this->buildPublicListsIndexQuery = $buildPublicListsIndexQuery;
     }
 
     public function updatedSearch(): void
@@ -44,18 +52,19 @@ class ListsPage extends Component
         $this->resetPage(pageName: 'lists');
     }
 
-    public function render(BuildPublicListsIndexQueryAction $buildPublicListsIndexQuery): View
+    #[Computed]
+    public function viewData(): array
     {
         $sort = in_array($this->sort, self::SORT_OPTIONS, true)
             ? $this->sort
             : 'recent';
 
-        $lists = $buildPublicListsIndexQuery
+        $lists = $this->buildPublicListsIndexQuery
             ->handle($this->search, $sort)
             ->paginate(12, pageName: 'lists')
             ->withQueryString();
 
-        return $this->renderPageView('lists.index', [
+        return [
             'lists' => $lists,
             'search' => $this->search,
             'sort' => $sort,
@@ -76,6 +85,11 @@ class ListsPage extends Component
                 preserveQueryString: true,
                 allowedQueryParameters: ['q', 'sort'],
             ),
-        ]);
+        ];
+    }
+
+    public function render(): View
+    {
+        return $this->renderPageView('lists.index', $this->viewData);
     }
 }

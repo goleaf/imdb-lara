@@ -166,35 +166,43 @@ class ResolvePageShellViewDataAction
         $adminShortcutsEnabled = (bool) config('screenbase.shell.admin_shortcuts_enabled', true);
         $watchlistShortcutsEnabled = (bool) config('screenbase.shell.watchlist_shortcuts_enabled', true);
         $renderedNavbarText = strip_tags((string) ($data['renderedNavbar'] ?? ''));
+        $shouldRenderAdminShortcut = ! $catalogOnly
+            && $adminShortcutsEnabled
+            && auth()->user()?->can('access-admin-area')
+            && Route::has('admin.dashboard')
+            && ! request()->routeIs('admin.*')
+            && ! str_contains($renderedNavbarText, 'Admin');
+        $shouldRenderWatchlistShortcut = ! $catalogOnly
+            && $watchlistShortcutsEnabled
+            && auth()->check()
+            && Route::has('account.watchlist')
+            && ! str_contains($renderedNavbarText, 'Watchlist');
+        $shouldRenderSignOutShortcut = ! $catalogOnly
+            && $authShortcutsEnabled
+            && auth()->check()
+            && Route::has('logout')
+            && ! str_contains($renderedNavbarText, 'Sign out');
+        $shouldRenderGuestAuthShortcuts = ! $catalogOnly
+            && $authShortcutsEnabled
+            && ! auth()->check()
+            && Route::has('login')
+            && Route::has('register')
+            && ! str_contains($renderedNavbarText, 'Sign in')
+            && ! str_contains($renderedNavbarText, 'Create account');
 
         return [
             ...$data,
             'isCatalogOnlyApplication' => $catalogOnly,
             'hasBreadcrumbs' => $this->trimString($data['renderedBreadcrumbs'] ?? null) !== '',
             'isAuthShell' => ($data['shellVariant'] ?? 'default') === 'auth',
-            'shouldRenderAdminShortcut' => ! $catalogOnly
-                && $adminShortcutsEnabled
-                && auth()->user()?->can('access-admin-area')
-                && Route::has('admin.dashboard')
-                && ! request()->routeIs('admin.*')
-                && ! str_contains($renderedNavbarText, 'Admin'),
-            'shouldRenderWatchlistShortcut' => ! $catalogOnly
-                && $watchlistShortcutsEnabled
-                && auth()->check()
-                && Route::has('account.watchlist')
-                && ! str_contains($renderedNavbarText, 'Watchlist'),
-            'shouldRenderSignOutShortcut' => ! $catalogOnly
-                && $authShortcutsEnabled
-                && auth()->check()
-                && Route::has('logout')
-                && ! str_contains($renderedNavbarText, 'Sign out'),
-            'shouldRenderGuestAuthShortcuts' => ! $catalogOnly
-                && $authShortcutsEnabled
-                && ! auth()->check()
-                && Route::has('login')
-                && Route::has('register')
-                && ! str_contains($renderedNavbarText, 'Sign in')
-                && ! str_contains($renderedNavbarText, 'Create account'),
+            'shouldRenderAdminShortcut' => $shouldRenderAdminShortcut,
+            'shouldRenderWatchlistShortcut' => $shouldRenderWatchlistShortcut,
+            'shouldRenderSignOutShortcut' => $shouldRenderSignOutShortcut,
+            'shouldRenderGuestAuthShortcuts' => $shouldRenderGuestAuthShortcuts,
+            'hasShellUtilities' => $shouldRenderAdminShortcut
+                || $shouldRenderWatchlistShortcut
+                || $shouldRenderSignOutShortcut
+                || $shouldRenderGuestAuthShortcuts,
         ];
     }
 

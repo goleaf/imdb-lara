@@ -8,12 +8,6 @@
     <x-ui.breadcrumbs.item>{{ $certificateAttribute->name ?: 'Certificate attribute' }}</x-ui.breadcrumbs.item>
 @endsection
 
-@php
-    $summaryItems ??= collect();
-    $typeOptions ??= collect();
-    $countryOptions ??= collect();
-@endphp
-
 @section('content')
     <section class="space-y-6">
         <x-seo.pagination-links :paginator="$archiveRecords" />

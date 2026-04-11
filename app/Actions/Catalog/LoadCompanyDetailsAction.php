@@ -37,7 +37,7 @@ class LoadCompanyDetailsAction
      *         categoryLabel: string|null,
      *         activeYearsLabel: string|null,
      *         countryBadges: Collection<int, array{code: string, label: string}>,
-     *         attributeBadges: Collection<int, array{id: int, label: string}>
+     *         attributeBadges: Collection<int, array{id: int, href: string, label: string}>
      *     }>,
      *     seo: PageSeoData
      * }
@@ -284,7 +284,7 @@ class LoadCompanyDetailsAction
      *     categoryLabel: string|null,
      *     activeYearsLabel: string|null,
      *     countryBadges: Collection<int, array{code: string, label: string}>,
-     *     attributeBadges: Collection<int, array{id: int, label: string}>
+     *     attributeBadges: Collection<int, array{id: int, href: string, label: string}>
      * }
      */
     private function mapArchiveRecord(MovieCompanyCredit $movieCompanyCredit): array
@@ -313,6 +313,7 @@ class LoadCompanyDetailsAction
             ->unique('id')
             ->map(fn (CompanyCreditAttribute $companyCreditAttribute): array => [
                 'id' => (int) $companyCreditAttribute->getKey(),
+                'href' => route('public.company-credit-attributes.show', $companyCreditAttribute),
                 'label' => (string) $companyCreditAttribute->name,
             ])
             ->values();

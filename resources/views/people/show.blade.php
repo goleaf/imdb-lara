@@ -285,7 +285,7 @@
                     </x-ui.card>
                 @endif
 
-                <livewire:people.filmography-panel :person="$person" :wire:key="'person-filmography-'.$person->id" />
+                <livewire:people.filmography-panel :person="$person" :wire:key="'person-filmography-'.$person->id" lazy />
             </div>
 
             <div class="space-y-6">

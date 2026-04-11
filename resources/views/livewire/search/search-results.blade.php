@@ -183,18 +183,19 @@
         </div>
     </x-ui.card>
 
-    <div wire:loading.delay wire:target="{{ $this->viewData['searchLoadingTargets'] }}">
-        <x-ui.card class="!max-w-none rounded-[1.6rem] p-5">
-            <div class="flex items-center gap-3">
-                <x-ui.icon name="magnifying-glass" class="size-5 text-neutral-400 dark:text-neutral-500" />
-                <x-ui.text class="text-sm text-neutral-600 dark:text-neutral-300">
-                    Refreshing title and people matches.
-                </x-ui.text>
-            </div>
-        </x-ui.card>
-    </div>
+    <div wire:loading.delay.attr="data-loading" wire:target="{{ $this->viewData['searchLoadingTargets'] }}" class="space-y-6">
+        <div class="not-data-loading:hidden">
+            <x-ui.card class="!max-w-none rounded-[1.6rem] p-5">
+                <div class="flex items-center gap-3">
+                    <x-ui.icon name="magnifying-glass" class="size-5 text-neutral-400 dark:text-neutral-500" />
+                    <x-ui.text class="text-sm text-neutral-600 dark:text-neutral-300">
+                        Refreshing title and people matches.
+                    </x-ui.text>
+                </div>
+            </x-ui.card>
+        </div>
 
-    <div wire:loading.remove wire:target="{{ $this->viewData['searchLoadingTargets'] }}" class="space-y-6">
+        <div class="space-y-6 in-data-loading:hidden">
         @if ($this->viewData['topMatch']['record'])
             <x-ui.card class="sb-results-shell !max-w-none rounded-[1.6rem] p-5">
                 <div class="space-y-4">
@@ -384,6 +385,7 @@
                 </x-ui.text>
             </x-ui.empty>
         @endunless
+        </div>
     </div>
 </div>
 @endisland

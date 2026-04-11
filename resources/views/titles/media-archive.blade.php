@@ -11,22 +11,6 @@
     <x-ui.breadcrumbs.item>{{ $archiveKind->label() }}</x-ui.breadcrumbs.item>
 @endsection
 
-@php
-    $archiveLinks = collect(App\Enums\TitleMediaArchiveKind::cases())
-        ->map(function (App\Enums\TitleMediaArchiveKind $candidateKind) use ($title, $mediaCounts, $overviewHref): array {
-            $count = $mediaCounts[$candidateKind->value] ?? 0;
-
-            return [
-                'kind' => $candidateKind,
-                'count' => $count,
-                'href' => $count > 0
-                    ? route('public.titles.media.archive', ['title' => $title, 'archive' => $candidateKind->value])
-                    : $overviewHref.'#'.$candidateKind->sectionId(),
-            ];
-        })
-        ->values();
-@endphp
-
 @section('content')
     @if ($archiveKind->isImageArchive())
         <x-catalog.media-lightbox-shell :groups="$imageLightboxGroups" modal-id="title-media-archive-lightbox" class="space-y-6">
@@ -230,10 +214,7 @@
 
                     @if ($trailerAssetsPagination->total() > 0)
                         <div class="sb-media-trailer-list" data-slot="title-media-trailer-list">
-                            @foreach ($trailerAssetsPagination as $video)
-                                @php($videoLabel = $video->name ?: $video->meaningfulCaption() ?: str($video->kind->value)->headline())
-                                @php($videoCopy = $video->meaningfulCaption() ?: 'IMDb video record linked to this title.')
-
+                            @foreach ($trailerArchiveItems as $trailerArchiveItem)
                                 <article class="sb-media-trailer-item" data-slot="title-media-trailer-item">
                                     <div class="sb-media-trailer-item-media">
                                         @if ($trailerPreviewAsset)
@@ -250,41 +231,41 @@
                                         @endif
 
                                         <div class="sb-media-trailer-item-index">
-                                            {{ str_pad((string) (($trailerAssetsPagination->currentPage() - 1) * $trailerAssetsPagination->perPage() + $loop->iteration), 2, '0', STR_PAD_LEFT) }}
+                                            {{ $trailerArchiveItem['indexLabel'] }}
                                         </div>
                                     </div>
 
                                     <div class="sb-media-trailer-item-body">
                                         <div class="space-y-2">
-                                            <div class="sb-media-trailer-item-copy">{{ $videoCopy }}</div>
+                                            <div class="sb-media-trailer-item-copy">{{ $trailerArchiveItem['copy'] }}</div>
 
                                             <div class="flex flex-wrap items-center gap-2 text-sm text-neutral-600 dark:text-neutral-300">
                                                 <span class="inline-flex items-center rounded-full border border-black/8 px-2.5 py-1 text-xs font-medium dark:border-white/10">
-                                                    {{ $videoLabel }}
+                                                    {{ $trailerArchiveItem['label'] }}
                                                 </span>
                                                 <span class="inline-flex items-center rounded-full border border-black/8 px-2.5 py-1 text-xs font-medium dark:border-white/10">
-                                                    {{ str($video->kind->value)->headline() }}
+                                                    {{ $trailerArchiveItem['kindLabel'] }}
                                                 </span>
                                                 <span class="inline-flex items-center rounded-full border border-black/8 px-2.5 py-1 text-xs font-medium dark:border-white/10">
                                                     IMDb
                                                 </span>
-                                                @if ($video->durationMinutesLabel())
+                                                @if ($trailerArchiveItem['video']->durationMinutesLabel())
                                                     <span class="inline-flex items-center rounded-full border border-black/8 px-2.5 py-1 text-xs font-medium dark:border-white/10">
-                                                        {{ $video->durationMinutesLabel() }}
+                                                        {{ $trailerArchiveItem['video']->durationMinutesLabel() }}
                                                     </span>
                                                 @endif
-                                                @if ($video->published_at)
+                                                @if ($trailerArchiveItem['video']->published_at)
                                                     <span class="inline-flex items-center rounded-full border border-black/8 px-2.5 py-1 text-xs font-medium dark:border-white/10">
-                                                        {{ $video->published_at->format('M j, Y') }}
+                                                        {{ $trailerArchiveItem['video']->published_at->format('M j, Y') }}
                                                     </span>
                                                 @endif
                                             </div>
                                         </div>
                                     </div>
 
-                                    @if (filled($video->url))
+                                    @if (filled($trailerArchiveItem['video']->url))
                                         <div class="sb-media-trailer-item-actions">
-                                            <x-ui.button.light-action :href="$video->url" icon="play" open-in-new-tab>
+                                            <x-ui.button.light-action :href="$trailerArchiveItem['video']->url" icon="play" open-in-new-tab>
                                                 Open video
                                             </x-ui.button.light-action>
                                         </div>

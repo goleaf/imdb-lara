@@ -48,48 +48,50 @@
         </div>
     </x-ui.card>
 
-    <div wire:loading.delay class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        @foreach (range(1, 6) as $index)
-            <x-ui.card class="sb-person-card !max-w-none h-full overflow-hidden rounded-[1.4rem]" wire:key="interest-category-browser-skeleton-{{ $index }}">
-                <div class="space-y-4">
-                    <x-ui.skeleton.text class="w-1/3" />
-                    <x-ui.skeleton.text class="w-2/3" />
-                    <x-ui.skeleton.text class="w-5/6" />
-                    <x-ui.skeleton.text class="w-4/6" />
-                </div>
-            </x-ui.card>
-        @endforeach
-    </div>
-
-    <div wire:loading.remove class="sb-results-shell space-y-4 rounded-[1.6rem] p-4 sm:p-5">
-        <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            @forelse ($this->viewData['interestCategories'] as $interestCategory)
-                <div wire:key="interest-category-card-{{ $interestCategory->id }}">
-                    <x-catalog.interest-category-card
-                        :interest-category="$interestCategory"
-                        :show-image="$this->viewData['showImages']"
-                    />
-                </div>
-            @empty
-                <div class="sm:col-span-2 xl:col-span-3">
-                    <x-ui.empty class="rounded-box border border-dashed border-black/10 bg-white dark:border-white/10 dark:bg-neutral-900">
-                        <x-ui.empty.media>
-                            <x-ui.icon name="squares-2x2" class="size-8 text-neutral-400 dark:text-neutral-500" />
-                        </x-ui.empty.media>
-                        <x-ui.heading level="h3">{{ $this->viewData['emptyHeading'] }}</x-ui.heading>
-                        <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
-                            {{ $this->viewData['emptyText'] }}
-                        </x-ui.text>
-                    </x-ui.empty>
-                </div>
-            @endforelse
+    <div wire:loading.delay.attr="data-loading" class="space-y-4">
+        <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 not-data-loading:hidden">
+            @foreach (range(1, 6) as $index)
+                <x-ui.card class="sb-person-card !max-w-none h-full overflow-hidden rounded-[1.4rem]" wire:key="interest-category-browser-skeleton-{{ $index }}">
+                    <div class="space-y-4">
+                        <x-ui.skeleton.text class="w-1/3" />
+                        <x-ui.skeleton.text class="w-2/3" />
+                        <x-ui.skeleton.text class="w-5/6" />
+                        <x-ui.skeleton.text class="w-4/6" />
+                    </div>
+                </x-ui.card>
+            @endforeach
         </div>
 
-        @if ($this->viewData['hasPagination'])
-            <div>
-                {{ $this->viewData['interestCategories']->links() }}
+        <div class="sb-results-shell space-y-4 rounded-[1.6rem] p-4 sm:p-5 in-data-loading:hidden">
+            <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                @forelse ($this->viewData['interestCategories'] as $interestCategory)
+                    <div wire:key="interest-category-card-{{ $interestCategory->id }}">
+                        <x-catalog.interest-category-card
+                            :interest-category="$interestCategory"
+                            :show-image="$this->viewData['showImages']"
+                        />
+                    </div>
+                @empty
+                    <div class="sm:col-span-2 xl:col-span-3">
+                        <x-ui.empty class="rounded-box border border-dashed border-black/10 bg-white dark:border-white/10 dark:bg-neutral-900">
+                            <x-ui.empty.media>
+                                <x-ui.icon name="squares-2x2" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                            </x-ui.empty.media>
+                            <x-ui.heading level="h3">{{ $this->viewData['emptyHeading'] }}</x-ui.heading>
+                            <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
+                                {{ $this->viewData['emptyText'] }}
+                            </x-ui.text>
+                        </x-ui.empty>
+                    </div>
+                @endforelse
             </div>
-        @endif
+
+            @if ($this->viewData['hasPagination'])
+                <div>
+                    {{ $this->viewData['interestCategories']->links() }}
+                </div>
+            @endif
+        </div>
     </div>
 </div>
 @endisland

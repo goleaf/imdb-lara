@@ -37,6 +37,7 @@ class TitleReviewListTest extends TestCase
 
         Livewire::actingAs($viewer)
             ->test(TitleReviewList::class, ['title' => $title])
+            ->assertSeeHtml('data-slot="review-list-loading"')
             ->assertSeeInOrder(['Newest review', 'Most helpful review'])
             ->assertDontSee('Draft review')
             ->call('setSort', 'helpful')

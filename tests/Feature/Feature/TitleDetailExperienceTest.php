@@ -87,6 +87,8 @@ class TitleDetailExperienceTest extends TestCase
         $this->get(route('public.titles.show', $title))
             ->assertOk()
             ->assertSee('Featured cast')
+            ->assertSeeHtml('data-slot="featured-cast-card"')
+            ->assertSee('View person')
             ->assertSee('Key crew')
             ->assertSee('Full Cast & Crew');
     }
@@ -152,10 +154,14 @@ class TitleDetailExperienceTest extends TestCase
         $this->get(route('public.titles.show', $title))
             ->assertOk()
             ->assertSeeHtml('data-slot="title-detail-aka-attributes"')
-            ->assertSee('id')
-            ->assertSee('name')
-            ->assertSee((string) $movieAkaAttribute->akaAttribute->id)
-            ->assertSee($movieAkaAttribute->akaAttribute->name);
+            ->assertSee('Attribute')
+            ->assertSee('Meaning')
+            ->assertSee('Used on this movie')
+            ->assertSee('Archive')
+            ->assertSee($movieAkaAttribute->akaAttribute->resolvedLabel())
+            ->assertSee($movieAkaAttribute->akaAttribute->shortDescription())
+            ->assertSee(route('public.aka-attributes.show', $movieAkaAttribute->akaAttribute), false)
+            ->assertDontSee('Raw rows imported from the <code>aka_attributes</code> table and linked to this movie through its AKA records.', false);
     }
 
     public function test_title_page_surfaces_raw_movie_aka_rows_when_available(): void
@@ -221,7 +227,7 @@ class TitleDetailExperienceTest extends TestCase
         }
     }
 
-    public function test_title_page_surfaces_raw_movie_aka_attribute_rows_when_available(): void
+    public function test_title_page_does_not_surface_the_removed_movie_aka_attribute_table(): void
     {
         Livewire::withoutLazyLoading();
 
@@ -250,13 +256,7 @@ class TitleDetailExperienceTest extends TestCase
 
         $this->get(route('public.titles.show', $title))
             ->assertOk()
-            ->assertSeeHtml('data-slot="title-detail-movie-aka-attributes"')
-            ->assertSee('movie_aka_id')
-            ->assertSee('aka_attribute_id')
-            ->assertSee('position')
-            ->assertSee((string) $movieAkaAttribute->movie_aka_id)
-            ->assertSee((string) $movieAkaAttribute->aka_attribute_id)
-            ->assertSee((string) $movieAkaAttribute->position);
+            ->assertDontSeeHtml('data-slot="title-detail-movie-aka-attributes"');
     }
 
     public function test_title_page_does_not_surface_the_removed_legacy_aka_type_table(): void
@@ -888,7 +888,10 @@ class TitleDetailExperienceTest extends TestCase
         $response = $this->get(route('public.titles.show', $title))
             ->assertOk()
             ->assertSeeHtml('data-slot="title-detail-certificate-ratings"')
+            ->assertSeeHtml('data-slot="title-detail-certificate-rating-tabs"')
             ->assertSee('Certificate ratings linked to this title through its certificate records.')
+            ->assertSee('By rating')
+            ->assertSee('By title')
             ->assertSee($movieCertificate->certificateRating->resolvedLabel())
             ->assertSee($movieCertificate->certificateRating->shortDescription())
             ->assertSeeHtml('data-slot="certificate-rating-chip"')
@@ -902,6 +905,14 @@ class TitleDetailExperienceTest extends TestCase
         $this->assertStringContainsString('>Certificates on this title</th>', $sectionMarkup);
         $this->assertStringNotContainsString('>id</th>', $sectionMarkup);
         $this->assertStringNotContainsString('>name</th>', $sectionMarkup);
+
+        $content = $response->getContent();
+
+        $this->assertIsString($content);
+        $this->assertMatchesRegularExpression(
+            '/data-slot="title-detail-certificate-rating-tabs".*?data-name="title".*?>Meaning<\/th>.*?>Country<\/th>.*?>Attributes<\/th>/s',
+            $content,
+        );
 
         $linkedAttribute = $movieCertificate->movieCertificateAttributes
             ->map(fn ($movieCertificateAttribute) => $movieCertificateAttribute->certificateAttribute)
@@ -1314,7 +1325,7 @@ class TitleDetailExperienceTest extends TestCase
         }
     }
 
-    public function test_title_page_surfaces_raw_movie_genre_rows_when_available(): void
+    public function test_title_page_surfaces_humanized_genre_cards_when_available(): void
     {
         Livewire::withoutLazyLoading();
 
@@ -1344,16 +1355,12 @@ class TitleDetailExperienceTest extends TestCase
 
         $response = $this->get(route('public.titles.show', $title))
             ->assertOk()
-            ->assertSeeHtml('data-slot="title-detail-movie-genres"')
-            ->assertSee('Genre links attached directly to this title.')
-            ->assertSee($movieGenre->genre->name);
-
-        $sectionMarkup = $this->sectionMarkup($response, 'title-detail-movie-genres');
-
-        $this->assertStringContainsString('>Genre</th>', $sectionMarkup);
-        $this->assertStringNotContainsString('>movie_id</th>', $sectionMarkup);
-        $this->assertStringNotContainsString('>genre_id</th>', $sectionMarkup);
-        $this->assertStringNotContainsString('>position</th>', $sectionMarkup);
+            ->assertSeeHtml('data-slot="title-detail-genres"')
+            ->assertSee('Genre lanes attached to this title. Open any genre to browse more titles in the existing archive.')
+            ->assertSee($movieGenre->genre->name)
+            ->assertSee('Open genre')
+            ->assertSee(route('public.genres.show', $movieGenre->genre), false)
+            ->assertDontSee('Genre links attached directly to this title.');
     }
 
     public function test_title_page_surfaces_raw_movie_image_summary_rows_when_available(): void
@@ -1620,7 +1627,7 @@ class TitleDetailExperienceTest extends TestCase
         }
     }
 
-    public function test_title_page_surfaces_raw_genre_rows_when_available(): void
+    public function test_title_page_surfaces_humanized_genre_archive_links_when_available(): void
     {
         Livewire::withoutLazyLoading();
 
@@ -1638,8 +1645,7 @@ class TitleDetailExperienceTest extends TestCase
         $response = $this->get(route('public.titles.show', $title))
             ->assertOk()
             ->assertSeeHtml('data-slot="title-detail-genres"')
-            ->assertSee('id')
-            ->assertSee('name');
+            ->assertSee('Open genre');
 
         $genre = $title->load([
             'genres:id,name',
@@ -1647,12 +1653,12 @@ class TitleDetailExperienceTest extends TestCase
 
         if ($genre !== null) {
             $response
-                ->assertSee((string) $genre->id)
-                ->assertSee($genre->name);
+                ->assertSee($genre->name)
+                ->assertSee(route('public.genres.show', $genre), false);
         }
     }
 
-    public function test_title_page_surfaces_raw_interest_category_rows_when_available(): void
+    public function test_title_page_surfaces_humanized_interest_category_cards_when_available(): void
     {
         Livewire::withoutLazyLoading();
 
@@ -1670,8 +1676,8 @@ class TitleDetailExperienceTest extends TestCase
         $response = $this->get(route('public.titles.show', $title))
             ->assertOk()
             ->assertSeeHtml('data-slot="title-detail-interest-categories"')
-            ->assertSee('id')
-            ->assertSee('name');
+            ->assertSee('Discovery themes connected to this title through its imported interest graph.')
+            ->assertSee('Open category');
 
         $interestCategory = $title->load([
             'interests:imdb_id,name,description,is_subgenre',
@@ -1684,8 +1690,8 @@ class TitleDetailExperienceTest extends TestCase
 
         if ($interestCategory !== null) {
             $response
-                ->assertSee((string) $interestCategory->id)
-                ->assertSee($interestCategory->name);
+                ->assertSee($interestCategory->name)
+                ->assertSee(route('public.interest-categories.show', $interestCategory), false);
         }
     }
 

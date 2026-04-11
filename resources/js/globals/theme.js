@@ -6,13 +6,17 @@
 import defineReactiveMagicProperty from '../utils.js';
 
 document.addEventListener('alpine:init', () => {
+    if (! themeRuntimeEnabled()) {
+        return;
+    }
+
     defineReactiveMagicProperty('theme', {
         currentTheme: null,
         storedTheme: null,
 
         init() {
             // Check localStorage for stored theme preference
-            this.storedTheme = localStorage.getItem('theme') ?? 'system';
+            this.storedTheme = localStorage.getItem('theme') ?? 'dark';
 
             // Resolve the configured theme to be only [light, dark]
             this.currentTheme = computeTheme(this.storedTheme);
@@ -140,9 +144,15 @@ function applyTheme(theme) {
     } else {
         documentElement.classList.remove('dark');
     }
+
+    documentElement.style.colorScheme = theme;
     
     // Dispatch custom event for theme change listeners
     document.dispatchEvent(new CustomEvent('theme-changed', {
         detail: { theme }
     }));
+}
+
+function themeRuntimeEnabled() {
+    return document.documentElement.dataset.themeEnabled === 'true';
 }

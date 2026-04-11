@@ -9,77 +9,6 @@
     <x-ui.breadcrumbs.item>{{ $title->name }}</x-ui.breadcrumbs.item>
 @endsection
 
-@php
-    foreach ([
-        'galleryAssets',
-        'castPreview',
-        'crewGroups',
-        'movieAkaRows',
-        'movieAkaAttributeRows',
-        'akaAttributeRows',
-        'akaTypeRows',
-        'awardCategoryRows',
-        'awardEventRows',
-        'movieAwardNominationRows',
-        'movieAwardNominationNomineeRows',
-        'movieAwardNominationTitleRows',
-        'movieAwardNominationSummaryRows',
-        'movieCertificateRows',
-        'movieCertificateSummaryRows',
-        'movieCertificateAttributeRows',
-        'movieCompanyCreditRows',
-        'movieCompanyCreditAttributeRows',
-        'movieCompanyCreditCountryRows',
-        'movieCompanyCreditSummaryRows',
-        'movieDirectorRows',
-        'movieEpisodeRows',
-        'movieEpisodeSummaryRows',
-        'movieGenreRows',
-        'movieImageSummaryRows',
-        'certificateAttributeRows',
-        'certificateRatingRows',
-        'companyEntries',
-        'companyRows',
-        'companyCreditAttributeRows',
-        'companyCreditCategoryRows',
-        'movieBoxOfficeRows',
-        'currencyRows',
-        'countryRows',
-        'genreRows',
-        'interestRows',
-        'interestCategoryRows',
-        'interestPrimaryImageRows',
-        'interestSimilarInterestRows',
-        'detailItems',
-        'certificateItems',
-        'awardHighlights',
-        'relatedTitles',
-        'seasonNavigation',
-        'seasons',
-        'latestSeasonEpisodes',
-        'topRatedEpisodes',
-        'countries',
-        'languages',
-        'interestHighlights',
-        'archiveLinks',
-        'heroStats',
-    ] as $collectionVariable) {
-        if (! isset($$collectionVariable) || ! ($$collectionVariable instanceof \Illuminate\Support\Collection)) {
-            $$collectionVariable = collect();
-        }
-    }
-
-    $poster ??= null;
-    $backdrop ??= null;
-    $primaryVideo ??= null;
-    $latestSeason ??= null;
-    $shareModalId ??= 'title-share-'.$title->id;
-    $shareUrl ??= route('public.titles.show', $title);
-    $isSeriesLike ??= false;
-    $ratingCount ??= 0;
-    $posterLightboxModalId = 'title-poster-lightbox-'.$title->id;
-@endphp
-
 @section('content')
     <section class="space-y-6">
         <x-ui.card data-slot="title-detail-hero" class="sb-detail-hero !max-w-none overflow-hidden p-0">
@@ -301,6 +230,33 @@
                     </div>
                 </x-ui.card>
 
+                @if ($hasCatalogInternals)
+                    <details
+                        data-slot="title-detail-catalog-internals"
+                        class="group rounded-[1.35rem] border border-black/5 bg-white/60 p-5 shadow-sm dark:border-white/10 dark:bg-white/[0.02]"
+                    >
+                        <summary class="flex cursor-pointer list-none items-start justify-between gap-4 [&::-webkit-details-marker]:hidden">
+                            <div class="space-y-2">
+                                <div class="sb-page-kicker">Catalog Internals</div>
+                                <x-ui.heading level="h2" size="lg">Imported source tables and linkage records</x-ui.heading>
+                                <x-ui.text class="max-w-3xl text-sm text-neutral-600 dark:text-neutral-300">
+                                    These sections are useful for catalog QA, but they stay collapsed by default so the public title page remains readable.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="flex shrink-0 items-center gap-3">
+                                <x-ui.badge variant="outline" color="neutral" icon="queue-list">
+                                    {{ number_format($catalogInternalSectionCount) }} sections
+                                </x-ui.badge>
+                                <span class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-black/5 bg-white/80 transition group-open:rotate-180 dark:border-white/10 dark:bg-white/[0.04]">
+                                    <x-ui.icon name="chevron-down" class="size-4" />
+                                </span>
+                            </div>
+                        </summary>
+
+                        <div class="mt-5 space-y-6 border-t border-black/5 pt-5 dark:border-white/10">
+                @endif
+
                 @if ($movieAkaRows->isNotEmpty())
                     <x-ui.card data-slot="title-detail-movie-akas" class="sb-detail-section !max-w-none">
                         <div class="space-y-4">
@@ -350,55 +306,13 @@
                     </x-ui.card>
                 @endif
 
-                @if ($movieAkaAttributeRows->isNotEmpty())
-                    <x-ui.card data-slot="title-detail-movie-aka-attributes" class="sb-detail-section !max-w-none">
-                        <div class="space-y-4">
-                            <div>
-                                <x-ui.heading level="h2" size="lg">Movie AKA attributes</x-ui.heading>
-                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                    Raw rows imported from the <code>movie_aka_attributes</code> table and linked to this movie through its movie AKA records.
-                                </x-ui.text>
-                            </div>
-
-                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
-                                <div class="overflow-x-auto">
-                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
-                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
-                                            <tr>
-                                                <th scope="col" class="px-4 py-3 font-medium">movie_aka_id</th>
-                                                <th scope="col" class="px-4 py-3 font-medium">aka_attribute_id</th>
-                                                <th scope="col" class="px-4 py-3 font-medium">position</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
-                                            @foreach ($movieAkaAttributeRows as $movieAkaAttributeRow)
-                                                <tr>
-                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
-                                                        {{ $movieAkaAttributeRow->movie_aka_id }}
-                                                    </td>
-                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
-                                                        {{ $movieAkaAttributeRow->aka_attribute_id }}
-                                                    </td>
-                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
-                                                        {{ $movieAkaAttributeRow->position }}
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </x-ui.card>
-                @endif
-
-                @if ($akaAttributeRows->isNotEmpty())
+                @if ($akaAttributeEntries->isNotEmpty())
                     <x-ui.card data-slot="title-detail-aka-attributes" class="sb-detail-section !max-w-none">
                         <div class="space-y-4">
                             <div>
                                 <x-ui.heading level="h2" size="lg">AKA attributes</x-ui.heading>
                                 <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                    Raw rows imported from the <code>aka_attributes</code> table and linked to this movie through its AKA records.
+                                    Alternate-title attributes linked to this movie through its imported AKA records.
                                 </x-ui.text>
                             </div>
 
@@ -407,18 +321,48 @@
                                     <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
                                         <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
                                             <tr>
-                                                <th scope="col" class="px-4 py-3 font-medium">id</th>
-                                                <th scope="col" class="px-4 py-3 font-medium">name</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">Attribute</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">Meaning</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">Used on this movie</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">Archive</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
-                                            @foreach ($akaAttributeRows as $akaAttributeRow)
+                                            @foreach ($akaAttributeEntries as $akaAttributeEntry)
                                                 <tr>
                                                     <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
-                                                        {{ $akaAttributeRow->id }}
+                                                        <div class="flex items-center gap-2">
+                                                            <x-catalog.aka-attribute-chip
+                                                                :href="$akaAttributeEntry['href']"
+                                                                :label="$akaAttributeEntry['label']"
+                                                                active
+                                                            />
+                                                            <span class="text-xs text-neutral-500 dark:text-neutral-400">
+                                                                {{ number_format($akaAttributeEntry['linkedAkaCount']) }} record{{ $akaAttributeEntry['linkedAkaCount'] === 1 ? '' : 's' }}
+                                                            </span>
+                                                        </div>
                                                     </td>
                                                     <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
-                                                        {{ $akaAttributeRow->name }}
+                                                        {{ $akaAttributeEntry['description'] }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        <div class="flex flex-wrap gap-2">
+                                                            @foreach ($akaAttributeEntry['linkedAkas'] as $linkedAka)
+                                                                <span class="inline-flex items-center gap-2 rounded-full border border-black/8 bg-white/70 px-2.5 py-1 text-xs font-medium dark:border-white/10 dark:bg-white/[0.03]">
+                                                                    <span>{{ $linkedAka['text'] }}</span>
+                                                                    @if ($linkedAka['meta'])
+                                                                        <span class="text-[11px] uppercase tracking-[0.14em] text-neutral-500 dark:text-neutral-400">
+                                                                            {{ $linkedAka['meta'] }}
+                                                                        </span>
+                                                                    @endif
+                                                                </span>
+                                                            @endforeach
+                                                        </div>
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        <x-ui.link :href="$akaAttributeEntry['href']" variant="ghost" icon="queue-list" :primary="false">
+                                                            Open archive
+                                                        </x-ui.link>
                                                     </td>
                                                 </tr>
                                             @endforeach
@@ -594,7 +538,7 @@
                     </x-ui.card>
                 @endif
 
-                @if ($movieAwardNominationNomineeRows->isNotEmpty())
+                @if ($awardNomineeEntries->isNotEmpty())
                     <x-ui.card data-slot="title-detail-movie-award-nomination-nominees" class="sb-detail-section !max-w-none">
                         <div class="space-y-4">
                             <div>
@@ -614,38 +558,31 @@
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
-                                            @foreach ($movieAwardNominationNomineeRows as $movieAwardNominationNomineeRow)
-                                                @php
-                                                    $nomineePerson = $movieAwardNominationNomineeRow->person;
-                                                    $nomineeHeadshot = $nomineePerson?->preferredHeadshot();
-                                                    $nomineeHref = $nomineePerson ? route('public.people.show', $nomineePerson) : null;
-                                                    $nomineeName = $nomineePerson?->name;
-                                                @endphp
+                                            @foreach ($awardNomineeEntries as $awardNomineeEntry)
                                                 <tr>
                                                     <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
-                                                        @if ($movieAwardNominationNomineeRow->awardNomination)
+                                                        @if ($awardNomineeEntry['awardHref'])
                                                             <a
-                                                                href="{{ route('public.awards.nominations.show', $movieAwardNominationNomineeRow->awardNomination) }}"
+                                                                href="{{ $awardNomineeEntry['awardHref'] }}"
                                                                 class="block rounded-[1rem] transition hover:opacity-80"
                                                             >
                                                                 <div class="font-medium text-neutral-900 dark:text-neutral-100">
-                                                                    {{ $movieAwardNominationNomineeRow->awardNomination->awardCategory?->name ?: 'Award nomination' }}
+                                                                    {{ $awardNomineeEntry['awardLabel'] }}
                                                                 </div>
-                                                                <div class="text-xs text-neutral-500 dark:text-neutral-400">
-                                                                    {{ $movieAwardNominationNomineeRow->awardNomination->awardEvent?->name ?: 'Event' }}
-                                                                    @if ($movieAwardNominationNomineeRow->awardNomination->award_year)
-                                                                        · {{ $movieAwardNominationNomineeRow->awardNomination->award_year }}
-                                                                    @endif
-                                                                </div>
+                                                                @if ($awardNomineeEntry['awardMeta'])
+                                                                    <div class="text-xs text-neutral-500 dark:text-neutral-400">
+                                                                        {{ $awardNomineeEntry['awardMeta'] }}
+                                                                    </div>
+                                                                @endif
                                                             </a>
                                                         @else
                                                             <div class="font-medium text-neutral-900 dark:text-neutral-100">Award nomination</div>
                                                         @endif
                                                     </td>
                                                     <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
-                                                        @if ($nomineePerson && $nomineeHref)
+                                                        @if ($awardNomineeEntry['nomineeHref'] && $awardNomineeEntry['nomineeName'])
                                                             <a
-                                                                href="{{ $nomineeHref }}"
+                                                                href="{{ $awardNomineeEntry['nomineeHref'] }}"
                                                                 data-slot="title-detail-award-nominee-link"
                                                                 class="flex items-center gap-3 rounded-[1rem] transition hover:opacity-80"
                                                             >
@@ -653,10 +590,10 @@
                                                                     data-slot="title-detail-award-nominee-avatar"
                                                                     class="flex h-12 w-10 shrink-0 items-center justify-center overflow-hidden rounded-[0.8rem] border border-black/5 bg-neutral-100 dark:border-white/10 dark:bg-white/[0.04]"
                                                                 >
-                                                                    @if ($nomineeHeadshot)
+                                                                    @if ($awardNomineeEntry['nomineeHeadshotUrl'])
                                                                         <img
-                                                                            src="{{ $nomineeHeadshot->url }}"
-                                                                            alt="{{ $nomineeHeadshot->alt_text ?: $nomineeName }}"
+                                                                            src="{{ $awardNomineeEntry['nomineeHeadshotUrl'] }}"
+                                                                            alt="{{ $awardNomineeEntry['nomineeHeadshotAlt'] ?: $awardNomineeEntry['nomineeName'] }}"
                                                                             class="h-full w-full object-cover"
                                                                             loading="lazy"
                                                                         >
@@ -666,7 +603,7 @@
                                                                 </div>
 
                                                                 <span class="min-w-0 truncate font-medium text-neutral-900 dark:text-neutral-100">
-                                                                    {{ $nomineeName }}
+                                                                    {{ $awardNomineeEntry['nomineeName'] }}
                                                                 </span>
                                                             </a>
                                                         @else
@@ -969,7 +906,7 @@
                     </x-ui.card>
                 @endif
 
-                @if ($certificateRatingEntries->isNotEmpty())
+                @if ($certificateRatingEntries->isNotEmpty() || $certificateTitleEntries->isNotEmpty())
                     <x-ui.card data-slot="title-detail-certificate-ratings" class="sb-detail-section !max-w-none">
                         <div class="space-y-4">
                             <div>
@@ -979,63 +916,153 @@
                                 </x-ui.text>
                             </div>
 
-                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
-                                <div class="overflow-x-auto">
-                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
-                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
-                                            <tr>
-                                                <th scope="col" class="px-4 py-3 font-medium">Rating</th>
-                                                <th scope="col" class="px-4 py-3 font-medium">Countries on this title</th>
-                                                <th scope="col" class="px-4 py-3 font-medium">Attributes on this title</th>
-                                                <th scope="col" class="px-4 py-3 font-medium">Certificates on this title</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
-                                            @foreach ($certificateRatingEntries as $certificateRatingEntry)
-                                                <tr>
-                                                    <td class="px-4 py-3 align-top">
-                                                        <div class="space-y-2">
-                                                            <x-catalog.certificate-rating-chip :rating="$certificateRatingEntry['rating']" />
-                                                            <div class="sb-certificate-rating-note">
-                                                                {{ $certificateRatingEntry['rating']->shortDescription() }}
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
-                                                        <div class="flex flex-wrap gap-2">
-                                                            @forelse ($certificateRatingEntry['countries'] as $country)
-                                                                <span class="inline-flex items-center gap-2 rounded-full border border-black/8 px-2.5 py-1 text-xs font-medium dark:border-white/10">
-                                                                    <x-ui.flag type="country" :code="$country['code']" class="size-3.5" />
-                                                                    <span>{{ $country['label'] }}</span>
-                                                                </span>
-                                                            @empty
-                                                                <span class="text-neutral-500 dark:text-neutral-400">—</span>
-                                                            @endforelse
-                                                        </div>
-                                                    </td>
-                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
-                                                        <div class="flex flex-wrap gap-2">
-                                                            @forelse ($certificateRatingEntry['attributes'] as $certificateAttribute)
-                                                                <a
-                                                                    href="{{ route('public.certificate-attributes.show', $certificateAttribute) }}"
-                                                                    class="inline-flex items-center rounded-full border border-black/8 px-2.5 py-1 text-xs font-medium text-neutral-700 transition hover:bg-white dark:border-white/10 dark:text-neutral-200 dark:hover:bg-white/[0.05]"
-                                                                >
-                                                                    {{ $certificateAttribute->name }}
-                                                                </a>
-                                                            @empty
-                                                                <span class="text-neutral-500 dark:text-neutral-400">—</span>
-                                                            @endforelse
-                                                        </div>
-                                                    </td>
-                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
-                                                        {{ number_format($certificateRatingEntry['usageCount']) }}
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+                            <x-ui.tabs
+                                class="block"
+                                variant="outlined"
+                                :active-tab="$certificateRatingEntries->isNotEmpty() ? 'rating' : 'title'"
+                                data-slot="title-detail-certificate-rating-tabs"
+                            >
+                                <x-ui.tab.group class="justify-start gap-2">
+                                    @if ($certificateRatingEntries->isNotEmpty())
+                                        <x-ui.tab name="rating" class="justify-between gap-3">
+                                            <span>By rating</span>
+                                            <span class="inline-flex min-w-7 items-center justify-center rounded-full bg-black/5 px-2 py-0.5 text-[0.72rem] font-semibold text-neutral-600 dark:bg-white/10 dark:text-neutral-200">
+                                                {{ number_format($certificateRatingEntries->count()) }}
+                                            </span>
+                                        </x-ui.tab>
+                                    @endif
+
+                                    @if ($certificateTitleEntries->isNotEmpty())
+                                        <x-ui.tab name="title" class="justify-between gap-3">
+                                            <span>By title</span>
+                                            <span class="inline-flex min-w-7 items-center justify-center rounded-full bg-black/5 px-2 py-0.5 text-[0.72rem] font-semibold text-neutral-600 dark:bg-white/10 dark:text-neutral-200">
+                                                {{ number_format($certificateTitleEntries->count()) }}
+                                            </span>
+                                        </x-ui.tab>
+                                    @endif
+                                </x-ui.tab.group>
+
+                                @if ($certificateRatingEntries->isNotEmpty())
+                                    <x-ui.tab.panel name="rating" class="!border-0 !bg-transparent !p-0">
+                                        <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                            <div class="overflow-x-auto">
+                                                <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                                    <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                                        <tr>
+                                                            <th scope="col" class="px-4 py-3 font-medium">Rating</th>
+                                                            <th scope="col" class="px-4 py-3 font-medium">Countries on this title</th>
+                                                            <th scope="col" class="px-4 py-3 font-medium">Attributes on this title</th>
+                                                            <th scope="col" class="px-4 py-3 font-medium">Certificates on this title</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                                        @foreach ($certificateRatingEntries as $certificateRatingEntry)
+                                                            <tr>
+                                                                <td class="px-4 py-3 align-top">
+                                                                    <div class="space-y-2">
+                                                                        <x-catalog.certificate-rating-chip :rating="$certificateRatingEntry['rating']" />
+                                                                        <div class="sb-certificate-rating-note">
+                                                                            {{ $certificateRatingEntry['rating']->shortDescription() }}
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                                <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                                    <div class="flex flex-wrap gap-2">
+                                                                        @forelse ($certificateRatingEntry['countries'] as $country)
+                                                                            <span class="inline-flex items-center gap-2 rounded-full border border-black/8 px-2.5 py-1 text-xs font-medium dark:border-white/10">
+                                                                                <x-ui.flag type="country" :code="$country['code']" class="size-3.5" />
+                                                                                <span>{{ $country['label'] }}</span>
+                                                                            </span>
+                                                                        @empty
+                                                                            <span class="text-neutral-500 dark:text-neutral-400">—</span>
+                                                                        @endforelse
+                                                                    </div>
+                                                                </td>
+                                                                <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                                    <div class="flex flex-wrap gap-2">
+                                                                        @forelse ($certificateRatingEntry['attributes'] as $certificateAttribute)
+                                                                            <a
+                                                                                href="{{ route('public.certificate-attributes.show', $certificateAttribute) }}"
+                                                                                class="inline-flex items-center rounded-full border border-black/8 px-2.5 py-1 text-xs font-medium text-neutral-700 transition hover:bg-white dark:border-white/10 dark:text-neutral-200 dark:hover:bg-white/[0.05]"
+                                                                            >
+                                                                                {{ $certificateAttribute->name }}
+                                                                            </a>
+                                                                        @empty
+                                                                            <span class="text-neutral-500 dark:text-neutral-400">—</span>
+                                                                        @endforelse
+                                                                    </div>
+                                                                </td>
+                                                                <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
+                                                                    {{ number_format($certificateRatingEntry['usageCount']) }}
+                                                                </td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </x-ui.tab.panel>
+                                @endif
+
+                                @if ($certificateTitleEntries->isNotEmpty())
+                                    <x-ui.tab.panel name="title" class="!border-0 !bg-transparent !p-0">
+                                        <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                            <div class="overflow-x-auto">
+                                                <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                                    <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                                        <tr>
+                                                            <th scope="col" class="px-4 py-3 font-medium">Rating</th>
+                                                            <th scope="col" class="px-4 py-3 font-medium">Meaning</th>
+                                                            <th scope="col" class="px-4 py-3 font-medium">Country</th>
+                                                            <th scope="col" class="px-4 py-3 font-medium">Attributes</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                                        @foreach ($certificateTitleEntries as $certificateTitleEntry)
+                                                            <tr>
+                                                                <td class="px-4 py-3 align-top text-neutral-900 dark:text-neutral-100">
+                                                                    @if ($certificateTitleEntry['rating'])
+                                                                        <x-catalog.certificate-rating-chip :rating="$certificateTitleEntry['rating']" />
+                                                                    @else
+                                                                        <span class="text-neutral-500 dark:text-neutral-400">—</span>
+                                                                    @endif
+                                                                </td>
+                                                                <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                                    {{ $certificateTitleEntry['meaning'] }}
+                                                                </td>
+                                                                <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                                    @if ($certificateTitleEntry['country'])
+                                                                        <div class="flex items-center gap-2">
+                                                                            <x-ui.flag type="country" :code="$certificateTitleEntry['country']['code']" class="size-4" />
+                                                                            <span>{{ $certificateTitleEntry['country']['label'] }}</span>
+                                                                        </div>
+                                                                    @else
+                                                                        —
+                                                                    @endif
+                                                                </td>
+                                                                <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                                    <div class="flex flex-wrap gap-2">
+                                                                        @forelse ($certificateTitleEntry['attributes'] as $certificateAttribute)
+                                                                            <a
+                                                                                href="{{ route('public.certificate-attributes.show', $certificateAttribute) }}"
+                                                                                class="inline-flex items-center rounded-full border border-black/8 px-2.5 py-1 text-xs font-medium text-neutral-700 transition hover:bg-white dark:border-white/10 dark:text-neutral-200 dark:hover:bg-white/[0.05]"
+                                                                            >
+                                                                                {{ $certificateAttribute->name }}
+                                                                            </a>
+                                                                        @empty
+                                                                            <span class="text-neutral-500 dark:text-neutral-400">—</span>
+                                                                        @endforelse
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </x-ui.tab.panel>
+                                @endif
+                            </x-ui.tabs>
                         </div>
                     </x-ui.card>
                 @endif
@@ -1095,7 +1122,7 @@
                     </x-ui.card>
                 @endif
 
-                @if ($movieDirectorRows->isNotEmpty())
+                @if ($directorEntries->isNotEmpty())
                     <x-ui.card data-slot="title-detail-movie-directors" class="sb-detail-section !max-w-none">
                         <div class="space-y-4">
                             <div>
@@ -1106,39 +1133,24 @@
                             </div>
 
                             <div class="grid gap-3 md:grid-cols-2">
-                                @foreach ($movieDirectorRows as $movieDirectorRow)
-                                    @php
-                                        $directorPerson = $movieDirectorRow->person;
-                                        $directorName = $directorPerson?->name
-                                            ?? $movieDirectorRow->nameBasic?->displayName
-                                            ?? $movieDirectorRow->nameBasic?->primaryname
-                                            ?? (string) $movieDirectorRow->name_basic_id;
-                                        $directorHeadshot = $directorPerson?->preferredHeadshot();
-                                        $directorProfileHref = $directorPerson ? route('public.people.show', $directorPerson) : null;
-                                        $directorArchiveHref = $directorPerson
-                                            ? route('public.people.show', ['person' => $directorPerson, 'job' => 'Directing']).'#person-filmography'
-                                            : null;
-                                        $directorSummary = $directorPerson?->summaryText();
-                                        $directorProfessionLabels = collect($directorPerson?->professionLabels() ?? []);
-                                    @endphp
-
+                                @foreach ($directorEntries as $directorEntry)
                                     <div class="rounded-[1.15rem] border border-black/5 bg-white/70 p-4 dark:border-white/10 dark:bg-white/[0.02]">
                                         <div class="flex items-start gap-4">
-                                            @if ($directorProfileHref)
-                                                <a href="{{ $directorProfileHref }}" class="shrink-0" data-slot="title-detail-director-avatar-link">
+                                            @if ($directorEntry['profileHref'])
+                                                <a href="{{ $directorEntry['profileHref'] }}" class="shrink-0" data-slot="title-detail-director-avatar-link">
                                                     <x-ui.avatar
-                                                        :src="$directorHeadshot?->url"
-                                                        :alt="$directorHeadshot?->alt_text ?: $directorName"
-                                                        :name="$directorName"
+                                                        :src="$directorEntry['headshotUrl']"
+                                                        :alt="$directorEntry['headshotAlt'] ?: $directorEntry['name']"
+                                                        :name="$directorEntry['name']"
                                                         color="auto"
                                                         class="!h-20 !w-16 rounded-[1rem] border border-black/5 dark:border-white/10"
                                                     />
                                                 </a>
                                             @else
                                                 <x-ui.avatar
-                                                    :src="$directorHeadshot?->url"
-                                                    :alt="$directorHeadshot?->alt_text ?: $directorName"
-                                                    :name="$directorName"
+                                                    :src="$directorEntry['headshotUrl']"
+                                                    :alt="$directorEntry['headshotAlt'] ?: $directorEntry['name']"
+                                                    :name="$directorEntry['name']"
                                                     color="auto"
                                                     class="!h-20 !w-16 shrink-0 rounded-[1rem] border border-black/5 dark:border-white/10"
                                                 />
@@ -1146,56 +1158,56 @@
 
                                             <div class="min-w-0 flex-1 space-y-3">
                                                 <div class="space-y-2">
-                                                    @if ($directorProfileHref)
+                                                    @if ($directorEntry['profileHref'])
                                                         <a
-                                                            href="{{ $directorProfileHref }}"
+                                                            href="{{ $directorEntry['profileHref'] }}"
                                                             data-slot="title-detail-director-link"
                                                             class="block text-lg font-semibold text-neutral-900 transition hover:opacity-80 dark:text-neutral-100"
                                                         >
-                                                            {{ $directorName }}
+                                                            {{ $directorEntry['name'] }}
                                                         </a>
                                                     @else
                                                         <div class="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
-                                                            {{ $directorName }}
+                                                            {{ $directorEntry['name'] }}
                                                         </div>
                                                     @endif
 
                                                     <div class="flex flex-wrap gap-2">
-                                                        @foreach ($directorProfessionLabels as $directorProfessionLabel)
+                                                        @foreach ($directorEntry['professionLabels'] as $directorProfessionLabel)
                                                             <x-ui.badge variant="outline" color="slate" icon="briefcase">
                                                                 {{ $directorProfessionLabel }}
                                                             </x-ui.badge>
                                                         @endforeach
 
-                                                        @if ($directorPerson?->nationality)
+                                                        @if ($directorEntry['nationality'])
                                                             <x-ui.badge variant="outline" color="neutral" icon="globe-alt">
-                                                                {{ $directorPerson->nationality }}
+                                                                {{ $directorEntry['nationality'] }}
                                                             </x-ui.badge>
                                                         @endif
 
-                                                        @if ($directorPerson?->credits_count)
+                                                        @if ($directorEntry['creditsBadgeLabel'])
                                                             <x-ui.badge variant="outline" color="neutral" icon="film">
-                                                                {{ $directorPerson->creditsBadgeLabel() }}
+                                                                {{ $directorEntry['creditsBadgeLabel'] }}
                                                             </x-ui.badge>
                                                         @endif
                                                     </div>
 
-                                                    @if ($directorSummary)
+                                                    @if ($directorEntry['summary'])
                                                         <x-ui.text class="text-sm text-neutral-600 dark:text-neutral-300">
-                                                            {{ str($directorSummary)->limit(180) }}
+                                                            {{ str($directorEntry['summary'])->limit(180) }}
                                                         </x-ui.text>
                                                     @endif
                                                 </div>
 
                                                 <div class="flex flex-wrap gap-2">
-                                                    @if ($directorProfileHref)
-                                                        <x-ui.button as="a" :href="$directorProfileHref" variant="outline" size="sm" icon="user">
+                                                    @if ($directorEntry['profileHref'])
+                                                        <x-ui.button as="a" :href="$directorEntry['profileHref']" variant="outline" size="sm" icon="user">
                                                             View person
                                                         </x-ui.button>
                                                     @endif
 
-                                                    @if ($directorArchiveHref)
-                                                        <x-ui.button as="a" :href="$directorArchiveHref" size="sm" icon="film">
+                                                    @if ($directorEntry['archiveHref'])
+                                                        <x-ui.button as="a" :href="$directorEntry['archiveHref']" size="sm" icon="film">
                                                             Directed titles
                                                         </x-ui.button>
                                                     @endif
@@ -1800,111 +1812,104 @@
                     </x-ui.card>
                 @endif
 
-                @if ($movieGenreRows->isNotEmpty())
-                    <x-ui.card data-slot="title-detail-movie-genres" class="sb-detail-section !max-w-none">
-                        <div class="space-y-4">
-                            <div>
-                                <x-ui.heading level="h2" size="lg">Movie genres</x-ui.heading>
-                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                    Genre links attached directly to this title.
-                                </x-ui.text>
-                            </div>
-
-                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
-                                <div class="overflow-x-auto">
-                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
-                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
-                                            <tr>
-                                                <th scope="col" class="px-4 py-3 font-medium">Genre</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
-                                            @foreach ($movieGenreRows as $movieGenreRow)
-                                                <tr>
-                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
-                                                        {{ $movieGenreRow->genre?->name ?? $movieGenreRow->genre_id }}
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </x-ui.card>
-                @endif
-
-                @if ($genreRows->isNotEmpty())
+                @if ($genreEntries->isNotEmpty())
                     <x-ui.card data-slot="title-detail-genres" class="sb-detail-section !max-w-none">
                         <div class="space-y-4">
                             <div>
                                 <x-ui.heading level="h2" size="lg">Genres</x-ui.heading>
                                 <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                    Raw rows imported from the <code>genres</code> table and linked to this movie through its movie genre records.
+                                    Genre lanes attached to this title. Open any genre to browse more titles in the existing archive.
                                 </x-ui.text>
                             </div>
 
-                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
-                                <div class="overflow-x-auto">
-                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
-                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
-                                            <tr>
-                                                <th scope="col" class="px-4 py-3 font-medium">id</th>
-                                                <th scope="col" class="px-4 py-3 font-medium">name</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
-                                            @foreach ($genreRows as $genreRow)
-                                                <tr>
-                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
-                                                        {{ $genreRow->id }}
-                                                    </td>
-                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
-                                                        {{ $genreRow->name }}
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
+                            <div class="grid auto-rows-fr gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                                @forelse ($genreEntries as $genreEntry)
+                                    <x-ui.card class="!max-w-none h-full overflow-hidden rounded-[1.4rem] !p-0">
+                                        <div class="flex h-full flex-col">
+                                            <a
+                                                href="{{ $genreEntry['href'] }}"
+                                                class="group block overflow-hidden border-b border-black/5 dark:border-white/10"
+                                            >
+                                                @if ($genreEntry['previewUrl'])
+                                                    <img
+                                                        src="{{ $genreEntry['previewUrl'] }}"
+                                                        alt="{{ $genreEntry['previewAlt'] ?? $genreEntry['genre']->name }}"
+                                                        class="aspect-[16/9] w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+                                                        loading="lazy"
+                                                    >
+                                                @else
+                                                    <div class="flex aspect-[16/9] items-center justify-center bg-white/[0.04] text-[#8f877a]">
+                                                        <x-ui.icon name="tag" class="size-10" />
+                                                    </div>
+                                                @endif
+                                            </a>
+
+                                            <div class="flex flex-1 flex-col gap-4 p-4">
+                                                <div class="flex flex-wrap gap-2">
+                                                    <x-ui.badge variant="outline" color="neutral" icon="tag">
+                                                        {{ $genreEntry['genre']->name }}
+                                                    </x-ui.badge>
+
+                                                    @if ($genreEntry['titleCountLabel'])
+                                                        <x-ui.badge variant="outline" color="slate" icon="film">
+                                                            {{ $genreEntry['titleCountLabel'] }}
+                                                        </x-ui.badge>
+                                                    @endif
+                                                </div>
+
+                                                <x-ui.text class="text-sm text-neutral-600 dark:text-neutral-300">
+                                                    {{ $genreEntry['description'] }}
+                                                </x-ui.text>
+
+                                                <div class="mt-auto flex justify-end">
+                                                    <x-ui.button.light-outline :href="$genreEntry['href']" size="sm" iconAfter="arrow-right">
+                                                        Open genre
+                                                    </x-ui.button.light-outline>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </x-ui.card>
+                                @empty
+                                @endforelse
                             </div>
                         </div>
                     </x-ui.card>
                 @endif
 
-                @if ($interestCategoryRows->isNotEmpty())
+                @if ($interestCategoryEntries->isNotEmpty())
                     <x-ui.card data-slot="title-detail-interest-categories" class="sb-detail-section !max-w-none">
                         <div class="space-y-4">
                             <div>
                                 <x-ui.heading level="h2" size="lg">Interest categories</x-ui.heading>
                                 <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                    Raw rows imported from the <code>interest_categories</code> table and linked to this movie through its imported interests.
+                                    Discovery themes connected to this title through its imported interest graph.
                                 </x-ui.text>
                             </div>
 
-                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
-                                <div class="overflow-x-auto">
-                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
-                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
-                                            <tr>
-                                                <th scope="col" class="px-4 py-3 font-medium">id</th>
-                                                <th scope="col" class="px-4 py-3 font-medium">name</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
-                                            @foreach ($interestCategoryRows as $interestCategoryRow)
-                                                <tr>
-                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
-                                                        {{ $interestCategoryRow->id }}
-                                                    </td>
-                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
-                                                        {{ $interestCategoryRow->name }}
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
+                            <div class="grid auto-rows-fr gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                                @forelse ($interestCategoryEntries as $interestCategoryEntry)
+                                    <x-catalog.interest-category-card
+                                        :interest-category="$interestCategoryEntry['interestCategory']"
+                                        show-image
+                                    >
+                                        <x-ui.badge variant="outline" color="amber" icon="sparkles">
+                                            {{ $interestCategoryEntry['matchedInterestCountLabel'] }}
+                                        </x-ui.badge>
+
+                                        @foreach ($interestCategoryEntry['matchedInterests'] as $matchedInterest)
+                                            <a href="{{ $matchedInterest['href'] }}">
+                                                <x-ui.badge
+                                                    variant="outline"
+                                                    :color="$matchedInterest['isSubgenre'] ? 'slate' : 'neutral'"
+                                                    :icon="$matchedInterest['isSubgenre'] ? 'tag' : 'sparkles'"
+                                                >
+                                                    {{ $matchedInterest['name'] }}
+                                                </x-ui.badge>
+                                            </a>
+                                        @endforeach
+                                    </x-catalog.interest-category-card>
+                                @empty
+                                @endforelse
                             </div>
                         </div>
                     </x-ui.card>
@@ -2048,6 +2053,11 @@
                     </x-ui.card>
                 @endif
 
+                @if ($hasCatalogInternals)
+                        </div>
+                    </details>
+                @endif
+
                 @if ($interestHighlights->isNotEmpty())
                     <x-ui.card data-slot="title-discovery-profile" class="sb-detail-section !max-w-none">
                         <div class="space-y-4">
@@ -2073,7 +2083,7 @@
                     </x-ui.card>
                 @endif
 
-                @if ($castPreview->isNotEmpty())
+                @if ($featuredCastEntries->isNotEmpty())
                     <x-ui.card class="sb-detail-section !max-w-none">
                         <div class="space-y-4">
                             <div>
@@ -2083,25 +2093,68 @@
                                 </x-ui.text>
                             </div>
 
-                            <div class="grid gap-3 sm:grid-cols-2">
-                                @foreach ($castPreview as $credit)
-                                    @if ($credit->person)
-                                        <a href="{{ route('public.people.show', $credit->person) }}" class="rounded-[1.15rem] border border-black/5 bg-white/70 p-4 transition hover:bg-white dark:border-white/10 dark:bg-white/[0.02] dark:hover:bg-white/[0.05]">
-                                            <div class="flex items-center gap-3">
+                            <div class="grid auto-rows-fr gap-3 sm:grid-cols-2">
+                                @foreach ($featuredCastEntries as $featuredCastEntry)
+                                    <article
+                                        class="h-full rounded-[1.15rem] border border-black/5 bg-white/70 p-4 transition hover:bg-white dark:border-white/10 dark:bg-white/[0.02] dark:hover:bg-white/[0.05]"
+                                        data-slot="featured-cast-card"
+                                    >
+                                        <div class="flex h-full flex-col gap-4">
+                                            <div class="flex items-start gap-3">
                                                 <x-ui.avatar
-                                                    :src="$credit->person->preferredHeadshot()?->url"
-                                                    :alt="$credit->person->preferredHeadshot()?->alt_text ?: $credit->person->name"
-                                                    :name="$credit->person->name"
+                                                    as="a"
+                                                    :href="$featuredCastEntry['profileHref']"
+                                                    :src="$featuredCastEntry['headshotUrl']"
+                                                    :alt="$featuredCastEntry['headshotAlt'] ?: $featuredCastEntry['name']"
+                                                    :name="$featuredCastEntry['name']"
                                                     color="auto"
                                                     class="!h-14 !w-14 shrink-0 border border-black/5 dark:border-white/10"
                                                 />
-                                                <div class="min-w-0">
-                                                    <div class="truncate font-medium text-neutral-900 dark:text-neutral-100">{{ $credit->person->name }}</div>
-                                                    <div class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">{{ $credit->job }}</div>
+
+                                                <div class="flex min-w-0 flex-1 flex-col gap-3">
+                                                    <div class="space-y-2">
+                                                        <div>
+                                                            <a
+                                                                href="{{ $featuredCastEntry['profileHref'] }}"
+                                                                class="block truncate font-medium text-neutral-900 transition hover:opacity-80 dark:text-neutral-100"
+                                                            >
+                                                                {{ $featuredCastEntry['name'] }}
+                                                            </a>
+                                                            <div class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+                                                                {{ $featuredCastEntry['roleLabel'] }}
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="flex flex-wrap gap-2">
+                                                            @if ($featuredCastEntry['nationality'])
+                                                                <x-ui.badge variant="outline" color="neutral" icon="globe-alt">
+                                                                    {{ $featuredCastEntry['nationality'] }}
+                                                                </x-ui.badge>
+                                                            @endif
+
+                                                            @if ($featuredCastEntry['creditsBadgeLabel'])
+                                                                <x-ui.badge variant="outline" color="slate" icon="film">
+                                                                    {{ $featuredCastEntry['creditsBadgeLabel'] }}
+                                                                </x-ui.badge>
+                                                            @endif
+                                                        </div>
+
+                                                        @if ($featuredCastEntry['summary'])
+                                                            <x-ui.text class="text-sm text-neutral-600 dark:text-neutral-300">
+                                                                {{ str($featuredCastEntry['summary'])->limit(110) }}
+                                                            </x-ui.text>
+                                                        @endif
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </a>
-                                    @endif
+
+                                            <div class="mt-auto flex justify-start">
+                                                <x-ui.button as="a" :href="$featuredCastEntry['profileHref']" variant="outline" size="sm" icon="user">
+                                                    View person
+                                                </x-ui.button>
+                                            </div>
+                                        </div>
+                                    </article>
                                 @endforeach
                             </div>
                         </div>
@@ -2164,12 +2217,23 @@
                                     @endforeach
                                 </div>
 
-                                <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                                <div class="grid auto-rows-fr gap-3 sm:grid-cols-2 xl:grid-cols-3">
                                     @foreach ($seasonNavigation as $navigationSeason)
-                                        <a href="{{ route('public.seasons.show', ['series' => $title, 'season' => $navigationSeason]) }}" class="rounded-[1.15rem] border border-black/5 bg-white/70 p-4 transition hover:bg-white dark:border-white/10 dark:bg-white/[0.02] dark:hover:bg-white/[0.05]">
-                                            <div class="font-medium text-neutral-900 dark:text-neutral-100">{{ $navigationSeason->name }}</div>
-                                            <div class="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
-                                                {{ number_format((int) $navigationSeason->episodes_count) }} episodes
+                                        <a
+                                            href="{{ route('public.seasons.show', ['series' => $title, 'season' => $navigationSeason]) }}"
+                                            class="flex h-full min-h-[7.5rem] flex-col justify-between rounded-[1.15rem] border border-black/5 bg-white/70 p-4 transition hover:bg-white dark:border-white/10 dark:bg-white/[0.02] dark:hover:bg-white/[0.05]"
+                                            data-slot="series-guide-season-card"
+                                        >
+                                            <div>
+                                                <div class="font-medium text-neutral-900 dark:text-neutral-100">{{ $navigationSeason->name }}</div>
+                                                <div class="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
+                                                    {{ number_format((int) $navigationSeason->episodes_count) }} episodes
+                                                </div>
+                                            </div>
+
+                                            <div class="mt-4 inline-flex items-center gap-2 text-sm font-medium text-neutral-700 dark:text-neutral-200">
+                                                <span>Open season</span>
+                                                <x-ui.icon name="arrow-right" class="size-4" />
                                             </div>
                                         </a>
                                     @endforeach

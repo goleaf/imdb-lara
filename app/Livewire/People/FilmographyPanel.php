@@ -40,4 +40,9 @@ class FilmographyPanel extends Component
             ]),
         ]);
     }
+
+    public function placeholder(array $params = []): View
+    {
+        return view('livewire.placeholders.filmography-panel');
+    }
 }

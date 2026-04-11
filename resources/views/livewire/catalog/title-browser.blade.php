@@ -79,11 +79,7 @@
                     <div wire:key="title-browser-{{ $title->id }}">
                         <x-catalog.chart-title-card
                             :title="$title"
-                            :comparison-label="$this->viewData['chartRows'][$title->id]['comparisonLabel']"
-                            :rank="$this->viewData['chartRows'][$title->id]['rank']"
-                            :movement-amount="$this->viewData['chartRows'][$title->id]['movementAmount']"
-                            :movement-direction="$this->viewData['chartRows'][$title->id]['movementDirection']"
-                            :movement-note="$this->viewData['chartRows'][$title->id]['movementNote']"
+                            :card="$this->viewData['chartRows'][$title->id]"
                         />
                     </div>
                 @else

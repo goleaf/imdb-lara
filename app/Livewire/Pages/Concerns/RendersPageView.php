@@ -14,15 +14,23 @@ trait RendersPageView
     protected function renderPageView(string $view, array $data = []): View
     {
         $sections = view($view, $data)->renderSections();
+        $isAdminView = str_starts_with($view, 'admin.');
+        $isAccountView = str_starts_with($view, 'account.');
         $navbarView = match (true) {
-            str_starts_with($view, 'admin.') => 'layouts.partials.admin-navbar',
-            str_starts_with($view, 'account.') => 'layouts.partials.account-navbar',
-            default => 'layouts.partials.public-navbar',
+            $isAdminView => 'layouts.partials.admin-navbar',
+            $isAccountView => 'layouts.partials.account-navbar',
+            default => null,
+        };
+        $sidebarView = match (true) {
+            $isAdminView => 'layouts.partials.admin-sidebar',
+            $isAccountView => 'layouts.partials.account-sidebar',
+            default => null,
         };
         $pageSeo = $data['seo'] ?? null;
         $defaultDescription = 'Screenbase is a Livewire-driven IMDb-style catalog for titles, people, awards, trailers, and discovery.';
         $renderedTitle = trim((string) ($sections['title'] ?? ''));
         $renderedMetaDescription = trim((string) ($sections['meta_description'] ?? ''));
+        $defaultRobots = $isAdminView || $isAccountView ? 'noindex,nofollow' : 'index,follow';
         $pageTitle = $pageSeo instanceof PageSeoData
             ? $pageSeo->documentTitle(request())
             : ($renderedTitle !== ''
@@ -45,7 +53,7 @@ trait RendersPageView
         $layoutData = [
             'pageTitle' => $pageTitle,
             'pageDescription' => $pageDescription,
-            'pageRobots' => $pageSeo instanceof PageSeoData ? $pageSeo->robots : 'index,follow',
+            'pageRobots' => $pageSeo instanceof PageSeoData ? $pageSeo->robots : $defaultRobots,
             'canonicalUrl' => $pageSeo instanceof PageSeoData ? $pageSeo->canonicalUrl(request()) : url()->current(),
             'openGraphTitle' => $openGraphTitle,
             'openGraphDescription' => $openGraphDescription,
@@ -55,14 +63,14 @@ trait RendersPageView
             'twitterCard' => $pageSeo instanceof PageSeoData ? $pageSeo->twitterCard() : 'summary',
             'breadcrumbSchema' => $pageSeo instanceof PageSeoData ? $pageSeo->breadcrumbSchema(request()) : null,
             'breadcrumbs' => $sections['breadcrumbs'] ?? null,
-            'navbarView' => $navbarView,
-            'sidebar' => null,
+            'navbar' => $navbarView ? view($navbarView)->render() : null,
+            'sidebar' => $sidebarView ? view($sidebarView)->render() : null,
             'shellVariant' => match (true) {
-                str_starts_with($view, 'admin.') => 'admin',
-                str_starts_with($view, 'account.') => 'account',
+                $isAdminView => 'admin',
+                $isAccountView => 'account',
                 default => 'default',
             },
-            'showFooter' => ! str_starts_with($view, 'admin.'),
+            'showFooter' => ! $isAdminView,
         ];
 
         request()->attributes->set('livewirePageLayoutData', $layoutData);

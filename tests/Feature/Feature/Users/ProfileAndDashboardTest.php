@@ -106,6 +106,24 @@ class ProfileAndDashboardTest extends TestCase
             ->assertSee('@ari-lane');
     }
 
+    public function test_account_pages_render_the_portal_sidebar_shell(): void
+    {
+        $user = User::factory()->create([
+            'name' => 'Ari Lane',
+            'username' => 'ari-lane',
+        ]);
+
+        UserList::factory()->watchlist()->for($user)->create();
+
+        $this->actingAs($user)
+            ->get(route('account.dashboard'))
+            ->assertOk()
+            ->assertSeeHtml('data-theme-enabled="true"')
+            ->assertSeeHtml('data-slot="layout"')
+            ->assertSee('Member workspace')
+            ->assertSee('Account menu');
+    }
+
     public function test_public_profile_renders_visible_sections_for_public_users(): void
     {
         $user = User::factory()->create([

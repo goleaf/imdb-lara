@@ -43,7 +43,7 @@
         },
     }"
     x-on:keydown.escape.window="open = false"
-    class="relative w-full"
+    class="relative w-full [&:has(input[data-loading])_[data-slot=global-search-loading]]:block [&:has(input[data-loading])_[data-slot=global-search-results]]:hidden"
 >
     <form wire:submit="submitSearch" x-on:submit="storeRecent($wire.query)">
         <x-ui.input
@@ -87,7 +87,7 @@
                 </button>
             </div>
 
-            <div wire:loading.delay wire:target="query" class="sb-search-panel rounded-[1.35rem] border border-white/8 bg-white/[0.03] p-4">
+            <div data-slot="global-search-loading" class="sb-search-panel hidden rounded-[1.35rem] border border-white/8 bg-white/[0.03] p-4">
                 <div class="space-y-3">
                     <div>
                         <div class="sb-search-group-title inline-flex items-center gap-2">
@@ -111,7 +111,7 @@
                 </div>
             </div>
 
-            <div wire:loading.remove wire:target="query" class="space-y-4">
+            <div data-slot="global-search-results" class="space-y-4">
                 @if ($hasSearchTerm)
                     @if ($topSuggestion['record'])
                         <div data-slot="global-search-top-suggestion" class="sb-search-panel rounded-[1.35rem] border border-white/8 bg-white/[0.03] p-4">

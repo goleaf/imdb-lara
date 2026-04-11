@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Number;
 use Illuminate\Support\Str;
 
 class Genre extends ImdbModel
@@ -59,6 +60,23 @@ class Genre extends ImdbModel
         return $this->hasMany(MovieGenre::class, 'genre_id', 'id');
     }
 
+    public function publishedTitleCount(): int
+    {
+        $selectedValue = $this->getAttributeFromArray('published_titles_count');
+
+        return $selectedValue !== null ? (int) $selectedValue : 0;
+    }
+
+    public function publishedTitleCountBadgeLabel(): string
+    {
+        return Number::format($this->publishedTitleCount()).' '.Str::plural('title', $this->publishedTitleCount());
+    }
+
+    public function descriptionText(): string
+    {
+        return 'Browse '.$this->name.' titles from the imported catalog.';
+    }
+
     public function getSlugAttribute(): string
     {
         return Str::slug((string) $this->name).'-g'.$this->id;
@@ -66,6 +84,6 @@ class Genre extends ImdbModel
 
     public function getDescriptionAttribute(): ?string
     {
-        return null;
+        return $this->descriptionText();
     }
 }

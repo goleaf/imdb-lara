@@ -105,39 +105,47 @@
                             @endif
                         </div>
 
-                        <form method="POST" action="{{ route('admin.reports.update', $report) }}" class="grid gap-4 xl:grid-cols-[220px,220px,minmax(0,1fr),auto]">
+                        <form method="POST" action="{{ route('admin.reports.update', $report) }}" class="grid gap-4 xl:grid-cols-[220px,220px,minmax(0,1fr),auto] xl:items-end">
                             @csrf
                             @method('PATCH')
-                            <select
-                                name="status"
-                                class="min-h-10 rounded-box border border-black/10 bg-white px-3 text-sm text-neutral-800 shadow-xs transition focus:border-black/15 focus:outline-none focus:ring-2 focus:ring-neutral-900/15 dark:border-white/15 dark:bg-neutral-900 dark:text-neutral-200 dark:focus:border-white/20 dark:focus:ring-neutral-100/15"
-                            >
-                                @foreach ($reportStatuses as $status)
-                                    <option value="{{ $status->value }}" @selected($report->status === $status)>
-                                        {{ str($status->value)->headline() }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <x-ui.field>
+                                <x-ui.label>Report status</x-ui.label>
+                                <x-ui.native-select name="status">
+                                    @foreach ($reportStatuses as $status)
+                                        <option value="{{ $status->value }}" @selected($report->status === $status)>
+                                            {{ str($status->value)->headline() }}
+                                        </option>
+                                    @endforeach
+                                </x-ui.native-select>
+                            </x-ui.field>
 
-                            <select
-                                name="content_action"
-                                class="min-h-10 rounded-box border border-black/10 bg-white px-3 text-sm text-neutral-800 shadow-xs transition focus:border-black/15 focus:outline-none focus:ring-2 focus:ring-neutral-900/15 dark:border-white/15 dark:bg-neutral-900 dark:text-neutral-200 dark:focus:border-white/20 dark:focus:ring-neutral-100/15"
-                            >
-                                <option value="none">No content action</option>
-                                <option value="hide_content">Hide reported content</option>
-                            </select>
+                            <x-ui.field>
+                                <x-ui.label>Content action</x-ui.label>
+                                <x-ui.native-select name="content_action">
+                                    <option value="none">No content action</option>
+                                    <option value="hide_content">Hide reported content</option>
+                                </x-ui.native-select>
+                            </x-ui.field>
 
-                            <x-ui.input name="resolution_notes" :value="$report->resolution_notes" placeholder="Resolution notes" />
+                            <x-ui.field>
+                                <x-ui.label>Resolution notes</x-ui.label>
+                                <x-ui.input name="resolution_notes" :value="$report->resolution_notes" placeholder="Resolution notes" />
+                            </x-ui.field>
 
-                            <x-ui.button type="submit" icon="check-circle">
-                                Update
-                            </x-ui.button>
+                            <div class="flex items-end">
+                                <x-ui.button type="submit" icon="check-circle">
+                                    Update
+                                </x-ui.button>
+                            </div>
 
                             @if ($report->reportableOwner() && ! $report->reportableOwner()->canAccessAdminPanel())
-                                <label class="xl:col-span-4 flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-300">
-                                    <input type="checkbox" name="suspend_owner" value="1" class="rounded border-black/20 dark:border-white/20">
-                                    <span>Suspend {{ $report->reportableOwner()->name }} from public activity.</span>
-                                </label>
+                                <div class="xl:col-span-4 rounded-box border border-dashed border-black/10 px-4 py-3 dark:border-white/10">
+                                    <x-ui.checkbox
+                                        name="suspend_owner"
+                                        value="1"
+                                        :label="'Suspend '.$report->reportableOwner()->name.' from public activity.'"
+                                    />
+                                </div>
                             @endif
                         </form>
 

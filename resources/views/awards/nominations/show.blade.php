@@ -9,13 +9,6 @@
     <x-ui.breadcrumbs.item>{{ $awardNomination->awardCategory?->name ?? 'Award nomination' }}</x-ui.breadcrumbs.item>
 @endsection
 
-@php
-    $linkedNominees ??= collect();
-    $linkedTitles ??= collect();
-    $summaryItems ??= collect();
-    $cohortEntries ??= collect();
-@endphp
-
 @section('content')
     <section class="space-y-6">
         <x-ui.card data-slot="award-nomination-detail-hero" class="sb-page-hero !max-w-none p-6 sm:p-7">

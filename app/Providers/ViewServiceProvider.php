@@ -30,13 +30,13 @@ class ViewServiceProvider extends ServiceProvider
             ]);
         });
 
-        View::composer(['layouts.account', 'layouts.partials.account-navbar'], function (ViewInstance $view) use ($buildTopNavigation): void {
+        View::composer(['layouts.account', 'layouts.partials.account-navbar', 'layouts.partials.account-sidebar'], function (ViewInstance $view) use ($buildTopNavigation): void {
             $view->with([
                 'accountNavigationSections' => $buildTopNavigation->forAccount(),
             ]);
         });
 
-        View::composer(['layouts.admin', 'layouts.partials.admin-navbar'], function (ViewInstance $view) use ($buildTopNavigation): void {
+        View::composer(['layouts.admin', 'layouts.partials.admin-navbar', 'layouts.partials.admin-sidebar'], function (ViewInstance $view) use ($buildTopNavigation): void {
             $user = auth()->user();
             $permissions = [
                 'canViewAdminTitles' => $user?->can('viewAny', Title::class) ?? false,

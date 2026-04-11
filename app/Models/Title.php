@@ -175,13 +175,20 @@ class Title extends Model
                     'openingWeekendGross:code',
                     'worldwideGross:code',
                 ]),
-            'genres:id,name',
+            'genres' => fn ($genreQuery) => $genreQuery
+                ->select(['genres.id', 'genres.name'])
+                ->withCount([
+                    'titles as published_titles_count' => fn (Builder $titleQuery) => $titleQuery->publishedCatalog(),
+                ]),
             'movieGenres:movie_id,genre_id,position',
             'countries:code,name',
             'languages:code,name',
             'interests:imdb_id,name,description,is_subgenre',
             'interests.interestCategoryInterests:interest_category_id,interest_imdb_id,position',
-            'interests.interestCategoryInterests.interestCategory:id,name',
+            'interests.interestCategoryInterests.interestCategory' => fn ($interestCategoryQuery) => $interestCategoryQuery
+                ->selectDirectoryColumns()
+                ->withDirectoryMetrics()
+                ->withDirectoryPreviewImage(),
             'interests.interestPrimaryImages:interest_imdb_id,url,width,height,type',
             'interests.interestSimilarInterests:interest_imdb_id,similar_interest_imdb_id,position',
             'interests.interestSimilarInterests.similar:imdb_id,name,description,is_subgenre',
@@ -249,7 +256,11 @@ class Title extends Model
             'movieGenres' => fn ($movieGenreQuery) => $movieGenreQuery
                 ->select(['movie_id', 'genre_id', 'position'])
                 ->with([
-                    'genre:id,name',
+                    'genre' => fn ($genreQuery) => $genreQuery
+                        ->select(['genres.id', 'genres.name'])
+                        ->withCount([
+                            'titles as published_titles_count' => fn (Builder $titleQuery) => $titleQuery->publishedCatalog(),
+                        ]),
                 ])
                 ->orderBy('position'),
             'parentsGuideSections:id,movie_id,parents_guide_category_id,position',

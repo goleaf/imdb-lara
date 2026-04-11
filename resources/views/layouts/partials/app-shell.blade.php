@@ -1,5 +1,18 @@
+@php
+    $isPortalShell = in_array($shell['shellVariant'], ['account', 'admin'], true);
+@endphp
+
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark h-full scroll-smooth [color-scheme:dark]">
+<html
+    lang="{{ str_replace('_', '-', app()->getLocale()) }}"
+    @class([
+        'h-full scroll-smooth',
+        'dark [color-scheme:dark]' => ! $isPortalShell,
+    ])
+    @if ($isPortalShell)
+        data-theme-enabled="true"
+    @endif
+>
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -26,6 +39,20 @@
             <script type="application/ld+json">{!! $shell['breadcrumbSchema'] !!}</script>
         @endif
 
+        @if ($isPortalShell)
+            <script>
+                (() => {
+                    const storedTheme = localStorage.getItem('theme') ?? 'dark';
+                    const resolvedTheme = storedTheme === 'system'
+                        ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+                        : storedTheme;
+
+                    document.documentElement.classList.toggle('dark', resolvedTheme === 'dark');
+                    document.documentElement.style.colorScheme = resolvedTheme;
+                })();
+            </script>
+        @endif
+
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @livewireStyles
         @stack('head')
@@ -33,7 +60,8 @@
     <body @class([
         'min-h-full antialiased',
         'bg-[#080707] text-stone-50' => $shell['isAuthShell'],
-        'bg-neutral-950 text-neutral-50' => ! $shell['isAuthShell'],
+        'bg-stone-100 text-stone-950 dark:bg-neutral-950 dark:text-neutral-50' => $isPortalShell,
+        'bg-neutral-950 text-neutral-50' => ! $shell['isAuthShell'] && ! $isPortalShell,
     ])>
         @if ($shell['isAuthShell'])
             <div class="sb-auth-shell relative min-h-screen overflow-hidden">
@@ -85,6 +113,84 @@
                     @endif
                 </div>
             </div>
+        @elseif ($isPortalShell)
+            <div class="min-h-screen bg-[radial-gradient(circle_at_top_right,_rgba(245,158,11,0.14),_transparent_24%),radial-gradient(circle_at_bottom_left,_rgba(14,165,233,0.12),_transparent_20%)] dark:bg-[radial-gradient(circle_at_top_right,_rgba(245,158,11,0.16),_transparent_26%),radial-gradient(circle_at_bottom_left,_rgba(37,99,235,0.18),_transparent_24%),linear-gradient(180deg,_rgba(10,10,10,1),_rgba(15,18,25,1))]">
+                <x-ui.layout>
+                    {!! $shell['renderedSidebar'] !!}
+
+                    <x-ui.layout.main class="bg-transparent">
+                        <div class="flex min-h-screen flex-col">
+                            <x-ui.layout.header class="gap-3 border-b border-black/5 bg-white/75 px-4 backdrop-blur-xl dark:border-white/5 dark:bg-neutral-950/75">
+                                <x-ui.sidebar.toggle class="md:hidden" />
+
+                                @if (filled(trim((string) $shell['renderedNavbar'])))
+                                    {!! $shell['renderedNavbar'] !!}
+                                @endif
+
+                                <div class="ml-auto flex items-center gap-2">
+                                    <x-ui.theme-switcher variant="inline" />
+
+                                    @auth
+                                        <x-ui.dropdown position="bottom-end">
+                                            <x-slot:button>
+                                                <x-ui.avatar
+                                                    :src="auth()->user()->avatar_url"
+                                                    :name="auth()->user()->name"
+                                                    color="auto"
+                                                    size="sm"
+                                                    circle
+                                                    as="button"
+                                                />
+                                            </x-slot:button>
+
+                                            <x-slot:menu class="!w-[15rem]">
+                                                <x-ui.dropdown.item readOnly>{{ auth()->user()->email }}</x-ui.dropdown.item>
+                                                <x-ui.dropdown.separator />
+                                                @if ($shell['shellVariant'] === 'admin')
+                                                    <x-ui.dropdown.item :href="route('admin.dashboard')" icon="chart-bar-square">Admin dashboard</x-ui.dropdown.item>
+                                                @else
+                                                    <x-ui.dropdown.item :href="route('account.dashboard')" icon="home">Dashboard</x-ui.dropdown.item>
+                                                    <x-ui.dropdown.item :href="route('account.settings')" icon="cog-6-tooth">Settings</x-ui.dropdown.item>
+                                                @endif
+                                                <x-ui.dropdown.item :href="route('public.home')" icon="arrow-up-right">Public site</x-ui.dropdown.item>
+                                                <x-ui.dropdown.separator />
+                                                <form method="POST" action="{{ route('logout') }}" class="contents">
+                                                    @csrf
+                                                    <x-ui.dropdown.item as="button" type="submit" icon="arrow-right-start-on-rectangle" variant="danger">
+                                                        Sign out
+                                                    </x-ui.dropdown.item>
+                                                </form>
+                                            </x-slot:menu>
+                                        </x-ui.dropdown>
+                                    @endauth
+                                </div>
+                            </x-ui.layout.header>
+
+                            <main class="flex-1">
+                                <div class="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 md:px-6">
+                                    @if ($shell['hasBreadcrumbs'])
+                                        <x-ui.breadcrumbs class="pt-1">
+                                            {!! $shell['renderedBreadcrumbs'] !!}
+                                        </x-ui.breadcrumbs>
+                                    @endif
+
+                                    @isset($slot)
+                                        {{ $slot }}
+                                    @elseif (isset($content))
+                                        {!! $content !!}
+                                    @else
+                                        @yield('content')
+                                    @endisset
+                                </div>
+                            </main>
+
+                            @if ($shell['showFooter'])
+                                <x-ui.footer />
+                            @endif
+                        </div>
+                    </x-ui.layout.main>
+                </x-ui.layout>
+            </div>
         @else
             <div class="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(214,181,116,0.16),_transparent_24%),radial-gradient(circle_at_bottom_left,_rgba(94,73,47,0.2),_transparent_26%),linear-gradient(to_bottom,_rgba(10,10,10,1),_rgba(18,16,14,1))]">
                 <div class="pointer-events-none absolute inset-0">
@@ -118,8 +224,6 @@
                                 @endunless
                             </div>
 
-                            @php($hasShellUtilities = $shell['shouldRenderAdminShortcut'] || $shell['shouldRenderWatchlistShortcut'] || $shell['shouldRenderSignOutShortcut'] || $shell['shouldRenderGuestAuthShortcuts'])
-
                             <div class="sb-shell-topnav" aria-label="Global navigation">
                                 @if (filled(trim((string) $shell['renderedNavbar'])))
                                     {!! $shell['renderedNavbar'] !!}
@@ -127,7 +231,7 @@
                                     @include('layouts.partials.public-navbar')
                                 @endif
 
-                                @if ($hasShellUtilities)
+                                @if ($shell['hasShellUtilities'])
                                     <div class="sb-shell-topnav-utility">
                                         @if ($shell['shouldRenderAdminShortcut'])
                                             <x-ui.button.light-outline
@@ -213,7 +317,7 @@
             </div>
         @endif
 
-        <x-ui.toast />
+        <x-ui.toast position="bottom-right" maxToasts="5" />
 
         @stack('modals')
         @livewireScriptConfig

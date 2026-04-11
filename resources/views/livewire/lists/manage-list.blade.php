@@ -11,11 +11,7 @@
                     </div>
 
                     <div class="flex flex-wrap gap-2">
-                        <x-ui.badge variant="outline" color="neutral" :icon="match ($list->visibility->value) {
-                            'public' => 'globe-alt',
-                            'unlisted' => 'eye-slash',
-                            default => 'lock-closed',
-                        }">{{ str($list->visibility->value)->headline() }}</x-ui.badge>
+                        <x-ui.badge variant="outline" color="neutral" :icon="$list->visibility->icon()">{{ $list->visibility->label() }}</x-ui.badge>
                         <x-ui.badge variant="outline" color="slate" icon="queue-list">{{ number_format($list->items_count) }} titles</x-ui.badge>
                     </div>
                 </div>
@@ -124,155 +120,159 @@
                     />
                 </x-ui.field>
 
-                <div wire:loading.delay wire:target="titleQuery" class="space-y-2">
-                    @foreach (range(1, 3) as $index)
-                        <x-ui.skeleton.text class="w-full" wire:key="list-suggestion-skeleton-{{ $index }}" />
-                    @endforeach
-                </div>
+                <div wire:loading.delay.attr="data-loading" wire:target="titleQuery" class="space-y-2">
+                    <div class="space-y-2 not-data-loading:hidden">
+                        @foreach (range(1, 3) as $index)
+                            <x-ui.skeleton.text class="w-full" wire:key="list-suggestion-skeleton-{{ $index }}" />
+                        @endforeach
+                    </div>
 
-                <div wire:loading.remove wire:target="titleQuery" class="space-y-2">
-                    @if (filled($titleQuery) && $titleSuggestions->isEmpty())
-                        <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
-                            <x-ui.empty.media>
-                                <x-ui.icon name="magnifying-glass" class="size-8 text-neutral-400 dark:text-neutral-500" />
-                            </x-ui.empty.media>
-                            <x-ui.heading level="h3">No published titles match that search.</x-ui.heading>
-                        </x-ui.empty>
-                    @endif
+                    <div class="space-y-2 in-data-loading:hidden">
+                        @if (filled($titleQuery) && $titleSuggestions->isEmpty())
+                            <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                <x-ui.empty.media>
+                                    <x-ui.icon name="magnifying-glass" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                                </x-ui.empty.media>
+                                <x-ui.heading level="h3">No published titles match that search.</x-ui.heading>
+                            </x-ui.empty>
+                        @endif
 
-                    @foreach ($titleSuggestions as $titleSuggestion)
-                        <div
-                            wire:key="list-suggestion-{{ $titleSuggestion->id }}"
-                            class="flex flex-wrap items-center justify-between gap-3 rounded-box border border-black/5 p-3 dark:border-white/10"
-                        >
-                            <div>
-                                <div class="font-medium">{{ $titleSuggestion->name }}</div>
-                                <div class="flex flex-wrap items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
-                                    <span class="inline-flex items-center gap-1.5">
-                                        <x-ui.icon name="film" class="size-4" />
-                                        <span>{{ str($titleSuggestion->title_type->value)->headline() }}</span>
-                                    </span>
-                                    @if ($titleSuggestion->release_year)
-                                        <span>·</span>
-                                        <span class="inline-flex items-center gap-1.5">
-                                            <x-ui.icon name="calendar-days" class="size-4" />
-                                            <span>{{ $titleSuggestion->release_year }}</span>
-                                        </span>
-                                    @endif
-                                </div>
-                            </div>
-
-                            <x-ui.button
-                                type="button"
-                                size="sm"
-                                wire:click="addTitle({{ $titleSuggestion->id }})"
-                                wire:target="addTitle({{ $titleSuggestion->id }})"
-                                icon="plus"
+                        @foreach ($titleSuggestions as $titleSuggestion)
+                            <div
+                                wire:key="list-suggestion-{{ $titleSuggestion->id }}"
+                                class="flex flex-wrap items-center justify-between gap-3 rounded-box border border-black/5 p-3 dark:border-white/10"
                             >
-                                Add
-                            </x-ui.button>
-                        </div>
-                    @endforeach
+                                <div>
+                                    <div class="font-medium">{{ $titleSuggestion->name }}</div>
+                                    <div class="flex flex-wrap items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
+                                        <span class="inline-flex items-center gap-1.5">
+                                            <x-ui.icon name="film" class="size-4" />
+                                            <span>{{ str($titleSuggestion->title_type->value)->headline() }}</span>
+                                        </span>
+                                        @if ($titleSuggestion->release_year)
+                                            <span>·</span>
+                                            <span class="inline-flex items-center gap-1.5">
+                                                <x-ui.icon name="calendar-days" class="size-4" />
+                                                <span>{{ $titleSuggestion->release_year }}</span>
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <x-ui.button
+                                    type="button"
+                                    size="sm"
+                                    wire:click="addTitle({{ $titleSuggestion->id }})"
+                                    wire:target="addTitle({{ $titleSuggestion->id }})"
+                                    icon="plus"
+                                >
+                                    Add
+                                </x-ui.button>
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
             </div>
         </x-ui.card>
     </div>
 
-    <div wire:loading.delay wire:target="addTitle,moveItemUp,moveItemDown,removeTitle" class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        @foreach (range(1, 6) as $index)
-            <x-ui.card class="!max-w-none h-full overflow-hidden" wire:key="manage-list-skeleton-{{ $index }}">
-                <div class="space-y-4">
-                    <x-ui.skeleton class="aspect-[2/3] w-full rounded-box" />
-                    <x-ui.skeleton.text class="w-1/3" />
-                    <x-ui.skeleton.text class="w-3/4" />
-                    <x-ui.skeleton.text class="w-5/6" />
-                </div>
-            </x-ui.card>
-        @endforeach
-    </div>
+    <div wire:loading.delay.attr="data-loading" wire:target="addTitle,moveItemUp,moveItemDown,removeTitle,sortItems" class="space-y-4">
+        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3 not-data-loading:hidden">
+            @foreach (range(1, 6) as $index)
+                <x-ui.card class="!max-w-none h-full overflow-hidden" wire:key="manage-list-skeleton-{{ $index }}">
+                    <div class="space-y-4">
+                        <x-ui.skeleton class="aspect-[2/3] w-full rounded-box" />
+                        <x-ui.skeleton.text class="w-1/3" />
+                        <x-ui.skeleton.text class="w-3/4" />
+                        <x-ui.skeleton.text class="w-5/6" />
+                    </div>
+                </x-ui.card>
+            @endforeach
+        </div>
 
-    <div wire:loading.remove wire:target="addTitle,moveItemUp,moveItemDown,removeTitle" class="space-y-4">
-        <div class="flex items-center justify-between gap-4">
-            <div class="space-y-1">
-                <x-ui.heading level="h2" size="lg">List items</x-ui.heading>
-                <x-ui.text class="text-sm text-neutral-600 dark:text-neutral-300">
-                    Drag the reorder handle to reshuffle this page, or use the move buttons for finer adjustments.
-                </x-ui.text>
+        <div class="space-y-4 in-data-loading:hidden">
+            <div class="flex items-center justify-between gap-4">
+                <div class="space-y-1">
+                    <x-ui.heading level="h2" size="lg">List items</x-ui.heading>
+                    <x-ui.text class="text-sm text-neutral-600 dark:text-neutral-300">
+                        Drag the reorder handle to reshuffle this page, or use the move buttons for finer adjustments.
+                    </x-ui.text>
+                </div>
+                <x-ui.badge variant="outline" color="slate" icon="bookmark">{{ number_format($list->items_count) }} saved</x-ui.badge>
             </div>
-            <x-ui.badge variant="outline" color="slate" icon="bookmark">{{ number_format($list->items_count) }} saved</x-ui.badge>
-        </div>
 
-        <div wire:sort="sortItems" class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            @forelse ($items as $item)
-                <div
-                    wire:key="manage-list-item-{{ $item->id }}"
-                    wire:sort:item="{{ $item->id }}"
-                    class="h-full"
-                >
-                    <x-catalog.title-card :title="$item->title">
-                        <x-ui.button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            wire:sort:handle
-                            icon="bars-3"
-                            aria-label="Drag to reorder {{ $item->title->name }}"
-                            title="Drag to reorder"
-                        >
-                            Reorder
-                        </x-ui.button>
+            <div wire:sort="sortItems" class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                @forelse ($items as $item)
+                    <div
+                        wire:key="manage-list-item-{{ $item->id }}"
+                        wire:sort:item="{{ $item->id }}"
+                        class="h-full"
+                    >
+                        <x-catalog.title-card :title="$item->title">
+                            <x-ui.button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                wire:sort:handle
+                                icon="bars-3"
+                                aria-label="Drag to reorder {{ $item->title->name }}"
+                                title="Drag to reorder"
+                            >
+                                Reorder
+                            </x-ui.button>
 
-                        <x-ui.button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            wire:click="moveItemUp({{ $item->id }})"
-                            wire:target="moveItemUp({{ $item->id }})"
-                            icon="arrow-up"
-                        >
-                            Move up
-                        </x-ui.button>
+                            <x-ui.button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                wire:click="moveItemUp({{ $item->id }})"
+                                wire:target="moveItemUp({{ $item->id }})"
+                                icon="arrow-up"
+                            >
+                                Move up
+                            </x-ui.button>
 
-                        <x-ui.button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            wire:click="moveItemDown({{ $item->id }})"
-                            wire:target="moveItemDown({{ $item->id }})"
-                            icon="arrow-down"
-                        >
-                            Move down
-                        </x-ui.button>
+                            <x-ui.button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                wire:click="moveItemDown({{ $item->id }})"
+                                wire:target="moveItemDown({{ $item->id }})"
+                                icon="arrow-down"
+                            >
+                                Move down
+                            </x-ui.button>
 
-                        <x-ui.button
-                            type="button"
-                            size="sm"
-                            variant="ghost"
-                            wire:click="removeTitle({{ $item->title_id }})"
-                            wire:target="removeTitle({{ $item->title_id }})"
-                            icon="trash"
-                        >
-                            Remove
-                        </x-ui.button>
-                    </x-catalog.title-card>
-                </div>
-            @empty
-                <div class="md:col-span-2 xl:col-span-3">
-                    <x-ui.empty class="rounded-box border border-dashed border-black/10 bg-white dark:border-white/10 dark:bg-neutral-900">
-                        <x-ui.empty.media>
-                            <x-ui.icon name="queue-list" class="size-8 text-neutral-400 dark:text-neutral-500" />
-                        </x-ui.empty.media>
-                        <x-ui.heading level="h3">This list is empty.</x-ui.heading>
-                        <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
-                            Search above to start building the collection.
-                        </x-ui.text>
-                    </x-ui.empty>
-                </div>
-            @endforelse
-        </div>
+                            <x-ui.button
+                                type="button"
+                                size="sm"
+                                variant="ghost"
+                                wire:click="removeTitle({{ $item->title_id }})"
+                                wire:target="removeTitle({{ $item->title_id }})"
+                                icon="trash"
+                            >
+                                Remove
+                            </x-ui.button>
+                        </x-catalog.title-card>
+                    </div>
+                @empty
+                    <div class="md:col-span-2 xl:col-span-3">
+                        <x-ui.empty class="rounded-box border border-dashed border-black/10 bg-white dark:border-white/10 dark:bg-neutral-900">
+                            <x-ui.empty.media>
+                                <x-ui.icon name="queue-list" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                            </x-ui.empty.media>
+                            <x-ui.heading level="h3">This list is empty.</x-ui.heading>
+                            <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
+                                Search above to start building the collection.
+                            </x-ui.text>
+                        </x-ui.empty>
+                    </div>
+                @endforelse
+            </div>
 
-        <div>
-            {{ $items->links() }}
+            <div>
+                {{ $items->links() }}
+            </div>
         </div>
     </div>
 </div>

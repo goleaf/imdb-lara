@@ -375,55 +375,57 @@
             @endif
         </x-ui.card>
 
-        <div wire:loading.delay wire:target="{{ $this->viewData['loadingTargets'] }}" class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            @foreach (range(1, 6) as $index)
-                <x-ui.card class="sb-poster-card !max-w-none h-full overflow-hidden rounded-[1.4rem]" wire:key="discover-skeleton-{{ $index }}">
-                    <div class="space-y-4">
-                        <x-ui.skeleton class="aspect-[2/3] w-full rounded-box" />
-                        <x-ui.skeleton.text class="w-1/3" />
-                        <x-ui.skeleton.text class="w-3/4" />
-                        <x-ui.skeleton.text class="w-5/6" />
-                    </div>
-                </x-ui.card>
-            @endforeach
-        </div>
+        <div wire:loading.delay.attr="data-loading" wire:target="{{ $this->viewData['loadingTargets'] }}" class="space-y-4">
+            <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3 not-data-loading:hidden">
+                @foreach (range(1, 6) as $index)
+                    <x-ui.card class="sb-poster-card !max-w-none h-full overflow-hidden rounded-[1.4rem]" wire:key="discover-skeleton-{{ $index }}">
+                        <div class="space-y-4">
+                            <x-ui.skeleton class="aspect-[2/3] w-full rounded-box" />
+                            <x-ui.skeleton.text class="w-1/3" />
+                            <x-ui.skeleton.text class="w-3/4" />
+                            <x-ui.skeleton.text class="w-5/6" />
+                        </div>
+                    </x-ui.card>
+                @endforeach
+            </div>
 
-        <div wire:loading.remove wire:target="{{ $this->viewData['loadingTargets'] }}" class="sb-results-shell space-y-4 rounded-[1.6rem] p-4 sm:p-5">
-            <div class="flex flex-wrap items-center justify-between gap-3">
-                <div class="space-y-1">
-                    <div class="sb-discovery-section-title">Discovery results</div>
-                    <div class="sb-discovery-section-copy">Poster-led results update against the live filter rail without leaving the page.</div>
+            <div class="sb-results-shell space-y-4 rounded-[1.6rem] p-4 sm:p-5 in-data-loading:hidden">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div class="space-y-1">
+                        <div class="sb-discovery-section-title">Discovery results</div>
+                        <div class="sb-discovery-section-copy">Poster-led results update against the live filter rail without leaving the page.</div>
+                    </div>
+
+                    @if ($this->viewData['activeFilterCount'] > 0)
+                        <x-ui.button type="button" variant="ghost" size="sm" icon="x-mark" wire:click="clearFilters">
+                            Reset filters
+                        </x-ui.button>
+                    @endif
                 </div>
 
-                @if ($this->viewData['activeFilterCount'] > 0)
-                    <x-ui.button type="button" variant="ghost" size="sm" icon="x-mark" wire:click="clearFilters">
-                        Reset filters
-                    </x-ui.button>
-                @endif
-            </div>
+                <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    @forelse ($this->viewData['titles'] as $title)
+                        <div wire:key="discover-title-{{ $title->id }}">
+                            <x-catalog.title-card :title="$title" :show-summary="$this->viewData['showSummary']" />
+                        </div>
+                    @empty
+                        <div class="md:col-span-2 xl:col-span-3">
+                            <x-ui.empty class="rounded-box border border-dashed border-black/10 bg-white dark:border-white/10 dark:bg-neutral-900">
+                                <x-ui.empty.media>
+                                    <x-ui.icon name="magnifying-glass" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                                </x-ui.empty.media>
+                                <x-ui.heading level="h3">No titles match the current filters.</x-ui.heading>
+                                <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
+                                    Broaden the release range, awards profile, or runtime settings to widen discovery.
+                                </x-ui.text>
+                            </x-ui.empty>
+                        </div>
+                    @endforelse
+                </div>
 
-            <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                @forelse ($this->viewData['titles'] as $title)
-                    <div wire:key="discover-title-{{ $title->id }}">
-                        <x-catalog.title-card :title="$title" :show-summary="$this->viewData['showSummary']" />
-                    </div>
-                @empty
-                    <div class="md:col-span-2 xl:col-span-3">
-                        <x-ui.empty class="rounded-box border border-dashed border-black/10 bg-white dark:border-white/10 dark:bg-neutral-900">
-                            <x-ui.empty.media>
-                                <x-ui.icon name="magnifying-glass" class="size-8 text-neutral-400 dark:text-neutral-500" />
-                            </x-ui.empty.media>
-                            <x-ui.heading level="h3">No titles match the current filters.</x-ui.heading>
-                            <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
-                                Broaden the release range, awards profile, or runtime settings to widen discovery.
-                            </x-ui.text>
-                        </x-ui.empty>
-                    </div>
-                @endforelse
-            </div>
-
-            <div>
-                {{ $this->viewData['titles']->links() }}
+                <div>
+                    {{ $this->viewData['titles']->links() }}
+                </div>
             </div>
         </div>
     </div>

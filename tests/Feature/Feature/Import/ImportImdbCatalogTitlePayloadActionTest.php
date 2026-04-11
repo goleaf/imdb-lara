@@ -6,10 +6,16 @@ use App\Actions\Import\ImportImdbCatalogTitlePayloadAction;
 use App\Console\Commands\ImdbImportTitlesFrontierCommand;
 use App\Models\CertificateAttribute;
 use App\Models\CertificateRating;
+use App\Models\Company;
+use App\Models\CompanyCreditAttribute;
+use App\Models\CompanyCreditCategory;
 use App\Models\Country;
 use App\Models\Movie;
 use App\Models\MovieCertificate;
 use App\Models\MovieCertificateAttribute;
+use App\Models\MovieCompanyCredit;
+use App\Models\MovieCompanyCreditAttribute;
+use App\Models\MovieCompanyCreditCountry;
 use App\Models\MovieParentsGuideSection;
 use App\Models\MovieParentsGuideSeverityBreakdown;
 use App\Models\MovieReleaseDate;
@@ -41,6 +47,7 @@ class ImportImdbCatalogTitlePayloadActionTest extends TestCase
         $this->setUpParentsGuideTables();
         $this->setUpReleaseDateTables();
         $this->setUpCertificateTables();
+        $this->setUpCompanyCreditTables();
     }
 
     public function test_sync_parents_guide_defaults_missing_severity_vote_counts_to_zero(): void
@@ -408,6 +415,132 @@ class ImportImdbCatalogTitlePayloadActionTest extends TestCase
         );
     }
 
+    public function test_sync_company_credits_merges_duplicate_bridge_rows_before_writing(): void
+    {
+        $movie = Movie::query()->create([
+            'tconst' => 'tt8036976',
+            'imdb_id' => 'tt8036976',
+            'titletype' => 'movie',
+            'primarytitle' => 'Duplicate Company Credit Attributes',
+            'originaltitle' => 'Duplicate Company Credit Attributes',
+            'isadult' => 0,
+            'startyear' => 2026,
+        ]);
+
+        $action = app(ImportImdbCatalogTitlePayloadAction::class);
+
+        $syncCompanyCredits = \Closure::bind(
+            function (Movie $movie, array $companyCreditsPayload): void {
+                $this->syncCompanyCredits($movie, $companyCreditsPayload);
+            },
+            $action,
+            ImportImdbCatalogTitlePayloadAction::class,
+        );
+
+        $syncCompanyCredits($movie, [
+            'companyCredits' => [
+                [
+                    'company' => [
+                        'id' => 'co07109',
+                        'name' => 'Duplicate Company',
+                    ],
+                    'category' => 'Production company',
+                    'countries' => [
+                        ['code' => 'US', 'name' => 'United States'],
+                        ['code' => 'US', 'name' => 'United States'],
+                    ],
+                    'attributes' => [
+                        'Presented by',
+                        'Presented by',
+                        'In association with',
+                    ],
+                ],
+            ],
+        ]);
+
+        $companyCredit = MovieCompanyCredit::query()
+            ->where('movie_id', $movie->getKey())
+            ->firstOrFail();
+
+        $this->assertSame('co07109', $companyCredit->company_imdb_id);
+        $this->assertSame(
+            'Production company',
+            CompanyCreditCategory::query()->findOrFail($companyCredit->company_credit_category_id)->name,
+        );
+        $this->assertSame(['co07109'], Company::query()->pluck('imdb_id')->all());
+
+        $countryRows = MovieCompanyCreditCountry::query()
+            ->where('movie_company_credit_id', $companyCredit->getKey())
+            ->orderBy('position')
+            ->get();
+
+        $this->assertCount(1, $countryRows);
+        $this->assertSame(['US'], $countryRows->pluck('country_code')->all());
+
+        $attributeRows = MovieCompanyCreditAttribute::query()
+            ->where('movie_company_credit_id', $companyCredit->getKey())
+            ->orderBy('position')
+            ->get();
+
+        $this->assertCount(2, $attributeRows);
+        $this->assertSame(
+            ['Presented by', 'In association with'],
+            CompanyCreditAttribute::query()->orderBy('id')->pluck('name')->all(),
+        );
+        $this->assertSame(
+            [1, 2],
+            $attributeRows->pluck('position')->all(),
+        );
+    }
+
+    public function test_company_credit_bridge_row_deduplicator_keeps_the_earliest_position_for_duplicate_keys(): void
+    {
+        $action = app(ImportImdbCatalogTitlePayloadAction::class);
+
+        $deduplicateBridgeRows = \Closure::bind(
+            function (array $rows, array $keyColumns): array {
+                return $this->deduplicateBridgeRows($rows, $keyColumns);
+            },
+            $action,
+            ImportImdbCatalogTitlePayloadAction::class,
+        );
+
+        $rows = $deduplicateBridgeRows([
+            [
+                'movie_company_credit_id' => 7109,
+                'company_credit_attribute_id' => 53,
+                'position' => 2,
+            ],
+            [
+                'movie_company_credit_id' => 7109,
+                'company_credit_attribute_id' => 53,
+                'position' => 1,
+            ],
+            [
+                'movie_company_credit_id' => 7109,
+                'company_credit_attribute_id' => 91,
+                'position' => 3,
+            ],
+        ], [
+            'movie_company_credit_id',
+            'company_credit_attribute_id',
+        ]);
+
+        $this->assertCount(2, $rows);
+        $this->assertSame([
+            [
+                'movie_company_credit_id' => 7109,
+                'company_credit_attribute_id' => 53,
+                'position' => 1,
+            ],
+            [
+                'movie_company_credit_id' => 7109,
+                'company_credit_attribute_id' => 91,
+                'position' => 3,
+            ],
+        ], $rows);
+    }
+
     public function test_frontier_command_is_isolatable(): void
     {
         $this->assertInstanceOf(Isolatable::class, $this->app->make(ImdbImportTitlesFrontierCommand::class));
@@ -512,6 +645,55 @@ class ImportImdbCatalogTitlePayloadActionTest extends TestCase
             $table->primary(['movie_certificate_id', 'certificate_attribute_id']);
             $table->foreign('movie_certificate_id')->references('id')->on('movie_certificates')->cascadeOnDelete();
             $table->foreign('certificate_attribute_id')->references('id')->on('certificate_attributes')->cascadeOnUpdate()->restrictOnDelete();
+        });
+    }
+
+    private function setUpCompanyCreditTables(): void
+    {
+        Schema::connection('imdb_mysql')->create('companies', function (Blueprint $table): void {
+            $table->string('imdb_id')->primary();
+            $table->string('name')->nullable();
+        });
+
+        Schema::connection('imdb_mysql')->create('company_credit_categories', function (Blueprint $table): void {
+            $table->increments('id');
+            $table->string('name')->unique();
+        });
+
+        Schema::connection('imdb_mysql')->create('company_credit_attributes', function (Blueprint $table): void {
+            $table->increments('id');
+            $table->string('name')->unique();
+        });
+
+        Schema::connection('imdb_mysql')->create('movie_company_credits', function (Blueprint $table): void {
+            $table->increments('id');
+            $table->unsignedInteger('movie_id');
+            $table->string('company_imdb_id')->nullable();
+            $table->unsignedInteger('company_credit_category_id')->nullable();
+            $table->unsignedSmallInteger('start_year')->nullable();
+            $table->unsignedSmallInteger('end_year')->nullable();
+            $table->unsignedSmallInteger('position')->nullable();
+            $table->foreign('movie_id')->references('id')->on('movies')->cascadeOnDelete();
+            $table->foreign('company_imdb_id')->references('imdb_id')->on('companies')->cascadeOnUpdate()->restrictOnDelete();
+            $table->foreign('company_credit_category_id')->references('id')->on('company_credit_categories')->cascadeOnUpdate()->restrictOnDelete();
+        });
+
+        Schema::connection('imdb_mysql')->create('movie_company_credit_countries', function (Blueprint $table): void {
+            $table->unsignedInteger('movie_company_credit_id');
+            $table->string('country_code', 8);
+            $table->unsignedSmallInteger('position')->nullable();
+            $table->primary(['movie_company_credit_id', 'country_code']);
+            $table->foreign('movie_company_credit_id')->references('id')->on('movie_company_credits')->cascadeOnDelete();
+            $table->foreign('country_code')->references('code')->on('countries')->cascadeOnUpdate()->restrictOnDelete();
+        });
+
+        Schema::connection('imdb_mysql')->create('movie_company_credit_attributes', function (Blueprint $table): void {
+            $table->unsignedInteger('movie_company_credit_id');
+            $table->unsignedInteger('company_credit_attribute_id');
+            $table->unsignedSmallInteger('position')->nullable();
+            $table->primary(['movie_company_credit_id', 'company_credit_attribute_id']);
+            $table->foreign('movie_company_credit_id')->references('id')->on('movie_company_credits')->cascadeOnDelete();
+            $table->foreign('company_credit_attribute_id')->references('id')->on('company_credit_attributes')->cascadeOnUpdate()->restrictOnDelete();
         });
     }
 

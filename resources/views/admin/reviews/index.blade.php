@@ -18,47 +18,39 @@
 
         <x-ui.card class="!max-w-none">
             <form method="GET" action="{{ route('admin.reviews.index') }}" class="grid gap-4 xl:grid-cols-[220px,220px,auto,1fr,auto] xl:items-end">
-                <div class="space-y-2">
+                <x-ui.field>
                     <x-ui.label>Review status</x-ui.label>
-                    <select
-                        name="status"
-                        class="min-h-10 rounded-box border border-black/10 bg-white px-3 text-sm text-neutral-800 shadow-xs transition focus:border-black/15 focus:outline-none focus:ring-2 focus:ring-neutral-900/15 dark:border-white/15 dark:bg-neutral-900 dark:text-neutral-200 dark:focus:border-white/20 dark:focus:ring-neutral-100/15"
-                    >
+                    <x-ui.native-select name="status">
                         <option value="all" @selected(($reviewFilters['status'] ?? 'pending') === 'all')>All statuses</option>
                         @foreach ($reviewStatuses as $status)
                             <option value="{{ $status->value }}" @selected(($reviewFilters['status'] ?? 'pending') === $status->value)>
                                 {{ str($status->value)->headline() }}
                             </option>
                         @endforeach
-                    </select>
-                </div>
+                    </x-ui.native-select>
+                </x-ui.field>
 
-                <div class="space-y-2">
+                <x-ui.field>
                     <x-ui.label>Sort queue</x-ui.label>
-                    <select
-                        name="sort"
-                        class="min-h-10 rounded-box border border-black/10 bg-white px-3 text-sm text-neutral-800 shadow-xs transition focus:border-black/15 focus:outline-none focus:ring-2 focus:ring-neutral-900/15 dark:border-white/15 dark:bg-neutral-900 dark:text-neutral-200 dark:focus:border-white/20 dark:focus:ring-neutral-100/15"
-                    >
+                    <x-ui.native-select name="sort">
                         <option value="flagged" @selected(($reviewFilters['sort'] ?? 'flagged') === 'flagged')>Flagged first</option>
                         <option value="helpful" @selected(($reviewFilters['sort'] ?? 'flagged') === 'helpful')>Most helpful</option>
                         <option value="oldest" @selected(($reviewFilters['sort'] ?? 'flagged') === 'oldest')>Oldest first</option>
-                    </select>
-                </div>
+                    </x-ui.native-select>
+                </x-ui.field>
 
-                <label class="flex min-h-10 items-center gap-2 text-sm text-neutral-600 dark:text-neutral-300">
-                    <input
-                        type="checkbox"
+                <div class="flex items-center xl:min-h-10">
+                    <x-ui.checkbox
                         name="flaggedOnly"
                         value="1"
-                        @checked($reviewFilters['flaggedOnly'] ?? false)
-                        class="rounded border-black/20 dark:border-white/20"
-                    >
-                    <span>Flagged only</span>
-                </label>
+                        :checked="$reviewFilters['flaggedOnly'] ?? false"
+                        label="Flagged only"
+                    />
+                </div>
 
-                <x-ui.text class="text-sm text-neutral-500 dark:text-neutral-400">
+                <x-ui.description class="xl:pb-2">
                     Surface open reports first and narrow the queue when moderators need to act on flagged reviews quickly.
-                </x-ui.text>
+                </x-ui.description>
 
                 <div class="flex flex-wrap gap-2 xl:justify-end">
                     <x-ui.button as="a" :href="route('admin.reviews.index')" variant="ghost" icon="arrow-path">
@@ -105,25 +97,30 @@
                             </div>
                         </div>
 
-                        <form method="POST" action="{{ route('admin.reviews.update', $review) }}" class="grid gap-4 md:grid-cols-[220px,1fr,auto]">
+                        <form method="POST" action="{{ route('admin.reviews.update', $review) }}" class="grid gap-4 md:grid-cols-[220px,minmax(0,1fr),auto] md:items-end">
                             @csrf
                             @method('PATCH')
-                            <select
-                                name="status"
-                                class="min-h-10 rounded-box border border-black/10 bg-white px-3 text-sm text-neutral-800 shadow-xs transition focus:border-black/15 focus:outline-none focus:ring-2 focus:ring-neutral-900/15 dark:border-white/15 dark:bg-neutral-900 dark:text-neutral-200 dark:focus:border-white/20 dark:focus:ring-neutral-100/15"
-                            >
-                                @foreach ($reviewStatuses as $status)
-                                    <option value="{{ $status->value }}" @selected($review->status === $status)>
-                                        {{ str($status->value)->headline() }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <x-ui.field>
+                                <x-ui.label>Review status</x-ui.label>
+                                <x-ui.native-select name="status">
+                                    @foreach ($reviewStatuses as $status)
+                                        <option value="{{ $status->value }}" @selected($review->status === $status)>
+                                            {{ str($status->value)->headline() }}
+                                        </option>
+                                    @endforeach
+                                </x-ui.native-select>
+                            </x-ui.field>
 
-                            <x-ui.input name="moderation_notes" placeholder="Moderation notes" />
+                            <x-ui.field>
+                                <x-ui.label>Moderation notes</x-ui.label>
+                                <x-ui.input name="moderation_notes" placeholder="Moderation notes" />
+                            </x-ui.field>
 
-                            <x-ui.button type="submit" icon="check-circle">
-                                Update
-                            </x-ui.button>
+                            <div class="flex items-end">
+                                <x-ui.button type="submit" icon="check-circle">
+                                    Update
+                                </x-ui.button>
+                            </div>
                         </form>
                     </div>
                 </x-ui.card>

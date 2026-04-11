@@ -7,16 +7,17 @@ use App\Enums\WatchState;
 use App\Models\Genre;
 use App\Models\Title;
 use App\Models\UserList;
+use Illuminate\Support\Collection;
 
 class GetAccountWatchlistFilterOptionsAction
 {
     /**
      * @return array{
-     *     genres: \Illuminate\Support\Collection<int, Genre>,
-     *     sortOptions: list<array{label: string, value: string}>,
-     *     stateOptions: list<array{label: string, value: string}>,
+     *     genres: Collection<int, Genre>,
+     *     sortOptions: list<array{icon: string, label: string, value: string}>,
+     *     stateOptions: list<array{icon: string, label: string, value: string}>,
      *     titleTypes: list<TitleType>,
-     *     years: \Illuminate\Support\Collection<int, int>
+     *     years: Collection<int, int>
      * }
      */
     public function handle(UserList $watchlist): array
@@ -51,23 +52,40 @@ class GetAccountWatchlistFilterOptionsAction
                 ->unique()
                 ->values(),
             'titleTypes' => $titleTypes,
-            'stateOptions' => [
-                ['value' => 'all', 'label' => 'All titles'],
-                ['value' => 'watched', 'label' => 'Watched'],
-                ['value' => 'unwatched', 'label' => 'Unwatched'],
-                ...collect(WatchState::cases())
-                    ->map(fn (WatchState $watchState): array => [
-                        'value' => $watchState->value,
-                        'label' => str($watchState->value)->headline()->value(),
-                    ])
-                    ->all(),
-            ],
-            'sortOptions' => [
-                ['value' => 'added', 'label' => 'Date added'],
-                ['value' => 'year', 'label' => 'Release year'],
-                ['value' => 'rating', 'label' => 'Rating'],
-                ['value' => 'title', 'label' => 'Title'],
-            ],
+            'stateOptions' => $this->stateOptions(),
+            'sortOptions' => $this->sortOptions(),
+        ];
+    }
+
+    /**
+     * @return list<array{icon: string, label: string, value: string}>
+     */
+    public function stateOptions(): array
+    {
+        return [
+            ['value' => 'all', 'label' => 'All titles', 'icon' => 'squares-2x2'],
+            ['value' => 'watched', 'label' => 'Watched', 'icon' => 'check-circle'],
+            ['value' => 'unwatched', 'label' => 'Unwatched', 'icon' => 'eye'],
+            ...collect(WatchState::cases())
+                ->map(fn (WatchState $watchState): array => [
+                    'value' => $watchState->value,
+                    'label' => str($watchState->value)->headline()->value(),
+                    'icon' => $watchState->icon(),
+                ])
+                ->all(),
+        ];
+    }
+
+    /**
+     * @return list<array{icon: string, label: string, value: string}>
+     */
+    public function sortOptions(): array
+    {
+        return [
+            ['value' => 'added', 'label' => 'Date added', 'icon' => 'calendar-days'],
+            ['value' => 'year', 'label' => 'Release year', 'icon' => 'calendar-days'],
+            ['value' => 'rating', 'label' => 'Rating', 'icon' => 'star'],
+            ['value' => 'title', 'label' => 'Title', 'icon' => 'bars-arrow-down'],
         ];
     }
 }

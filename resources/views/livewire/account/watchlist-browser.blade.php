@@ -104,9 +104,7 @@
                         <x-ui.combobox.option
                             wire:key="watchlist-state-{{ $stateOption['value'] }}"
                             value="{{ $stateOption['value'] }}"
-                            :icon="$stateOption['value'] === 'all'
-                                ? 'squares-2x2'
-                                : (\App\Enums\WatchState::tryFrom($stateOption['value'])?->icon() ?? 'eye')"
+                            :icon="$stateOption['icon']"
                         >
                             {{ $stateOption['label'] }}
                         </x-ui.combobox.option>
@@ -166,11 +164,7 @@
                         <x-ui.combobox.option
                             wire:key="watchlist-sort-{{ $sortOption['value'] }}"
                             value="{{ $sortOption['value'] }}"
-                            :icon="match ($sortOption['value']) {
-                                'added', 'year' => 'calendar-days',
-                                'rating' => 'star',
-                                default => 'bars-arrow-down',
-                            }"
+                            :icon="$sortOption['icon']"
                         >
                             {{ $sortOption['label'] }}
                         </x-ui.combobox.option>
@@ -181,76 +175,78 @@
         </div>
     </x-ui.card>
 
-    <div wire:loading.delay class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        @foreach (range(1, 6) as $index)
-            <x-ui.card class="!max-w-none h-full overflow-hidden" wire:key="watchlist-skeleton-{{ $index }}">
-                <div class="space-y-4">
-                    <x-ui.skeleton class="aspect-[2/3] w-full rounded-box" />
-                    <x-ui.skeleton.text class="w-1/3" />
-                    <x-ui.skeleton.text class="w-3/4" />
-                    <x-ui.skeleton.text class="w-5/6" />
-                </div>
-            </x-ui.card>
-        @endforeach
-    </div>
-
-    <div wire:loading.remove class="space-y-4">
-        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            @forelse ($items as $item)
-                <div wire:key="watchlist-item-{{ $item->id }}">
-                    <x-catalog.title-card
-                        :title="$item->title"
-                        :tracking-state="$item->watch_state"
-                        :tracking-added-at="$item->created_at"
-                        :tracking-watched-at="$item->watched_at"
-                    >
-                        <x-ui.button
-                            type="button"
-                            size="sm"
-                            :variant="$item->watch_state === \App\Enums\WatchState::Completed ? 'outline' : 'primary'"
-                            wire:click="toggleWatched({{ $item->title_id }})"
-                            wire:target="toggleWatched({{ $item->title_id }})"
-                            icon="check-circle"
-                        >
-                            {{ $item->watch_state === \App\Enums\WatchState::Completed ? 'Mark unwatched' : 'Mark watched' }}
-                        </x-ui.button>
-
-                        <x-ui.button
-                            type="button"
-                            size="sm"
-                            variant="ghost"
-                            wire:click="removeFromWatchlist({{ $item->title_id }})"
-                            wire:target="removeFromWatchlist({{ $item->title_id }})"
-                            icon="bookmark-slash"
-                        >
-                            Remove
-                        </x-ui.button>
-                    </x-catalog.title-card>
-                </div>
-            @empty
-                <div class="md:col-span-2 xl:col-span-3">
-                    <x-ui.empty class="rounded-box border border-dashed border-black/10 bg-white dark:border-white/10 dark:bg-neutral-900">
-                        <x-ui.empty.media>
-                            <x-ui.icon name="bookmark" class="size-8 text-neutral-400 dark:text-neutral-500" />
-                        </x-ui.empty.media>
-                        @if ((int) $watchlist->items_count === 0)
-                            <x-ui.heading level="h3">Your watchlist is empty.</x-ui.heading>
-                            <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
-                                Save titles from any title page to build a private queue you can sort and filter here.
-                            </x-ui.text>
-                        @else
-                            <x-ui.heading level="h3">No titles match the current watchlist filters.</x-ui.heading>
-                            <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
-                                Adjust the state, genre, year, or type filters to widen the page.
-                            </x-ui.text>
-                        @endif
-                    </x-ui.empty>
-                </div>
-            @endforelse
+    <div wire:loading.delay.attr="data-loading" class="space-y-4">
+        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3 not-data-loading:hidden">
+            @foreach (range(1, 6) as $index)
+                <x-ui.card class="!max-w-none h-full overflow-hidden" wire:key="watchlist-skeleton-{{ $index }}">
+                    <div class="space-y-4">
+                        <x-ui.skeleton class="aspect-[2/3] w-full rounded-box" />
+                        <x-ui.skeleton.text class="w-1/3" />
+                        <x-ui.skeleton.text class="w-3/4" />
+                        <x-ui.skeleton.text class="w-5/6" />
+                    </div>
+                </x-ui.card>
+            @endforeach
         </div>
 
-        <div>
-            {{ $items->links() }}
+        <div class="space-y-4 in-data-loading:hidden">
+            <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                @forelse ($items as $item)
+                    <div wire:key="watchlist-item-{{ $item->id }}">
+                        <x-catalog.title-card
+                            :title="$item->title"
+                            :tracking-state="$item->watch_state"
+                            :tracking-added-at="$item->created_at"
+                            :tracking-watched-at="$item->watched_at"
+                        >
+                            <x-ui.button
+                                type="button"
+                                size="sm"
+                                :variant="$item->watch_state === \App\Enums\WatchState::Completed ? 'outline' : 'primary'"
+                                wire:click="toggleWatched({{ $item->title_id }})"
+                                wire:target="toggleWatched({{ $item->title_id }})"
+                                icon="check-circle"
+                            >
+                                {{ $item->watch_state === \App\Enums\WatchState::Completed ? 'Mark unwatched' : 'Mark watched' }}
+                            </x-ui.button>
+
+                            <x-ui.button
+                                type="button"
+                                size="sm"
+                                variant="ghost"
+                                wire:click="removeFromWatchlist({{ $item->title_id }})"
+                                wire:target="removeFromWatchlist({{ $item->title_id }})"
+                                icon="bookmark-slash"
+                            >
+                                Remove
+                            </x-ui.button>
+                        </x-catalog.title-card>
+                    </div>
+                @empty
+                    <div class="md:col-span-2 xl:col-span-3">
+                        <x-ui.empty class="rounded-box border border-dashed border-black/10 bg-white dark:border-white/10 dark:bg-neutral-900">
+                            <x-ui.empty.media>
+                                <x-ui.icon name="bookmark" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                            </x-ui.empty.media>
+                            @if ((int) $watchlist->items_count === 0)
+                                <x-ui.heading level="h3">Your watchlist is empty.</x-ui.heading>
+                                <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
+                                    Save titles from any title page to build a private queue you can sort and filter here.
+                                </x-ui.text>
+                            @else
+                                <x-ui.heading level="h3">No titles match the current watchlist filters.</x-ui.heading>
+                                <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
+                                    Adjust the state, genre, year, or type filters to widen the page.
+                                </x-ui.text>
+                            @endif
+                        </x-ui.empty>
+                    </div>
+                @endforelse
+            </div>
+
+            <div>
+                {{ $items->links() }}
+            </div>
         </div>
     </div>
 </div>

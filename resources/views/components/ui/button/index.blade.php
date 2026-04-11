@@ -118,32 +118,35 @@ $variantClasses = match($variant){
 $classes = [
     'relative [:where(&)]:inline-flex items-center font-medium justify-center gap-x-2 whitespace-nowrap transition-colors duration-200',
     'disabled:opacity-55 dark:disabled:opacity-55 disabled:cursor-default disabled:pointer-events-none cursor-pointer',
+    'data-loading:opacity-55 data-loading:cursor-default data-loading:pointer-events-none',
     '[&_a]:no-underline [&_a]:decoration-none [&_a:hover]:no-underline' => $variant !== 'none' , // Handle anchor tags inside the button
     '[:where(&)]:rounded-field' => $variant !== 'none' , // Apply rounding unless variant is 'none'
-    
-    // Handling loading logic via CSS: Show loading indicator as flex and set opacity-0 on its siblings
-    '[&>[data-loading=true]:first-child]:flex', // Override 'hidden' to display the loading div during loading
-    '[&>[data-loading=true]:first-child~*]:opacity-0', // Apply opacity-0 to all subsequent children (e.g., icons, text)
     $sizeClasses,
     ...$variantClasses,
 ];
 
 /* LOADING LOGIC - START */
 
-// Check if any wire:loading attributes are present for dynamic handling
-$hasWireLoading = filled($attributes->whereStartsWith('wire:loading')->first());
-
-$loadingAttributes = new \Illuminate\View\ComponentAttributeBag();
-// Configure loading attributes for Livewire actions (adds data-loading="true" during loading)
-$loadingAttributes = $loadingAttributes->merge($hasWireLoading || $type === 'submit' ? [
+// When a button scopes a request with wire:target, bridge that target back to the
+// root element so Tailwind's data-loading selectors can style it consistently.
+$loadingStateAttributes = new \Illuminate\View\ComponentAttributeBag();
+$loadingStateAttributes = $loadingStateAttributes->merge(filled($attributes->get('wire:target')) ? [
     'wire:loading.attr' => 'data-loading',
-    'wire:target' => $attributes->has('wire:target') ? $attributes->get('wire:target') : ($attributes->whereStartsWith('wire:click')->first() ?? null),
+    'wire:target' => $attributes->get('wire:target'),
 ] : []);
 
-// Fallback for non-Livewire cases, I believe there use case for this static case beyond we actually need it in demo docs: 
-$loadingAttributes = $loadingAttributes->merge($loading ? [
+// Fallback for non-Livewire cases, I believe there use case for this static case beyond we actually need it in demo docs:
+$loadingStateAttributes = $loadingStateAttributes->merge($loading ? [
     'data-loading' => 'true', // thats 'true' is crucial, boolean true will break the work
 ] : []);
+
+$resolvedAttributes = $attributes->class($classes)->merge([
+    'role' => $as === 'a' && !$attributes->has('href') ? 'button' : null,
+    'aria-busy' => $loading ? 'true' : 'false',
+    'aria-disabled' => $attributes->has('disabled') ? 'true' : 'false',
+    // I know it basic, but you can create mapping labels for popular icons like ['x-mark' => 'Close']...
+    'aria-label' => $squared && blank($slot) ? Str::title($icon ?? $iconAfter ?? 'Button') : null,
+])->merge($loadingStateAttributes->getAttributes());
 
 /* LOADING LOGIC - END */
 @endphp
@@ -151,37 +154,27 @@ $loadingAttributes = $loadingAttributes->merge($loading ? [
 <x-ui.button.abstract 
     :$as 
     :$type 
-    :attributes="$attributes->class($classes)->merge([
-        'role' => $as === 'a' && !$attributes->has('href') ? 'button' : null,
-        'aria-busy' => $loading ? 'true' : 'false',
-        'aria-disabled' => $attributes->has('disabled') ? 'true' : 'false',
-        // I know it basic, but you can create mapping labels for popular icons like ['x-mark' => 'Close']... 
-        'aria-label' => $squared && blank($slot) ? Str::title($icon ?? $iconAfter ?? 'Button') : null,
-    ])"  
+    :attributes="$resolvedAttributes"
     data-slot="button"
 >
-        {{-- This is a special icon component (ui/icon/loading.blade.php) required for the loading indicator --}}
-        <div
-            @class([
-                'absolute inset-0 hidden items-center justify-center '
-            ])
-            {{-- the is just adding here data-loading="true" to shows loading icon,  you can add it manually, using php, js ... --}}
-            {{ $loadingAttributes }}
-        >
-            <x-ui.icon.loading :variant="$iconVariant" data-slot="loading-indicator" :attributes="$iconAttributes"/>
-        </div> 
+    {{-- This is a special icon component (ui/icon/loading.blade.php) required for the loading indicator --}}
+    <div class="absolute inset-0 hidden items-center justify-center not-in-data-loading:hidden">
+        <x-ui.icon.loading :variant="$iconVariant" data-slot="loading-indicator" :attributes="$iconAttributes" />
+    </div>
 
-    @if(filled($icon))
-        <x-ui.icon :name="$icon" :variant="$iconVariant" :attributes="$iconAttributes"  data-slot="right-icon"/>
-    @endif
+    <span class="inline-flex items-center gap-x-2 in-data-loading:opacity-0">
+        @if(filled($icon))
+            <x-ui.icon :name="$icon" :variant="$iconVariant" :attributes="$iconAttributes" data-slot="right-icon"/>
+        @endif
 
-    @if($slot->isNotEmpty())
-        <span data-text>
-            {{ $slot }}
-        </span>
-    @endif
+        @if($slot->isNotEmpty())
+            <span data-text>
+                {{ $slot }}
+            </span>
+        @endif
 
-    @if(filled($iconAfter))
-        <x-ui.icon :name="$iconAfter" :variant="$iconVariant" :attributes="$iconAttributes" data-slot="left-icon"/>
-    @endif
+        @if(filled($iconAfter))
+            <x-ui.icon :name="$iconAfter" :variant="$iconVariant" :attributes="$iconAttributes" data-slot="left-icon"/>
+        @endif
+    </span>
 </x-ui.button.abstract>

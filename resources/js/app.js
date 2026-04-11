@@ -1,5 +1,6 @@
 import './bootstrap';
 import './globals/modals.js';
+import './globals/theme.js';
 
 import { Livewire, Alpine } from '../../vendor/livewire/livewire/dist/livewire.esm';
 import anchor from '@alpinejs/anchor';

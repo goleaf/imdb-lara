@@ -1090,6 +1090,15 @@ class ImportImdbCatalogTitlePayloadAction
             }
         }
 
+        $countryRows = $this->deduplicateBridgeRows($countryRows, [
+            'movie_company_credit_id',
+            'country_code',
+        ]);
+        $attributeRows = $this->deduplicateBridgeRows($attributeRows, [
+            'movie_company_credit_id',
+            'company_credit_attribute_id',
+        ]);
+
         if ($countryRows !== []) {
             MovieCompanyCreditCountry::query()->insert($countryRows);
         }
@@ -1107,6 +1116,39 @@ class ImportImdbCatalogTitlePayloadAction
                 ],
             );
         }
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $rows
+     * @param  list<string>  $keyColumns
+     * @return list<array<string, mixed>>
+     */
+    private function deduplicateBridgeRows(array $rows, array $keyColumns): array
+    {
+        $rowsByKey = [];
+
+        foreach ($rows as $row) {
+            $rowKey = collect($keyColumns)
+                ->map(fn (string $keyColumn): string => (string) ($row[$keyColumn] ?? ''))
+                ->implode('|');
+
+            if (! array_key_exists($rowKey, $rowsByKey)) {
+                $rowsByKey[$rowKey] = $row;
+
+                continue;
+            }
+
+            $existingPosition = $rowsByKey[$rowKey]['position'] ?? null;
+            $incomingPosition = $row['position'] ?? null;
+
+            if (is_int($existingPosition) && is_int($incomingPosition)) {
+                $rowsByKey[$rowKey]['position'] = min($existingPosition, $incomingPosition);
+            } elseif ($existingPosition === null && $incomingPosition !== null) {
+                $rowsByKey[$rowKey]['position'] = $incomingPosition;
+            }
+        }
+
+        return array_values($rowsByKey);
     }
 
     /**

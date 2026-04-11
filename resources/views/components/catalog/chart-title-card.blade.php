@@ -1,54 +1,32 @@
 @props([
     'title',
-    'comparisonLabel' => null,
-    'rank',
-    'movementAmount' => 0,
-    'movementDirection' => 'steady',
-    'movementNote' => 'vs popularity',
+    'card',
 ])
-
-@php
-    $titleUrl = route('public.titles.show', $title);
-    $poster = $title->preferredPoster();
-    $summaryText = $title->summaryText();
-    $genres = $title->resolvedGenres();
-    $releaseYear = $title->release_year;
-    $runtimeLabel = $title->runtimeMinutesLabel();
-    $originalTitle = filled($title->original_name) && $title->original_name !== $title->name
-        ? $title->original_name
-        : null;
-    $voteLabel = $title->displayRatingCount() > 0 ? number_format($title->displayRatingCount()).' votes' : null;
-    $comparisonToken = filled($comparisonLabel) && $comparisonLabel !== $voteLabel
-        ? (string) $comparisonLabel
-        : null;
-    $originCountryCode = $title->originCountryCode();
-    $originCountryLabel = $title->originCountryLabel();
-@endphp
 
 <x-ui.card class="sb-chart-card !max-w-none overflow-hidden rounded-[1.45rem] p-3.5" data-slot="chart-title-card">
     <div class="grid gap-4 sm:grid-cols-[4.8rem_5.8rem_minmax(0,1fr)] xl:grid-cols-[5.2rem_6.6rem_minmax(0,1fr)] xl:items-start">
         <div class="sb-chart-rank-block">
             <div class="sb-chart-rank-number" data-slot="chart-rank-number">
-                {{ str_pad((string) $rank, 2, '0', STR_PAD_LEFT) }}
+                {{ str_pad((string) $card['rank'], 2, '0', STR_PAD_LEFT) }}
             </div>
             <div class="sb-chart-rank-label">Rank</div>
-            <div class="sb-chart-movement sb-chart-movement--{{ $movementDirection }}" data-slot="chart-movement">
-                <x-ui.icon :name="match ($movementDirection) { 'up' => 'arrow-trending-up', 'down' => 'arrow-trending-down', default => 'minus' }" class="size-3.5" />
-                <span>{{ match ($movementDirection) { 'up' => 'Up '.$movementAmount, 'down' => 'Down '.$movementAmount, default => 'Steady' } }}</span>
+            <div class="sb-chart-movement sb-chart-movement--{{ $card['movementDirection'] }}" data-slot="chart-movement">
+                <x-ui.icon :name="$card['movementIcon']" class="size-3.5" />
+                <span>{{ $card['movementLabel'] }}</span>
             </div>
-            @if (filled($movementNote))
-                <div class="sb-chart-movement-note">{{ $movementNote }}</div>
+            @if (filled($card['movementNote']))
+                <div class="sb-chart-movement-note">{{ $card['movementNote'] }}</div>
             @endif
         </div>
 
         <a
-            href="{{ $titleUrl }}"
+            href="{{ $card['titleUrl'] }}"
             class="group sb-chart-poster overflow-hidden rounded-[1rem]"
         >
-            @if ($poster)
+            @if ($card['poster'])
                 <img
-                    src="{{ $poster->url }}"
-                    alt="{{ $poster->accessibleAltText($title->name) }}"
+                    src="{{ $card['poster']->url }}"
+                    alt="{{ $card['poster']->accessibleAltText($title->name) }}"
                     class="aspect-[2/3] w-full object-cover transition duration-500 group-hover:scale-[1.03]"
                     loading="lazy"
                 >
@@ -68,42 +46,42 @@
                             {{ $title->typeLabel() }}
                         </span>
 
-                        @if ($releaseYear)
-                            <a href="{{ route('public.years.show', ['year' => $releaseYear]) }}" class="sb-chart-meta-token sb-chart-meta-token--interactive">
+                        @if ($card['releaseYear'])
+                            <a href="{{ route('public.years.show', ['year' => $card['releaseYear']]) }}" class="sb-chart-meta-token sb-chart-meta-token--interactive">
                                 <x-ui.icon name="calendar-days" class="size-3" />
-                                {{ $releaseYear }}
+                                {{ $card['releaseYear'] }}
                             </a>
                         @endif
 
-                        @if (filled($runtimeLabel))
+                        @if (filled($card['runtimeLabel']))
                             <span class="sb-chart-meta-token">
                                 <x-ui.icon name="clock" class="size-3" />
-                                {{ $runtimeLabel }}
+                                {{ $card['runtimeLabel'] }}
                             </span>
                         @endif
 
-                        @if (filled($originCountryCode) && filled($originCountryLabel))
+                        @if (filled($card['originCountryCode']) && filled($card['originCountryLabel']))
                             <span class="sb-chart-meta-token">
-                                <x-ui.flag type="country" :code="$originCountryCode" class="size-3.5" />
-                                {{ $originCountryLabel }}
+                                <x-ui.flag type="country" :code="$card['originCountryCode']" class="size-3.5" />
+                                {{ $card['originCountryLabel'] }}
                             </span>
                         @endif
                     </div>
 
                     <div class="space-y-2">
                         <x-ui.heading level="h3" size="md" class="sb-chart-title">
-                            <a href="{{ $titleUrl }}" class="hover:opacity-80">
+                            <a href="{{ $card['titleUrl'] }}" class="hover:opacity-80">
                                 {{ $title->name }}
                             </a>
                         </x-ui.heading>
 
-                        @if (filled($originalTitle))
-                            <div class="sb-chart-original-title">Original title: {{ $originalTitle }}</div>
+                        @if (filled($card['originalTitle']))
+                            <div class="sb-chart-original-title">Original title: {{ $card['originalTitle'] }}</div>
                         @endif
 
-                        @if (filled($summaryText))
+                        @if (filled($card['summaryText']))
                             <x-ui.text class="sb-chart-summary">
-                                {{ str($summaryText)->limit(210) }}
+                                {{ str($card['summaryText'])->limit(210) }}
                             </x-ui.text>
                         @endif
                     </div>
@@ -120,28 +98,28 @@
                         </div>
                     @endif
 
-                    @if (filled($voteLabel))
+                    @if (filled($card['voteLabel']))
                         <div class="sb-chart-metric">
                             <div class="sb-chart-metric-label">Audience</div>
-                            <div class="sb-chart-metric-value">{{ $voteLabel }}</div>
+                            <div class="sb-chart-metric-value">{{ $card['voteLabel'] }}</div>
                         </div>
                     @endif
 
-                    @if (filled($comparisonToken))
+                    @if (filled($card['comparisonToken']))
                         <div class="sb-chart-metric">
                             <div class="sb-chart-metric-label">Signal</div>
                             <div class="sb-chart-metric-value">
                                 <x-ui.icon name="sparkles" class="size-3.5" />
-                                {{ $comparisonToken }}
+                                {{ $card['comparisonToken'] }}
                             </div>
                         </div>
                     @endif
                 </div>
             </div>
 
-            @if ($genres->isNotEmpty())
+            @if ($card['genres']->isNotEmpty())
                 <div class="sb-chart-genre-links">
-                    @foreach ($genres as $genre)
+                    @foreach ($card['genres'] as $genre)
                         <a href="{{ route('public.genres.show', $genre) }}" class="sb-chart-genre-link">
                             {{ $genre->name }}
                         </a>
@@ -151,20 +129,20 @@
 
             <div class="sb-chart-footer">
                 <div class="flex flex-wrap items-center gap-2.5">
-                    @if (filled($movementNote))
-                        <span class="sb-chart-footer-note">{{ $movementNote }}</span>
+                    @if (filled($card['movementNote']))
+                        <span class="sb-chart-footer-note">{{ $card['movementNote'] }}</span>
                     @endif
 
-                    @if ($comparisonToken)
+                    @if ($card['comparisonToken'])
                         <span class="sb-chart-footer-separator">•</span>
                     @endif
 
-                    @if (filled($comparisonToken))
-                        <span class="sb-chart-footer-note">{{ $comparisonToken }}</span>
+                    @if (filled($card['comparisonToken']))
+                        <span class="sb-chart-footer-note">{{ $card['comparisonToken'] }}</span>
                     @endif
                 </div>
 
-                <x-ui.button.light-action :href="$titleUrl" icon="film">
+                <x-ui.button.light-action :href="$card['titleUrl']" icon="film">
                     View title
                 </x-ui.button.light-action>
             </div>
