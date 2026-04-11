@@ -31,8 +31,13 @@ class ViewServiceProvider extends ServiceProvider
         });
 
         View::composer(['layouts.account', 'layouts.partials.account-navbar', 'layouts.partials.account-sidebar'], function (ViewInstance $view) use ($buildTopNavigation): void {
+            $user = auth()->user();
+            $accountNavigationSections = $buildTopNavigation->forAccount();
+
             $view->with([
-                'accountNavigationSections' => $buildTopNavigation->forAccount(),
+                'accountNavigationSections' => $accountNavigationSections,
+                'accountNavbarItems' => $this->flattenNavigationItems($accountNavigationSections, 1),
+                'portalUser' => $user,
             ]);
         });
 
@@ -47,9 +52,12 @@ class ViewServiceProvider extends ServiceProvider
                 'canViewAdminReviews' => $user?->can('viewAny', Review::class) ?? false,
                 'canViewAdminReports' => $user?->can('viewAny', Report::class) ?? false,
             ];
+            $adminNavigationSections = $buildTopNavigation->forAdmin($permissions);
 
             $view->with([
-                'adminNavigationSections' => $buildTopNavigation->forAdmin($permissions),
+                'adminNavigationSections' => $adminNavigationSections,
+                'adminNavbarItems' => $this->flattenNavigationItems($adminNavigationSections),
+                'portalUser' => $user,
             ]);
         });
 
@@ -58,5 +66,27 @@ class ViewServiceProvider extends ServiceProvider
                 'footerData' => $buildFooter->handle(),
             ]);
         });
+    }
+
+    /**
+     * @param  list<array{label: string, items: list<array{href: string, label: string, icon: string, active: bool}>}>  $sections
+     * @return list<array{href: string, label: string, icon: string, active: bool}>
+     */
+    private function flattenNavigationItems(array $sections, int $skipSections = 0): array
+    {
+        $navigationItems = collect($sections)
+            ->slice($skipSections)
+            ->pluck('items')
+            ->flatten(1)
+            ->values();
+
+        if ($skipSections > 0 && $navigationItems->isEmpty()) {
+            $navigationItems = collect($sections)
+                ->pluck('items')
+                ->flatten(1)
+                ->values();
+        }
+
+        return $navigationItems->all();
     }
 }

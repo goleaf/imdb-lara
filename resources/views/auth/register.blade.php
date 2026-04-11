@@ -35,21 +35,31 @@
 
                 <div class="space-y-3">
                     <div class="grid gap-3 sm:grid-cols-2">
-                        <button type="button" class="sb-auth-social-button" disabled aria-disabled="true">
+                        <x-ui.button
+                            type="button"
+                            variant="none"
+                            disabled
+                            class="sb-auth-social-option !h-auto !w-full !justify-start !rounded-[1rem] !px-4 !py-4 text-left"
+                        >
                             <span class="sb-auth-social-button-badge">A</span>
                             <span>
                                 <span class="block text-sm font-semibold text-[#f4eee5]">Continue with Apple</span>
                                 <span class="mt-0.5 block text-xs text-[#8f877a]">Available soon</span>
                             </span>
-                        </button>
+                        </x-ui.button>
 
-                        <button type="button" class="sb-auth-social-button" disabled aria-disabled="true">
+                        <x-ui.button
+                            type="button"
+                            variant="none"
+                            disabled
+                            class="sb-auth-social-option !h-auto !w-full !justify-start !rounded-[1rem] !px-4 !py-4 text-left"
+                        >
                             <span class="sb-auth-social-button-badge">G</span>
                             <span>
                                 <span class="block text-sm font-semibold text-[#f4eee5]">Continue with Google</span>
                                 <span class="mt-0.5 block text-xs text-[#8f877a]">Available soon</span>
                             </span>
-                        </button>
+                        </x-ui.button>
                     </div>
 
                     <p class="sb-auth-note">

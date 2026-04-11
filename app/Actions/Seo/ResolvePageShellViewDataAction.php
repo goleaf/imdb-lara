@@ -165,6 +165,11 @@ class ResolvePageShellViewDataAction
         $authShortcutsEnabled = (bool) config('screenbase.shell.auth_shortcuts_enabled', true);
         $adminShortcutsEnabled = (bool) config('screenbase.shell.admin_shortcuts_enabled', true);
         $watchlistShortcutsEnabled = (bool) config('screenbase.shell.watchlist_shortcuts_enabled', true);
+        $shellVariant = $data['shellVariant'] ?? 'default';
+        $isAuthShell = $shellVariant === 'auth';
+        $isPortalShell = in_array($shellVariant, ['account', 'admin'], true);
+        $hasBreadcrumbs = $this->trimString($data['renderedBreadcrumbs'] ?? null) !== '';
+        $hasRenderedNavbar = $this->trimString($data['renderedNavbar'] ?? null) !== '';
         $renderedNavbarText = strip_tags((string) ($data['renderedNavbar'] ?? ''));
         $shouldRenderAdminShortcut = ! $catalogOnly
             && $adminShortcutsEnabled
@@ -193,8 +198,10 @@ class ResolvePageShellViewDataAction
         return [
             ...$data,
             'isCatalogOnlyApplication' => $catalogOnly,
-            'hasBreadcrumbs' => $this->trimString($data['renderedBreadcrumbs'] ?? null) !== '',
-            'isAuthShell' => ($data['shellVariant'] ?? 'default') === 'auth',
+            'hasBreadcrumbs' => $hasBreadcrumbs,
+            'hasRenderedNavbar' => $hasRenderedNavbar,
+            'isAuthShell' => $isAuthShell,
+            'isPortalShell' => $isPortalShell,
             'shouldRenderAdminShortcut' => $shouldRenderAdminShortcut,
             'shouldRenderWatchlistShortcut' => $shouldRenderWatchlistShortcut,
             'shouldRenderSignOutShortcut' => $shouldRenderSignOutShortcut,
