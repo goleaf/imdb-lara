@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Actions\Import\CrawlImdbGraphAction;
+use App\Actions\Import\EnsureLegacyImportPipelineIsEnabledAction;
 use App\Models\Person;
 use App\Models\Title;
 use BackedEnum;
@@ -13,6 +14,7 @@ use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use RuntimeException;
 
 class ImdbImportTitlesFrontierCommand extends Command
 {
@@ -46,8 +48,10 @@ class ImdbImportTitlesFrontierCommand extends Command
      */
     private array $activeNodeWriteTables = [];
 
-    public function __construct(private readonly CrawlImdbGraphAction $crawlImdbGraphAction)
-    {
+    public function __construct(
+        private readonly CrawlImdbGraphAction $crawlImdbGraphAction,
+        private readonly EnsureLegacyImportPipelineIsEnabledAction $ensureLegacyImportPipelineIsEnabledAction,
+    ) {
         parent::__construct();
     }
 
@@ -56,6 +60,14 @@ class ImdbImportTitlesFrontierCommand extends Command
      */
     public function handle(): int
     {
+        try {
+            $this->ensureLegacyImportPipelineIsEnabledAction->handle();
+        } catch (RuntimeException $runtimeException) {
+            $this->error($runtimeException->getMessage());
+
+            return self::FAILURE;
+        }
+
         $this->traceEnabled = true;
         $this->bootSqlTraceListener();
 

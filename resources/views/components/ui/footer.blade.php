@@ -25,14 +25,6 @@
         ]]);
     }
 
-    if (\Illuminate\Support\Facades\Route::has('public.lists.index')) {
-        array_splice($exploreLinks, 6, 0, [[
-            'label' => 'Public Lists',
-            'href' => route('public.lists.index'),
-            'icon' => 'queue-list',
-        ]]);
-    }
-
     $signalLinks = [];
 
     if (\Illuminate\Support\Facades\Route::has('public.trending')) {
@@ -40,32 +32,32 @@
     }
 
     if (\Illuminate\Support\Facades\Route::has('public.trailers.latest')) {
-        $signalLinks[] = ['label' => 'Latest Trailers', 'href' => route('public.trailers.latest'), 'icon' => 'play'];
+        $signalLinks[] = ['label' => 'Trailers', 'href' => route('public.trailers.latest'), 'icon' => 'play'];
     }
 
-    if (\Illuminate\Support\Facades\Route::has('public.reviews.latest')) {
-        $signalLinks[] = ['label' => 'Latest Reviews', 'href' => route('public.reviews.latest'), 'icon' => 'chat-bubble-left-right'];
+    if (\Illuminate\Support\Facades\Route::has('public.awards.index')) {
+        $signalLinks[] = ['label' => 'Awards', 'href' => route('public.awards.index'), 'icon' => 'trophy'];
     }
 
     $signalLinks[] = ['label' => 'Browse by Genre', 'href' => route('public.discover'), 'icon' => 'tag'];
     $signalLinks[] = ['label' => 'Browse by Year', 'href' => route('public.titles.index'), 'icon' => 'calendar-days'];
-
-    $accountLinks = auth()->check()
-        ? [
-            ['label' => 'Watchlist', 'href' => route('account.watchlist'), 'icon' => 'bookmark'],
-            ['label' => 'Custom Lists', 'href' => route('account.lists.index'), 'icon' => 'queue-list'],
-            ['label' => 'Public Profile', 'href' => route('public.users.show', auth()->user()), 'icon' => 'user'],
-        ]
-        : [
-            ['label' => 'Sign In', 'href' => route('login'), 'icon' => 'arrow-right-end-on-rectangle'],
-            ['label' => 'Create Account', 'href' => route('register'), 'icon' => 'user-plus'],
-            ['label' => 'Discover First', 'href' => route('public.discover'), 'icon' => 'sparkles'],
-        ];
+    $catalogLinks = collect([
+        \Illuminate\Support\Facades\Route::has('public.rankings.movies')
+            ? ['label' => 'Top Movies', 'href' => route('public.rankings.movies'), 'icon' => 'star']
+            : null,
+        \Illuminate\Support\Facades\Route::has('public.rankings.series')
+            ? ['label' => 'Top Series', 'href' => route('public.rankings.series'), 'icon' => 'tv']
+            : null,
+        \Illuminate\Support\Facades\Route::has('public.search')
+            ? ['label' => 'Advanced Search', 'href' => route('public.search'), 'icon' => 'magnifying-glass']
+            : null,
+        ['label' => 'Discover First', 'href' => route('public.discover'), 'icon' => 'sparkles'],
+    ])->filter()->values()->all();
 
     $footerSections = [
         ['heading' => 'Explore', 'links' => $exploreLinks],
         ['heading' => 'Live Routes', 'links' => $signalLinks],
-        ['heading' => auth()->check() ? 'Your Space' : 'Get Started', 'links' => $accountLinks],
+        ['heading' => 'Catalog Paths', 'links' => $catalogLinks],
     ];
 @endphp
 
@@ -80,13 +72,13 @@
                 />
 
                 <x-ui.text class="max-w-md text-sm leading-7 text-neutral-300">
-                    Discover titles, people, reviews, and curated lists from one public catalog built for browsing, rating, and community writing.
+                    Discover titles, people, genres, and release years from one public catalog built directly on the imported IMDb schema.
                 </x-ui.text>
 
                 <div class="flex flex-wrap gap-2">
                     <x-ui.badge variant="outline" color="neutral" icon="sparkles">Discovery</x-ui.badge>
-                    <x-ui.badge variant="outline" color="neutral" icon="chat-bubble-left-right">Reviews</x-ui.badge>
-                    <x-ui.badge variant="outline" color="neutral" icon="queue-list">Lists</x-ui.badge>
+                    <x-ui.badge variant="outline" color="neutral" icon="film">Titles</x-ui.badge>
+                    <x-ui.badge variant="outline" color="neutral" icon="users">People</x-ui.badge>
                 </div>
             </div>
 
@@ -116,7 +108,7 @@
 
         <div class="mt-6 flex flex-col gap-3 border-t border-white/8 pt-4 text-sm text-neutral-400 md:flex-row md:items-center md:justify-between">
             <x-ui.text class="text-sm text-neutral-400">
-                © {{ $currentYear }} Screenbase. Built for title discovery, public curation, and IMDb-style browsing.
+                © {{ $currentYear }} Screenbase. Built for title discovery, trailer browsing, awards, and IMDb-style catalog exploration.
             </x-ui.text>
 
             <div class="flex flex-wrap gap-3">

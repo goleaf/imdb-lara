@@ -3,11 +3,12 @@
 namespace App\Actions\Catalog;
 
 use App\Actions\Seo\PageSeoData;
-use App\Enums\MediaKind;
-use App\Enums\TitleRelationshipType;
-use App\Models\MediaAsset;
+use App\Models\CatalogMediaAsset;
+use App\Models\Genre;
+use App\Models\Interest;
 use App\Models\Title;
-use App\Models\TitleRelationship;
+use App\Models\TitleStatistic;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
@@ -16,8 +17,8 @@ class LoadTitleMetadataExplorationAction
     /**
      * @return array{
      *     title: Title,
-     *     poster: MediaAsset|null,
-     *     backdrop: MediaAsset|null,
+     *     poster: CatalogMediaAsset|null,
+     *     backdrop: CatalogMediaAsset|null,
      *     keywordCount: int,
      *     connectionCount: int,
      *     keywordGroups: Collection<int, array{
@@ -45,103 +46,29 @@ class LoadTitleMetadataExplorationAction
     public function handle(Title $title): array
     {
         $title->load([
-            'genres:id,name,slug',
-            'statistic:id,title_id,average_rating,rating_count,review_count,watchlist_count',
-            'mediaAssets' => fn ($query) => $query
-                ->select([
-                    'id',
-                    'mediable_type',
-                    'mediable_id',
-                    'kind',
-                    'url',
-                    'alt_text',
-                    'position',
-                    'is_primary',
-                ])
-                ->ordered(),
-            'outgoingRelationships' => fn ($query) => $query
-                ->select(['id', 'from_title_id', 'to_title_id', 'relationship_type', 'weight', 'notes'])
-                ->with([
-                    'toTitle' => fn ($titleQuery) => $titleQuery
-                        ->select([
-                            'id',
-                            'name',
-                            'slug',
-                            'title_type',
-                            'release_year',
-                            'plot_outline',
-                            'is_published',
-                        ])
-                        ->published()
-                        ->with([
-                            'mediaAssets:id,mediable_type,mediable_id,kind,url,alt_text,position,is_primary',
-                            'statistic:id,title_id,average_rating,rating_count,review_count',
-                        ]),
-                ])
-                ->orderByDesc('weight')
-                ->orderBy('id'),
-            'incomingRelationships' => fn ($query) => $query
-                ->select(['id', 'from_title_id', 'to_title_id', 'relationship_type', 'weight', 'notes'])
-                ->with([
-                    'fromTitle' => fn ($titleQuery) => $titleQuery
-                        ->select([
-                            'id',
-                            'name',
-                            'slug',
-                            'title_type',
-                            'release_year',
-                            'plot_outline',
-                            'is_published',
-                        ])
-                        ->published()
-                        ->with([
-                            'mediaAssets:id,mediable_type,mediable_id,kind,url,alt_text,position,is_primary',
-                            'statistic:id,title_id,average_rating,rating_count,review_count',
-                        ]),
-                ])
-                ->orderByDesc('weight')
-                ->orderBy('id'),
+            'genres:id,name',
+            'statistic:movie_id,aggregate_rating,vote_count',
+            'titleImages:id,movie_id,position,url,width,height,type',
+            'primaryImageRecord:movie_id,url,width,height,type',
+            'interests:imdb_id,name,description,is_subgenre',
+            'interests.interestCategoryInterests:interest_category_id,interest_imdb_id,position',
+            'interests.interestCategoryInterests.interestCategory:id,name',
+            'interests.interestSimilarInterests:interest_imdb_id,similar_interest_imdb_id,position',
+            'interests.interestSimilarInterests.similar:imdb_id,name,description,is_subgenre',
         ]);
 
-        $poster = MediaAsset::preferredFrom($title->mediaAssets, MediaKind::Poster, MediaKind::Backdrop);
-        $backdrop = MediaAsset::preferredFrom($title->mediaAssets, MediaKind::Backdrop, MediaKind::Poster);
+        $poster = $title->preferredPoster();
+        $backdrop = $title->preferredBackdrop();
         $keywordItems = $this->buildKeywordItems($title);
         $keywordGroups = $this->buildKeywordGroups($keywordItems);
-        $connectionEntries = $this->buildConnectionEntries($title);
-        $connectionGroups = $connectionEntries
-            ->groupBy('groupLabel')
-            ->map(function (Collection $entries, string $groupLabel): array {
-                $leadEntry = $entries->first();
-
-                return [
-                    'label' => $groupLabel,
-                    'copy' => $leadEntry['groupCopy'],
-                    'count' => $entries->count(),
-                    'items' => $entries
-                        ->sortByDesc(fn (array $entry): int => $entry['weight'] ?? 0)
-                        ->values()
-                        ->map(function (array $entry): array {
-                            unset($entry['groupLabel'], $entry['groupCopy'], $entry['groupPriority']);
-
-                            return $entry;
-                        }),
-                    'priority' => $leadEntry['groupPriority'],
-                ];
-            })
-            ->sortBy('priority')
-            ->values()
-            ->map(function (array $group): array {
-                unset($group['priority']);
-
-                return $group;
-            });
+        $connectionGroups = $this->buildConnectionGroups($title);
 
         return [
             'title' => $title,
             'poster' => $poster,
             'backdrop' => $backdrop,
             'keywordCount' => $keywordItems->count(),
-            'connectionCount' => $connectionEntries->count(),
+            'connectionCount' => (int) $connectionGroups->sum('count'),
             'keywordGroups' => $keywordGroups,
             'connectionGroups' => $connectionGroups,
             'seo' => new PageSeoData(
@@ -167,18 +94,15 @@ class LoadTitleMetadataExplorationAction
      */
     private function buildKeywordItems(Title $title): Collection
     {
-        $interestKeywords = collect($title->imdb_interests ?? [])
-            ->map(function (mixed $interest): ?string {
-                if (is_array($interest)) {
-                    return $this->nullableString(data_get($interest, 'name'));
-                }
+        $interestKeywords = $title->interests
+            ->map(fn (Interest $interest): ?string => $interest->name)
+            ->filter();
+        $fallbackKeywords = $interestKeywords->isEmpty()
+            ? $title->genres->map(fn (Genre $genre): string => $genre->name)
+            : collect();
 
-                return null;
-            });
-
-        return $this->tokenizeKeywords($title->search_keywords)
-            ->merge($interestKeywords)
-            ->filter()
+        return $interestKeywords
+            ->merge($fallbackKeywords)
             ->map(fn (string $keyword): string => Str::of($keyword)->trim()->headline()->toString())
             ->unique(fn (string $keyword): string => Str::of($keyword)->lower()->toString())
             ->take(12)
@@ -230,163 +154,330 @@ class LoadTitleMetadataExplorationAction
 
     /**
      * @return Collection<int, array{
-     *     groupLabel: string,
-     *     groupCopy: string,
-     *     groupPriority: int,
-     *     title: Title,
-     *     badgeLabel: string,
-     *     weight: int|null,
-     *     typeLabel: string,
-     *     yearLabel: string|null,
-     *     ratingLabel: string|null,
-     *     note: string|null
+     *     label: string,
+     *     copy: string,
+     *     count: int,
+     *     items: Collection<int, array{
+     *         title: Title,
+     *         badgeLabel: string,
+     *         weight: int|null,
+     *         typeLabel: string,
+     *         yearLabel: string|null,
+     *         ratingLabel: string|null,
+     *         note: string|null
+     *     }>
      * }>
      */
-    private function buildConnectionEntries(Title $title): Collection
+    private function buildConnectionGroups(Title $title): Collection
     {
-        $outgoing = $title->outgoingRelationships
-            ->map(fn (TitleRelationship $relationship): ?array => $this->mapConnectionEntry($relationship, false))
-            ->filter();
+        $usedTitleIds = collect([$title->getKey()]);
+        $groups = collect();
 
-        $incoming = $title->incomingRelationships
-            ->map(fn (TitleRelationship $relationship): ?array => $this->mapConnectionEntry($relationship, true))
-            ->filter();
+        $sharedInterestGroup = $this->buildSharedInterestGroup($title, $usedTitleIds->all());
 
-        return $outgoing
-            ->merge($incoming)
-            ->unique(fn (array $entry): string => $entry['groupLabel'].'-'.$entry['title']->id)
-            ->values();
+        if (is_array($sharedInterestGroup)) {
+            $groups->push($sharedInterestGroup);
+            $usedTitleIds = $usedTitleIds->merge($sharedInterestGroup['items']->pluck('title.id'))->unique();
+        }
+
+        $adjacentThemesGroup = $this->buildAdjacentThemesGroup($title, $usedTitleIds->all());
+
+        if (is_array($adjacentThemesGroup)) {
+            $groups->push($adjacentThemesGroup);
+            $usedTitleIds = $usedTitleIds->merge($adjacentThemesGroup['items']->pluck('title.id'))->unique();
+        }
+
+        $genreNeighborsGroup = $this->buildGenreNeighborsGroup($title, $usedTitleIds->all());
+
+        if (is_array($genreNeighborsGroup)) {
+            $groups->push($genreNeighborsGroup);
+        }
+
+        return $groups->values();
     }
 
     /**
+     * @param  list<int>  $excludedTitleIds
      * @return array{
-     *     groupLabel: string,
-     *     groupCopy: string,
-     *     groupPriority: int,
-     *     title: Title,
-     *     badgeLabel: string,
-     *     weight: int|null,
-     *     typeLabel: string,
-     *     yearLabel: string|null,
-     *     ratingLabel: string|null,
-     *     note: string|null
+     *     label: string,
+     *     copy: string,
+     *     count: int,
+     *     items: Collection<int, array{
+     *         title: Title,
+     *         badgeLabel: string,
+     *         weight: int|null,
+     *         typeLabel: string,
+     *         yearLabel: string|null,
+     *         ratingLabel: string|null,
+     *         note: string|null
+     *     }>
      * }|null
      */
-    private function mapConnectionEntry(TitleRelationship $relationship, bool $isIncoming): ?array
+    private function buildSharedInterestGroup(Title $title, array $excludedTitleIds): ?array
     {
-        $relatedTitle = $isIncoming ? $relationship->fromTitle : $relationship->toTitle;
+        $interestNames = $title->interests
+            ->mapWithKeys(fn (Interest $interest): array => $interest->name
+                ? [$interest->getKey() => $interest->name]
+                : [])
+            ->all();
 
-        if (! $relatedTitle instanceof Title) {
+        if ($interestNames === []) {
             return null;
         }
 
-        $presentation = $this->connectionPresentation($relationship->relationship_type, $isIncoming);
+        $titles = $this->baseConnectionTitleQuery($title)
+            ->whereNotIn('movies.id', $excludedTitleIds)
+            ->whereHas(
+                'interests',
+                fn (Builder $query) => $query->whereIn('interests.imdb_id', array_keys($interestNames)),
+            )
+            ->with([
+                'interests' => fn ($query) => $query
+                    ->select(['interests.imdb_id', 'interests.name'])
+                    ->whereIn('interests.imdb_id', array_keys($interestNames)),
+            ])
+            ->limit(6)
+            ->get();
+
+        $items = $titles
+            ->map(function (Title $relatedTitle) use ($interestNames): ?array {
+                $matchedInterests = $relatedTitle->interests
+                    ->map(fn (Interest $interest): ?string => $interestNames[$interest->getKey()] ?? null)
+                    ->filter()
+                    ->values();
+
+                if ($matchedInterests->isEmpty()) {
+                    return null;
+                }
+
+                return $this->makeConnectionItem(
+                    $relatedTitle,
+                    $matchedInterests->first() ?? 'Shared Interest',
+                    min(10, $matchedInterests->count() * 3),
+                    'Shares '.$matchedInterests->take(3)->implode(', ').'.',
+                );
+            })
+            ->filter()
+            ->values();
+
+        if ($items->isEmpty()) {
+            return null;
+        }
 
         return [
-            'groupLabel' => $presentation['groupLabel'],
-            'groupCopy' => $presentation['groupCopy'],
-            'groupPriority' => $presentation['groupPriority'],
-            'title' => $relatedTitle,
-            'badgeLabel' => $presentation['badgeLabel'],
-            'weight' => $relationship->weight,
-            'typeLabel' => Str::headline($relatedTitle->title_type->value),
-            'yearLabel' => $relatedTitle->release_year ? (string) $relatedTitle->release_year : null,
-            'ratingLabel' => $relatedTitle->statistic?->average_rating
-                ? number_format((float) $relatedTitle->statistic->average_rating, 1)
-                : null,
-            'note' => $this->relationshipNote($relationship, $relatedTitle),
+            'label' => 'Shared Interests',
+            'copy' => 'Titles linked through the same imported interest tags and subgenre signals.',
+            'count' => $items->count(),
+            'items' => $items,
         ];
     }
 
     /**
-     * @return array{groupLabel: string, groupCopy: string, groupPriority: int, badgeLabel: string}
+     * @param  list<int>  $excludedTitleIds
+     * @return array{
+     *     label: string,
+     *     copy: string,
+     *     count: int,
+     *     items: Collection<int, array{
+     *         title: Title,
+     *         badgeLabel: string,
+     *         weight: int|null,
+     *         typeLabel: string,
+     *         yearLabel: string|null,
+     *         ratingLabel: string|null,
+     *         note: string|null
+     *     }>
+     * }|null
      */
-    private function connectionPresentation(TitleRelationshipType $relationshipType, bool $isIncoming): array
+    private function buildAdjacentThemesGroup(Title $title, array $excludedTitleIds): ?array
     {
-        return match ($relationshipType) {
-            TitleRelationshipType::Sequel => [
-                'groupLabel' => 'Series Order',
-                'groupCopy' => 'Chronological continuations and return journeys inside the same story lane.',
-                'groupPriority' => 1,
-                'badgeLabel' => $isIncoming ? 'Followed By' : 'Follows',
-            ],
-            TitleRelationshipType::Prequel => [
-                'groupLabel' => 'Series Order',
-                'groupCopy' => 'Chronological continuations and return journeys inside the same story lane.',
-                'groupPriority' => 1,
-                'badgeLabel' => $isIncoming ? 'Preceded By' : 'Precedes',
-            ],
-            TitleRelationshipType::SharedUniverse => [
-                'groupLabel' => 'Shared Universe',
-                'groupCopy' => 'Titles that share canon, setting, or larger narrative architecture.',
-                'groupPriority' => 2,
-                'badgeLabel' => 'Shared Universe',
-            ],
-            TitleRelationshipType::Similar => [
-                'groupLabel' => 'Similar Mood',
-                'groupCopy' => 'Editorially adjacent titles for tone, premise, or viewer appetite.',
-                'groupPriority' => 3,
-                'badgeLabel' => 'Similar To',
-            ],
-            TitleRelationshipType::SpinOff => [
-                'groupLabel' => 'Expanded Storyworld',
-                'groupCopy' => 'Branches, side lanes, and character-led extensions of the core world.',
-                'groupPriority' => 4,
-                'badgeLabel' => $isIncoming ? 'Spun Off' : 'Spin-off Of',
-            ],
-            TitleRelationshipType::Adaptation => [
-                'groupLabel' => 'Adaptations',
-                'groupCopy' => 'Connected works shaped through source material or re-interpretation.',
-                'groupPriority' => 5,
-                'badgeLabel' => $isIncoming ? 'Adapted Into' : 'Adaptation Of',
-            ],
-            TitleRelationshipType::Remake => [
-                'groupLabel' => 'Reinterpretations',
-                'groupCopy' => 'Later reworkings, remakes, and refreshed takes on the same core idea.',
-                'groupPriority' => 6,
-                'badgeLabel' => $isIncoming ? 'Remade As' : 'Remake Of',
-            ],
-            TitleRelationshipType::Franchise => [
-                'groupLabel' => 'Franchise Links',
-                'groupCopy' => 'Higher-level franchise relationships beyond direct sequel ordering.',
-                'groupPriority' => 7,
-                'badgeLabel' => 'Franchise Link',
-            ],
-        };
-    }
+        $similarInterestNames = $title->interests
+            ->flatMap(fn (Interest $interest): Collection => $interest->interestSimilarInterests
+                ->mapWithKeys(function ($similarInterest): array {
+                    $similarName = $similarInterest->similar?->name;
 
-    private function relationshipNote(TitleRelationship $relationship, Title $relatedTitle): ?string
-    {
-        if (filled($relationship->notes)) {
-            return Str::of((string) $relationship->notes)->squish()->limit(130)->toString();
-        }
+                    return $similarName ? [$similarInterest->similar_interest_imdb_id => $similarName] : [];
+                }) ?? collect())
+            ->all();
 
-        if (filled($relatedTitle->plot_outline)) {
-            return Str::of((string) $relatedTitle->plot_outline)->squish()->limit(130)->toString();
-        }
-
-        return null;
-    }
-
-    /**
-     * @return Collection<int, string>
-     */
-    private function tokenizeKeywords(?string $value): Collection
-    {
-        return collect(preg_split('/[,|]/', (string) $value) ?: [])
-            ->map(fn (string $item): string => Str::of($item)->trim()->toString())
-            ->filter()
-            ->values();
-    }
-
-    private function nullableString(mixed $value): ?string
-    {
-        if (! is_string($value)) {
+        if ($similarInterestNames === []) {
             return null;
         }
 
-        $value = trim($value);
+        $titles = $this->baseConnectionTitleQuery($title)
+            ->whereNotIn('movies.id', $excludedTitleIds)
+            ->whereHas(
+                'interests',
+                fn (Builder $query) => $query->whereIn('interests.imdb_id', array_keys($similarInterestNames)),
+            )
+            ->with([
+                'interests' => fn ($query) => $query
+                    ->select(['interests.imdb_id', 'interests.name'])
+                    ->whereIn('interests.imdb_id', array_keys($similarInterestNames)),
+            ])
+            ->limit(6)
+            ->get();
 
-        return $value !== '' ? $value : null;
+        $items = $titles
+            ->map(function (Title $relatedTitle) use ($similarInterestNames): ?array {
+                $matchedThemes = $relatedTitle->interests
+                    ->map(fn (Interest $interest): ?string => $similarInterestNames[$interest->getKey()] ?? null)
+                    ->filter()
+                    ->values();
+
+                if ($matchedThemes->isEmpty()) {
+                    return null;
+                }
+
+                return $this->makeConnectionItem(
+                    $relatedTitle,
+                    $matchedThemes->first() ?? 'Adjacent Theme',
+                    min(10, $matchedThemes->count() * 2),
+                    'Bridges through adjacent themes like '.$matchedThemes->take(3)->implode(', ').'.',
+                );
+            })
+            ->filter()
+            ->values();
+
+        if ($items->isEmpty()) {
+            return null;
+        }
+
+        return [
+            'label' => 'Adjacent Themes',
+            'copy' => 'Nearby titles surfaced from related interests in the imported metadata graph.',
+            'count' => $items->count(),
+            'items' => $items,
+        ];
+    }
+
+    /**
+     * @param  list<int>  $excludedTitleIds
+     * @return array{
+     *     label: string,
+     *     copy: string,
+     *     count: int,
+     *     items: Collection<int, array{
+     *         title: Title,
+     *         badgeLabel: string,
+     *         weight: int|null,
+     *         typeLabel: string,
+     *         yearLabel: string|null,
+     *         ratingLabel: string|null,
+     *         note: string|null
+     *     }>
+     * }|null
+     */
+    private function buildGenreNeighborsGroup(Title $title, array $excludedTitleIds): ?array
+    {
+        $genreNames = $title->genres
+            ->mapWithKeys(fn (Genre $genre): array => [$genre->getKey() => $genre->name])
+            ->all();
+
+        if ($genreNames === []) {
+            return null;
+        }
+
+        $titles = $this->baseConnectionTitleQuery($title)
+            ->whereNotIn('movies.id', $excludedTitleIds)
+            ->whereHas('genres', fn (Builder $query) => $query->whereIn('genres.id', array_keys($genreNames)))
+            ->with([
+                'genres:id,name',
+            ])
+            ->limit(6)
+            ->get();
+
+        $items = $titles
+            ->map(function (Title $relatedTitle) use ($genreNames): ?array {
+                $matchedGenres = $relatedTitle->genres
+                    ->filter(fn (Genre $genre): bool => array_key_exists($genre->getKey(), $genreNames))
+                    ->map(fn (Genre $genre): string => $genre->name)
+                    ->values();
+
+                if ($matchedGenres->isEmpty()) {
+                    return null;
+                }
+
+                return $this->makeConnectionItem(
+                    $relatedTitle,
+                    $matchedGenres->first() ?? 'Shared Genre',
+                    min(10, $matchedGenres->count() * 2),
+                    'Shares genres such as '.$matchedGenres->take(3)->implode(', ').'.',
+                );
+            })
+            ->filter()
+            ->values();
+
+        if ($items->isEmpty()) {
+            return null;
+        }
+
+        return [
+            'label' => 'Genre Neighbors',
+            'copy' => 'Additional catalog neighbors connected through the same core genres.',
+            'count' => $items->count(),
+            'items' => $items,
+        ];
+    }
+
+    private function baseConnectionTitleQuery(Title $title): Builder
+    {
+        return Title::query()
+            ->select([
+                'movies.id',
+                'movies.tconst',
+                'movies.imdb_id',
+                'movies.primarytitle',
+                'movies.originaltitle',
+                'movies.titletype',
+                'movies.isadult',
+                'movies.startyear',
+                'movies.endyear',
+                'movies.runtimeminutes',
+                'movies.title_type_id',
+                'movies.runtimeSeconds',
+            ])
+            ->addSelect([
+                'popularity_rank' => TitleStatistic::query()
+                    ->select('vote_count')
+                    ->whereColumn('movie_ratings.movie_id', 'movies.id')
+                    ->limit(1),
+            ])
+            ->publishedCatalog()
+            ->whereKeyNot($title->getKey())
+            ->with([
+                'statistic:movie_id,aggregate_rating,vote_count',
+                'titleImages:id,movie_id,position,url,width,height,type',
+                'primaryImageRecord:movie_id,url,width,height,type',
+            ])
+            ->orderByDesc('popularity_rank')
+            ->orderByDesc('movies.startyear')
+            ->orderBy('movies.primarytitle');
+    }
+
+    /**
+     * @return array{
+     *     title: Title,
+     *     badgeLabel: string,
+     *     weight: int|null,
+     *     typeLabel: string,
+     *     yearLabel: string|null,
+     *     ratingLabel: string|null,
+     *     note: string|null
+     * }
+     */
+    private function makeConnectionItem(Title $title, string $badgeLabel, ?int $weight, ?string $note): array
+    {
+        $ratingLabel = $title->displayAverageRating();
+
+        return [
+            'title' => $title,
+            'badgeLabel' => $badgeLabel,
+            'weight' => $weight,
+            'typeLabel' => $title->typeLabel(),
+            'yearLabel' => $title->release_year ? (string) $title->release_year : null,
+            'ratingLabel' => $ratingLabel !== null ? number_format($ratingLabel, 1) : null,
+            'note' => $note,
+        ];
     }
 }

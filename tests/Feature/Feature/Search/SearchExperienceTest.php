@@ -2,219 +2,171 @@
 
 namespace Tests\Feature\Feature\Search;
 
-use App\Enums\ListVisibility;
-use App\Enums\TitleType;
-use App\Models\Genre;
-use App\Models\ListItem;
+use App\Livewire\Search\SearchResults;
+use App\Models\NameBasicMeterRanking;
 use App\Models\Person;
 use App\Models\Title;
-use App\Models\TitleStatistic;
-use App\Models\TitleTranslation;
-use App\Models\User;
-use App\Models\UserList;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Contracts\Pagination\Paginator;
+use Illuminate\Support\Collection;
+use Livewire\Livewire;
+use Tests\Concerns\InteractsWithRemoteCatalog;
+use Tests\Concerns\UsesCatalogOnlyApplication;
 use Tests\TestCase;
 
 class SearchExperienceTest extends TestCase
 {
-    use RefreshDatabase;
+    use InteractsWithRemoteCatalog;
+    use UsesCatalogOnlyApplication;
 
     public function test_search_page_highlights_top_matches_with_titles_and_people_lanes(): void
     {
-        [$movie, $series] = $this->seedSearchDataset();
+        $title = $this->sampleTitle();
 
-        $this->get(route('public.search', ['q' => 'Signal']))
+        $this->get(route('public.search', ['q' => $this->searchTermFor($title)]))
             ->assertOk()
             ->assertSee('Search Results')
             ->assertSee('Top Match')
             ->assertSee('Best title match')
-            ->assertSee('Search Lanes')
-            ->assertSee('Titles')
-            ->assertSee('People')
-            ->assertSee('Lists')
-            ->assertSee($movie->name)
-            ->assertSee($series->name)
-            ->assertSee('Ava Signal')
-            ->assertSee('Signal Essentials')
-            ->assertDontSee('Signal Draft Vault');
+            ->assertDontSee('No matches yet.')
+            ->assertSee($title->name);
     }
 
-    public function test_search_matches_translated_titles_and_supports_advanced_title_filters(): void
+    public function test_search_supports_live_genre_and_year_filters_against_remote_titles(): void
     {
-        [$movie, $series, $endedSeries, $upcomingSeries] = $this->seedSearchDataset();
-
-        $this->get(route('public.search', ['q' => 'Siaures']))
-            ->assertOk()
-            ->assertSee($movie->name);
+        $title = $this->sampleTitle()->loadMissing('genres');
+        $genre = $title->genres->firstOrFail();
 
         $this->get(route('public.search', [
-            'q' => 'Signal',
-            'type' => TitleType::Series->value,
-            'genre' => 'sci-fi',
-            'yearFrom' => 2020,
-            'yearTo' => 2025,
-            'ratingMin' => 8,
-            'ratingMax' => 10,
-            'votesMin' => 500,
-            'language' => 'en',
-            'country' => 'GB',
-            'runtime' => '30-60',
-            'status' => 'returning',
+            'q' => $this->searchTermFor($title),
+            'genre' => $genre->slug,
+            'yearFrom' => $title->release_year,
+            'yearTo' => $title->release_year,
         ]))
             ->assertOk()
-            ->assertSee($series->name)
-            ->assertDontSee(route('public.titles.show', $movie), false)
-            ->assertDontSee(route('public.titles.show', $endedSeries), false)
-            ->assertDontSee(route('public.titles.show', $upcomingSeries), false);
+            ->assertSee($title->name);
+
+        $this->get(route('public.search', [
+            'q' => $this->searchTermFor($title),
+            'yearFrom' => $title->release_year + 1,
+        ]))
+            ->assertOk()
+            ->assertSee('No matches yet.')
+            ->assertDontSee($title->name);
     }
 
     public function test_search_page_shows_a_no_results_state_when_nothing_matches(): void
     {
-        $this->seedSearchDataset();
-
         $this->get(route('public.search', [
-            'q' => 'Nope',
+            'q' => 'zzzzzz-not-a-real-imdb-record',
             'country' => 'JP',
         ]))
             ->assertOk()
-            ->assertSee('No search results match the current query and filters.');
+            ->assertSee('No matches yet.');
     }
 
-    /**
-     * @return array{0: Title, 1: Title, 2: Title, 3: Title}
-     */
-    private function seedSearchDataset(): array
+    public function test_search_page_reuses_ranked_person_cards_for_people_matches(): void
     {
-        $sciFi = Genre::factory()->create([
-            'name' => 'Sci-Fi',
-            'slug' => 'sci-fi',
-        ]);
-        $drama = Genre::factory()->create([
-            'name' => 'Drama',
-            'slug' => 'drama',
-        ]);
+        $person = Person::query()
+            ->select($this->remotePersonColumns())
+            ->addSelect([
+                'popularity_rank' => NameBasicMeterRanking::query()
+                    ->select('current_rank')
+                    ->whereColumn('name_basic_meter_rankings.name_basic_id', 'name_basics.id')
+                    ->limit(1),
+            ])
+            ->published()
+            ->whereHas('meterRanking')
+            ->whereNotNull('name_basics.primaryname')
+            ->orderBy('popularity_rank')
+            ->first();
 
-        $movie = Title::factory()->movie()->create([
-            'name' => 'Northern Signal',
-            'original_name' => 'Northern Signal',
-            'search_keywords' => 'signal, north, sci-fi',
-            'release_year' => 2024,
-            'release_date' => '2024-05-10',
-            'runtime_minutes' => 115,
-            'original_language' => 'en',
-            'origin_country' => 'US',
-            'popularity_rank' => 12,
-            'is_published' => true,
-        ]);
-        $movie->genres()->attach($sciFi);
-        TitleStatistic::factory()->for($movie)->create([
-            'average_rating' => 8.7,
-            'rating_count' => 740,
-            'review_count' => 88,
-            'watchlist_count' => 640,
-        ]);
-        TitleTranslation::factory()->for($movie)->create([
-            'locale' => 'lt',
-            'localized_title' => 'Siaures Signalas',
-            'localized_slug' => 'siaures-signalas',
-        ]);
+        if (! $person instanceof Person || ! is_int($person->popularity_rank)) {
+            $this->markTestSkipped('The remote catalog does not currently expose a ranked person.');
+        }
 
-        $series = Title::factory()->series()->create([
-            'name' => 'Signal North',
-            'original_name' => 'Signal North',
-            'search_keywords' => 'signal, series, north',
-            'release_year' => 2023,
-            'release_date' => '2023-03-02',
-            'end_year' => null,
-            'runtime_minutes' => 52,
-            'original_language' => 'en',
-            'origin_country' => 'GB',
-            'popularity_rank' => 4,
-            'is_published' => true,
-        ]);
-        $series->genres()->attach($sciFi);
-        TitleStatistic::factory()->for($series)->create([
-            'average_rating' => 9.2,
-            'rating_count' => 915,
-            'review_count' => 120,
-            'watchlist_count' => 980,
-        ]);
+        $this->get(route('public.search', ['q' => $this->personSearchTermFor($person)]))
+            ->assertOk()
+            ->assertSee('Best people match')
+            ->assertSee($person->name)
+            ->assertSee('Rank #'.number_format($person->popularity_rank))
+            ->assertSeeHtml('data-slot="search-top-match-person-metrics"');
+    }
 
-        $endedSeries = Title::factory()->series()->create([
-            'name' => 'Signal Archive',
-            'search_keywords' => 'signal, archive',
-            'release_year' => 2018,
-            'release_date' => '2018-04-12',
-            'end_year' => 2020,
-            'runtime_minutes' => 45,
-            'original_language' => 'lt',
-            'origin_country' => 'LT',
-            'popularity_rank' => 20,
-            'is_published' => true,
-        ]);
-        $endedSeries->genres()->attach($drama);
-        TitleStatistic::factory()->for($endedSeries)->create([
-            'average_rating' => 7.4,
-            'rating_count' => 160,
-            'review_count' => 26,
-            'watchlist_count' => 120,
-        ]);
+    public function test_search_page_deduplicates_a_title_top_match_from_the_title_grid(): void
+    {
+        $title = $this->sampleTitle();
+        $component = Livewire::test(SearchResults::class)->set('query', $this->searchTermFor($title));
 
-        $upcomingSeries = Title::factory()->series()->create([
-            'name' => 'Signal Future',
-            'search_keywords' => 'signal, future',
-            'release_year' => 2027,
-            'release_date' => '2027-01-15',
-            'end_year' => null,
-            'runtime_minutes' => 49,
-            'original_language' => 'en',
-            'origin_country' => 'US',
-            'popularity_rank' => 8,
-            'is_published' => true,
-        ]);
-        $upcomingSeries->genres()->attach($sciFi);
-        TitleStatistic::factory()->for($upcomingSeries)->create([
-            'average_rating' => 0,
-            'rating_count' => 0,
-            'review_count' => 0,
-            'watchlist_count' => 210,
-        ]);
+        /** @var array{
+         *     topMatch: array{record: Title|Person|null, type: 'title'|'person'|null},
+         *     titles: Paginator
+         * } $view
+         */
+        $view = $component->instance()->viewData();
+        $visibleTitles = collect($view['titles']->items());
 
-        Person::factory()->create([
-            'name' => 'Ava Signal',
-            'alternate_names' => 'Ava Mercer | Signal Maker',
-            'search_keywords' => 'signal, actor',
-            'is_published' => true,
-        ]);
+        $this->assertTrue($view['topMatch']['record'] instanceof Title);
+        $this->assertFalse(
+            $visibleTitles->contains(fn (Title $visibleTitle): bool => $visibleTitle->is($view['topMatch']['record'])),
+            'The top title match should not be repeated in the title results grid.',
+        );
+    }
 
-        $curator = User::factory()->create([
-            'name' => 'Signal Curator',
-            'username' => 'signal-curator',
-        ]);
+    public function test_search_page_deduplicates_a_person_top_match_from_the_people_grid(): void
+    {
+        $person = $this->samplePerson();
+        $component = Livewire::test(SearchResults::class)->set('query', $this->personSearchTermFor($person));
 
-        $publicList = UserList::factory()->public()->for($curator)->create([
-            'name' => 'Signal Essentials',
-            'slug' => 'signal-essentials',
-            'description' => 'A public list of essential signal stories.',
-            'visibility' => ListVisibility::Public,
-        ]);
-        ListItem::factory()->for($publicList, 'userList')->for($movie, 'title')->create([
-            'position' => 1,
-        ]);
-        ListItem::factory()->for($publicList, 'userList')->for($series, 'title')->create([
-            'position' => 2,
-        ]);
+        /** @var array{
+         *     people: Collection<int, Person>,
+         *     topMatch: array{record: Title|Person|null, type: 'title'|'person'|null}
+         * } $view
+         */
+        $view = $component->instance()->viewData();
 
-        $privateList = UserList::factory()->for($curator)->create([
-            'name' => 'Signal Draft Vault',
-            'slug' => 'signal-draft-vault',
-            'description' => 'A private draft signal list.',
-            'visibility' => ListVisibility::Private,
-        ]);
-        ListItem::factory()->for($privateList, 'userList')->for($movie, 'title')->create([
-            'position' => 1,
-        ]);
+        $this->assertTrue($view['topMatch']['record'] instanceof Person);
+        $this->assertFalse(
+            $view['people']->contains(fn (Person $visiblePerson): bool => $visiblePerson->is($view['topMatch']['record'])),
+            'The top person match should not be repeated in the people results grid.',
+        );
+    }
 
-        return [$movie, $series, $endedSeries, $upcomingSeries];
+    public function test_search_page_keeps_the_same_top_match_when_paging_titles(): void
+    {
+        $component = Livewire::test(SearchResults::class);
+
+        /** @var array{
+         *     titles: Paginator,
+         *     topMatch: array{record: Title|Person|null, type: 'title'|'person'|null}
+         * } $pageOne
+         */
+        $pageOne = $component->instance()->viewData();
+
+        if (! $pageOne['titles']->hasMorePages()) {
+            $this->markTestSkipped('The remote catalog did not produce a second title page for the search results contract.');
+        }
+
+        $this->assertTrue($pageOne['topMatch']['record'] instanceof Title);
+
+        $component->call('setPage', 2, 'titles');
+
+        /** @var array{
+         *     titles: Paginator,
+         *     topMatch: array{record: Title|Person|null, type: 'title'|'person'|null}
+         * } $pageTwo
+         */
+        $pageTwo = $component->instance()->viewData();
+
+        $this->assertTrue($pageTwo['topMatch']['record'] instanceof Title);
+        $this->assertTrue(
+            $pageTwo['topMatch']['record']->is($pageOne['topMatch']['record']),
+            'The top title match should stay stable across paginated title results.',
+        );
+        $this->assertFalse(
+            collect($pageTwo['titles']->items())->contains(
+                fn (Title $visibleTitle): bool => $visibleTitle->is($pageTwo['topMatch']['record']),
+            ),
+            'The global top title match should not be repeated inside paginated title results.',
+        );
     }
 }

@@ -2,68 +2,81 @@
 
 namespace Tests\Feature\Feature;
 
-use App\Models\Award;
-use App\Models\AwardCategory;
 use App\Models\AwardEvent;
 use App\Models\AwardNomination;
-use App\Models\Person;
 use App\Models\Title;
-use Database\Seeders\DemoCatalogSeeder;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Concerns\InteractsWithRemoteCatalog;
+use Tests\Concerns\UsesCatalogOnlyApplication;
 use Tests\TestCase;
 
 class AwardsArchiveExperienceTest extends TestCase
 {
-    use RefreshDatabase;
+    use InteractsWithRemoteCatalog;
+    use UsesCatalogOnlyApplication;
 
-    public function test_awards_archive_page_renders_event_category_and_linked_honorees(): void
+    public function test_awards_archive_page_renders_live_event_category_and_linked_honorees(): void
     {
-        $award = Award::factory()->create([
-            'name' => 'Aurora Guild Awards',
-            'slug' => 'aurora-guild-awards',
-            'description' => 'An annual guild archive for contemporary screen work.',
-        ]);
+        $eventId = AwardNomination::query()
+            ->select(['event_imdb_id'])
+            ->whereNotNull('event_imdb_id')
+            ->distinct()
+            ->orderBy('event_imdb_id')
+            ->limit(40)
+            ->value('event_imdb_id');
 
-        $event = AwardEvent::factory()->for($award)->create([
-            'name' => '2024 Aurora Guild Awards',
-            'slug' => '2024-aurora-guild-awards',
-            'year' => 2024,
-            'location' => 'Toronto',
-        ]);
+        if (! is_string($eventId) || $eventId === '') {
+            $this->markTestSkipped('The remote catalog does not currently expose any award events for the public archive.');
+        }
 
-        $bestPicture = AwardCategory::factory()->for($award)->create([
-            'name' => 'Best Picture',
-            'slug' => 'best-picture',
-            'recipient_scope' => 'title',
-        ]);
+        $event = AwardEvent::query()
+            ->select(['imdb_id', 'name'])
+            ->where('imdb_id', $eventId)
+            ->with([
+                'nominations' => fn ($nominationQuery) => $nominationQuery
+                    ->select([
+                        'id',
+                        'event_imdb_id',
+                        'movie_id',
+                        'award_category_id',
+                        'award_year',
+                        'text',
+                        'is_winner',
+                        'winner_rank',
+                        'position',
+                    ])
+                    ->with([
+                        'awardCategory:id,name',
+                        'title' => fn ($titleQuery) => $titleQuery
+                            ->select($this->remoteTitleColumns())
+                            ->publishedCatalog(),
+                        'people' => fn ($personQuery) => $personQuery->select($this->remotePersonColumns()),
+                    ])
+                    ->orderByDesc('is_winner')
+                    ->orderBy('position')
+                    ->orderBy('id'),
+            ])
+            ->first();
 
-        $bestLead = AwardCategory::factory()->for($award)->create([
-            'name' => 'Best Lead Performance',
-            'slug' => 'best-lead-performance',
-            'recipient_scope' => 'person',
-        ]);
+        if (! $event instanceof AwardEvent) {
+            $this->markTestSkipped('The sampled remote award event could not be loaded for archive assertions.');
+        }
 
-        $title = Title::factory()->movie()->create([
-            'name' => 'Glass Harbor',
-            'slug' => 'glass-harbor',
-            'release_year' => 2024,
-        ]);
+        $nomination = $event->nominations->first(
+            fn (AwardNomination $entry): bool => filled($entry->awardCategory?->name)
+                && (
+                    $entry->title instanceof Title
+                    || $entry->person !== null
+                    || filled($entry->text)
+                ),
+        );
 
-        $person = Person::factory()->create([
-            'name' => 'Ava Stone',
-            'slug' => 'ava-stone',
-            'known_for_department' => 'Acting',
-        ]);
+        if (! $nomination instanceof AwardNomination) {
+            $this->markTestSkipped('The sampled remote award event does not contain a renderable category entry.');
+        }
 
-        AwardNomination::factory()->for($event)->for($bestPicture, 'awardCategory')->winner()->create([
-            'title_id' => $title->id,
-            'sort_order' => 1,
-        ]);
-
-        AwardNomination::factory()->for($event)->for($bestLead, 'awardCategory')->forPerson()->create([
-            'person_id' => $person->id,
-            'sort_order' => 2,
-        ]);
+        $entryLabel = $nomination->title?->name
+            ?? $nomination->person?->name
+            ?? (string) $nomination->text;
 
         $this->get(route('public.awards.index'))
             ->assertOk()
@@ -73,30 +86,23 @@ class AwardsArchiveExperienceTest extends TestCase
             ->assertSeeHtml('data-slot="awards-timeline"')
             ->assertSeeHtml('data-slot="award-event-marker"')
             ->assertSeeHtml('data-slot="award-event-card"')
-            ->assertSee('2024 Aurora Guild Awards')
-            ->assertSee('Best Picture')
-            ->assertSee('Best Lead Performance')
-            ->assertSee('Winner')
-            ->assertSee('Nominee')
-            ->assertSee('Glass Harbor')
-            ->assertSee('Ava Stone')
-            ->assertSee('Toronto');
+            ->assertSee($event->name)
+            ->assertSee($nomination->awardCategory->name)
+            ->assertSee($nomination->is_winner ? 'Winner' : 'Nominee')
+            ->assertSee($entryLabel);
     }
 
-    public function test_seeded_awards_archive_route_renders_demo_catalog_records(): void
+    public function test_awards_archive_page_uses_catalog_only_summary_copy(): void
     {
-        $this->seed(DemoCatalogSeeder::class);
-
         $this->get(route('public.awards.index'))
             ->assertOk()
-            ->assertSee('Awards Archive')
-            ->assertSee('Ceremony')
-            ->assertSee('2025 Celestial Screen Awards')
-            ->assertSee('Best Picture')
-            ->assertSee('Best Lead Performance')
-            ->assertSee('Best Episode')
-            ->assertSee('Northern Signal')
-            ->assertSee('Ava Mercer')
-            ->assertSee('Static Bloom: Pilot');
+            ->assertSee('Archive Highlights')
+            ->assertSee('Award events')
+            ->assertSee('Named archives')
+            ->assertSee('Categories')
+            ->assertSee('Honorees')
+            ->assertDontSee('Write a review')
+            ->assertDontSee('Watchlist')
+            ->assertDontSee('Create account');
     }
 }

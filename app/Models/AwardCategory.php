@@ -2,35 +2,33 @@
 
 namespace App\Models;
 
-use Database\Factories\AwardCategoryFactory;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class AwardCategory extends Model
+class AwardCategory extends ImdbModel
 {
-    /** @use HasFactory<AwardCategoryFactory> */
-    use HasFactory;
+    protected $table = 'award_categories';
 
     /**
      * @var list<string>
      */
     protected $fillable = [
-        'award_id',
         'name',
-        'slug',
-        'recipient_scope',
-        'description',
     ];
 
-    public function award(): BelongsTo
+    protected function casts(): array
     {
-        return $this->belongsTo(Award::class);
+        return [
+            'id' => 'integer',
+        ];
     }
 
     public function nominations(): HasMany
     {
-        return $this->hasMany(AwardNomination::class);
+        return $this->hasMany(AwardNomination::class, 'award_category_id', 'id');
+    }
+
+    public function movieAwardNominations(): HasMany
+    {
+        return $this->hasMany(MovieAwardNomination::class, 'award_category_id', 'id');
     }
 }

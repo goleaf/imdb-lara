@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Search;
 
-use App\Actions\Search\GetGlobalSearchSuggestionsAction;
+use App\Actions\Search\BuildGlobalSearchViewDataAction;
 use Livewire\Component;
 
 class GlobalSearch extends Component
@@ -11,11 +11,12 @@ class GlobalSearch extends Component
 
     public string $searchRoute = '';
 
-    protected GetGlobalSearchSuggestionsAction $getGlobalSearchSuggestions;
+    protected BuildGlobalSearchViewDataAction $buildGlobalSearchViewData;
 
-    public function boot(GetGlobalSearchSuggestionsAction $getGlobalSearchSuggestions): void
-    {
-        $this->getGlobalSearchSuggestions = $getGlobalSearchSuggestions;
+    public function boot(
+        BuildGlobalSearchViewDataAction $buildGlobalSearchViewData,
+    ): void {
+        $this->buildGlobalSearchViewData = $buildGlobalSearchViewData;
     }
 
     public function mount(): void
@@ -39,17 +40,9 @@ class GlobalSearch extends Component
 
     public function render()
     {
-        $query = trim($this->query);
-        $suggestions = $this->getGlobalSearchSuggestions->handle($query);
-
         return view('livewire.search.global-search', [
-            'hasSuggestions' => $suggestions['titles']->isNotEmpty()
-                || $suggestions['people']->isNotEmpty()
-                || $suggestions['lists']->isNotEmpty(),
-            'hasSearchTerm' => mb_strlen($query) >= 2,
             'searchRoute' => $this->searchRoute,
-            'suggestions' => $suggestions,
-            'trimmedQuery' => $query,
+            ...$this->buildGlobalSearchViewData->handle($this->query),
         ]);
     }
 }

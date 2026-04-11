@@ -22,12 +22,12 @@ class LatestTrailersPage extends Component
         return $this->renderPageView('trailers.index', [
             'titles' => $titles,
             'seo' => new PageSeoData(
-                title: 'Latest Trailers',
-                description: 'Watch the freshest public trailers, clips, and featurettes added to Screenbase titles.',
+                title: 'Trailers',
+                description: 'Browse trailer-linked titles, clips, and featurettes from the imported Screenbase catalog.',
                 canonical: route('public.trailers.latest'),
                 breadcrumbs: [
                     ['label' => 'Home', 'href' => route('public.home')],
-                    ['label' => 'Latest Trailers'],
+                    ['label' => 'Trailers'],
                 ],
                 paginationPageName: 'page',
             ),

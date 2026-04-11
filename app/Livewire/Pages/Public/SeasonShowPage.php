@@ -23,7 +23,7 @@ class SeasonShowPage extends Component
         abort_unless(
             in_array($series->title_type, [TitleType::Series, TitleType::MiniSeries], true)
             && $season->series_id === $series->id
-            && ($series->is_published || (auth()->user()?->can('view', $series) ?? false)),
+            && $series->is_published,
             404,
         );
 
@@ -38,7 +38,6 @@ class SeasonShowPage extends Component
         return $this->renderPageView('seasons.show', $loadSeasonDetails->handle(
             $this->series,
             $this->season,
-            auth()->user(),
         ));
     }
 }

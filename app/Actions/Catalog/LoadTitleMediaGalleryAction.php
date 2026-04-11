@@ -2,8 +2,10 @@
 
 namespace App\Actions\Catalog;
 
+use App\Actions\Seo\PageSeoData;
 use App\Enums\MediaKind;
-use App\Models\MediaAsset;
+use App\Enums\TitleType;
+use App\Models\CatalogMediaAsset;
 use App\Models\Title;
 use Illuminate\Support\Collection;
 
@@ -12,98 +14,73 @@ class LoadTitleMediaGalleryAction
     /**
      * @return array{
      *     title: Title,
-     *     poster: MediaAsset|null,
-     *     backdrop: MediaAsset|null,
-     *     viewerAsset: MediaAsset|null,
-     *     featuredTrailer: MediaAsset|null,
-     *     posterAssets: Collection<int, MediaAsset>,
-     *     stillAssets: Collection<int, MediaAsset>,
-     *     backdropAssets: Collection<int, MediaAsset>,
-     *     trailerAssets: Collection<int, MediaAsset>,
-     *     viewerStripAssets: Collection<int, MediaAsset>,
-     *     leadTrailer: MediaAsset|null,
-     *     trailerArchive: Collection<int, MediaAsset>,
+     *     poster: CatalogMediaAsset|null,
+     *     backdrop: CatalogMediaAsset|null,
+     *     viewerAsset: CatalogMediaAsset|null,
+     *     featuredTrailer: CatalogMediaAsset|null,
+     *     posterAssets: Collection<int, CatalogMediaAsset>,
+     *     stillAssets: Collection<int, CatalogMediaAsset>,
+     *     backdropAssets: Collection<int, CatalogMediaAsset>,
+     *     trailerAssets: Collection<int, CatalogMediaAsset>,
+     *     viewerStripAssets: Collection<int, CatalogMediaAsset>,
+     *     leadTrailer: CatalogMediaAsset|null,
+     *     trailerArchive: Collection<int, CatalogMediaAsset>,
      *     totalImageAssets: int,
      *     heroCopy: string,
      *     viewerKindLabel: string,
      *     featuredTrailerLabel: string|null,
      *     featuredTrailerDuration: string|null,
+     *     seo: PageSeoData
      * }
      */
     public function handle(Title $title): array
     {
         $title->load([
-            'genres:id,name,slug',
-            'statistic:id,title_id,average_rating,rating_count,review_count,watchlist_count',
-            'mediaAssets' => fn ($query) => $query
-                ->select([
-                    'id',
-                    'mediable_type',
-                    'mediable_id',
-                    'kind',
-                    'url',
-                    'alt_text',
-                    'caption',
-                    'width',
-                    'height',
-                    'provider',
-                    'provider_key',
-                    'language',
-                    'duration_seconds',
-                    'is_primary',
-                    'position',
-                    'published_at',
-                ])
-                ->ordered(),
+            'statistic:movie_id,aggregate_rating,vote_count',
+            'titleImages:id,movie_id,position,url,width,height,type',
+            'titleVideos:imdb_id,movie_id,video_type_id,name,description,width,height,runtime_seconds,position',
+            'titleVideos.videoType:id,name',
+            'primaryImageRecord:movie_id,url,width,height,type',
+            'plotRecord:movie_id,plot',
         ]);
 
-        /** @var Collection<int, MediaAsset> $allMediaAssets */
-        $allMediaAssets = $title->mediaAssets->values();
-
-        /** @var Collection<int, MediaAsset> $imageAssets */
-        $imageAssets = $allMediaAssets
-            ->filter(fn (MediaAsset $mediaAsset): bool => in_array($mediaAsset->kind, [
-                MediaKind::Poster,
-                MediaKind::Backdrop,
-                MediaKind::Gallery,
-                MediaKind::Still,
-            ], true))
-            ->values();
-
-        /** @var Collection<int, MediaAsset> $videoAssets */
-        $videoAssets = $allMediaAssets
-            ->filter(fn (MediaAsset $mediaAsset): bool => in_array($mediaAsset->kind, [
-                MediaKind::Trailer,
-                MediaKind::Clip,
-                MediaKind::Featurette,
-            ], true))
-            ->values();
-
-        $posterAssets = $imageAssets
-            ->where('kind', MediaKind::Poster)
-            ->values();
-        $stillAssets = $imageAssets
-            ->filter(fn (MediaAsset $mediaAsset): bool => in_array($mediaAsset->kind, [MediaKind::Still, MediaKind::Gallery], true))
-            ->values();
-        $backdropAssets = $imageAssets
-            ->where('kind', MediaKind::Backdrop)
-            ->values();
-
-        $poster = MediaAsset::preferredFrom($posterAssets, MediaKind::Poster)
-            ?? MediaAsset::preferredFrom($imageAssets, MediaKind::Poster, MediaKind::Backdrop);
-        $backdrop = MediaAsset::preferredFrom($backdropAssets, MediaKind::Backdrop)
-            ?? MediaAsset::preferredFrom($imageAssets, MediaKind::Backdrop, MediaKind::Poster);
-        $viewerAsset = MediaAsset::preferredFrom($imageAssets, MediaKind::Backdrop, MediaKind::Still, MediaKind::Gallery, MediaKind::Poster);
-        $featuredTrailer = MediaAsset::preferredFrom($videoAssets, MediaKind::Trailer, MediaKind::Featurette, MediaKind::Clip);
-        $leadTrailer = $featuredTrailer ?: $videoAssets->first();
+        $poster = $title->preferredPoster();
+        $backdrop = $title->preferredBackdrop();
+        $groupedAssets = $title->groupedMediaAssetsByKind();
+        $posterAssets = $this->resolveGroupedAssets($groupedAssets, MediaKind::Poster);
+        $stillAssets = $this->resolveGroupedAssets($groupedAssets, MediaKind::Still, MediaKind::Gallery);
+        $backdropAssets = $this->resolveGroupedAssets($groupedAssets, MediaKind::Backdrop);
+        $trailerAssets = $this->resolveGroupedAssets(
+            $groupedAssets,
+            MediaKind::Trailer,
+            MediaKind::Featurette,
+            MediaKind::Clip,
+        );
+        $viewerAsset = CatalogMediaAsset::preferredFrom(
+            $stillAssets->concat($backdropAssets)->concat($posterAssets),
+            MediaKind::Backdrop,
+            MediaKind::Still,
+            MediaKind::Gallery,
+            MediaKind::Poster,
+        );
+        $featuredTrailer = CatalogMediaAsset::preferredFrom(
+            $trailerAssets,
+            MediaKind::Trailer,
+            MediaKind::Featurette,
+            MediaKind::Clip,
+        );
+        $leadTrailer = $featuredTrailer ?? $trailerAssets->first();
         $viewerStripAssets = collect([$viewerAsset])
             ->merge($posterAssets->take(1))
             ->merge($stillAssets->take(2))
             ->merge($backdropAssets->take(1))
-            ->filter()
-            ->unique('id')
+            ->filter(fn (mixed $asset): bool => $asset instanceof CatalogMediaAsset)
+            ->unique('url')
             ->take(4)
             ->values();
+        $openGraphType = in_array($title->title_type, [TitleType::Series, TitleType::MiniSeries], true)
+            ? 'video.tv_show'
+            : 'video.movie';
 
         return [
             'title' => $title,
@@ -114,17 +91,47 @@ class LoadTitleMediaGalleryAction
             'posterAssets' => $posterAssets,
             'stillAssets' => $stillAssets,
             'backdropAssets' => $backdropAssets,
-            'trailerAssets' => $videoAssets,
+            'trailerAssets' => $trailerAssets,
             'viewerStripAssets' => $viewerStripAssets,
             'leadTrailer' => $leadTrailer,
-            'trailerArchive' => $videoAssets
-                ->reject(fn (MediaAsset $video): bool => $leadTrailer && $video->id === $leadTrailer->id)
+            'trailerArchive' => $trailerAssets
+                ->reject(fn (CatalogMediaAsset $video): bool => $leadTrailer !== null && $video->url === $leadTrailer->url)
                 ->values(),
-            'totalImageAssets' => $imageAssets->count(),
-            'heroCopy' => $title->tagline ?: $title->plot_outline ?: 'A premium catalog view of posters, stills, backdrops, and trailers attached to this title.',
-            'viewerKindLabel' => $viewerAsset?->kind?->label() ?? 'Gallery viewer',
-            'featuredTrailerLabel' => $featuredTrailer?->caption ?: $featuredTrailer?->kind?->label(),
+            'totalImageAssets' => $posterAssets->count() + $stillAssets->count() + $backdropAssets->count(),
+            'heroCopy' => $title->summaryText() ?: 'A premium catalog view of posters, stills, backdrops, and trailers attached to this title.',
+            'viewerKindLabel' => $viewerAsset?->kindLabel() ?? 'Gallery viewer',
+            'featuredTrailerLabel' => $featuredTrailer?->caption ?: $featuredTrailer?->alt_text ?: $featuredTrailer?->kindLabel(),
             'featuredTrailerDuration' => $featuredTrailer?->durationMinutesLabel(),
+            'seo' => new PageSeoData(
+                title: $title->name.' Media Gallery',
+                description: 'Browse posters, stills, backdrops, and trailers for '.$title->name.'.',
+                canonical: route('public.titles.media', $title),
+                openGraphType: $openGraphType,
+                openGraphImage: ($backdrop ?? $poster)?->url,
+                openGraphImageAlt: ($backdrop ?? $poster)?->alt_text ?: $title->name,
+                breadcrumbs: [
+                    ['label' => 'Home', 'href' => route('public.home')],
+                    ['label' => 'Titles', 'href' => route('public.titles.index')],
+                    ['label' => $title->name, 'href' => route('public.titles.show', $title)],
+                    ['label' => 'Media Gallery'],
+                ],
+                paginationPageName: null,
+            ),
         ];
+    }
+
+    /**
+     * @param  Collection<string, Collection<int, CatalogMediaAsset>>  $groupedAssets
+     * @return Collection<int, CatalogMediaAsset>
+     */
+    private function resolveGroupedAssets(Collection $groupedAssets, MediaKind ...$kinds): Collection
+    {
+        return collect($kinds)
+            ->flatMap(
+                fn (MediaKind $kind): Collection => $groupedAssets->get($kind->value, collect()),
+            )
+            ->filter(fn (mixed $asset): bool => $asset instanceof CatalogMediaAsset)
+            ->unique('url')
+            ->values();
     }
 }

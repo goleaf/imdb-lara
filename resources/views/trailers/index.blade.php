@@ -1,11 +1,11 @@
 @extends('layouts.public')
 
-@section('title', 'Latest Trailers')
-@section('meta_description', 'Watch the freshest public trailers, clips, and featurettes added to Screenbase titles.')
+@section('title', 'Trailers')
+@section('meta_description', 'Browse trailer-linked titles, clips, and featurettes from the imported Screenbase catalog.')
 
 @section('breadcrumbs')
     <x-ui.breadcrumbs.item :href="route('public.home')">Home</x-ui.breadcrumbs.item>
-    <x-ui.breadcrumbs.item>Latest Trailers</x-ui.breadcrumbs.item>
+    <x-ui.breadcrumbs.item>Trailers</x-ui.breadcrumbs.item>
 @endsection
 
 @section('content')
@@ -15,14 +15,14 @@
         <x-ui.card class="!max-w-none">
             <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                 <div class="space-y-3">
-                    <x-ui.heading level="h1" size="xl">Latest Trailers</x-ui.heading>
+                    <x-ui.heading level="h1" size="xl">Trailers</x-ui.heading>
                     <x-ui.text class="max-w-3xl text-base text-neutral-600 dark:text-neutral-300">
-                        A chronological feed of the most recently published trailers, clips, and featurettes attached to public title pages.
+                        Browse titles that currently have trailer, clip, or featurette records attached in the imported catalog.
                     </x-ui.text>
                 </div>
 
                 <div class="flex flex-wrap gap-2">
-                    <x-ui.badge variant="outline" icon="play">Trailer feed</x-ui.badge>
+                    <x-ui.badge variant="outline" icon="play">Trailer archive</x-ui.badge>
                     <x-ui.badge variant="outline" color="neutral" icon="film">Title-linked</x-ui.badge>
                 </div>
             </div>
@@ -95,9 +95,9 @@
                     <x-ui.empty.media>
                         <x-ui.icon name="play-circle" class="size-8 text-neutral-400 dark:text-neutral-500" />
                     </x-ui.empty.media>
-                    <x-ui.heading level="h3">No public trailers are available yet.</x-ui.heading>
+                    <x-ui.heading level="h3">No trailer-linked titles are available yet.</x-ui.heading>
                     <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
-                        As trailer records are attached to titles, they will appear here in reverse chronological order.
+                        Titles with imported trailer records will appear here as soon as the source catalog exposes them.
                     </x-ui.text>
                 </x-ui.empty>
             @endforelse

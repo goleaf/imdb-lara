@@ -29,9 +29,9 @@
                             <div class="sb-awards-summary-copy">Published ceremonies in the archive.</div>
                         </div>
                         <div class="sb-awards-summary-card">
-                            <div class="sb-awards-summary-label">Award bodies</div>
+                            <div class="sb-awards-summary-label">Named archives</div>
                             <div class="sb-awards-summary-value">{{ number_format($summary['awardCount']) }}</div>
-                            <div class="sb-awards-summary-copy">Distinct institutions represented here.</div>
+                            <div class="sb-awards-summary-copy">Distinct published event names represented here.</div>
                         </div>
                         <div class="sb-awards-summary-card">
                             <div class="sb-awards-summary-label">Categories</div>
@@ -49,8 +49,8 @@
                 <div class="sb-awards-hero-panel">
                     <div class="flex items-center justify-between gap-3">
                         <div>
-                            <div class="sb-awards-panel-kicker">Award Bodies</div>
-                            <div class="sb-awards-panel-copy">A quick view of the award archives currently published on Screenbase.</div>
+                            <div class="sb-awards-panel-kicker">Archive Highlights</div>
+                            <div class="sb-awards-panel-copy">A quick view of the award event archives currently published on Screenbase.</div>
                         </div>
 
                         <x-ui.badge variant="outline" color="amber" icon="trophy">Prestige archive</x-ui.badge>

@@ -20,22 +20,75 @@
         ->trim('-')
         ->toString();
 
+    $iconPaths = collect(app(\BladeUI\Icons\Factory::class)->all()['blade-flags']['paths'] ?? []);
+    $iconExists = function (string $svgName) use ($iconPaths): bool {
+        return $iconPaths->contains(fn (string $path): bool => file_exists($path.'/'.$svgName.'.svg'));
+    };
+
+    $resolveLanguageSvgName = function (string $languageCode, string $variant) use ($iconPaths, $iconExists): ?string {
+        $baseLanguageCode = str($languageCode)->before('-')->toString();
+        $candidateCodes = collect([$languageCode]);
+
+        if ($baseLanguageCode !== '' && $baseLanguageCode !== $languageCode) {
+            $candidateCodes->push($baseLanguageCode);
+        }
+
+        $languageCountriesPath = base_path('vendor/outhebox/blade-flags/config/language-countries.json');
+        $languageCountries = file_exists($languageCountriesPath)
+            ? json_decode((string) file_get_contents($languageCountriesPath), true)
+            : [];
+        $languageCountryConfig = is_array($languageCountries) ? ($languageCountries[$baseLanguageCode] ?? null) : null;
+
+        if (is_array($languageCountryConfig)) {
+            $countryVariants = collect([
+                str($languageCode)->after('-')->toString(),
+                $languageCountryConfig['default'] ?? null,
+            ])->filter(fn (?string $countryCode): bool => filled($countryCode));
+
+            foreach ($countryVariants as $countryVariant) {
+                $candidateCodes->push($baseLanguageCode.'-'.$countryVariant);
+            }
+        }
+
+        foreach ($candidateCodes->unique()->filter() as $candidateCode) {
+            $svgName = collect([
+                $variant === 'default' ? null : $variant,
+                'language',
+                $candidateCode,
+            ])->filter()->implode('-');
+
+            if ($iconExists($svgName)) {
+                return $svgName;
+            }
+        }
+
+        if ($baseLanguageCode === '') {
+            return null;
+        }
+
+        return $iconPaths
+            ->flatMap(fn (string $path): array => glob($path.'/language-'.$baseLanguageCode.'-*.svg') ?: [])
+            ->map(fn (string $path): string => pathinfo($path, PATHINFO_FILENAME))
+            ->sort()
+            ->first();
+    };
+
     $iconName = null;
     $canRender = false;
 
     if ($type && $normalizedCode !== '') {
-        $flagSvgName = collect([
-            $variant === 'default' ? null : $variant,
-            $type,
-            $normalizedCode,
-        ])->filter()->implode('-');
+        $flagSvgName = $type === 'language'
+            ? $resolveLanguageSvgName($normalizedCode, $variant)
+            : collect([
+                $variant === 'default' ? null : $variant,
+                $type,
+                $normalizedCode,
+            ])->filter()->implode('-');
 
-        $iconName = 'flag-'.$flagSvgName;
-
-        $iconFile = collect(app(\BladeUI\Icons\Factory::class)->all()['blade-flags']['paths'] ?? [])
-            ->contains(fn (string $path): bool => file_exists($path.'/'.$flagSvgName.'.svg'));
-
-        $canRender = $iconFile;
+        if ($flagSvgName) {
+            $iconName = 'flag-'.$flagSvgName;
+            $canRender = $iconExists($flagSvgName);
+        }
     }
 
     $iconClasses = trim(($attributes->get('class') ?: 'size-4').' shrink-0');

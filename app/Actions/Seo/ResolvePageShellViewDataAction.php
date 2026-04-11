@@ -3,10 +3,11 @@
 namespace App\Actions\Seo;
 
 use Illuminate\Contracts\View\Factory as ViewFactory;
+use Illuminate\Support\Facades\Route;
 
 class ResolvePageShellViewDataAction
 {
-    private const DEFAULT_DESCRIPTION = 'Screenbase is a Livewire-driven IMDb-style platform for discovery, ratings, reviews, and curation.';
+    private const DEFAULT_DESCRIPTION = 'Screenbase is a Livewire-driven IMDb-style catalog for titles, people, awards, trailers, and discovery.';
 
     /**
      * @param  array<string, mixed>  $data
@@ -14,6 +15,8 @@ class ResolvePageShellViewDataAction
      */
     public function forStandardLayout(ViewFactory $viewFactory, array $data): array
     {
+        $livewireLayoutData = request()->attributes->get('livewirePageLayoutData');
+        $livewireLayoutData = is_array($livewireLayoutData) ? $livewireLayoutData : [];
         $pageSeo = $data['seo'] ?? null;
         $sectionPageTitleOverride = $this->trimString($viewFactory->yieldContent('page_title_override'));
         $sectionPageDescriptionOverride = $this->trimString($viewFactory->yieldContent('page_description_override'));
@@ -37,7 +40,8 @@ class ResolvePageShellViewDataAction
         $renderedNavbar = $slotNavbar ?? ($data['sectionNavbar'] ?? $viewFactory->yieldContent('navbar'));
         $renderedSidebar = $slotSidebar ?? ($data['sectionSidebar'] ?? $viewFactory->yieldContent('sidebar'));
 
-        $shellVariant = $data['shellVariant']
+        $shellVariant = $livewireLayoutData['shellVariant']
+            ?? $data['shellVariant']
             ?? ($sectionShellVariant !== '' ? $sectionShellVariant : 'default');
         $defaultRobots = in_array($shellVariant, ['auth', 'account', 'admin'], true)
             || request()->routeIs('login')
@@ -46,12 +50,14 @@ class ResolvePageShellViewDataAction
             || request()->routeIs('admin.*')
             ? 'noindex,nofollow'
             : 'index,follow';
-        $pageTitle = $data['pageTitleOverride']
+        $pageTitle = $livewireLayoutData['pageTitle']
+            ?? $data['pageTitleOverride']
             ?? ($sectionPageTitleOverride !== '' ? $sectionPageTitleOverride : null)
             ?? ($pageSeo instanceof PageSeoData ? $pageSeo->documentTitle(request()) : null)
             ?? ($renderedTitle !== '' ? $renderedTitle.' · Screenbase' : 'Screenbase');
 
-        $pageDescription = $data['pageDescriptionOverride']
+        $pageDescription = $livewireLayoutData['pageDescription']
+            ?? $data['pageDescriptionOverride']
             ?? ($sectionPageDescriptionOverride !== '' ? $sectionPageDescriptionOverride : null)
             ?? ($pageSeo instanceof PageSeoData ? $pageSeo->pageDescription(self::DEFAULT_DESCRIPTION) : null)
             ?? ($renderedMetaDescription !== '' ? $renderedMetaDescription : self::DEFAULT_DESCRIPTION);
@@ -59,44 +65,60 @@ class ResolvePageShellViewDataAction
         $resolvedData = [
             'pageTitle' => $pageTitle,
             'pageDescription' => $pageDescription,
-            'pageRobots' => $data['pageRobotsOverride']
+            'pageRobots' => $livewireLayoutData['pageRobots']
+                ?? $data['pageRobotsOverride']
                 ?? ($sectionPageRobots !== '' ? $sectionPageRobots : null)
                 ?? ($pageSeo instanceof PageSeoData ? $pageSeo->robots : null)
                 ?? $defaultRobots,
-            'canonicalUrl' => $data['canonicalUrlOverride']
+            'canonicalUrl' => $livewireLayoutData['canonicalUrl']
+                ?? $data['canonicalUrlOverride']
                 ?? ($sectionCanonicalUrl !== '' ? $sectionCanonicalUrl : null)
                 ?? ($pageSeo instanceof PageSeoData ? $pageSeo->canonicalUrl(request()) : null)
                 ?? url()->current(),
-            'openGraphTitle' => $data['openGraphTitleOverride']
+            'openGraphTitle' => $livewireLayoutData['openGraphTitle']
+                ?? $data['openGraphTitleOverride']
                 ?? ($sectionOpenGraphTitle !== '' ? $sectionOpenGraphTitle : null)
                 ?? ($pageSeo instanceof PageSeoData ? $pageSeo->openGraphTitle() : null)
                 ?? ($renderedTitle !== '' ? $renderedTitle : 'Screenbase'),
-            'openGraphDescription' => $data['openGraphDescriptionOverride']
+            'openGraphDescription' => $livewireLayoutData['openGraphDescription']
+                ?? $data['openGraphDescriptionOverride']
                 ?? ($sectionOpenGraphDescription !== '' ? $sectionOpenGraphDescription : null)
                 ?? ($pageSeo instanceof PageSeoData ? $pageSeo->openGraphDescription(self::DEFAULT_DESCRIPTION) : null)
                 ?? $pageDescription,
-            'openGraphType' => $data['openGraphTypeOverride']
+            'openGraphType' => $livewireLayoutData['openGraphType']
+                ?? $data['openGraphTypeOverride']
                 ?? ($sectionOpenGraphType !== '' ? $sectionOpenGraphType : null)
                 ?? ($pageSeo instanceof PageSeoData ? $pageSeo->openGraphType : null)
                 ?? 'website',
-            'openGraphImage' => $data['openGraphImageOverride']
+            'openGraphImage' => $livewireLayoutData['openGraphImage']
+                ?? $data['openGraphImageOverride']
                 ?? ($sectionOpenGraphImage !== '' ? $sectionOpenGraphImage : null)
                 ?? ($pageSeo instanceof PageSeoData ? $pageSeo->openGraphImage : null),
-            'openGraphImageAlt' => $data['openGraphImageAltOverride']
+            'openGraphImageAlt' => $livewireLayoutData['openGraphImageAlt']
+                ?? $data['openGraphImageAltOverride']
                 ?? ($sectionOpenGraphImageAlt !== '' ? $sectionOpenGraphImageAlt : null)
                 ?? ($pageSeo instanceof PageSeoData ? $pageSeo->openGraphImageAlt : null),
-            'twitterCard' => $data['twitterCardOverride']
+            'twitterCard' => $livewireLayoutData['twitterCard']
+                ?? $data['twitterCardOverride']
                 ?? ($sectionTwitterCard !== '' ? $sectionTwitterCard : null)
                 ?? ($pageSeo instanceof PageSeoData ? $pageSeo->twitterCard() : null)
                 ?? 'summary',
-            'breadcrumbSchema' => $data['breadcrumbSchemaOverride']
+            'breadcrumbSchema' => $livewireLayoutData['breadcrumbSchema']
+                ?? $data['breadcrumbSchemaOverride']
                 ?? ($sectionBreadcrumbSchema !== '' ? $sectionBreadcrumbSchema : null)
                 ?? ($pageSeo instanceof PageSeoData ? $pageSeo->breadcrumbSchema(request()) : null),
-            'renderedBreadcrumbs' => $renderedBreadcrumbs,
-            'renderedNavbar' => $renderedNavbar,
-            'renderedSidebar' => $renderedSidebar,
+            'renderedBreadcrumbs' => $this->trimString($renderedBreadcrumbs) !== ''
+                ? $renderedBreadcrumbs
+                : ($livewireLayoutData['breadcrumbs'] ?? null),
+            'renderedNavbar' => $this->trimString($renderedNavbar) !== ''
+                ? $renderedNavbar
+                : ($livewireLayoutData['navbar'] ?? null),
+            'renderedSidebar' => $this->trimString($renderedSidebar) !== ''
+                ? $renderedSidebar
+                : ($livewireLayoutData['sidebar'] ?? null),
             'shellVariant' => $shellVariant,
-            'showFooter' => $data['showFooter']
+            'showFooter' => $livewireLayoutData['showFooter']
+                ?? $data['showFooter']
                 ?? $this->parseBooleanValue($sectionShowFooter, true),
         ];
 
@@ -139,20 +161,38 @@ class ResolvePageShellViewDataAction
      */
     private function finalize(array $data): array
     {
+        $catalogOnly = (bool) config('screenbase.catalog_only', false);
+        $authShortcutsEnabled = (bool) config('screenbase.shell.auth_shortcuts_enabled', true);
+        $adminShortcutsEnabled = (bool) config('screenbase.shell.admin_shortcuts_enabled', true);
+        $watchlistShortcutsEnabled = (bool) config('screenbase.shell.watchlist_shortcuts_enabled', true);
         $renderedNavbarText = strip_tags((string) ($data['renderedNavbar'] ?? ''));
 
         return [
             ...$data,
+            'isCatalogOnlyApplication' => $catalogOnly,
             'hasBreadcrumbs' => $this->trimString($data['renderedBreadcrumbs'] ?? null) !== '',
             'isAuthShell' => ($data['shellVariant'] ?? 'default') === 'auth',
-            'shouldRenderAdminShortcut' => auth()->user()?->can('access-admin-area')
+            'shouldRenderAdminShortcut' => ! $catalogOnly
+                && $adminShortcutsEnabled
+                && auth()->user()?->can('access-admin-area')
+                && Route::has('admin.dashboard')
                 && ! request()->routeIs('admin.*')
                 && ! str_contains($renderedNavbarText, 'Admin'),
-            'shouldRenderWatchlistShortcut' => auth()->check()
+            'shouldRenderWatchlistShortcut' => ! $catalogOnly
+                && $watchlistShortcutsEnabled
+                && auth()->check()
+                && Route::has('account.watchlist')
                 && ! str_contains($renderedNavbarText, 'Watchlist'),
-            'shouldRenderSignOutShortcut' => auth()->check()
+            'shouldRenderSignOutShortcut' => ! $catalogOnly
+                && $authShortcutsEnabled
+                && auth()->check()
+                && Route::has('logout')
                 && ! str_contains($renderedNavbarText, 'Sign out'),
-            'shouldRenderGuestAuthShortcuts' => ! auth()->check()
+            'shouldRenderGuestAuthShortcuts' => ! $catalogOnly
+                && $authShortcutsEnabled
+                && ! auth()->check()
+                && Route::has('login')
+                && Route::has('register')
                 && ! str_contains($renderedNavbarText, 'Sign in')
                 && ! str_contains($renderedNavbarText, 'Create account'),
         ];

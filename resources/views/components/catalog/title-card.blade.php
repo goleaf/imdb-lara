@@ -94,7 +94,7 @@
             @endif
 
             <div class="mt-auto flex items-center justify-between gap-3 text-sm text-[#988f82] dark:text-[#988f82]">
-                <span>{{ number_format($title->displayReviewCount()) }} reviews</span>
+                <span>{{ number_format($title->displayRatingCount()) }} votes</span>
                 <x-ui.link :href="route('public.titles.show', $title)" variant="ghost" iconAfter="arrow-right">
                     View title
                 </x-ui.link>

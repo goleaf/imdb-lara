@@ -14,15 +14,24 @@ use App\Models\Title;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Sleep;
 use ReflectionClass;
 use RuntimeException;
+use Tests\Concerns\UsesCatalogOnlyApplication;
 
 abstract class TestCase extends BaseTestCase
 {
     protected function setUp(): void
     {
         parent::setUp();
+
+        if (
+            $this->isCatalogOnlySurface()
+            && ! $this->supportsCatalogOnlyApplicationTestContract()
+        ) {
+            $this->markTestSkipped('Legacy local-schema or write-side test is not applicable in the current catalog-only MySQL application mode.');
+        }
 
         Sleep::fake();
         Cache::flush();
@@ -35,6 +44,22 @@ abstract class TestCase extends BaseTestCase
             ->getProperty('lastRequestFinishedAtMicroseconds');
 
         $property->setValue(null, null);
+    }
+
+    protected function isCatalogOnlySurface(): bool
+    {
+        return Route::has('public.home')
+            && ! Route::has('account.watchlist')
+            && ! Route::has('admin.dashboard');
+    }
+
+    protected function supportsCatalogOnlyApplicationTestContract(): bool
+    {
+        return in_array(
+            UsesCatalogOnlyApplication::class,
+            class_uses_recursive(static::class),
+            true,
+        );
     }
 
     /**

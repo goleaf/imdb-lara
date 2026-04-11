@@ -3,7 +3,6 @@
 namespace App\Actions\Home;
 
 use App\Actions\Catalog\BuildPublicTitleIndexQueryAction;
-use App\Enums\MediaKind;
 use App\Enums\TitleType;
 use App\Models\Title;
 use Illuminate\Support\Facades\Cache;
@@ -32,85 +31,39 @@ class GetHeroSpotlightAction
                             TitleType::Short->value,
                         ],
                     ])
-                    ->addSelect([
-                        'tagline',
-                        'synopsis',
-                        'created_at',
-                    ])
                     ->with([
-                        'titleImages' => fn ($imageQuery) => $imageQuery
-                            ->select([
-                                'id',
-                                'mediable_type',
-                                'mediable_id',
-                                'kind',
-                                'url',
-                                'alt_text',
-                                'caption',
-                                'position',
-                                'is_primary',
+                        'titleVideos:imdb_id,movie_id,video_type_id,name,description,width,height,runtime_seconds,position',
+                        'credits' => fn ($creditQuery) => $creditQuery
+                            ->select(['name_basic_id', 'movie_id', 'category', 'episode_count', 'position'])
+                            ->whereIn('category', ['actor', 'actress', 'director', 'writer', 'producer'])
+                            ->with([
+                                'person' => fn ($personQuery) => $personQuery
+                                    ->select([
+                                        'id',
+                                        'nconst',
+                                        'imdb_id',
+                                        'primaryname',
+                                        'displayName',
+                                        'alternativeNames',
+                                        'primaryProfessions',
+                                        'biography',
+                                        'birthLocation',
+                                        'deathLocation',
+                                        'primaryImage_url',
+                                        'primaryImage_width',
+                                        'primaryImage_height',
+                                    ])
+                                    ->with([
+                                        'personImages:name_basic_id,position,url,width,height,type',
+                                        'professionTerms:id,name',
+                                    ])
+                                    ->limit(8),
                             ])
-                            ->whereIn('kind', [MediaKind::Backdrop, MediaKind::Poster])
-                            ->orderBy('position'),
-                        'titleVideos' => fn ($videoQuery) => $videoQuery
-                            ->select([
-                                'id',
-                                'mediable_type',
-                                'mediable_id',
-                                'kind',
-                                'url',
-                                'caption',
-                                'provider',
-                                'published_at',
-                            ])
-                            ->where('kind', MediaKind::Trailer)
-                            ->orderByDesc('published_at')
-                            ->limit(1),
-                        'credits.person:id,name,slug',
+                            ->orderBy('position')
+                            ->limit(8),
                     ]);
 
-                return $query->first() ?? $this->buildPublicTitleIndexQuery
-                    ->handle([
-                        'sort' => 'popular',
-                        'excludeEpisodes' => true,
-                    ])
-                    ->addSelect([
-                        'tagline',
-                        'synopsis',
-                        'created_at',
-                    ])
-                    ->with([
-                        'titleImages' => fn ($imageQuery) => $imageQuery
-                            ->select([
-                                'id',
-                                'mediable_type',
-                                'mediable_id',
-                                'kind',
-                                'url',
-                                'alt_text',
-                                'caption',
-                                'position',
-                                'is_primary',
-                            ])
-                            ->whereIn('kind', [MediaKind::Backdrop, MediaKind::Poster])
-                            ->orderBy('position'),
-                        'titleVideos' => fn ($videoQuery) => $videoQuery
-                            ->select([
-                                'id',
-                                'mediable_type',
-                                'mediable_id',
-                                'kind',
-                                'url',
-                                'caption',
-                                'provider',
-                                'published_at',
-                            ])
-                            ->where('kind', MediaKind::Trailer)
-                            ->orderByDesc('published_at')
-                            ->limit(1),
-                        'credits.person:id,name,slug',
-                    ])
-                    ->first();
+                return $query->first();
             },
         );
     }

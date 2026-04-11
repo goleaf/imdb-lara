@@ -2,98 +2,71 @@
 
 namespace App\Models;
 
-use Database\Factories\AwardNominationFactory;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use JsonException;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class AwardNomination extends Model
 {
-    /** @use HasFactory<AwardNominationFactory> */
-    use HasFactory;
+    protected $connection = 'imdb_mysql';
+
+    protected $table = 'movie_award_nominations';
+
+    public $timestamps = false;
 
     /**
      * @var list<string>
      */
     protected $fillable = [
-        'award_event_id',
+        'movie_id',
+        'event_imdb_id',
         'award_category_id',
-        'title_id',
-        'person_id',
-        'company_id',
-        'episode_id',
-        'credited_name',
-        'details',
+        'award_year',
+        'text',
         'is_winner',
-        'sort_order',
+        'winner_rank',
+        'position',
     ];
 
     protected function casts(): array
     {
         return [
+            'id' => 'integer',
+            'movie_id' => 'integer',
+            'award_category_id' => 'integer',
+            'award_year' => 'integer',
             'is_winner' => 'boolean',
+            'winner_rank' => 'integer',
+            'position' => 'integer',
         ];
     }
 
     public function awardEvent(): BelongsTo
     {
-        return $this->belongsTo(AwardEvent::class);
+        return $this->belongsTo(AwardEvent::class, 'event_imdb_id', 'imdb_id');
     }
 
     public function awardCategory(): BelongsTo
     {
-        return $this->belongsTo(AwardCategory::class);
+        return $this->belongsTo(AwardCategory::class, 'award_category_id', 'id');
     }
 
     public function title(): BelongsTo
     {
-        return $this->belongsTo(Title::class);
+        return $this->belongsTo(Title::class, 'movie_id', 'id');
     }
 
-    public function person(): BelongsTo
+    public function people(): BelongsToMany
     {
-        return $this->belongsTo(Person::class);
+        return $this->belongsToMany(Person::class, 'movie_award_nomination_nominees', 'movie_award_nomination_id', 'name_basic_id', 'id', 'id');
     }
 
-    public function company(): BelongsTo
+    public function getPersonAttribute(): ?Person
     {
-        return $this->belongsTo(Company::class);
-    }
-
-    public function episode(): BelongsTo
-    {
-        return $this->belongsTo(Episode::class);
-    }
-
-    /**
-     * @return array<string, mixed>|null
-     */
-    public function detailsPayload(): ?array
-    {
-        if (! is_string($this->details) || trim($this->details) === '') {
+        if (! $this->relationLoaded('people')) {
             return null;
         }
 
-        try {
-            $payload = json_decode($this->details, true, flags: JSON_THROW_ON_ERROR);
-        } catch (JsonException) {
-            return null;
-        }
-
-        return is_array($payload) ? $payload : null;
-    }
-
-    public function detailSummary(): ?string
-    {
-        $text = data_get($this->detailsPayload(), 'text');
-
-        if (is_string($text) && trim($text) !== '') {
-            return trim($text);
-        }
-
-        return is_string($this->details) && trim($this->details) !== ''
-            ? trim($this->details)
-            : null;
+        return $this->people->first();
     }
 }

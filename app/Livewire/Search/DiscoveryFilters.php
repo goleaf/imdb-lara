@@ -6,6 +6,8 @@ use App\Actions\Search\BuildDiscoveryQueryAction;
 use App\Actions\Search\GetDiscoveryFilterOptionsAction;
 use App\Actions\Search\GetDiscoveryTitleSuggestionsAction;
 use App\Enums\TitleType;
+use Illuminate\View\View;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -90,7 +92,8 @@ class DiscoveryFilters extends Component
         $this->resetPage(pageName: 'discover');
     }
 
-    public function render()
+    #[Computed]
+    public function viewData(): array
     {
         $searchSuggestions = $this->getDiscoveryTitleSuggestions->handle($this->search);
 
@@ -109,11 +112,10 @@ class DiscoveryFilters extends Component
             'awards' => $this->awards,
         ]);
 
-        $titleResultsCount = (clone $discoveryQuery)->count();
-
         $titles = $discoveryQuery
             ->simplePaginate(12, pageName: 'discover')
             ->withQueryString();
+        $titleResultsCount = count($titles->items());
 
         $filterOptions = $this->getDiscoveryFilterOptions->handle();
         $awardLabels = collect($filterOptions['awardOptions'])->mapWithKeys(
@@ -158,7 +160,7 @@ class DiscoveryFilters extends Component
             ])
             ->all();
 
-        return view('livewire.search.discovery-filters', [
+        return [
             'activeFilterCount' => collect([
                 filled($this->search) ? $this->search : null,
                 $this->genre,
@@ -194,6 +196,21 @@ class DiscoveryFilters extends Component
             'titleResultsCount' => $titleResultsCount,
             'voteThresholdOptions' => $filterOptions['voteThresholdOptions'],
             'years' => $filterOptions['years'],
-        ]);
+        ];
+    }
+
+    public function render(): View
+    {
+        return view('livewire.search.discovery-filters');
+    }
+
+    public function paginationSimpleView(): string
+    {
+        return 'livewire.pagination.island-simple';
+    }
+
+    public function paginationIslandName(): string
+    {
+        return 'discover-results-page';
     }
 }

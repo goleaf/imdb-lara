@@ -49,7 +49,7 @@
         <x-ui.input
             wire:model.live.debounce.180ms="query"
             name="global_search"
-            placeholder="Search titles, people, and lists"
+            placeholder="Search titles and people"
             left-icon="magnifying-glass"
             clearable
             kbd="/"
@@ -71,9 +71,9 @@
             <div class="mb-4 flex items-start justify-between gap-3">
                 <div class="space-y-1">
                     <div class="sb-auth-kicker">Global Search</div>
-                    <div class="sb-search-group-title">Find titles, people, and lists fast</div>
+                    <div class="sb-search-group-title">Find titles and people fast</div>
                     <div class="sb-search-group-copy">
-                        Live grouped suggestions with posters, portraits, and curated list previews.
+                        Live grouped suggestions from the imported catalog, with posters and portraits.
                     </div>
                 </div>
 
@@ -87,14 +87,14 @@
                 </button>
             </div>
 
-            <div wire:loading.delay wire:target="query" class="grid gap-3 xl:grid-cols-3">
-                @foreach (['titles', 'people', 'lists'] as $group)
-                    <div class="sb-search-panel rounded-[1.35rem] p-4 {{ $group === 'titles' ? 'sb-search-panel--titles' : ($group === 'people' ? 'sb-search-panel--people' : 'sb-search-panel--lists') }}">
+            <div wire:loading.delay wire:target="query" class="grid gap-3 xl:grid-cols-2">
+                @foreach (['titles', 'people'] as $group)
+                    <div class="sb-search-panel rounded-[1.35rem] p-4 {{ $group === 'titles' ? 'sb-search-panel--titles' : 'sb-search-panel--people' }}">
                         <div class="space-y-3">
                             <x-ui.skeleton.text class="w-1/3" />
                             @foreach (range(1, 3) as $index)
                                 <div class="flex items-center gap-3" wire:key="global-search-skeleton-{{ $group }}-{{ $index }}">
-                                    <x-ui.skeleton class="{{ $group === 'titles' ? 'h-20 w-14 rounded-[1rem]' : ($group === 'people' ? 'h-16 w-16 rounded-[1rem]' : 'h-16 w-12 rounded-[1rem]') }}" />
+                                    <x-ui.skeleton class="{{ $group === 'titles' ? 'h-20 w-14 rounded-[1rem]' : 'h-16 w-16 rounded-[1rem]' }}" />
                                     <div class="min-w-0 flex-1 space-y-2">
                                         <x-ui.skeleton.text class="w-2/3" />
                                         <x-ui.skeleton.text class="w-1/2" />
@@ -108,8 +108,109 @@
 
             <div wire:loading.remove wire:target="query" class="space-y-4">
                 @if ($hasSearchTerm)
+                    @if ($topSuggestion['record'])
+                        <div data-slot="global-search-top-suggestion" class="sb-search-panel rounded-[1.35rem] border border-white/8 bg-white/[0.03] p-4">
+                            <div class="mb-3 flex items-start justify-between gap-3">
+                                <div>
+                                    <div class="sb-search-group-title inline-flex items-center gap-2">
+                                        <x-ui.icon name="{{ $topSuggestion['type'] === 'title' ? 'film' : 'user' }}" class="size-4 {{ $topSuggestion['type'] === 'title' ? 'text-[#d6b574]' : 'text-[#a8bfd7]' }}" />
+                                        <span>Top suggestion</span>
+                                    </div>
+                                    <div class="sb-search-group-copy">
+                                        {{ $topSuggestion['type'] === 'title'
+                                            ? 'The strongest title match from the imported catalog.'
+                                            : 'The strongest profile match from the imported catalog.' }}
+                                    </div>
+                                </div>
+                                <span class="sb-search-chip {{ $topSuggestion['type'] === 'title' ? 'sb-search-chip--accent' : 'sb-search-chip--people' }}">
+                                    {{ $topSuggestion['type'] === 'title' ? 'Title' : 'Person' }}
+                                </span>
+                            </div>
+
+                            @if ($topSuggestion['type'] === 'title')
+                                <a
+                                    href="{{ route('public.titles.show', $topSuggestion['record']) }}"
+                                    x-on:click="storeRecent(@js($trimmedQuery))"
+                                    class="sb-search-item sb-search-item--title flex items-center gap-3 border border-white/6 bg-white/[0.025] p-2.5 hover:bg-white/[0.055]"
+                                >
+                                    <div class="sb-search-item-media sb-search-item-media--title h-20 w-14 shrink-0 overflow-hidden rounded-[1rem]">
+                                        @if ($topSuggestion['record']->preferredPoster())
+                                            <img
+                                                src="{{ $topSuggestion['record']->preferredPoster()->url }}"
+                                                alt="{{ $topSuggestion['record']->preferredPoster()->alt_text ?: $topSuggestion['record']->name }}"
+                                                class="h-full w-full object-cover"
+                                                loading="lazy"
+                                            >
+                                        @else
+                                            <div class="flex h-full w-full items-center justify-center bg-white/[0.03] text-[#8f877a]">
+                                                <x-ui.icon name="film" class="size-5" />
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    <div class="min-w-0 flex-1 space-y-1">
+                                        <div class="truncate text-sm font-semibold tracking-[-0.01em] text-[#f4eee5]">
+                                            {{ $topSuggestion['record']->name }}
+                                        </div>
+                                        <div class="sb-search-meta">
+                                            <span class="sb-search-chip sb-search-chip--accent sb-search-chip--tight">
+                                                {{ $topSuggestion['record']->typeLabel() }}
+                                            </span>
+                                            @if ($topSuggestion['record']->release_year)
+                                                <span class="sb-search-chip sb-search-chip--tight">
+                                                    {{ $topSuggestion['record']->release_year }}
+                                                </span>
+                                            @endif
+                                        </div>
+                                    </div>
+
+                                    <x-ui.icon name="arrow-right" class="size-4 shrink-0 text-[#9e9384]" />
+                                </a>
+                            @else
+                                <a
+                                    href="{{ route('public.people.show', $topSuggestion['record']) }}"
+                                    x-on:click="storeRecent(@js($trimmedQuery))"
+                                    class="sb-search-item sb-search-item--person flex items-center gap-3 border border-white/6 bg-white/[0.025] p-2.5 hover:bg-white/[0.055]"
+                                >
+                                    <div class="sb-search-item-media sb-search-item-media--person h-16 w-16 shrink-0 overflow-hidden rounded-[1rem]">
+                                        @if ($topSuggestion['record']->preferredHeadshot())
+                                            <img
+                                                src="{{ $topSuggestion['record']->preferredHeadshot()->url }}"
+                                                alt="{{ $topSuggestion['record']->preferredHeadshot()->alt_text ?: $topSuggestion['record']->name }}"
+                                                class="h-full w-full object-cover"
+                                                loading="lazy"
+                                            >
+                                        @else
+                                            <div class="flex h-full w-full items-center justify-center bg-white/[0.03] text-[#8f877a]">
+                                                <x-ui.icon name="user" class="size-5" />
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    <div class="min-w-0 flex-1 space-y-1">
+                                        <div class="truncate text-sm font-semibold tracking-[-0.01em] text-[#f4eee5]">
+                                            {{ $topSuggestion['record']->name }}
+                                        </div>
+                                        <div data-slot="global-search-person-suggestion-metrics" class="sb-search-meta">
+                                            @if ($topSuggestion['record']->popularityRankBadgeLabel())
+                                                <span class="sb-search-chip sb-search-chip--people sb-search-chip--tight">
+                                                    {{ $topSuggestion['record']->popularityRankBadgeLabel() }}
+                                                </span>
+                                            @endif
+                                            <span class="sb-search-chip sb-search-chip--tight">
+                                                {{ $topSuggestion['record']->creditsBadgeLabel() }}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <x-ui.icon name="arrow-right" class="size-4 shrink-0 text-[#9e9384]" />
+                                </a>
+                            @endif
+                        </div>
+                    @endif
+
                     @if ($hasSuggestions)
-                        <div class="grid gap-3 xl:grid-cols-3">
+                        <div class="grid gap-3 xl:grid-cols-2">
                             @if ($suggestions['titles']->isNotEmpty())
                                 <section class="sb-search-panel sb-search-panel--titles rounded-[1.35rem] p-4">
                                     <div class="mb-3 flex items-start justify-between gap-3">
@@ -118,7 +219,7 @@
                                                 <x-ui.icon name="film" class="size-4 text-[#d6b574]" />
                                                 <span>Titles</span>
                                             </div>
-                                            <div class="sb-search-group-copy">Poster-led title matches with year and type.</div>
+                                            <div class="sb-search-group-copy">Poster-led matches with year and type.</div>
                                         </div>
                                         <span class="sb-search-chip sb-search-chip--accent">
                                             {{ $suggestions['titles']->count() }} shown
@@ -221,62 +322,14 @@
                                                             </span>
                                                         @endif
                                                     </div>
-                                                </div>
-
-                                                <x-ui.icon name="arrow-right" class="size-4 shrink-0 text-[#9e9384]" />
-                                            </a>
-                                        @endforeach
-                                    </div>
-                                </section>
-                            @endif
-
-                            @if ($suggestions['lists']->isNotEmpty())
-                                <section class="sb-search-panel sb-search-panel--lists rounded-[1.35rem] p-4">
-                                    <div class="mb-3 flex items-start justify-between gap-3">
-                                        <div>
-                                            <div class="sb-search-group-title inline-flex items-center gap-2">
-                                                <x-ui.icon name="queue-list" class="size-4 text-[#c7b7d8]" />
-                                                <span>Lists</span>
-                                            </div>
-                                            <div class="sb-search-group-copy">Public curated lists with owner and title counts.</div>
-                                        </div>
-                                        <span class="sb-search-chip sb-search-chip--lists">
-                                            {{ $suggestions['lists']->count() }} shown
-                                        </span>
-                                    </div>
-
-                                    <div class="space-y-2">
-                                        @foreach ($suggestions['lists'] as $listSuggestion)
-                                            <a
-                                                href="{{ route('public.lists.show', [$listSuggestion->user, $listSuggestion]) }}"
-                                                x-on:click="storeRecent(@js($trimmedQuery))"
-                                                class="sb-search-item sb-search-item--list flex items-center gap-3 border border-white/6 bg-white/[0.025] p-2.5 hover:bg-white/[0.055]"
-                                            >
-                                                <div class="sb-search-item-media sb-search-item-media--list h-16 w-12 shrink-0 overflow-hidden rounded-[1rem]">
-                                                    @if ($listSuggestion->previewPoster())
-                                                        <img
-                                                            src="{{ $listSuggestion->previewPoster()->url }}"
-                                                            alt="{{ $listSuggestion->previewPoster()->alt_text ?: $listSuggestion->previewTitle()?->name ?: $listSuggestion->name }}"
-                                                            class="h-full w-full object-cover"
-                                                            loading="lazy"
-                                                        >
-                                                    @else
-                                                        <div class="flex h-full w-full items-center justify-center bg-white/[0.03] text-[#8f877a]">
-                                                            <x-ui.icon name="queue-list" class="size-5" />
-                                                        </div>
-                                                    @endif
-                                                </div>
-
-                                                <div class="min-w-0 flex-1 space-y-1">
-                                                    <div class="truncate text-sm font-semibold tracking-[-0.01em] text-[#f4eee5]">
-                                                        {{ $listSuggestion->name }}
-                                                    </div>
-                                                    <div class="sb-search-meta">
-                                                        <span class="sb-search-chip sb-search-chip--lists sb-search-chip--tight">
-                                                            {{ number_format($listSuggestion->published_items_count) }} titles
-                                                        </span>
-                                                        <span class="sb-search-meta-copy truncate">
-                                                            {{ '@'.$listSuggestion->user->username }}
+                                                    <div data-slot="global-search-person-suggestion-metrics" class="sb-search-meta">
+                                                        @if ($personSuggestion->popularityRankBadgeLabel())
+                                                            <span class="sb-search-chip sb-search-chip--people sb-search-chip--tight">
+                                                                {{ $personSuggestion->popularityRankBadgeLabel() }}
+                                                            </span>
+                                                        @endif
+                                                        <span class="sb-search-chip sb-search-chip--tight">
+                                                            {{ $personSuggestion->creditsBadgeLabel() }}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -314,7 +367,7 @@
                         <div class="mb-3 flex items-start justify-between gap-3">
                             <div>
                                 <div class="sb-search-group-title">Recent Searches</div>
-                                <div class="sb-search-group-copy">Jump back into titles, people, and lists you looked up recently on this device.</div>
+                                <div class="sb-search-group-copy">Jump back into titles and people you looked up recently on this device.</div>
                             </div>
                             <span class="sb-search-chip" x-show="recent.length > 0" x-text="`${recent.length} saved`"></span>
                         </div>
@@ -341,10 +394,8 @@
                             </template>
                         </div>
 
-                        <div x-show="recent.length === 0" class="rounded-[1.1rem] border border-dashed border-white/10 bg-white/[0.02] px-4 py-5 text-center">
-                            <div class="sb-search-group-copy mx-auto max-w-md">
-                                Start typing a title or person and Screenbase will remember your latest searches on this device.
-                            </div>
+                        <div x-show="recent.length === 0" class="rounded-[1rem] border border-dashed border-white/10 px-4 py-6 text-center text-sm text-[#9e9384]">
+                            Start typing to surface fast title and people matches.
                         </div>
                     </section>
                 @endif

@@ -4,6 +4,8 @@ namespace App\Livewire\Catalog;
 
 use App\Actions\Catalog\BuildPublicPeopleIndexQueryAction;
 use App\Actions\Catalog\GetPublicPeopleFilterOptionsAction;
+use Illuminate\View\View;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -48,7 +50,8 @@ class PeopleBrowser extends Component
         $this->resetPage();
     }
 
-    public function render()
+    #[Computed]
+    public function viewData(): array
     {
         $people = $this->buildPublicPeopleIndexQuery
             ->handle([
@@ -72,10 +75,25 @@ class PeopleBrowser extends Component
             ])
             ->all();
 
-        return view('livewire.catalog.people-browser', [
+        return [
             'people' => $people,
             'professions' => $filterOptions['professions'],
             'sortOptions' => $sortOptions,
-        ]);
+        ];
+    }
+
+    public function render(): View
+    {
+        return view('livewire.catalog.people-browser');
+    }
+
+    public function paginationSimpleView(): string
+    {
+        return 'livewire.pagination.island-simple';
+    }
+
+    public function paginationIslandName(): string
+    {
+        return 'people-browser-page';
     }
 }

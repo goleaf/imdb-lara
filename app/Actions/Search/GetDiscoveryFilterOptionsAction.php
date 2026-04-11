@@ -37,7 +37,7 @@ class GetDiscoveryFilterOptionsAction
 
                 return [
                     'countries' => $searchFilterOptions['countries'],
-                    'genres' => Genre::query()->select(['id', 'name', 'slug'])->orderBy('name')->get(),
+                    'genres' => Genre::query()->select(['id', 'name'])->orderBy('name')->get(),
                     'languages' => $searchFilterOptions['languages'],
                     'titleTypes' => TitleType::cases(),
                     'minimumRatings' => range(10, 1),

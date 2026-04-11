@@ -2,10 +2,9 @@
 
 namespace App\Actions\Catalog;
 
-use App\Enums\MediaKind;
-use App\Enums\ReviewStatus;
 use App\Enums\TitleType;
 use App\Models\Title;
+use App\Models\TitleStatistic;
 use Illuminate\Database\Eloquent\Builder;
 
 class BuildPublicTitleIndexQueryAction
@@ -13,6 +12,7 @@ class BuildPublicTitleIndexQueryAction
     /**
      * @param  array{
      *     search?: string,
+     *     searchMode?: string|null,
      *     genre?: string|null,
      *     minimumRating?: int|float|string|null,
      *     ratingMin?: int|float|string|null,
@@ -37,80 +37,69 @@ class BuildPublicTitleIndexQueryAction
     public function handle(array $filters = []): Builder
     {
         $search = trim((string) ($filters['search'] ?? ''));
-        $genre = filled($filters['genre'] ?? null) ? (string) ($filters['genre'] ?? null) : null;
+        $searchMode = filled($filters['searchMode'] ?? null) ? (string) $filters['searchMode'] : null;
+        $genre = filled($filters['genre'] ?? null) ? (string) $filters['genre'] : null;
         $minimumRating = filled($filters['minimumRating'] ?? $filters['ratingMin'] ?? null)
-            ? (float) ($filters['minimumRating'] ?? $filters['ratingMin'] ?? null)
+            ? (float) ($filters['minimumRating'] ?? $filters['ratingMin'])
             : null;
         $maximumRating = filled($filters['ratingMax'] ?? null)
-            ? (float) ($filters['ratingMax'] ?? null)
+            ? (float) $filters['ratingMax']
             : null;
         $votesMin = filled($filters['votesMin'] ?? null)
-            ? (int) ($filters['votesMin'] ?? null)
+            ? (int) $filters['votesMin']
             : null;
-        $type = filled($filters['type'] ?? null) ? (string) ($filters['type'] ?? null) : null;
-        $types = array_values(array_filter(
-            array_map(
-                static fn (mixed $titleType): string => (string) $titleType,
-                $filters['types'] ?? [],
-            ),
-            static fn (string $titleType): bool => $titleType !== '',
-        ));
-        $sort = $filters['sort'] ?? 'popular';
-        $year = filled($filters['year'] ?? null) ? (int) ($filters['year'] ?? null) : null;
-        $yearFrom = filled($filters['yearFrom'] ?? null) ? (int) ($filters['yearFrom'] ?? null) : null;
-        $yearTo = filled($filters['yearTo'] ?? null) ? (int) ($filters['yearTo'] ?? null) : null;
-        $language = filled($filters['language'] ?? null) ? (string) ($filters['language'] ?? null) : null;
-        $country = filled($filters['country'] ?? null) ? (string) ($filters['country'] ?? null) : null;
-        $runtime = filled($filters['runtime'] ?? null) ? (string) ($filters['runtime'] ?? null) : null;
-        $awards = filled($filters['awards'] ?? null) ? (string) ($filters['awards'] ?? null) : null;
-        $status = filled($filters['status'] ?? null) ? (string) ($filters['status'] ?? null) : null;
+        $type = filled($filters['type'] ?? null) ? (string) $filters['type'] : null;
+        $types = collect($filters['types'] ?? [])
+            ->map(fn (mixed $value): ?TitleType => TitleType::tryFrom((string) $value))
+            ->filter()
+            ->flatMap(fn (TitleType $titleType): array => Title::remoteTypesForCatalogType($titleType))
+            ->unique()
+            ->values()
+            ->all();
+        $sort = (string) ($filters['sort'] ?? 'popular');
+        $year = filled($filters['year'] ?? null) ? (int) $filters['year'] : null;
+        $yearFrom = filled($filters['yearFrom'] ?? null) ? (int) $filters['yearFrom'] : null;
+        $yearTo = filled($filters['yearTo'] ?? null) ? (int) $filters['yearTo'] : null;
+        $language = filled($filters['language'] ?? null) ? strtoupper((string) $filters['language']) : null;
+        $country = filled($filters['country'] ?? null) ? strtoupper((string) $filters['country']) : null;
+        $runtime = filled($filters['runtime'] ?? null) ? (string) $filters['runtime'] : null;
+        $awards = filled($filters['awards'] ?? null) ? (string) $filters['awards'] : null;
+        $status = filled($filters['status'] ?? null) ? (string) $filters['status'] : null;
         $excludeEpisodes = (bool) ($filters['excludeEpisodes'] ?? true);
         $includePresentationRelations = (bool) ($filters['includePresentationRelations'] ?? true);
-        $includePublishedReviewCount = (bool) ($filters['includePublishedReviewCount'] ?? true);
 
         $query = Title::query()
             ->select([
-                'id',
-                'name',
-                'original_name',
-                'slug',
-                'title_type',
-                'release_year',
-                'release_date',
-                'runtime_minutes',
-                'plot_outline',
-                'origin_country',
-                'original_language',
-                'popularity_rank',
-                'is_published',
+                'movies.id',
+                'movies.tconst',
+                'movies.imdb_id',
+                'movies.primarytitle',
+                'movies.originaltitle',
+                'movies.titletype',
+                'movies.isadult',
+                'movies.startyear',
+                'movies.endyear',
+                'movies.runtimeminutes',
+            ])
+            ->addSelect([
+                'popularity_rank' => TitleStatistic::query()
+                    ->select('vote_count')
+                    ->whereColumn('movie_ratings.movie_id', 'movies.id')
+                    ->limit(1),
             ])
             ->published();
 
         if ($includePresentationRelations) {
             $query->with([
-                'genres:id,name,slug',
-                'statistic:id,title_id,average_rating,rating_count,review_count,watchlist_count',
-                'mediaAssets' => fn ($mediaQuery) => $mediaQuery
-                    ->select([
-                        'id',
-                        'mediable_type',
-                        'mediable_id',
-                        'kind',
-                        'url',
-                        'alt_text',
-                        'position',
-                        'is_primary',
-                    ])
-                    ->where('kind', MediaKind::Poster)
-                    ->orderBy('position')
-                    ->limit(1),
-            ]);
-        }
-
-        if ($includePublishedReviewCount) {
-            $query->withCount([
-                'reviews as published_reviews_count' => fn (Builder $reviewQuery) => $reviewQuery
-                    ->where('status', ReviewStatus::Published),
+                'genres:id,name',
+                'statistic:movie_id,aggregate_rating,vote_count',
+                'titleImages' => fn ($imageQuery) => $imageQuery
+                    ->select(['id', 'movie_id', 'position', 'url', 'width', 'height', 'type'])
+                    ->whereIn('type', ['poster', 'backdrop', 'still_frame', 'gallery'])
+                    ->limit(6),
+                'primaryImageRecord:movie_id,url,width,height,type',
+                'countries:code,name',
+                'languages:code,name',
             ]);
         }
 
@@ -118,74 +107,82 @@ class BuildPublicTitleIndexQueryAction
             $query->withoutEpisodes();
         }
 
-        $query->matchingSearch($search);
+        if ($searchMode === 'discovery') {
+            $query->matchingDiscoverySearch($search);
+        } else {
+            $query->matchingSearch($search);
+        }
 
-        if ($genre !== null) {
-            $query->whereHas('genres', fn (Builder $genreQuery) => $genreQuery->where('slug', $genre));
+        if ($genreId = $this->resolveGenreId($genre)) {
+            $query->whereHas('genres', fn (Builder $genreQuery) => $genreQuery->where('genres.id', $genreId));
         }
 
         if ($minimumRating !== null || $maximumRating !== null || $votesMin !== null) {
             $query->whereHas('statistic', function (Builder $statisticQuery) use ($maximumRating, $minimumRating, $votesMin): void {
                 if ($minimumRating !== null) {
-                    $statisticQuery->where('average_rating', '>=', $minimumRating);
+                    $statisticQuery->where('aggregate_rating', '>=', $minimumRating);
                 }
 
                 if ($maximumRating !== null) {
-                    $statisticQuery->where('average_rating', '<=', $maximumRating);
+                    $statisticQuery->where('aggregate_rating', '<=', $maximumRating);
                 }
 
                 if ($votesMin !== null) {
-                    $statisticQuery->where('rating_count', '>=', $votesMin);
+                    $statisticQuery->where('vote_count', '>=', $votesMin);
                 }
             });
         }
 
-        if ($type !== null) {
-            $query->where('title_type', $type);
+        if ($typeEnum = TitleType::tryFrom((string) $type)) {
+            $query->whereIn('titletype', Title::remoteTypesForCatalogType($typeEnum));
         }
 
         if ($types !== []) {
-            $query->whereIn('title_type', $types);
+            $query->whereIn('titletype', $types);
         }
 
         if ($year !== null) {
-            $query->where('release_year', $year);
+            $query->where('startyear', $year);
         }
 
         if ($yearFrom !== null) {
-            $query->where('release_year', '>=', $yearFrom);
+            $query->where('startyear', '>=', $yearFrom);
         }
 
         if ($yearTo !== null) {
-            $query->where('release_year', '<=', $yearTo);
+            $query->where('startyear', '<=', $yearTo);
         }
 
         if ($language !== null) {
-            $query->where('original_language', $language);
+            $query->whereHas(
+                'languages',
+                fn (Builder $languageQuery) => $languageQuery->where('languages.code', $language),
+            );
         }
 
         if ($country !== null) {
-            $query->where('origin_country', $country);
+            $query->whereHas(
+                'countries',
+                fn (Builder $countryQuery) => $countryQuery->where('countries.code', $country),
+            );
         }
 
         if ($runtime !== null) {
             match ($runtime) {
-                'under-30' => $query->whereNotNull('runtime_minutes')->where('runtime_minutes', '<', 30),
-                '30-60' => $query->whereBetween('runtime_minutes', [30, 60]),
-                '60-90' => $query->whereBetween('runtime_minutes', [60, 90]),
-                '90-120' => $query->whereBetween('runtime_minutes', [90, 120]),
-                '120-plus' => $query->where('runtime_minutes', '>=', 120),
+                'under-30' => $query->whereNotNull('runtimeminutes')->where('runtimeminutes', '<', 30),
+                '30-60' => $query->whereBetween('runtimeminutes', [30, 60]),
+                '60-90' => $query->whereBetween('runtimeminutes', [60, 90]),
+                '90-120' => $query->whereBetween('runtimeminutes', [90, 120]),
+                '120-plus' => $query->where('runtimeminutes', '>=', 120),
                 default => $query,
             };
         }
 
         if ($awards !== null) {
-            $query->whereHas('statistic', function (Builder $statisticQuery) use ($awards): void {
-                match ($awards) {
-                    'winners' => $statisticQuery->where('awards_won_count', '>', 0),
-                    'nominated' => $statisticQuery->where('awards_nominated_count', '>', 0),
-                    default => $statisticQuery,
-                };
+            $query->whereHas('awardNominations', function (Builder $awardQuery) use ($awards): void {
+                if ($awards === 'winners') {
+                    $awardQuery->where('is_winner', true);
+                }
             });
         }
 
@@ -194,48 +191,52 @@ class BuildPublicTitleIndexQueryAction
         }
 
         return match ($sort) {
-            'name' => $query->orderBy('name'),
-            'latest' => $query->orderByDesc('release_date')->orderByDesc('release_year')->orderBy('name'),
-            'year' => $query->orderByDesc('release_year')->orderBy('name'),
+            'name' => $query->orderBy('primarytitle'),
+            'latest' => $query->orderByDesc('startyear')->orderByDesc('movies.id'),
+            'year' => $query->orderByDesc('startyear')->orderBy('primarytitle'),
             'rating' => $query->orderByTopRated(max(1, $votesMin ?? 1)),
             'trending' => $query->orderByTrending(),
-            default => $query->orderBy('popularity_rank')->orderBy('name'),
+            default => $query->orderByDesc('popularity_rank')->orderByDesc('startyear')->orderBy('primarytitle'),
         };
     }
 
     private function applyTelevisionStatusFilter(Builder $query, string $status): void
     {
-        $today = now()->startOfDay();
-        $currentYear = (int) $today->format('Y');
+        $currentYear = now()->year;
 
         if ($status === 'limited') {
-            $query->where('title_type', TitleType::MiniSeries);
+            $query->whereIn('titletype', Title::remoteTypesForCatalogType(TitleType::MiniSeries));
 
             return;
         }
 
-        $query->whereIn('title_type', [
-            TitleType::Series,
-            TitleType::MiniSeries,
+        $query->whereIn('titletype', [
+            ...Title::remoteTypesForCatalogType(TitleType::Series),
+            ...Title::remoteTypesForCatalogType(TitleType::MiniSeries),
         ]);
 
         match ($status) {
-            'upcoming' => $query->where(function (Builder $statusQuery) use ($currentYear, $today): void {
-                $statusQuery
-                    ->where('release_year', '>', $currentYear)
-                    ->orWhereDate('release_date', '>', $today);
+            'returning' => $query->where(function (Builder $seriesQuery) use ($currentYear): void {
+                $seriesQuery
+                    ->whereNull('endyear')
+                    ->orWhere('endyear', '>=', $currentYear);
             }),
-            'returning' => $query
-                ->where('title_type', TitleType::Series)
-                ->where(function (Builder $statusQuery) use ($currentYear, $today): void {
-                    $statusQuery
-                        ->whereNull('release_date')
-                        ->orWhereDate('release_date', '<=', $today)
-                        ->orWhere('release_year', '<=', $currentYear);
-                })
-                ->whereNull('end_year'),
-            'ended' => $query->whereNotNull('end_year')->where('end_year', '<=', $currentYear),
-            default => $query,
+            'ended' => $query->whereNotNull('endyear')->where('endyear', '<', $currentYear),
+            'upcoming' => $query->where('startyear', '>', $currentYear),
+            default => null,
         };
+    }
+
+    private function resolveGenreId(?string $genre): ?int
+    {
+        if (! filled($genre)) {
+            return null;
+        }
+
+        if (preg_match('/-g(?P<id>\d+)$/', $genre, $matches) === 1) {
+            return (int) $matches['id'];
+        }
+
+        return ctype_digit($genre) ? (int) $genre : null;
     }
 }

@@ -19,14 +19,10 @@ class GetPopularPeopleAction
     public function handle(int $limit = 6): Collection
     {
         return Cache::remember(
-            "home:popular-people:{$limit}",
+            "home:popular-people:v2:{$limit}",
             now()->addMinutes(10),
             fn (): Collection => $this->buildPublicPeopleIndexQuery
-                ->handle()
-                ->reorder()
-                ->orderBy('popularity_rank')
-                ->orderByDesc('credits_count')
-                ->orderBy('name')
+                ->handle(['sort' => 'popular'])
                 ->limit($limit)
                 ->get(),
         );

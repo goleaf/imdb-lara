@@ -3,7 +3,6 @@
 namespace App\Livewire\Pages\Public;
 
 use App\Actions\Catalog\LoadEpisodeDetailsAction;
-use App\Enums\TitleType;
 use App\Livewire\Pages\Concerns\RendersPageView;
 use App\Models\Season;
 use App\Models\Title;
@@ -22,18 +21,18 @@ class EpisodeShowPage extends Component
 
     public function mount(Title $series, Season $season, Title $episode): void
     {
-        $episode->loadMissing('episodeMeta');
-
-        $canViewSeries = $series->is_published || (auth()->user()?->can('view', $series) ?? false);
-        $canViewEpisode = $episode->is_published || (auth()->user()?->can('view', $episode) ?? false);
+        $episode->loadMissing([
+            'episodeMeta',
+            'episodeMeta.series',
+        ]);
 
         abort_unless(
-            $episode->title_type === TitleType::Episode
+            $series->is_published
+            && $episode->is_published
+            && $episode->title_type->value === 'episode'
             && $episode->episodeMeta !== null
-            && $episode->episodeMeta->series_id === $series->id
-            && $episode->episodeMeta->season_id === $season->id
-            && $canViewSeries
-            && $canViewEpisode,
+            && $episode->episodeMeta->series?->is($series)
+            && $episode->episodeMeta->season_number === $season->season_number,
             404,
         );
 

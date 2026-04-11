@@ -3,8 +3,11 @@
 namespace App\Actions\Search;
 
 use App\Enums\TitleType;
+use App\Models\Country;
 use App\Models\Genre;
+use App\Models\Language;
 use App\Models\Title;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
 
@@ -30,37 +33,33 @@ class GetSearchFilterOptionsAction
             now()->addMinutes(10),
             function (): array {
                 $publishedTitles = Title::query()->published();
-                $minimumYear = (clone $publishedTitles)->whereNotNull('release_year')->min('release_year');
-                $maximumYear = (clone $publishedTitles)->whereNotNull('release_year')->max('release_year');
+                $minimumYear = (clone $publishedTitles)->whereNotNull('startyear')->min('startyear');
+                $maximumYear = (clone $publishedTitles)->whereNotNull('startyear')->max('startyear');
 
                 return [
-                    'countries' => Title::query()
-                        ->published()
-                        ->whereNotNull('origin_country')
-                        ->distinct()
-                        ->orderBy('origin_country')
-                        ->pluck('origin_country')
-                        ->filter()
-                        ->map(fn (string $country): array => [
-                            'value' => $country,
-                            'label' => $this->countryLabel($country),
+                    'countries' => Country::query()
+                        ->select(['code', 'name'])
+                        ->whereHas('movies', fn (Builder $query) => $query->where('isadult', 0))
+                        ->orderBy('name')
+                        ->get()
+                        ->map(fn (Country $country): array => [
+                            'value' => $country->code,
+                            'label' => $country->name ?: strtoupper($country->code),
                         ])
                         ->values()
                         ->all(),
                     'genres' => Genre::query()
-                        ->select(['id', 'name', 'slug'])
+                        ->select(['id', 'name'])
                         ->orderBy('name')
                         ->get(),
-                    'languages' => Title::query()
-                        ->published()
-                        ->whereNotNull('original_language')
-                        ->distinct()
-                        ->orderBy('original_language')
-                        ->pluck('original_language')
-                        ->filter()
-                        ->map(fn (string $language): array => [
-                            'value' => $language,
-                            'label' => $this->languageLabel($language),
+                    'languages' => Language::query()
+                        ->select(['code', 'name'])
+                        ->whereHas('movies', fn (Builder $query) => $query->where('isadult', 0))
+                        ->orderBy('name')
+                        ->get()
+                        ->map(fn (Language $language): array => [
+                            'value' => $language->code,
+                            'label' => $language->name ?: strtoupper($language->code),
                         ])
                         ->values()
                         ->all(),
@@ -99,31 +98,5 @@ class GetSearchFilterOptionsAction
                 ];
             },
         );
-    }
-
-    private function countryLabel(string $country): string
-    {
-        if (class_exists(\Locale::class)) {
-            $label = \Locale::getDisplayRegion('-'.$country, app()->getLocale());
-
-            if (filled($label)) {
-                return $label;
-            }
-        }
-
-        return strtoupper($country);
-    }
-
-    private function languageLabel(string $language): string
-    {
-        if (class_exists(\Locale::class)) {
-            $label = \Locale::getDisplayLanguage($language, app()->getLocale());
-
-            if (filled($label)) {
-                return str($label)->headline()->value();
-            }
-        }
-
-        return strtoupper($language);
     }
 }

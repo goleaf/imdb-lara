@@ -3,6 +3,7 @@
 namespace App\Livewire\Pages\Concerns;
 
 use App\Actions\Seo\PageSeoData;
+use App\Actions\Seo\ResolvePageShellViewDataAction;
 use Illuminate\Contracts\View\View;
 
 trait RendersPageView
@@ -19,7 +20,7 @@ trait RendersPageView
             default => 'layouts.partials.public-navbar',
         };
         $pageSeo = $data['seo'] ?? null;
-        $defaultDescription = 'Screenbase is a Livewire-driven IMDb-style platform for discovery, ratings, reviews, and curation.';
+        $defaultDescription = 'Screenbase is a Livewire-driven IMDb-style catalog for titles, people, awards, trailers, and discovery.';
         $renderedTitle = trim((string) ($sections['title'] ?? ''));
         $renderedMetaDescription = trim((string) ($sections['meta_description'] ?? ''));
         $pageTitle = $pageSeo instanceof PageSeoData
@@ -64,8 +65,12 @@ trait RendersPageView
             'showFooter' => ! str_starts_with($view, 'admin.'),
         ];
 
+        request()->attributes->set('livewirePageLayoutData', $layoutData);
+
         return view('livewire.pages.page-content', [
             'content' => $sections['content'] ?? '',
-        ])->layout('components.layouts.livewire-page', $layoutData);
+        ])->layout('components.layouts.livewire-page', [
+            'shell' => app(ResolvePageShellViewDataAction::class)->forLivewireLayout($layoutData),
+        ]);
     }
 }

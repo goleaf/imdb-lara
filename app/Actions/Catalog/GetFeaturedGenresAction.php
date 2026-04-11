@@ -18,7 +18,7 @@ class GetFeaturedGenresAction
             "catalog:featured-genres:{$limit}",
             now()->addMinutes(10),
             fn (): Collection => Genre::query()
-                ->select(['id', 'name', 'slug'])
+                ->select(['id', 'name'])
                 ->whereHas('titles', fn (Builder $titleQuery) => $titleQuery->publishedCatalog())
                 ->withCount([
                     'titles as published_titles_count' => fn (Builder $titleQuery) => $titleQuery->publishedCatalog(),

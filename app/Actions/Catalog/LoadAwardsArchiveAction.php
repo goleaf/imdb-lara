@@ -5,7 +5,6 @@ namespace App\Actions\Catalog;
 use App\Actions\Seo\PageSeoData;
 use App\Models\AwardEvent;
 use App\Models\AwardNomination;
-use App\Models\Episode;
 use App\Models\Person;
 use App\Models\Title;
 use Illuminate\Support\Collection;
@@ -14,6 +13,8 @@ use Illuminate\Support\Str;
 
 class LoadAwardsArchiveAction
 {
+    private const EVENT_LIMIT = 40;
+
     /**
      * @return array{
      *     summary: array{eventCount: int, awardCount: int, categoryCount: int, honoreeCount: int},
@@ -47,98 +48,116 @@ class LoadAwardsArchiveAction
      */
     public function handle(): array
     {
-        return Cache::remember('catalog:awards-archive:v1', now()->addMinutes(10), function (): array {
+        return Cache::remember('catalog:awards-archive:v2', now()->addMinutes(10), function (): array {
+            $eventIds = AwardNomination::query()
+                ->select(['event_imdb_id'])
+                ->whereNotNull('event_imdb_id')
+                ->distinct()
+                ->orderBy('event_imdb_id')
+                ->limit(self::EVENT_LIMIT)
+                ->pluck('event_imdb_id')
+                ->filter()
+                ->values();
+
             $events = AwardEvent::query()
                 ->select([
-                    'id',
-                    'award_id',
+                    'imdb_id',
                     'name',
-                    'slug',
-                    'year',
-                    'edition',
-                    'event_date',
-                    'location',
                 ])
-                ->whereHas('award', fn ($awardQuery) => $awardQuery->where('is_published', true))
-                ->whereHas('nominations')
+                ->whereIn('imdb_id', $eventIds)
                 ->with([
-                    'award:id,name,slug,country_code',
                     'nominations' => fn ($nominationQuery) => $nominationQuery
                         ->select([
                             'id',
-                            'award_event_id',
+                            'event_imdb_id',
+                            'movie_id',
                             'award_category_id',
-                            'title_id',
-                            'person_id',
-                            'company_id',
-                            'episode_id',
-                            'credited_name',
+                            'award_year',
+                            'text',
                             'is_winner',
-                            'sort_order',
+                            'winner_rank',
+                            'position',
                         ])
                         ->with([
-                            'awardCategory:id,award_id,name,slug,recipient_scope',
-                            'title:id,name,slug,title_type,release_year,is_published',
-                            'person:id,name,slug,known_for_department,is_published',
-                            'company:id,name',
-                            'episode:id,title_id,series_id,season_id,season_number,episode_number',
-                            'episode.title:id,name,slug,is_published',
-                            'episode.series:id,name,slug,is_published',
-                            'episode.season:id,series_id,name,slug,season_number',
+                            'awardCategory:id,name',
+                            'title' => fn ($titleQuery) => $titleQuery
+                                ->select([
+                                    'movies.id',
+                                    'movies.tconst',
+                                    'movies.imdb_id',
+                                    'movies.primarytitle',
+                                    'movies.originaltitle',
+                                    'movies.titletype',
+                                    'movies.isadult',
+                                    'movies.startyear',
+                                    'movies.endyear',
+                                    'movies.runtimeminutes',
+                                    'movies.title_type_id',
+                                    'movies.runtimeSeconds',
+                                ])
+                                ->publishedCatalog(),
+                            'people' => fn ($personQuery) => $personQuery->select([
+                                'name_basics.id',
+                                'name_basics.nconst',
+                                'name_basics.imdb_id',
+                                'name_basics.primaryname',
+                                'name_basics.displayName',
+                                'name_basics.primaryprofession',
+                            ]),
                         ])
                         ->orderByDesc('is_winner')
-                        ->orderBy('sort_order')
+                        ->orderBy('position')
                         ->orderBy('id'),
                 ])
-                ->orderByDesc('year')
-                ->orderByDesc('event_date')
                 ->orderBy('name')
                 ->get();
 
+            $mappedEvents = $events
+                ->map(fn (AwardEvent $event): array => $this->mapEvent($event))
+                ->sort(function (array $left, array $right): int {
+                    return ($right['year'] ?? 0) <=> ($left['year'] ?? 0)
+                        ?: strcmp(mb_strtolower($left['name']), mb_strtolower($right['name']));
+                })
+                ->values();
+
+            $featuredAwards = $mappedEvents
+                ->groupBy('name')
+                ->map(function (Collection $eventGroup, string $eventName): array {
+                    $categoryCount = (int) $eventGroup->sum('categoryCount');
+                    $winnerCount = (int) $eventGroup->sum('winnerCount');
+                    $years = $eventGroup
+                        ->pluck('year')
+                        ->filter(fn (mixed $year): bool => is_int($year))
+                        ->values();
+
+                    return [
+                        'name' => $eventName,
+                        'summary' => collect([
+                            $this->formatYearRange($years),
+                            sprintf('%d %s', $categoryCount, Str::plural('category', $categoryCount)),
+                            sprintf('%d %s', $winnerCount, Str::plural('winner', $winnerCount)),
+                        ])->filter()->implode(' · '),
+                    ];
+                })
+                ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
+                ->values();
+
             $summary = [
-                'eventCount' => $events->count(),
-                'awardCount' => $events->pluck('award_id')->filter()->unique()->count(),
+                'eventCount' => $mappedEvents->count(),
+                'awardCount' => $featuredAwards->count(),
                 'categoryCount' => $events
                     ->flatMap(fn (AwardEvent $event): Collection => $event->nominations->pluck('award_category_id'))
                     ->filter()
                     ->unique()
                     ->count(),
                 'honoreeCount' => $events
-                    ->flatMap(fn (AwardEvent $event): Collection => $event->nominations->map(fn (AwardNomination $nomination): ?string => $this->honoreeKey($nomination)))
+                    ->flatMap(fn (AwardEvent $event): Collection => $event->nominations->flatMap(
+                        fn (AwardNomination $nomination): Collection => $this->honoreeKeys($nomination),
+                    ))
                     ->filter()
                     ->unique()
                     ->count(),
             ];
-
-            $featuredAwards = $events
-                ->groupBy('award_id')
-                ->map(function (Collection $awardEvents): array {
-                    /** @var AwardEvent $leadEvent */
-                    $leadEvent = $awardEvents->first();
-                    $years = $awardEvents
-                        ->pluck('year')
-                        ->filter(fn (mixed $year): bool => is_numeric($year))
-                        ->map(fn (mixed $year): int => (int) $year)
-                        ->sort()
-                        ->values();
-                    $eventCount = $awardEvents->count();
-                    $summaryParts = collect([
-                        $this->formatYearRange($years),
-                        $eventCount > 0 ? sprintf('%d recorded %s', $eventCount, Str::plural('event', $eventCount)) : null,
-                        $awardEvents->pluck('location')->filter()->unique()->first(),
-                    ])->filter();
-
-                    return [
-                        'name' => $leadEvent->award?->name ?: $leadEvent->name,
-                        'summary' => $summaryParts->implode(' · '),
-                    ];
-                })
-                ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
-                ->values();
-
-            $mappedEvents = $events
-                ->map(fn (AwardEvent $event): array => $this->mapEvent($event))
-                ->values();
 
             return [
                 'summary' => $summary,
@@ -185,12 +204,18 @@ class LoadAwardsArchiveAction
      */
     private function mapEvent(AwardEvent $event): array
     {
+        $eventYear = $event->nominations
+            ->pluck('award_year')
+            ->filter(fn (mixed $year): bool => is_numeric($year))
+            ->map(fn (mixed $year): int => (int) $year)
+            ->max();
+
         $groupedCategories = $event->nominations
             ->sortBy(fn (AwardNomination $nomination): string => sprintf(
                 '%s-%d-%08d-%08d',
                 Str::lower($nomination->awardCategory?->name ?? 'zzz'),
                 $nomination->is_winner ? 0 : 1,
-                $nomination->sort_order ?? PHP_INT_MAX,
+                $nomination->position ?? PHP_INT_MAX,
                 $nomination->id,
             ))
             ->groupBy(fn (AwardNomination $nomination): string => (string) ($nomination->award_category_id ?? 'uncategorized'))
@@ -199,11 +224,11 @@ class LoadAwardsArchiveAction
 
         return [
             'name' => $event->name,
-            'awardName' => $event->award?->name ?: 'Award Event',
-            'year' => is_numeric($event->year) ? (int) $event->year : null,
-            'edition' => filled($event->edition) ? (string) $event->edition : null,
-            'dateLabel' => $event->event_date?->format('M j, Y'),
-            'location' => filled($event->location) ? (string) $event->location : null,
+            'awardName' => $event->name,
+            'year' => is_int($eventYear) ? $eventYear : null,
+            'edition' => null,
+            'dateLabel' => null,
+            'location' => null,
             'categoryCount' => $groupedCategories->count(),
             'winnerCount' => $event->nominations->where('is_winner', true)->count(),
             'categories' => $groupedCategories,
@@ -235,7 +260,7 @@ class LoadAwardsArchiveAction
 
         return [
             'name' => $category?->name ?: 'Uncategorized',
-            'scopeLabel' => $this->scopeLabel($category?->recipient_scope),
+            'scopeLabel' => $this->inferScopeLabel($nominations),
             'winnerCount' => $nominations->where('is_winner', true)->count(),
             'entryCount' => $nominations->count(),
             'entries' => $nominations
@@ -270,24 +295,18 @@ class LoadAwardsArchiveAction
 
     private function entryLabel(AwardNomination $nomination): string
     {
-        if ($nomination->episode instanceof Episode && $nomination->episode->title instanceof Title) {
-            return $nomination->episode->title->name;
-        }
-
-        if ($nomination->person instanceof Person) {
-            return $nomination->person->name;
-        }
-
         if ($nomination->title instanceof Title) {
             return $nomination->title->name;
         }
 
-        if ($nomination->company !== null && filled($nomination->company->name)) {
-            return (string) $nomination->company->name;
+        $peopleLabel = $this->peopleLabel($nomination);
+
+        if ($peopleLabel !== null) {
+            return $peopleLabel;
         }
 
-        if (filled($nomination->credited_name)) {
-            return (string) $nomination->credited_name;
+        if (filled($nomination->text)) {
+            return (string) $nomination->text;
         }
 
         return 'Archived entry';
@@ -295,24 +314,12 @@ class LoadAwardsArchiveAction
 
     private function entryLink(AwardNomination $nomination): ?string
     {
-        if ($nomination->episode instanceof Episode
-            && $nomination->episode->title instanceof Title
-            && $nomination->episode->series instanceof Title
-            && $nomination->episode->season !== null
-        ) {
-            return route('public.episodes.show', [
-                'series' => $nomination->episode->series,
-                'season' => $nomination->episode->season,
-                'episode' => $nomination->episode->title,
-            ]);
-        }
-
-        if ($nomination->person instanceof Person) {
-            return route('public.people.show', $nomination->person);
-        }
-
         if ($nomination->title instanceof Title) {
             return route('public.titles.show', $nomination->title);
+        }
+
+        if ($nomination->people->count() === 1 && $nomination->person instanceof Person) {
+            return route('public.people.show', $nomination->person);
         }
 
         return null;
@@ -320,33 +327,16 @@ class LoadAwardsArchiveAction
 
     private function entryMeta(AwardNomination $nomination): ?string
     {
-        if ($nomination->episode instanceof Episode) {
-            $parts = collect();
-
-            if ($nomination->episode->series instanceof Title) {
-                $parts->push($nomination->episode->series->name);
-            }
-
-            $parts->push(sprintf('S%d · E%d', $nomination->episode->season_number, $nomination->episode->episode_number));
-
-            return $parts->implode(' · ');
-        }
-
-        if ($nomination->person instanceof Person) {
-            return filled($nomination->person->known_for_department)
-                ? Str::headline($nomination->person->known_for_department)
-                : 'Person';
-        }
-
         if ($nomination->title instanceof Title) {
             return collect([
+                $this->peopleLabel($nomination),
                 Str::headline($nomination->title->title_type->value),
                 $nomination->title->release_year,
             ])->filter()->implode(' · ');
         }
 
-        if ($nomination->company !== null) {
-            return 'Company';
+        if ($nomination->people->isNotEmpty()) {
+            return 'People';
         }
 
         return null;
@@ -354,22 +344,27 @@ class LoadAwardsArchiveAction
 
     private function creditedAs(AwardNomination $nomination, string $label): ?string
     {
-        if (! filled($nomination->credited_name)) {
+        if (! filled($nomination->text)) {
             return null;
         }
 
-        $creditedName = trim((string) $nomination->credited_name);
+        $creditedName = trim((string) $nomination->text);
 
         return strcasecmp($creditedName, $label) === 0 ? null : $creditedName;
     }
 
-    private function scopeLabel(?string $scope): string
+    /**
+     * @param  Collection<int, AwardNomination>  $nominations
+     */
+    private function inferScopeLabel(Collection $nominations): string
     {
-        return match ($scope) {
-            'title' => 'Title recipients',
-            'person' => 'People recipients',
-            'episode' => 'Episode recipients',
-            'company' => 'Company recipients',
+        $hasTitles = $nominations->contains(fn (AwardNomination $nomination): bool => $nomination->title instanceof Title);
+        $hasPeople = $nominations->contains(fn (AwardNomination $nomination): bool => $nomination->people->isNotEmpty());
+
+        return match (true) {
+            $hasTitles && $hasPeople => 'Title and people recipients',
+            $hasTitles => 'Title recipients',
+            $hasPeople => 'People recipients',
             default => 'Archive entries',
         };
     }
@@ -383,8 +378,8 @@ class LoadAwardsArchiveAction
             return null;
         }
 
-        $startYear = $years->first();
-        $endYear = $years->last();
+        $startYear = $years->min();
+        $endYear = $years->max();
 
         if ($startYear === $endYear) {
             return (string) $startYear;
@@ -393,26 +388,45 @@ class LoadAwardsArchiveAction
         return sprintf('%d–%d', $startYear, $endYear);
     }
 
-    private function honoreeKey(AwardNomination $nomination): ?string
+    /**
+     * @return Collection<int, string>
+     */
+    private function honoreeKeys(AwardNomination $nomination): Collection
     {
-        if ($nomination->episode_id !== null) {
-            return 'episode:'.$nomination->episode_id;
+        $keys = collect();
+
+        if ($nomination->movie_id !== null) {
+            $keys->push('title:'.$nomination->movie_id);
         }
 
-        if ($nomination->person_id !== null) {
-            return 'person:'.$nomination->person_id;
+        foreach ($nomination->people as $person) {
+            $keys->push('person:'.$person->getKey());
         }
 
-        if ($nomination->title_id !== null) {
-            return 'title:'.$nomination->title_id;
+        if ($keys->isNotEmpty()) {
+            return $keys;
         }
 
-        if ($nomination->company_id !== null) {
-            return 'company:'.$nomination->company_id;
+        return filled($nomination->text)
+            ? collect(['credited:'.Str::lower(trim((string) $nomination->text))])
+            : collect();
+    }
+
+    private function peopleLabel(AwardNomination $nomination): ?string
+    {
+        $people = $nomination->people
+            ->map(fn (Person $person): string => $person->name)
+            ->filter()
+            ->values();
+
+        if ($people->isEmpty()) {
+            return null;
         }
 
-        return filled($nomination->credited_name)
-            ? 'credited:'.Str::lower(trim((string) $nomination->credited_name))
-            : null;
+        if ($people->count() <= 2) {
+            return $people->implode(', ');
+        }
+
+        return $people->take(2)->implode(', ').' +'.($people->count() - 2);
     }
 }

@@ -2,66 +2,65 @@
 
 namespace Tests\Feature\Feature;
 
-use Database\Seeders\DemoCatalogSeeder;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\User;
 use Livewire\Livewire;
+use Tests\Concerns\UsesCatalogOnlyApplication;
 use Tests\TestCase;
 
 class HomepageTest extends TestCase
 {
-    use RefreshDatabase;
+    use UsesCatalogOnlyApplication;
 
-    public function test_homepage_renders_all_imdb_style_sections_with_seeded_content(): void
+    public function test_homepage_renders_the_catalog_home_sections_for_the_mysql_backed_surface(): void
     {
-        $this->seed(DemoCatalogSeeder::class);
         Livewire::withoutLazyLoading();
 
         $this->get(route('public.home'))
             ->assertOk()
-            ->assertSee('Hero Spotlight')
-            ->assertSeeHtml('data-slot="home-hero"')
-            ->assertDontSeeHtml('bg-[linear-gradient(140deg,rgba(15,23,42,0.98),rgba(23,23,23,0.96))]')
-            ->assertSeeHtml('data-slot="site-footer"')
-            ->assertSee('Screenbase')
-            ->assertSee('Trending Now')
-            ->assertSee('Top Rated Movies')
-            ->assertSee('Top Rated TV Shows')
-            ->assertSee('Coming Soon')
-            ->assertSee('Recently Added Titles')
-            ->assertSee('Popular People')
-            ->assertSee('Featured talent')
+            ->assertSee('Catalog Spotlight')
+            ->assertSee('Start anywhere')
+            ->assertSee('Genre hubs')
+            ->assertSee('Search and charts')
+            ->assertSee('Awards Spotlight')
             ->assertSee('Latest Trailers')
-            ->assertSee('Latest Reviews')
-            ->assertSee('Featured Public Lists')
-            ->assertSee('Browse by Genre')
-            ->assertSee('Browse by Year')
-            ->assertSee('Northern Signal')
-            ->assertSee('Static Bloom')
-            ->assertSee('Aurora Run')
-            ->assertSee('Ava Mercer')
-            ->assertSee('Weekend Marathon')
-            ->assertSee('2026')
-            ->assertSeeHtml('data-slot="link-icon:after"');
+            ->assertSeeHtml('data-slot="home-awards-spotlight"')
+            ->assertSeeHtml('data-slot="home-trailers-preview"')
+            ->assertSee('Trending titles')
+            ->assertSee('Movies')
+            ->assertSee('Series')
+            ->assertSee('Popular people')
+            ->assertSeeHtml('data-slot="person-card-metrics"')
+            ->assertSee('Discovery')
+            ->assertSee('Advanced Search');
     }
 
-    public function test_homepage_renders_clean_empty_states_without_catalog_data(): void
+    public function test_homepage_navigation_reflects_the_catalog_only_route_set(): void
     {
         Livewire::withoutLazyLoading();
 
         $this->get(route('public.home'))
             ->assertOk()
-            ->assertSee('Hero Spotlight')
-            ->assertSee('No trending titles are available yet.')
-            ->assertSee('No rated movies are available yet.')
-            ->assertSee('No rated TV shows are available yet.')
-            ->assertSee('No upcoming releases are scheduled yet.')
-            ->assertSee('No recently added titles are available yet.')
-            ->assertSee('No public people profiles are available yet.')
-            ->assertSee('No public trailers are available yet.')
-            ->assertSee('No published reviews are available yet.')
-            ->assertSee('No public lists are featured right now.')
-            ->assertSee('No genres are ready to browse yet.')
-            ->assertSee('No release years are available yet.')
-            ->assertSeeHtml('data-slot="empty-media"');
+            ->assertSeeInOrder(['Home', 'Discovery', 'All Titles', 'Movies', 'TV Shows', 'People', 'Awards', 'Charts', 'Trailers', 'Advanced Search'])
+            ->assertDontSee('Lists')
+            ->assertDontSee('Latest Reviews')
+            ->assertDontSee('Sign In')
+            ->assertDontSee('Create Account')
+            ->assertDontSee('Watchlist');
+    }
+
+    public function test_homepage_does_not_render_legacy_shortcuts_even_for_signed_in_admins(): void
+    {
+        Livewire::withoutLazyLoading();
+
+        $admin = User::factory()->admin()->make();
+
+        $this->actingAs($admin)
+            ->get(route('public.home'))
+            ->assertOk()
+            ->assertDontSee('Admin')
+            ->assertDontSee('Watchlist')
+            ->assertDontSee('Sign out')
+            ->assertDontSee('Sign in')
+            ->assertDontSee('Create account');
     }
 }

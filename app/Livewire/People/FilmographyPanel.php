@@ -4,6 +4,7 @@ namespace App\Livewire\People;
 
 use App\Actions\Catalog\BuildPersonFilmographyQueryAction;
 use App\Models\Person;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
@@ -22,9 +23,9 @@ class FilmographyPanel extends Component
         $this->person = $person;
     }
 
-    public function render()
+    public function render(BuildPersonFilmographyQueryAction $buildPersonFilmographyQuery): View
     {
-        $filmography = app(BuildPersonFilmographyQueryAction::class)->handle($this->person, [
+        $filmography = $buildPersonFilmographyQuery->handle($this->person, [
             'profession' => $this->profession,
             'sort' => $this->sort,
         ]);

@@ -29,44 +29,37 @@ class BuildPersonFilmographyQueryAction
             : null;
         $sort = (string) ($filters['sort'] ?? 'latest');
 
-        $person->loadMissing('professions:id,person_id,profession,sort_order');
-
         $credits = Credit::query()
             ->select([
-                'id',
-                'title_id',
-                'person_id',
-                'department',
-                'job',
-                'character_name',
-                'billing_order',
-                'person_profession_id',
-                'episode_id',
-                'credited_as',
-                'is_principal',
+                'name_credits.name_basic_id',
+                'name_credits.movie_id',
+                'name_credits.category',
+                'name_credits.episode_count',
+                'name_credits.position',
             ])
-            ->whereBelongsTo($person)
+            ->where('name_credits.name_basic_id', $person->getKey())
             ->with([
-                'profession:id,person_id,department,profession,is_primary,sort_order',
-                'episode:id,title_id,season_number,episode_number',
                 'title' => fn ($query) => $query
                     ->select([
-                        'id',
-                        'name',
-                        'slug',
-                        'title_type',
-                        'release_year',
-                        'plot_outline',
-                        'popularity_rank',
-                        'is_published',
+                        'movies.id',
+                        'movies.tconst',
+                        'movies.imdb_id',
+                        'movies.primarytitle',
+                        'movies.originaltitle',
+                        'movies.titletype',
+                        'movies.isadult',
+                        'movies.startyear',
+                        'movies.endyear',
+                        'movies.runtimeminutes',
                     ])
                     ->published()
                     ->with([
-                        'mediaAssets:id,mediable_type,mediable_id,kind,url,alt_text,position,is_primary',
-                        'statistic:id,title_id,average_rating,rating_count,review_count',
+                        'statistic:movie_id,aggregate_rating,vote_count',
+                        'titleImages:id,movie_id,position,url,width,height,type',
+                        'primaryImageRecord:movie_id,url,width,height,type',
                     ]),
             ])
-            ->orderBy('billing_order')
+            ->orderBy('name_credits.position')
             ->get()
             ->filter(fn (Credit $credit): bool => $credit->title instanceof Title)
             ->values();
@@ -78,9 +71,8 @@ class BuildPersonFilmographyQueryAction
             ];
         });
 
-        $professionOptions = $person->professions
-            ->pluck('profession')
-            ->merge($normalizedCredits->pluck('group'))
+        $professionOptions = $normalizedCredits
+            ->pluck('group')
             ->filter()
             ->unique()
             ->values();
@@ -119,8 +111,7 @@ class BuildPersonFilmographyQueryAction
 
     private function resolveProfessionLabel(Credit $credit): string
     {
-        return $credit->profession?->profession
-            ?? ($credit->job ?: $credit->department);
+        return $credit->department ?: $credit->job;
     }
 
     /**
@@ -148,17 +139,13 @@ class BuildPersonFilmographyQueryAction
             ->unique()
             ->values();
 
-        $episodeCredits = $creditsForTitle
-            ->pluck('episode')
-            ->filter()
-            ->unique('id')
-            ->values();
+        $episodeCount = (int) $creditsForTitle
+            ->pluck('episode_count')
+            ->filter(fn (mixed $value): bool => is_numeric($value) && (int) $value > 0)
+            ->max();
 
-        $episodeLabel = $episodeCredits->isNotEmpty()
-            ? $episodeCredits
-                ->take(2)
-                ->map(fn ($episode) => sprintf('S%02dE%02d', $episode->season_number, $episode->episode_number))
-                ->implode(', ')
+        $episodeLabel = $episodeCount > 0
+            ? number_format($episodeCount).' episode'.($episodeCount === 1 ? '' : 's')
             : null;
 
         return [

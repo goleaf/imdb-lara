@@ -3,75 +3,52 @@
 namespace App\Models;
 
 use App\Enums\MediaKind;
-use App\Enums\TitleType;
-use App\Models\Concerns\GeneratesSlugs;
-use Database\Factories\TitleFactory;
+use App\Enums\TitleType as CatalogTitleType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection as SupportCollection;
+use Illuminate\Support\Str;
 
 class Title extends Model
 {
-    /** @use HasFactory<TitleFactory> */
-    use GeneratesSlugs;
+    protected $connection = 'imdb_mysql';
 
-    use HasFactory;
-    use SoftDeletes;
+    protected $table = 'movies';
+
+    public $timestamps = false;
 
     /**
      * @var list<string>
      */
     protected $fillable = [
+        'tconst',
+        'titletype',
+        'primarytitle',
+        'originaltitle',
+        'isadult',
+        'startyear',
+        'endyear',
+        'runtimeminutes',
+        'genres',
+        'title_type_id',
         'imdb_id',
-        'name',
-        'original_name',
-        'slug',
-        'sort_title',
-        'title_type',
-        'imdb_type',
-        'release_year',
-        'end_year',
-        'release_date',
-        'runtime_minutes',
-        'runtime_seconds',
-        'age_rating',
-        'plot_outline',
-        'synopsis',
-        'tagline',
-        'origin_country',
-        'original_language',
-        'popularity_rank',
-        'canonical_title_id',
-        'meta_title',
-        'meta_description',
-        'search_keywords',
-        'imdb_genres',
-        'imdb_interests',
-        'imdb_origin_countries',
-        'imdb_spoken_languages',
-        'imdb_payload',
-        'is_published',
+        'runtimeSeconds',
     ];
 
     protected function casts(): array
     {
         return [
-            'title_type' => TitleType::class,
-            'release_date' => 'date',
-            'imdb_genres' => 'array',
-            'imdb_interests' => 'array',
-            'imdb_origin_countries' => 'array',
-            'imdb_spoken_languages' => 'array',
-            'imdb_payload' => 'array',
-            'is_published' => 'boolean',
+            'id' => 'integer',
+            'isadult' => 'integer',
+            'startyear' => 'integer',
+            'endyear' => 'integer',
+            'runtimeminutes' => 'integer',
+            'title_type_id' => 'integer',
+            'runtimeSeconds' => 'integer',
         ];
     }
 
@@ -80,14 +57,30 @@ class Title extends Model
         return 'slug';
     }
 
+    public function getRouteKey(): string
+    {
+        return $this->slug;
+    }
+
+    public function resolveRouteBindingQuery($query, $value, $field = null)
+    {
+        if (preg_match('/-(?P<imdb>tt\d+)$/', (string) $value, $matches) === 1) {
+            return $query->where('tconst', $matches['imdb']);
+        }
+
+        return $query
+            ->where('tconst', (string) $value)
+            ->orWhere('imdb_id', (string) $value);
+    }
+
     public function scopePublished(Builder $query): Builder
     {
-        return $query->where('is_published', true);
+        return $query->where('isadult', 0);
     }
 
     public function scopeWithoutEpisodes(Builder $query): Builder
     {
-        return $query->where('title_type', '!=', TitleType::Episode);
+        return $query->whereNotIn('titletype', self::remoteTypesForCatalogType(CatalogTitleType::Episode));
     }
 
     public function scopePublishedCatalog(Builder $query): Builder
@@ -103,177 +96,204 @@ class Title extends Model
             return $query;
         }
 
+        if (preg_match('/^tt\d+$/i', $search) === 1) {
+            return $query->where(function (Builder $titleQuery) use ($search): void {
+                $titleQuery
+                    ->where('tconst', $search)
+                    ->orWhere('imdb_id', $search);
+            });
+        }
+
         return $query->where(function (Builder $titleQuery) use ($search): void {
             $titleQuery
-                ->where('name', 'like', "%{$search}%")
-                ->orWhere('imdb_id', 'like', "%{$search}%")
-                ->orWhere('original_name', 'like', "%{$search}%")
-                ->orWhere('slug', 'like', "%{$search}%")
-                ->orWhere('sort_title', 'like', "%{$search}%")
-                ->orWhere('plot_outline', 'like', "%{$search}%")
-                ->orWhere('synopsis', 'like', "%{$search}%")
-                ->orWhere('search_keywords', 'like', "%{$search}%")
-                ->orWhereHas('translations', function (Builder $translationQuery) use ($search): void {
-                    $translationQuery
-                        ->where('localized_title', 'like', "%{$search}%")
-                        ->orWhere('localized_slug', 'like', "%{$search}%")
-                        ->orWhere('localized_plot_outline', 'like', "%{$search}%")
-                        ->orWhere('localized_synopsis', 'like', "%{$search}%");
-                });
+                ->where('primarytitle', 'like', '%'.$search.'%')
+                ->orWhere('originaltitle', 'like', '%'.$search.'%')
+                ->orWhere('tconst', 'like', '%'.$search.'%')
+                ->orWhere('imdb_id', 'like', '%'.$search.'%')
+                ->orWhereHas('plotRecord', fn (Builder $plotQuery) => $plotQuery->where('plot', 'like', '%'.$search.'%'));
         });
     }
 
-    public function scopeForType(Builder $query, TitleType $type): Builder
+    public function scopeMatchingDiscoverySearch(Builder $query, string $search): Builder
     {
-        return $query->where('title_type', $type);
+        $search = Str::of($search)->squish()->toString();
+
+        if ($search === '') {
+            return $query;
+        }
+
+        if (preg_match('/^tt\d+$/i', $search) === 1) {
+            return $query->where(function (Builder $titleQuery) use ($search): void {
+                $titleQuery
+                    ->where('tconst', $search)
+                    ->orWhere('imdb_id', $search);
+            });
+        }
+
+        $prefixSearch = $search.'%';
+
+        return $query->where(function (Builder $titleQuery) use ($prefixSearch, $search): void {
+            $titleQuery
+                ->where('primarytitle', $search)
+                ->orWhere('originaltitle', $search)
+                ->orWhere('primarytitle', 'like', $prefixSearch)
+                ->orWhere('originaltitle', 'like', $prefixSearch);
+        });
+    }
+
+    public function scopeForType(Builder $query, CatalogTitleType $type): Builder
+    {
+        return $query->whereIn('titletype', self::remoteTypesForCatalogType($type));
     }
 
     public function scopeRatedAtLeast(Builder $query, int $minimumVotes = 1): Builder
     {
         return $query->whereHas(
             'statistic',
-            fn (Builder $statisticQuery) => $statisticQuery->where('rating_count', '>=', $minimumVotes),
+            fn (Builder $statisticQuery) => $statisticQuery->where('vote_count', '>=', $minimumVotes),
         );
     }
 
     public function scopeOrderByTopRated(Builder $query, int $minimumVotes = 1): Builder
     {
         return $query->ratedAtLeast($minimumVotes)
-            ->orderByDesc(self::statisticColumnSubquery('average_rating'))
-            ->orderByDesc(self::statisticColumnSubquery('rating_count'))
-            ->orderBy('name');
+            ->orderByDesc(self::statisticColumnSubquery('aggregate_rating'))
+            ->orderByDesc(self::statisticColumnSubquery('vote_count'))
+            ->orderBy('primarytitle');
     }
 
     public function scopeOrderByTrending(Builder $query): Builder
     {
-        return $query->whereHas('statistic')
-            ->orderByDesc(self::statisticColumnSubquery('watchlist_count'))
-            ->orderByDesc(self::statisticColumnSubquery('review_count'))
-            ->orderByDesc(self::statisticColumnSubquery('rating_count'))
-            ->orderBy('popularity_rank')
-            ->orderBy('name');
-    }
-
-    public function canonicalTitle(): BelongsTo
-    {
-        return $this->belongsTo(self::class, 'canonical_title_id');
-    }
-
-    public function alternateTitles(): HasMany
-    {
-        return $this->hasMany(self::class, 'canonical_title_id');
+        return $query
+            ->orderByDesc(self::statisticColumnSubquery('vote_count'))
+            ->orderByDesc('startyear')
+            ->orderBy('primarytitle');
     }
 
     public function genres(): BelongsToMany
     {
-        return $this->belongsToMany(Genre::class)->withTimestamps();
+        return $this->belongsToMany(Genre::class, 'movie_genres', 'movie_id', 'genre_id', 'id', 'id')
+            ->orderBy('movie_genres.position');
     }
 
-    public function companies(): BelongsToMany
+    public function countries(): BelongsToMany
     {
-        return $this->belongsToMany(Company::class)
-            ->withPivot('relationship', 'credited_as', 'is_primary', 'sort_order')
-            ->withTimestamps();
+        return $this->belongsToMany(Country::class, 'movie_origin_countries', 'movie_id', 'country_code', 'id', 'code')
+            ->withPivot('position')
+            ->orderByPivot('position');
+    }
+
+    public function languages(): BelongsToMany
+    {
+        return $this->belongsToMany(Language::class, 'movie_spoken_languages', 'movie_id', 'language_code', 'id', 'code')
+            ->withPivot('position')
+            ->orderByPivot('position');
+    }
+
+    public function interests(): BelongsToMany
+    {
+        return $this->belongsToMany(Interest::class, 'movie_interests', 'movie_id', 'interest_imdb_id', 'id', 'imdb_id')
+            ->withPivot('position')
+            ->orderByPivot('position');
     }
 
     public function credits(): HasMany
     {
-        return $this->hasMany(Credit::class)->orderBy('billing_order');
+        return $this->hasMany(Credit::class, 'movie_id', 'id')->orderBy('position');
     }
 
-    public function translations(): HasMany
+    public function movieAkas(): HasMany
     {
-        return $this->hasMany(TitleTranslation::class);
+        return $this->hasMany(MovieAka::class, 'movie_id', 'id')->orderBy('position');
+    }
+
+    public function titleAkas(): HasMany
+    {
+        return $this->hasMany(TitleAka::class, 'titleid', 'tconst')->orderBy('ordering');
+    }
+
+    public function awardNominations(): HasMany
+    {
+        return $this->hasMany(AwardNomination::class, 'movie_id', 'id')
+            ->orderByDesc('award_year')
+            ->orderBy('position');
     }
 
     public function seasons(): HasMany
     {
-        return $this->hasMany(Season::class, 'series_id')->orderBy('season_number');
+        return $this->hasMany(Season::class, 'movie_id', 'id')->orderBy('season');
     }
 
     public function seriesEpisodes(): HasMany
     {
-        return $this->hasMany(Episode::class, 'series_id')
-            ->orderBy('season_number')
+        return $this->hasMany(Episode::class, 'movie_id', 'id')
+            ->orderBy('season')
             ->orderBy('episode_number');
     }
 
     public function episodeMeta(): HasOne
     {
-        return $this->hasOne(Episode::class);
+        return $this->hasOne(Episode::class, 'episode_movie_id', 'id');
     }
 
-    public function mediaAssets(): MorphMany
+    public function titleImages(): HasMany
     {
-        return $this->morphMany(MediaAsset::class, 'mediable')->ordered();
+        return $this->hasMany(TitleImage::class, 'movie_id', 'id')->orderBy('position');
     }
 
-    public function titleImages(): MorphMany
+    public function titleVideos(): HasMany
     {
-        return $this->morphMany(TitleImage::class, 'mediable')
-            ->whereIn('kind', [
-                MediaKind::Poster,
-                MediaKind::Backdrop,
-                MediaKind::Gallery,
-                MediaKind::Still,
-            ])
-            ->ordered();
-    }
-
-    public function titleVideos(): MorphMany
-    {
-        return $this->morphMany(TitleVideo::class, 'mediable')
-            ->whereIn('kind', [
-                MediaKind::Trailer,
-                MediaKind::Clip,
-                MediaKind::Featurette,
-            ])
-            ->ordered();
+        return $this->hasMany(TitleVideo::class, 'movie_id', 'id')->orderBy('position');
     }
 
     public function statistic(): HasOne
     {
-        return $this->hasOne(TitleStatistic::class);
+        return $this->hasOne(TitleStatistic::class, 'movie_id', 'id');
     }
 
-    public function imdbImport(): HasOne
+    public function boxOfficeRecord(): HasOne
     {
-        return $this->hasOne(ImdbTitleImport::class, 'imdb_id', 'imdb_id');
+        return $this->hasOne(MovieBoxOffice::class, 'movie_id', 'id');
     }
 
-    public function ratings(): HasMany
+    public function plotRecord(): HasOne
     {
-        return $this->hasMany(Rating::class);
+        return $this->hasOne(MoviePlot::class, 'movie_id', 'id');
     }
 
-    public function reviews(): HasMany
+    public function primaryImageRecord(): HasOne
     {
-        return $this->hasMany(Review::class);
+        return $this->hasOne(MoviePrimaryImage::class, 'movie_id', 'id');
     }
 
-    public function listItems(): HasMany
+    public function originCountryRecords(): HasMany
     {
-        return $this->hasMany(ListItem::class);
+        return $this->hasMany(MovieOriginCountry::class, 'movie_id', 'id')->orderBy('position');
     }
 
-    public function outgoingRelationships(): HasMany
+    public function spokenLanguageRecords(): HasMany
     {
-        return $this->hasMany(TitleRelationship::class, 'from_title_id');
+        return $this->hasMany(MovieSpokenLanguage::class, 'movie_id', 'id')->orderBy('position');
     }
 
-    public function incomingRelationships(): HasMany
+    public function certificateRecords(): HasMany
     {
-        return $this->hasMany(TitleRelationship::class, 'to_title_id');
+        return $this->hasMany(MovieCertificate::class, 'movie_id', 'id')->orderBy('position');
     }
 
-    public function awardNominations(): HasMany
+    public function movieCompanyCredits(): HasMany
     {
-        return $this->hasMany(AwardNomination::class);
+        return $this->hasMany(MovieCompanyCredit::class, 'movie_id', 'id')->orderBy('position');
     }
 
-    public function contributions(): MorphMany
+    public function parentsGuideSections(): HasMany
     {
-        return $this->morphMany(Contribution::class, 'contributable');
+        return $this->hasMany(MovieParentsGuideSection::class, 'movie_id', 'id')->orderBy('position');
+    }
+
+    public function movieInterests(): HasMany
+    {
+        return $this->hasMany(MovieInterest::class, 'movie_id', 'id')->orderBy('position');
     }
 
     /**
@@ -281,9 +301,7 @@ class Title extends Model
      */
     public function imdbPayloadSection(string $key): ?array
     {
-        $payload = data_get($this->imdb_payload, $key);
-
-        return is_array($payload) ? $payload : null;
+        return null;
     }
 
     public function typeLabel(): string
@@ -296,15 +314,10 @@ class Title extends Model
         return $this->title_type->icon();
     }
 
-    public function preferredPoster(): ?MediaAsset
+    public function preferredPoster(): ?CatalogMediaAsset
     {
-        /** @var iterable<array-key, mixed> $assets */
-        $assets = $this->relationLoaded('mediaAssets')
-            ? $this->mediaAssets
-            : ($this->relationLoaded('titleImages') ? $this->titleImages : []);
-
-        return MediaAsset::preferredFrom(
-            $assets,
+        return CatalogMediaAsset::preferredFrom(
+            $this->allImageAssets(),
             MediaKind::Poster,
             MediaKind::Backdrop,
             MediaKind::Gallery,
@@ -312,15 +325,10 @@ class Title extends Model
         );
     }
 
-    public function preferredBackdrop(): ?MediaAsset
+    public function preferredBackdrop(): ?CatalogMediaAsset
     {
-        /** @var iterable<array-key, mixed> $assets */
-        $assets = $this->relationLoaded('mediaAssets')
-            ? $this->mediaAssets
-            : ($this->relationLoaded('titleImages') ? $this->titleImages : []);
-
-        return MediaAsset::preferredFrom(
-            $assets,
+        return CatalogMediaAsset::preferredFrom(
+            $this->allImageAssets(),
             MediaKind::Backdrop,
             MediaKind::Poster,
             MediaKind::Gallery,
@@ -328,15 +336,10 @@ class Title extends Model
         );
     }
 
-    public function preferredDisplayImage(): ?MediaAsset
+    public function preferredDisplayImage(): ?CatalogMediaAsset
     {
-        /** @var iterable<array-key, mixed> $assets */
-        $assets = $this->relationLoaded('mediaAssets')
-            ? $this->mediaAssets
-            : ($this->relationLoaded('titleImages') ? $this->titleImages : []);
-
-        return MediaAsset::preferredFrom(
-            $assets,
+        return CatalogMediaAsset::preferredFrom(
+            $this->allImageAssets(),
             MediaKind::Still,
             MediaKind::Backdrop,
             MediaKind::Poster,
@@ -379,11 +382,7 @@ class Title extends Model
 
     public function displayReviewCount(): int
     {
-        if ($this->relationLoaded('statistic') && $this->statistic) {
-            return (int) $this->statistic->review_count;
-        }
-
-        return (int) ($this->published_reviews_count ?? 0);
+        return 0;
     }
 
     public function originCountryCode(): ?string
@@ -392,22 +391,21 @@ class Title extends Model
             return null;
         }
 
-        return str($this->origin_country)
+        return Str::of((string) $this->origin_country)
             ->before(',')
             ->trim()
             ->upper()
             ->toString();
     }
 
-    public function preferredVideo(): ?MediaAsset
+    public function preferredVideo(): ?CatalogMediaAsset
     {
-        /** @var iterable<array-key, mixed> $assets */
-        $assets = $this->relationLoaded('titleVideos')
-            ? $this->titleVideos
-            : ($this->relationLoaded('mediaAssets') ? $this->mediaAssets : []);
+        if (! $this->relationLoaded('titleVideos')) {
+            return null;
+        }
 
-        return MediaAsset::preferredFrom(
-            $assets,
+        return CatalogMediaAsset::preferredFrom(
+            $this->titleVideos,
             MediaKind::Trailer,
             MediaKind::Featurette,
             MediaKind::Clip,
@@ -421,35 +419,441 @@ class Title extends Model
         return filled($summary) ? (string) $summary : null;
     }
 
-    public function leadAwardNomination(): ?AwardNomination
+    /**
+     * @return SupportCollection<int, AwardCategory>
+     */
+    public function resolvedAwardCategories(): SupportCollection
     {
         if (! $this->relationLoaded('awardNominations')) {
-            return null;
-        }
-
-        /** @var AwardNomination|null $nomination */
-        $nomination = $this->awardNominations->sortByDesc('is_winner')->first();
-
-        return $nomination;
-    }
-
-    /**
-     * @return SupportCollection<string, EloquentCollection<int, MediaAsset>>
-     */
-    public function groupedMediaAssetsByKind(): SupportCollection
-    {
-        if (! $this->relationLoaded('mediaAssets')) {
             return collect();
         }
 
-        return $this->mediaAssets->groupBy(fn (MediaAsset $mediaAsset): string => $mediaAsset->kind->value);
+        return $this->awardNominations
+            ->map(function (AwardNomination $awardNomination): ?AwardCategory {
+                if (! $awardNomination->relationLoaded('awardCategory')) {
+                    return null;
+                }
+
+                return $awardNomination->awardCategory;
+            })
+            ->filter(fn (mixed $awardCategory): bool => $awardCategory instanceof AwardCategory && filled($awardCategory->name))
+            ->unique('id')
+            ->values();
+    }
+
+    /**
+     * @return SupportCollection<int, AwardEvent>
+     */
+    public function resolvedAwardEvents(): SupportCollection
+    {
+        if (! $this->relationLoaded('awardNominations')) {
+            return collect();
+        }
+
+        return $this->awardNominations
+            ->map(function (AwardNomination $awardNomination): ?AwardEvent {
+                if (! $awardNomination->relationLoaded('awardEvent')) {
+                    return null;
+                }
+
+                return $awardNomination->awardEvent;
+            })
+            ->filter(fn (mixed $awardEvent): bool => $awardEvent instanceof AwardEvent && filled($awardEvent->name))
+            ->unique('imdb_id')
+            ->values();
+    }
+
+    /**
+     * @return SupportCollection<int, CertificateAttribute>
+     */
+    public function resolvedCertificateAttributes(): SupportCollection
+    {
+        if (! $this->relationLoaded('certificateRecords')) {
+            return collect();
+        }
+
+        return $this->certificateRecords
+            ->flatMap(function (MovieCertificate $certificate): SupportCollection {
+                if (! $certificate->relationLoaded('movieCertificateAttributes')) {
+                    return collect();
+                }
+
+                return $certificate->movieCertificateAttributes;
+            })
+            ->map(function (MovieCertificateAttribute $movieCertificateAttribute): ?CertificateAttribute {
+                if (! $movieCertificateAttribute->relationLoaded('certificateAttribute')) {
+                    return null;
+                }
+
+                return $movieCertificateAttribute->certificateAttribute;
+            })
+            ->filter(fn (mixed $certificateAttribute): bool => $certificateAttribute instanceof CertificateAttribute && filled($certificateAttribute->name))
+            ->unique('id')
+            ->values();
+    }
+
+    /**
+     * @return SupportCollection<int, CertificateRating>
+     */
+    public function resolvedCertificateRatings(): SupportCollection
+    {
+        if (! $this->relationLoaded('certificateRecords')) {
+            return collect();
+        }
+
+        return $this->certificateRecords
+            ->map(function (MovieCertificate $certificate): ?CertificateRating {
+                if (! $certificate->relationLoaded('certificateRating')) {
+                    return null;
+                }
+
+                return $certificate->certificateRating;
+            })
+            ->filter(fn (mixed $certificateRating): bool => $certificateRating instanceof CertificateRating && filled($certificateRating->name))
+            ->unique('id')
+            ->values();
+    }
+
+    /**
+     * @return SupportCollection<int, Company>
+     */
+    public function resolvedCompanies(): SupportCollection
+    {
+        if (! $this->relationLoaded('movieCompanyCredits')) {
+            return collect();
+        }
+
+        return $this->movieCompanyCredits
+            ->map(function (MovieCompanyCredit $movieCompanyCredit): ?Company {
+                if (! $movieCompanyCredit->relationLoaded('company')) {
+                    return null;
+                }
+
+                return $movieCompanyCredit->company;
+            })
+            ->filter(fn (mixed $company): bool => $company instanceof Company && filled($company->name))
+            ->unique('imdb_id')
+            ->values();
+    }
+
+    /**
+     * @return SupportCollection<int, CompanyCreditAttribute>
+     */
+    public function resolvedCompanyCreditAttributes(): SupportCollection
+    {
+        if (! $this->relationLoaded('movieCompanyCredits')) {
+            return collect();
+        }
+
+        return $this->movieCompanyCredits
+            ->flatMap(function (MovieCompanyCredit $movieCompanyCredit): SupportCollection {
+                if (! $movieCompanyCredit->relationLoaded('movieCompanyCreditAttributes')) {
+                    return collect();
+                }
+
+                return $movieCompanyCredit->movieCompanyCreditAttributes;
+            })
+            ->map(function (MovieCompanyCreditAttribute $movieCompanyCreditAttribute): ?CompanyCreditAttribute {
+                if (! $movieCompanyCreditAttribute->relationLoaded('companyCreditAttribute')) {
+                    return null;
+                }
+
+                return $movieCompanyCreditAttribute->companyCreditAttribute;
+            })
+            ->filter(fn (mixed $companyCreditAttribute): bool => $companyCreditAttribute instanceof CompanyCreditAttribute && filled($companyCreditAttribute->name))
+            ->unique('id')
+            ->values();
+    }
+
+    /**
+     * @return SupportCollection<int, AkaType>
+     */
+    public function resolvedAkaTypes(): SupportCollection
+    {
+        if (! $this->relationLoaded('titleAkas')) {
+            return collect();
+        }
+
+        return $this->titleAkas
+            ->flatMap(function (TitleAka $titleAka): SupportCollection {
+                if (! $titleAka->relationLoaded('titleAkaTypes')) {
+                    return collect();
+                }
+
+                return $titleAka->titleAkaTypes;
+            })
+            ->map(function (TitleAkaType $titleAkaType): ?AkaType {
+                if (! $titleAkaType->relationLoaded('akaType')) {
+                    return null;
+                }
+
+                return $titleAkaType->akaType;
+            })
+            ->filter(fn (mixed $akaType): bool => $akaType instanceof AkaType && filled($akaType->name))
+            ->unique('id')
+            ->values();
+    }
+
+    /**
+     * @return SupportCollection<string, SupportCollection<int, CatalogMediaAsset>>
+     */
+    public function groupedMediaAssetsByKind(): SupportCollection
+    {
+        return $this->allMediaAssets()->groupBy(
+            fn (CatalogMediaAsset $mediaAsset): string => $mediaAsset->kind->value,
+        );
+    }
+
+    public function getSlugAttribute(): string
+    {
+        return Str::slug($this->name).'-'.($this->tconst ?: $this->imdb_id ?: $this->id);
+    }
+
+    public function getNameAttribute(): string
+    {
+        return (string) ($this->primarytitle ?: $this->originaltitle ?: $this->tconst ?: 'Untitled');
+    }
+
+    public function getOriginalNameAttribute(): ?string
+    {
+        return filled($this->originaltitle) ? (string) $this->originaltitle : null;
+    }
+
+    /**
+     * @return EloquentCollection<int, Genre>
+     */
+    public function getGenresAttribute(mixed $value): EloquentCollection
+    {
+        if ($this->relationLoaded('genres')) {
+            $genres = $this->getRelation('genres');
+
+            if ($genres instanceof EloquentCollection) {
+                return $genres;
+            }
+        }
+
+        return new EloquentCollection;
+    }
+
+    public function getTitleTypeAttribute(): CatalogTitleType
+    {
+        $remoteType = $this->getAttributeFromArray('titletype');
+
+        return self::catalogTypeFromRemote(is_string($remoteType) ? $remoteType : null);
+    }
+
+    public function getReleaseYearAttribute(): ?int
+    {
+        return $this->startyear ? (int) $this->startyear : null;
+    }
+
+    public function getEndYearAttribute(): ?int
+    {
+        return $this->endyear ? (int) $this->endyear : null;
+    }
+
+    public function getRuntimeMinutesAttribute(): ?int
+    {
+        $runtimeMinutes = $this->getAttributeFromArray('runtimeminutes');
+
+        return $runtimeMinutes ? (int) $runtimeMinutes : null;
+    }
+
+    public function getRuntimeSecondsAttribute(): ?int
+    {
+        $runtimeSeconds = $this->getAttributeFromArray('runtimeSeconds');
+
+        return $runtimeSeconds ? (int) $runtimeSeconds : null;
+    }
+
+    public function getReleaseDateAttribute(): mixed
+    {
+        return null;
+    }
+
+    public function getAgeRatingAttribute(): ?string
+    {
+        if (! $this->relationLoaded('certificateRecords')) {
+            return null;
+        }
+
+        /** @var MovieCertificate|null $certificate */
+        $certificate = $this->certificateRecords->first();
+
+        return $certificate?->certificateRating?->name;
+    }
+
+    public function getPlotOutlineAttribute(): ?string
+    {
+        if ($this->relationLoaded('plotRecord')) {
+            return $this->plotRecord?->plot;
+        }
+
+        return null;
+    }
+
+    public function getSynopsisAttribute(): ?string
+    {
+        return $this->plot_outline;
+    }
+
+    public function getTaglineAttribute(): ?string
+    {
+        return null;
+    }
+
+    public function getOriginCountryAttribute(): ?string
+    {
+        if ($this->relationLoaded('countries')) {
+            return $this->countries->first()?->code;
+        }
+
+        if (! $this->relationLoaded('originCountryRecords')) {
+            return null;
+        }
+
+        /** @var MovieOriginCountry|null $country */
+        $country = $this->originCountryRecords->first();
+
+        return $country?->country_code;
+    }
+
+    public function getOriginalLanguageAttribute(): ?string
+    {
+        if ($this->relationLoaded('languages')) {
+            return $this->languages->first()?->code;
+        }
+
+        if (! $this->relationLoaded('spokenLanguageRecords')) {
+            return null;
+        }
+
+        /** @var MovieSpokenLanguage|null $language */
+        $language = $this->spokenLanguageRecords->first();
+
+        return $language?->language_code;
+    }
+
+    public function getPopularityRankAttribute(): ?int
+    {
+        $value = $this->getAttributeFromArray('popularity_rank');
+
+        return $value !== null ? (int) $value : null;
+    }
+
+    public function getMetaTitleAttribute(): string
+    {
+        return $this->release_year ? $this->name.' ('.$this->release_year.')' : $this->name;
+    }
+
+    public function getMetaDescriptionAttribute(): string
+    {
+        return $this->plot_outline ?: 'Browse cast, awards, genres, ratings, and release details for '.$this->name.'.';
+    }
+
+    public function getSearchKeywordsAttribute(): ?string
+    {
+        return null;
+    }
+
+    public function getIsPublishedAttribute(): bool
+    {
+        return (int) ($this->isadult ?? 0) === 0;
+    }
+
+    public function getUpdatedAtAttribute(): mixed
+    {
+        return null;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function remoteTypesForCatalogType(CatalogTitleType $type): array
+    {
+        return match ($type) {
+            CatalogTitleType::Movie => ['movie', 'tvMovie', 'video'],
+            CatalogTitleType::Series => ['tvSeries'],
+            CatalogTitleType::MiniSeries => ['tvMiniSeries'],
+            CatalogTitleType::Documentary => ['documentary'],
+            CatalogTitleType::Special => ['tvSpecial', 'special'],
+            CatalogTitleType::Short => ['short'],
+            CatalogTitleType::Episode => ['tvEpisode'],
+        };
+    }
+
+    private static function catalogTypeFromRemote(?string $remoteType): CatalogTitleType
+    {
+        return match ($remoteType) {
+            'tvSeries' => CatalogTitleType::Series,
+            'tvMiniSeries' => CatalogTitleType::MiniSeries,
+            'tvEpisode' => CatalogTitleType::Episode,
+            'short' => CatalogTitleType::Short,
+            'documentary' => CatalogTitleType::Documentary,
+            'tvSpecial', 'special' => CatalogTitleType::Special,
+            default => CatalogTitleType::Movie,
+        };
+    }
+
+    /**
+     * @return SupportCollection<int, CatalogMediaAsset>
+     */
+    private function allImageAssets(): SupportCollection
+    {
+        $assets = collect();
+
+        if ($this->relationLoaded('titleImages')) {
+            $assets = $assets->concat($this->titleImages);
+        }
+
+        if ($primaryImage = $this->primaryImageAsset()) {
+            $assets->prepend($primaryImage);
+        }
+
+        return $assets
+            ->filter(fn (mixed $asset): bool => $asset instanceof CatalogMediaAsset)
+            ->unique('url')
+            ->values();
+    }
+
+    /**
+     * @return SupportCollection<int, CatalogMediaAsset>
+     */
+    private function allMediaAssets(): SupportCollection
+    {
+        $assets = $this->allImageAssets();
+
+        if ($this->relationLoaded('titleVideos')) {
+            $assets = $assets->concat($this->titleVideos);
+        }
+
+        return $assets
+            ->filter(fn (mixed $asset): bool => $asset instanceof CatalogMediaAsset)
+            ->values();
+    }
+
+    private function primaryImageAsset(): ?CatalogMediaAsset
+    {
+        if (! $this->relationLoaded('primaryImageRecord') || ! $this->primaryImageRecord?->url) {
+            return null;
+        }
+
+        return CatalogMediaAsset::fromCatalog([
+            'kind' => $this->primaryImageRecord->type === 'poster' ? MediaKind::Poster : MediaKind::Gallery,
+            'url' => $this->primaryImageRecord->url,
+            'alt_text' => $this->name,
+            'width' => $this->primaryImageRecord->width,
+            'height' => $this->primaryImageRecord->height,
+            'position' => 0,
+            'is_primary' => true,
+        ]);
     }
 
     private static function statisticColumnSubquery(string $column): Builder
     {
         return TitleStatistic::query()
             ->select($column)
-            ->whereColumn('title_statistics.title_id', 'titles.id')
+            ->whereColumn('movie_ratings.movie_id', 'movies.id')
             ->limit(1);
     }
 }

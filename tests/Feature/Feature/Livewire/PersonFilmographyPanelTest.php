@@ -2,106 +2,72 @@
 
 namespace Tests\Feature\Feature\Livewire;
 
+use App\Actions\Catalog\BuildPersonFilmographyQueryAction;
 use App\Livewire\People\FilmographyPanel;
-use App\Models\Credit;
-use App\Models\Person;
-use App\Models\PersonProfession;
-use App\Models\Title;
-use App\Models\TitleStatistic;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Tests\Concerns\InteractsWithRemoteCatalog;
+use Tests\Concerns\UsesCatalogOnlyApplication;
 use Tests\TestCase;
 
 class PersonFilmographyPanelTest extends TestCase
 {
-    use RefreshDatabase;
+    use InteractsWithRemoteCatalog;
+    use UsesCatalogOnlyApplication;
 
-    public function test_filmography_panel_groups_titles_by_profession(): void
+    public function test_filmography_panel_renders_live_catalog_rows_for_a_remote_person(): void
     {
-        $person = Person::factory()->create();
-        $actorProfession = PersonProfession::factory()->for($person)->primary()->create([
-            'profession' => 'Actor',
-            'department' => 'Cast',
-        ]);
-        $writerProfession = PersonProfession::factory()->for($person)->create([
-            'profession' => 'Writer',
-            'department' => 'Writing',
-            'sort_order' => 1,
-        ]);
+        $person = $this->samplePerson();
+        $filmography = app(BuildPersonFilmographyQueryAction::class)->handle($person);
+        $firstGroup = $filmography['groups']->first();
 
-        $movie = Title::factory()->create([
-            'name' => 'Northern Signal',
-            'release_year' => 2024,
-        ]);
-        $series = Title::factory()->create([
-            'name' => 'Static Bloom',
-            'release_year' => 2021,
-        ]);
+        if (! is_array($firstGroup) || $firstGroup['rows']->isEmpty()) {
+            $this->markTestSkipped('The remote catalog did not return filmography rows for the sample person.');
+        }
 
-        Credit::factory()->for($person)->for($movie)->create([
-            'department' => 'Cast',
-            'job' => 'Actor',
-            'character_name' => 'Dr. Mara Elling',
-            'person_profession_id' => $actorProfession->id,
-        ]);
-        Credit::factory()->for($person)->for($series)->create([
-            'department' => 'Writing',
-            'job' => 'Writer',
-            'person_profession_id' => $writerProfession->id,
-        ]);
+        $firstRow = $firstGroup['rows']->first();
 
         Livewire::test(FilmographyPanel::class, ['person' => $person])
             ->assertSee('Filmography')
-            ->assertSee('Actor')
-            ->assertSee('Writer')
-            ->assertSee('Northern Signal')
-            ->assertSee('Static Bloom')
-            ->assertSee(route('public.titles.show', $movie), false)
-            ->assertSee(route('public.titles.show', $series), false);
+            ->assertSee('Credit group')
+            ->assertSee('Sort')
+            ->assertSee($firstGroup['label'])
+            ->assertSee($firstRow['title']->name)
+            ->assertSee(route('public.titles.show', $firstRow['title']), false)
+            ->assertDontSee('No filmography rows match the current filters.');
     }
 
-    public function test_filmography_panel_filters_and_sorts_titles(): void
+    public function test_filmography_panel_applies_group_filter_and_rating_sort_for_remote_catalog_rows(): void
     {
-        $person = Person::factory()->create();
-        $actorProfession = PersonProfession::factory()->for($person)->primary()->create([
-            'profession' => 'Actor',
-            'department' => 'Cast',
-        ]);
+        $person = $this->samplePerson();
+        $baseFilmography = app(BuildPersonFilmographyQueryAction::class)->handle($person);
+        $group = $baseFilmography['groups']->first(
+            fn (array $group): bool => $group['rows']->count() >= 2
+        );
 
-        $olderTitle = Title::factory()->create([
-            'name' => 'Harbor Nine',
-            'release_year' => 2021,
-        ]);
-        $newerTitle = Title::factory()->create([
-            'name' => 'Aurora Run',
-            'release_year' => 2026,
-        ]);
+        if (! is_array($group)) {
+            $this->markTestSkipped('The remote catalog did not provide a filmography group with multiple rows for sorting coverage.');
+        }
 
-        TitleStatistic::factory()->for($olderTitle)->create([
-            'average_rating' => 9.1,
-            'rating_count' => 120,
+        $filteredFilmography = app(BuildPersonFilmographyQueryAction::class)->handle($person, [
+            'profession' => $group['label'],
+            'sort' => 'rating',
         ]);
-        TitleStatistic::factory()->for($newerTitle)->create([
-            'average_rating' => 7.2,
-            'rating_count' => 40,
-        ]);
+        $filteredGroup = $filteredFilmography['groups']->first();
 
-        Credit::factory()->for($person)->for($olderTitle)->create([
-            'department' => 'Cast',
-            'job' => 'Actor',
-            'person_profession_id' => $actorProfession->id,
-        ]);
-        Credit::factory()->for($person)->for($newerTitle)->create([
-            'department' => 'Cast',
-            'job' => 'Actor',
-            'person_profession_id' => $actorProfession->id,
-        ]);
+        if (! is_array($filteredGroup) || $filteredGroup['rows']->count() < 2) {
+            $this->markTestSkipped('The filtered remote filmography did not retain enough rows for sort assertions.');
+        }
+
+        $expectedTitles = $filteredGroup['rows']
+            ->take(2)
+            ->pluck('title.name')
+            ->values()
+            ->all();
 
         Livewire::test(FilmographyPanel::class, ['person' => $person])
-            ->set('profession', 'Actor')
-            ->assertSee('Harbor Nine')
-            ->assertSee('Aurora Run')
+            ->set('profession', $group['label'])
             ->set('sort', 'rating')
-            ->assertSeeInOrder(['Harbor Nine', 'Aurora Run']);
+            ->assertSee($group['label'])
+            ->assertSeeInOrder($expectedTitles);
     }
 }

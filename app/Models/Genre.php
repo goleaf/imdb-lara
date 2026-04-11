@@ -2,29 +2,70 @@
 
 namespace App\Models;
 
-use App\Models\Concerns\GeneratesSlugs;
-use Database\Factories\GenreFactory;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
-class Genre extends Model
+class Genre extends ImdbModel
 {
-    /** @use HasFactory<GenreFactory> */
-    use GeneratesSlugs;
-    use HasFactory;
+    protected $table = 'genres';
 
     /**
      * @var list<string>
      */
     protected $fillable = [
         'name',
-        'slug',
-        'description',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'id' => 'integer',
+        ];
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
+    public function getRouteKey(): string
+    {
+        return $this->slug;
+    }
+
+    public function resolveRouteBindingQuery($query, $value, $field = null)
+    {
+        if (preg_match('/-g(?P<id>\d+)$/', (string) $value, $matches) === 1) {
+            return $query->where('id', (int) $matches['id']);
+        }
+
+        return $query->where('id', (int) $value);
+    }
 
     public function titles(): BelongsToMany
     {
-        return $this->belongsToMany(Title::class)->withTimestamps();
+        return $this->belongsToMany(Title::class, 'movie_genres', 'genre_id', 'movie_id', 'id', 'id')
+            ->orderBy('primarytitle');
+    }
+
+    public function movies(): BelongsToMany
+    {
+        return $this->belongsToMany(Movie::class, 'movie_genres', 'genre_id', 'movie_id', 'id', 'id');
+    }
+
+    public function movieGenres(): HasMany
+    {
+        return $this->hasMany(MovieGenre::class, 'genre_id', 'id');
+    }
+
+    public function getSlugAttribute(): string
+    {
+        return Str::slug((string) $this->name).'-g'.$this->id;
+    }
+
+    public function getDescriptionAttribute(): ?string
+    {
+        return null;
     }
 }

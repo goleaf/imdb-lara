@@ -2,60 +2,100 @@
 
 namespace App\Models;
 
-use Database\Factories\CreditFactory;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Credit extends Model
 {
-    /** @use HasFactory<CreditFactory> */
-    use HasFactory;
+    protected $connection = 'imdb_mysql';
 
-    use SoftDeletes;
+    protected $table = 'name_credits';
+
+    public $timestamps = false;
 
     /**
      * @var list<string>
      */
     protected $fillable = [
-        'title_id',
-        'person_id',
-        'department',
-        'job',
-        'character_name',
-        'billing_order',
-        'is_principal',
-        'person_profession_id',
-        'episode_id',
-        'credited_as',
-        'imdb_source_group',
+        'name_basic_id',
+        'movie_id',
+        'category',
+        'episode_count',
+        'position',
     ];
 
     protected function casts(): array
     {
         return [
-            'is_principal' => 'boolean',
+            'name_basic_id' => 'integer',
+            'movie_id' => 'integer',
+            'episode_count' => 'integer',
+            'position' => 'integer',
         ];
     }
 
     public function title(): BelongsTo
     {
-        return $this->belongsTo(Title::class);
+        return $this->belongsTo(Title::class, 'movie_id', 'id');
     }
 
     public function person(): BelongsTo
     {
-        return $this->belongsTo(Person::class);
+        return $this->belongsTo(Person::class, 'name_basic_id', 'id');
     }
 
-    public function profession(): BelongsTo
+    public function getTitleIdAttribute(): int
     {
-        return $this->belongsTo(PersonProfession::class, 'person_profession_id');
+        return (int) $this->movie_id;
     }
 
-    public function episode(): BelongsTo
+    public function getPersonIdAttribute(): int
     {
-        return $this->belongsTo(Episode::class);
+        return (int) $this->name_basic_id;
+    }
+
+    public function getDepartmentAttribute(): string
+    {
+        return match ($this->category) {
+            'actor', 'actress', 'archive_footage', 'self' => 'Cast',
+            'director' => 'Directing',
+            'writer' => 'Writing',
+            'producer', 'executive' => 'Production',
+            'composer', 'music_department', 'soundtrack' => 'Music',
+            'cinematographer' => 'Camera',
+            'editor' => 'Editing',
+            'thanks' => 'Thanks',
+            default => str((string) $this->category)->headline()->toString(),
+        };
+    }
+
+    public function getJobAttribute(): string
+    {
+        return str((string) $this->category)->headline()->toString();
+    }
+
+    public function getCharacterNameAttribute(): ?string
+    {
+        return null;
+    }
+
+    public function getBillingOrderAttribute(): int
+    {
+        return (int) ($this->position ?? 0);
+    }
+
+    public function getIsPrincipalAttribute(): bool
+    {
+        return (int) ($this->position ?? 0) <= 5;
+    }
+
+    public function getCreditedAsAttribute(): ?string
+    {
+        return null;
+    }
+
+    public function getImdbSourceGroupAttribute(): ?string
+    {
+        return $this->category ? (string) $this->category : null;
     }
 }

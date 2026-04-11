@@ -2,8 +2,7 @@
 
 namespace App\Actions\Home;
 
-use App\Enums\MediaKind;
-use App\Models\MediaAsset;
+use App\Actions\Catalog\BuildPublicTitleIndexQueryAction;
 use App\Models\Title;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -11,65 +10,42 @@ use Illuminate\Support\Facades\Cache;
 
 class GetLatestTrailerTitlesAction
 {
+    public function __construct(
+        private BuildPublicTitleIndexQueryAction $buildPublicTitleIndexQuery,
+    ) {}
+
     public function query(): Builder
     {
-        $trailerKinds = [MediaKind::Trailer, MediaKind::Clip, MediaKind::Featurette];
-
-        return Title::query()
-            ->select([
-                'id',
-                'name',
-                'slug',
-                'title_type',
-                'release_year',
-                'plot_outline',
-                'popularity_rank',
-                'is_published',
+        return $this->buildPublicTitleIndexQuery
+            ->handle([
+                'includePresentationRelations' => false,
+                'sort' => 'trending',
             ])
-            ->publishedCatalog()
-            ->whereHas('titleVideos', fn (Builder $videoQuery) => $videoQuery->whereIn('kind', $trailerKinds))
+            ->whereHas('titleVideos')
             ->with([
-                'genres:id,name,slug',
-                'statistic:id,title_id,average_rating,rating_count,review_count,watchlist_count',
-                'mediaAssets' => fn ($mediaQuery) => $mediaQuery
+                'statistic:movie_id,aggregate_rating,vote_count',
+                'titleImages' => fn (Builder $imageQuery) => $imageQuery
+                    ->select(['id', 'movie_id', 'position', 'url', 'width', 'height', 'type'])
+                    ->whereIn('type', ['poster', 'backdrop', 'still_frame', 'gallery'])
+                    ->limit(6),
+                'primaryImageRecord:movie_id,url,width,height,type',
+                'plotRecord:movie_id,plot',
+                'titleVideos' => fn (Builder $videoQuery) => $videoQuery
                     ->select([
-                        'id',
-                        'mediable_type',
-                        'mediable_id',
-                        'kind',
-                        'url',
-                        'alt_text',
+                        'imdb_id',
+                        'movie_id',
+                        'video_type_id',
+                        'name',
+                        'description',
+                        'width',
+                        'height',
+                        'runtime_seconds',
                         'position',
-                        'is_primary',
                     ])
-                    ->where('kind', MediaKind::Poster)
                     ->orderBy('position')
-                    ->limit(1),
-                'titleVideos' => fn ($videoQuery) => $videoQuery
-                    ->select([
-                        'id',
-                        'mediable_type',
-                        'mediable_id',
-                        'kind',
-                        'url',
-                        'caption',
-                        'provider',
-                        'published_at',
-                    ])
-                    ->whereIn('kind', $trailerKinds)
-                    ->orderByDesc('published_at')
-                    ->orderByDesc('id')
-                    ->limit(1),
-            ])
-            ->orderByDesc(
-                MediaAsset::query()
-                    ->select('published_at')
-                    ->whereColumn('media_assets.mediable_id', 'titles.id')
-                    ->where('media_assets.mediable_type', Title::class)
-                    ->whereIn('kind', $trailerKinds)
-                    ->orderByDesc('published_at')
-                    ->limit(1),
-            );
+                    ->orderBy('imdb_id')
+                    ->limit(3),
+            ]);
     }
 
     /**

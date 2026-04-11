@@ -53,28 +53,24 @@ class BrowseTitlesPage extends Component
 
         return $this->renderBrowseView([
             'pageTitle' => 'Browse Titles',
-            'metaDescription' => 'Browse published Screenbase titles across movies, series, documentaries, shorts, and specials.',
+            'metaDescription' => 'Browse the full imported title catalog across movies, series, documentaries, shorts, and specials.',
             'heading' => 'Browse Titles',
-            'description' => 'The full public title directory, excluding episode records from the main grid so series navigation stays canonical.',
+            'description' => 'The public title directory, mapped onto the imported MySQL schema and filtered to canonical title pages.',
             'breadcrumbs' => $breadcrumbs,
             'badges' => ['Movies', 'Series', 'Documentaries', 'Specials'],
-            'actions' => array_values(array_filter([
-                route('public.movies.index')
-                    ? ['label' => 'Browse Movies', 'href' => route('public.movies.index'), 'variant' => 'outline', 'icon' => 'film']
-                    : null,
-                route('public.series.index')
-                    ? ['label' => 'Browse TV Shows', 'href' => route('public.series.index'), 'variant' => 'ghost', 'icon' => 'tv']
-                    : null,
-            ])),
+            'actions' => [
+                ['label' => 'Browse Movies', 'href' => route('public.movies.index'), 'variant' => 'outline', 'icon' => 'film'],
+                ['label' => 'Browse TV Shows', 'href' => route('public.series.index'), 'variant' => 'ghost', 'icon' => 'tv'],
+            ],
             'browserProps' => [
                 'sort' => 'name',
                 'pageName' => 'titles',
-                'emptyHeading' => 'No published titles match the current catalog.',
-                'emptyText' => 'Check back soon or browse discovery and search instead.',
+                'emptyHeading' => 'No titles match the current browse state.',
+                'emptyText' => 'Try another route into the catalog.',
             ],
             'seo' => new PageSeoData(
                 title: 'Browse Titles',
-                description: 'Browse published Screenbase titles across movies, series, documentaries, shorts, and specials.',
+                description: 'Browse the full imported title catalog across movies, series, documentaries, shorts, and specials.',
                 canonical: route('public.titles.index'),
                 breadcrumbs: $breadcrumbs,
                 paginationPageName: 'titles',
@@ -91,11 +87,11 @@ class BrowseTitlesPage extends Component
 
         return $this->renderBrowseView([
             'pageTitle' => 'Browse Movies',
-            'metaDescription' => 'Browse published movies on Screenbase with ratings, reviews, and genre links.',
+            'metaDescription' => 'Browse imported feature films from the remote IMDb catalog.',
             'heading' => 'Browse Movies',
-            'description' => 'Explore released feature films through the existing Screenbase card system, rating aggregates, and public detail pages.',
+            'description' => 'Feature films from the imported catalog, ranked by catalog popularity, rating, or release date.',
             'breadcrumbs' => $breadcrumbs,
-            'badges' => ['Feature films', 'Audience ratings', 'Editorial discovery'],
+            'badges' => ['Feature films', 'Ratings', 'Genre hubs'],
             'actions' => [
                 ['label' => 'Top Rated Movies', 'href' => route('public.rankings.movies'), 'variant' => 'outline', 'icon' => 'star'],
                 ['label' => 'Trending', 'href' => route('public.trending'), 'variant' => 'ghost', 'icon' => 'bolt'],
@@ -104,12 +100,12 @@ class BrowseTitlesPage extends Component
                 'types' => [TitleType::Movie->value],
                 'sort' => 'popular',
                 'pageName' => 'movies',
-                'emptyHeading' => 'No published movies are available right now.',
+                'emptyHeading' => 'No movies are available right now.',
                 'emptyText' => 'Check back soon or explore the broader title catalog.',
             ],
             'seo' => new PageSeoData(
                 title: 'Browse Movies',
-                description: 'Browse published movies on Screenbase with ratings, reviews, and genre links.',
+                description: 'Browse imported feature films from the remote IMDb catalog.',
                 canonical: route('public.movies.index'),
                 breadcrumbs: $breadcrumbs,
                 paginationPageName: 'movies',
@@ -126,25 +122,25 @@ class BrowseTitlesPage extends Component
 
         return $this->renderBrowseView([
             'pageTitle' => 'Browse TV Shows',
-            'metaDescription' => 'Browse published TV series and mini-series on Screenbase.',
+            'metaDescription' => 'Browse imported TV series and mini-series from the remote catalog, with season and episode routes when source data exists.',
             'heading' => 'Browse TV Shows',
-            'description' => 'Track ongoing series, mini-series, and season structures with the same catalog, review, and people architecture used across the public site.',
+            'description' => 'Series and mini-series from the imported catalog, with canonical season and episode routes when the source database provides that hierarchy.',
             'breadcrumbs' => $breadcrumbs,
-            'badges' => ['Series', 'Mini-series', 'Season-aware pages'],
+            'badges' => ['Series', 'Mini-series', 'Catalog-backed'],
             'actions' => [
                 ['label' => 'Top Rated Series', 'href' => route('public.rankings.series'), 'variant' => 'outline', 'icon' => 'star'],
-                ['label' => 'Latest Trailers', 'href' => route('public.trailers.latest'), 'variant' => 'ghost', 'icon' => 'play'],
+                ['label' => 'Trending', 'href' => route('public.trending'), 'variant' => 'ghost', 'icon' => 'bolt'],
             ],
             'browserProps' => [
                 'types' => [TitleType::Series->value, TitleType::MiniSeries->value],
                 'sort' => 'popular',
                 'pageName' => 'tv-shows',
-                'emptyHeading' => 'No published TV shows are available right now.',
+                'emptyHeading' => 'No TV shows are available right now.',
                 'emptyText' => 'Check back soon or explore other areas of the catalog.',
             ],
             'seo' => new PageSeoData(
                 title: 'Browse TV Shows',
-                description: 'Browse published TV series and mini-series on Screenbase.',
+                description: 'Browse imported TV series and mini-series from the remote catalog, with season and episode routes when source data exists.',
                 canonical: route('public.series.index'),
                 breadcrumbs: $breadcrumbs,
                 paginationPageName: 'tv-shows',
@@ -164,9 +160,9 @@ class BrowseTitlesPage extends Component
 
         return $this->renderBrowseView([
             'pageTitle' => $this->genre->name,
-            'metaDescription' => $this->genre->description ?: 'Browse '.$this->genre->name.' titles, reviews, and discovery pages on Screenbase.',
+            'metaDescription' => 'Browse '.$this->genre->name.' titles from the imported catalog.',
             'heading' => $this->genre->name,
-            'description' => $this->genre->description ?: 'Published titles tagged with '.$this->genre->name.'.',
+            'description' => 'Titles tagged with '.$this->genre->name.' in the imported IMDb data.',
             'breadcrumbs' => $breadcrumbs,
             'badges' => ['Genre hub', 'Linked from title pages'],
             'actions' => [
@@ -177,12 +173,12 @@ class BrowseTitlesPage extends Component
                 'genre' => $this->genre->slug,
                 'sort' => 'popular',
                 'pageName' => 'genre-'.$this->genre->slug,
-                'emptyHeading' => 'No published titles are available in this genre yet.',
+                'emptyHeading' => 'No titles are available in this genre yet.',
                 'emptyText' => 'Try another genre or return to the broader catalog.',
             ],
             'seo' => new PageSeoData(
                 title: $this->genre->name,
-                description: $this->genre->description ?: 'Browse '.$this->genre->name.' titles, reviews, and discovery pages on Screenbase.',
+                description: 'Browse '.$this->genre->name.' titles from the imported catalog.',
                 canonical: route('public.genres.show', $this->genre),
                 breadcrumbs: $breadcrumbs,
                 paginationPageName: 'genre-'.$this->genre->slug,
@@ -202,7 +198,7 @@ class BrowseTitlesPage extends Component
 
         return $this->renderBrowseView([
             'pageTitle' => 'Titles from '.$this->year,
-            'metaDescription' => 'Browse public title pages released in '.$this->year.' on Screenbase.',
+            'metaDescription' => 'Browse imported titles released in '.$this->year.'.',
             'heading' => (string) $this->year,
             'description' => 'Released titles from '.$this->year.', including movies, series, documentaries, specials, and shorts.',
             'breadcrumbs' => $breadcrumbs,
@@ -215,12 +211,12 @@ class BrowseTitlesPage extends Component
                 'year' => $this->year,
                 'sort' => 'rating',
                 'pageName' => 'year-'.$this->year,
-                'emptyHeading' => 'No published titles were found for '.$this->year.'.',
+                'emptyHeading' => 'No titles were found for '.$this->year.'.',
                 'emptyText' => 'Try a different year or browse the broader catalog.',
             ],
             'seo' => new PageSeoData(
                 title: 'Titles from '.$this->year,
-                description: 'Browse public title pages released in '.$this->year.' on Screenbase.',
+                description: 'Browse imported titles released in '.$this->year.'.',
                 canonical: route('public.years.show', ['year' => $this->year]),
                 breadcrumbs: $breadcrumbs,
                 paginationPageName: 'year-'.$this->year,
@@ -237,14 +233,14 @@ class BrowseTitlesPage extends Component
 
         return $this->renderBrowseView([
             'pageTitle' => 'Top Rated Movies',
-            'metaDescription' => 'Browse Screenbase movies ordered by rating and rating volume.',
+            'metaDescription' => 'Browse movies ordered by rating and vote volume from the imported catalog.',
             'heading' => 'Top Rated Movies',
-            'description' => 'Feature films ranked by aggregate audience rating, then stabilized by vote volume.',
+            'description' => 'Feature films ranked by audience score and stabilized by vote volume from the imported data.',
             'breadcrumbs' => $breadcrumbs,
             'badges' => ['Rating-driven', 'Movie only'],
             'actions' => [
                 ['label' => 'Browse Movies', 'href' => route('public.movies.index'), 'variant' => 'outline', 'icon' => 'film'],
-                ['label' => 'Latest Reviews', 'href' => route('public.reviews.latest'), 'variant' => 'ghost', 'icon' => 'chat-bubble-left-right'],
+                ['label' => 'Trending', 'href' => route('public.trending'), 'variant' => 'ghost', 'icon' => 'bolt'],
             ],
             'browserProps' => [
                 'types' => [TitleType::Movie->value],
@@ -252,11 +248,11 @@ class BrowseTitlesPage extends Component
                 'pageName' => 'top-rated-movies',
                 'displayMode' => 'chart',
                 'emptyHeading' => 'No rated movies are available yet.',
-                'emptyText' => 'As ratings arrive, this page will surface the strongest films.',
+                'emptyText' => 'As vote counts accumulate, this page will surface the strongest films.',
             ],
             'seo' => new PageSeoData(
                 title: 'Top Rated Movies',
-                description: 'Browse Screenbase movies ordered by rating and rating volume.',
+                description: 'Browse movies ordered by rating and vote volume from the imported catalog.',
                 canonical: route('public.rankings.movies'),
                 breadcrumbs: $breadcrumbs,
                 paginationPageName: 'top-rated-movies',
@@ -273,14 +269,14 @@ class BrowseTitlesPage extends Component
 
         return $this->renderBrowseView([
             'pageTitle' => 'Top Rated Series',
-            'metaDescription' => 'Browse Screenbase series and mini-series ordered by audience rating.',
+            'metaDescription' => 'Browse series and mini-series ordered by audience rating.',
             'heading' => 'Top Rated Series',
-            'description' => 'TV and mini-series ranked by audience score with review and watchlist momentum alongside each record.',
+            'description' => 'TV and mini-series ranked by audience score and vote count from the imported catalog.',
             'breadcrumbs' => $breadcrumbs,
             'badges' => ['TV and mini-series', 'Rating-driven'],
             'actions' => [
                 ['label' => 'Browse TV Shows', 'href' => route('public.series.index'), 'variant' => 'outline', 'icon' => 'tv'],
-                ['label' => 'Latest Trailers', 'href' => route('public.trailers.latest'), 'variant' => 'ghost', 'icon' => 'play'],
+                ['label' => 'Trending', 'href' => route('public.trending'), 'variant' => 'ghost', 'icon' => 'bolt'],
             ],
             'browserProps' => [
                 'types' => [TitleType::Series->value, TitleType::MiniSeries->value],
@@ -288,11 +284,11 @@ class BrowseTitlesPage extends Component
                 'pageName' => 'top-rated-series',
                 'displayMode' => 'chart',
                 'emptyHeading' => 'No rated series are available yet.',
-                'emptyText' => 'Once ratings accumulate, this page will rank the strongest series.',
+                'emptyText' => 'As vote counts accumulate, this page will rank the strongest series.',
             ],
             'seo' => new PageSeoData(
                 title: 'Top Rated Series',
-                description: 'Browse Screenbase series and mini-series ordered by audience rating.',
+                description: 'Browse series and mini-series ordered by audience rating.',
                 canonical: route('public.rankings.series'),
                 breadcrumbs: $breadcrumbs,
                 paginationPageName: 'top-rated-series',
@@ -309,25 +305,25 @@ class BrowseTitlesPage extends Component
 
         return $this->renderBrowseView([
             'pageTitle' => 'Trending',
-            'metaDescription' => 'Browse titles trending on Screenbase by watchlist activity and review momentum.',
+            'metaDescription' => 'Browse titles currently trending in the imported catalog.',
             'heading' => 'Trending Now',
-            'description' => 'A public feed weighted toward watchlist saves, review volume, and popularity ranking.',
+            'description' => 'A live catalog feed weighted toward vote activity, recency, and catalog visibility.',
             'breadcrumbs' => $breadcrumbs,
-            'badges' => ['Momentum', 'Watchlists', 'Recent discussion'],
+            'badges' => ['Momentum', 'Catalog visibility', 'Fresh interest'],
             'actions' => [
-                ['label' => 'Latest Reviews', 'href' => route('public.reviews.latest'), 'variant' => 'outline', 'icon' => 'chat-bubble-left-right'],
-                ['label' => 'Latest Trailers', 'href' => route('public.trailers.latest'), 'variant' => 'ghost', 'icon' => 'play'],
+                ['label' => 'Top Rated Movies', 'href' => route('public.rankings.movies'), 'variant' => 'outline', 'icon' => 'star'],
+                ['label' => 'Top Rated Series', 'href' => route('public.rankings.series'), 'variant' => 'ghost', 'icon' => 'tv'],
             ],
             'browserProps' => [
                 'sort' => 'trending',
                 'pageName' => 'trending',
                 'displayMode' => 'chart',
                 'emptyHeading' => 'No trending titles are available yet.',
-                'emptyText' => 'As the community adds watchlists and reviews, this page will update.',
+                'emptyText' => 'The chart will update as the imported catalog evolves.',
             ],
             'seo' => new PageSeoData(
                 title: 'Trending',
-                description: 'Browse titles trending on Screenbase by watchlist activity and review momentum.',
+                description: 'Browse titles currently trending in the imported catalog.',
                 canonical: route('public.trending'),
                 breadcrumbs: $breadcrumbs,
                 paginationPageName: 'trending',
@@ -376,7 +372,6 @@ class BrowseTitlesPage extends Component
                         'tv' => 'tv',
                         'series' => 'tv',
                         'rating' => 'star',
-                        'review' => 'chat-bubble-left-right',
                         'discover' => 'sparkles',
                         'genre' => 'tag',
                         'year' => 'calendar-days',

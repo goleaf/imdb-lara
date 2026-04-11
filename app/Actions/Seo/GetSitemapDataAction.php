@@ -2,50 +2,57 @@
 
 namespace App\Actions\Seo;
 
-use App\Enums\ListVisibility;
-use App\Enums\ProfileVisibility;
-use App\Enums\TitleType;
 use App\Models\Genre;
 use App\Models\Person;
 use App\Models\Season;
 use App\Models\Title;
-use App\Models\User;
-use App\Models\UserList;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Route;
 
 class GetSitemapDataAction
 {
+    private const TITLE_LIMIT = 100;
+
+    private const PERSON_LIMIT = 100;
+
+    private const SEASON_LIMIT = 100;
+
+    private const EPISODE_LIMIT = 100;
+
     /**
      * @return array{
      *     staticRoutes: list<string>,
      *     genres: EloquentCollection<int, Genre>,
      *     years: Collection<int, int>,
      *     titles: EloquentCollection<int, Title>,
+     *     titleArchiveUrls: Collection<int, string>,
      *     episodes: EloquentCollection<int, Title>,
      *     seasons: EloquentCollection<int, Season>,
-     *     people: EloquentCollection<int, Person>,
-     *     profiles: EloquentCollection<int, User>,
-     *     lists: EloquentCollection<int, UserList>
+     *     people: EloquentCollection<int, Person>
      * }
      */
     public function handle(): array
     {
+        $titles = Title::query()
+            ->select(['id', 'tconst', 'primarytitle', 'isadult', 'startyear'])
+            ->publishedCatalog()
+            ->orderByDesc('startyear')
+            ->orderBy('primarytitle')
+            ->limit(self::TITLE_LIMIT)
+            ->get();
         $staticRoutes = collect([
             'public.home',
             'public.discover',
             'public.titles.index',
             'public.people.index',
-            'public.lists.index',
+            'public.awards.index',
+            'public.trailers.latest',
             'public.movies.index',
             'public.series.index',
-            'public.awards.index',
             'public.rankings.movies',
             'public.rankings.series',
             'public.trending',
-            'public.trailers.latest',
-            'public.reviews.latest',
         ])
             ->filter(fn (string $routeName): bool => Route::has($routeName))
             ->map(fn (string $routeName): string => route($routeName))
@@ -55,68 +62,56 @@ class GetSitemapDataAction
         return [
             'staticRoutes' => $staticRoutes,
             'genres' => Genre::query()
-                ->select(['id', 'slug', 'updated_at'])
+                ->select(['id', 'name'])
                 ->whereHas('titles', fn ($query) => $query->publishedCatalog())
-                ->orderBy('slug')
+                ->orderBy('name')
                 ->get(),
             'years' => Title::query()
-                ->select(['release_year'])
+                ->select(['startyear'])
                 ->publishedCatalog()
-                ->whereNotNull('release_year')
+                ->whereNotNull('startyear')
                 ->distinct()
-                ->orderByDesc('release_year')
-                ->pluck('release_year'),
-            'titles' => Title::query()
-                ->select(['id', 'slug', 'updated_at', 'canonical_title_id'])
-                ->publishedCatalog()
-                ->whereNull('canonical_title_id')
-                ->latest('updated_at')
-                ->get(),
+                ->orderByDesc('startyear')
+                ->pluck('startyear'),
+            'titles' => $titles,
+            'titleArchiveUrls' => $titles
+                ->flatMap(function (Title $title): Collection {
+                    return collect([
+                        'public.titles.cast',
+                        'public.titles.media',
+                        'public.titles.box-office',
+                        'public.titles.parents-guide',
+                        'public.titles.trivia',
+                        'public.titles.metadata',
+                    ])
+                        ->filter(fn (string $routeName): bool => Route::has($routeName))
+                        ->map(fn (string $routeName): string => route($routeName, $title));
+                })
+                ->values(),
             'episodes' => Route::has('public.episodes.show')
                 ? Title::query()
-                    ->select(['id', 'slug', 'updated_at'])
+                    ->select(['id', 'tconst', 'primarytitle', 'titletype'])
                     ->published()
-                    ->where('title_type', TitleType::Episode)
-                    ->with('episodeMeta.season:id,series_id,slug', 'episodeMeta.series:id,slug')
-                    ->latest('updated_at')
+                    ->where('titletype', 'tvEpisode')
+                    ->with('episodeMeta.series:id,tconst,primarytitle', 'episodeMeta')
+                    ->orderBy('primarytitle')
+                    ->limit(self::EPISODE_LIMIT)
                     ->get()
                 : new EloquentCollection,
             'seasons' => Route::has('public.seasons.show')
                 ? Season::query()
-                    ->select(['id', 'series_id', 'slug', 'updated_at'])
-                    ->with('series:id,slug')
-                    ->latest('updated_at')
+                    ->select(['movie_id', 'season', 'episode_count'])
+                    ->with('series:id,tconst,primarytitle')
+                    ->orderBy('movie_id')
+                    ->orderBy('season')
+                    ->limit(self::SEASON_LIMIT)
                     ->get()
                 : new EloquentCollection,
             'people' => Person::query()
-                ->select(['id', 'slug', 'updated_at'])
+                ->select(['id', 'nconst', 'primaryname', 'displayName'])
                 ->published()
-                ->latest('updated_at')
-                ->get(),
-            'profiles' => Route::has('public.users.show')
-                ? User::query()
-                    ->select(['id', 'username', 'updated_at'])
-                    ->where('profile_visibility', ProfileVisibility::Public)
-                    ->where(function ($query): void {
-                        $query
-                            ->whereHas('publicLists')
-                            ->orWhereHas('publicWatchlist')
-                            ->orWhereHas('reviews', fn ($reviewQuery) => $reviewQuery->published())
-                            ->orWhere(function ($ratingsQuery): void {
-                                $ratingsQuery
-                                    ->where('show_ratings_on_profile', true)
-                                    ->whereHas('ratings');
-                            });
-                    })
-                    ->latest('updated_at')
-                    ->get()
-                : new EloquentCollection,
-            'lists' => UserList::query()
-                ->select(['id', 'user_id', 'slug', 'updated_at'])
-                ->where('visibility', ListVisibility::Public)
-                ->where('is_watchlist', false)
-                ->with('user:id,username')
-                ->latest('updated_at')
+                ->orderBy('displayName')
+                ->limit(self::PERSON_LIMIT)
                 ->get(),
         ];
     }

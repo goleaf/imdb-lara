@@ -29,6 +29,9 @@ class BuildDiscoveryQueryAction
      */
     public function handle(array $filters = []): Builder
     {
-        return $this->buildPublicTitleIndexQuery->handle($filters);
+        return $this->buildPublicTitleIndexQuery->handle([
+            ...$filters,
+            'searchMode' => 'discovery',
+        ]);
     }
 }

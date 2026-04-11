@@ -2,98 +2,37 @@
 
 namespace Tests\Feature\Feature;
 
-use App\Enums\TitleRelationshipType;
-use App\Models\Title;
-use App\Models\TitleRelationship;
-use Database\Seeders\DemoCatalogSeeder;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Concerns\InteractsWithRemoteCatalog;
+use Tests\Concerns\UsesCatalogOnlyApplication;
 use Tests\TestCase;
 
 class TitleMetadataExplorationExperienceTest extends TestCase
 {
-    use RefreshDatabase;
+    use InteractsWithRemoteCatalog;
+    use UsesCatalogOnlyApplication;
 
-    public function test_title_metadata_page_renders_grouped_keywords_and_connection_cards(): void
+    public function test_title_metadata_page_renders_the_remote_catalog_keyword_and_connection_surface(): void
     {
-        $title = Title::factory()->movie()->create([
-            'name' => 'Signal Harbor',
-            'slug' => 'signal-harbor',
-            'search_keywords' => 'harbor conspiracy, signal breach, polar thriller, cold war mystery, surveillance relay, frozen pipeline, coded distress',
-        ]);
-
-        $precedingTitle = Title::factory()->movie()->create([
-            'name' => 'Signal Harbor Zero',
-            'slug' => 'signal-harbor-zero',
-            'plot_outline' => 'The first harbor breach leaves a coded trail under the ice.',
-        ]);
-
-        $followingTitle = Title::factory()->movie()->create([
-            'name' => 'Signal Harbor Aftermath',
-            'slug' => 'signal-harbor-aftermath',
-            'plot_outline' => 'The fallout spreads across northern relay stations.',
-        ]);
-
-        $similarTitle = Title::factory()->movie()->create([
-            'name' => 'Mirror Current',
-            'slug' => 'mirror-current',
-            'plot_outline' => 'A mirrored data leak ties two submarine crews together.',
-        ]);
-
-        TitleRelationship::factory()->create([
-            'from_title_id' => $title->id,
-            'to_title_id' => $precedingTitle->id,
-            'relationship_type' => TitleRelationshipType::Sequel,
-            'weight' => 9,
-            'notes' => 'Direct continuation of the harbor incident dossier.',
-        ]);
-
-        TitleRelationship::factory()->create([
-            'from_title_id' => $followingTitle->id,
-            'to_title_id' => $title->id,
-            'relationship_type' => TitleRelationshipType::Sequel,
-            'weight' => 7,
-            'notes' => 'Later investigation into the relay collapse.',
-        ]);
-
-        TitleRelationship::factory()->create([
-            'from_title_id' => $title->id,
-            'to_title_id' => $similarTitle->id,
-            'relationship_type' => TitleRelationshipType::Similar,
-            'weight' => 6,
-        ]);
+        $title = $this->sampleTitleWithInterests();
 
         $this->get(route('public.titles.metadata', $title))
             ->assertOk()
+            ->assertSee($title->name)
+            ->assertSee('Keywords & Connections')
             ->assertSeeHtml('data-slot="title-metadata-hero"')
             ->assertSeeHtml('data-slot="title-keyword-map"')
             ->assertSeeHtml('data-slot="title-connection-map"')
-            ->assertSeeHtml('data-slot="connection-card"')
-            ->assertSee('Keywords & Connections')
-            ->assertSee('Primary Cues')
-            ->assertSee('Story Vectors')
-            ->assertSee('Follows')
-            ->assertSee('Followed By')
-            ->assertSee('Similar To')
-            ->assertSee('Signal Harbor Zero')
-            ->assertSee('Signal Harbor Aftermath')
-            ->assertSee('Mirror Current')
-            ->assertSee('Harbor Conspiracy')
-            ->assertSee('Signal Breach');
+            ->assertSee('Keyword Map')
+            ->assertSee('Title Connections');
     }
 
-    public function test_seeded_title_metadata_route_renders_keywords_and_connections(): void
+    public function test_title_detail_page_links_to_the_metadata_route(): void
     {
-        $this->seed(DemoCatalogSeeder::class);
+        $title = $this->sampleTitleWithInterests();
 
-        $title = Title::query()->where('slug', 'northern-signal')->firstOrFail();
-
-        $this->get(route('public.titles.metadata', $title))
+        $this->get(route('public.titles.show', $title))
             ->assertOk()
-            ->assertSee('Keywords & Connections')
-            ->assertSee('Keyword Map')
-            ->assertSee('Title Connections')
-            ->assertSee('Arctic Mystery')
-            ->assertSee('Buried Signal')
-            ->assertSee('Afterlight Protocol');
+            ->assertSee(route('public.titles.metadata', $title), false)
+            ->assertSee('Keywords & Connections');
     }
 }

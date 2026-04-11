@@ -3,6 +3,8 @@
 namespace App\Livewire\Catalog;
 
 use App\Actions\Catalog\BuildPublicTitleIndexQueryAction;
+use Illuminate\View\View;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -37,126 +39,71 @@ class TitleBrowser extends Component
 
     public string $emptyText = 'Check back soon or explore another part of the catalog.';
 
-    public function render()
+    #[Computed]
+    public function viewData(): array
     {
         $queryAction = app(BuildPublicTitleIndexQueryAction::class);
 
-        $baseFilters = [
-            'types' => $this->types,
-            'genre' => $this->genre,
-            'year' => $this->year,
-            'sort' => $this->sort,
-            'excludeEpisodes' => $this->excludeEpisodes,
-        ];
-
         $titles = $queryAction
             ->handle([
-                ...$baseFilters,
+                'types' => $this->types,
+                'genre' => $this->genre,
+                'year' => $this->year,
                 'country' => $this->country,
+                'sort' => $this->sort,
+                'excludeEpisodes' => $this->excludeEpisodes,
             ])
             ->simplePaginate($this->perPage, pageName: $this->pageName)
             ->withQueryString();
 
-        $chartCountryOptions = [];
-        $globalPositions = [];
-
-        if ($this->displayMode === 'chart') {
-            $globalChartTitles = $queryAction
-                ->handle([
-                    ...$baseFilters,
-                    'includePresentationRelations' => false,
-                    'includePublishedReviewCount' => false,
-                ])
-                ->get(['id', 'origin_country']);
-
-            $chartCountryOptions = $globalChartTitles
-                ->pluck('origin_country')
-                ->filter()
-                ->countBy()
-                ->sortDesc()
-                ->take(5)
-                ->map(
-                    fn (int $count, string $country): array => [
-                        'code' => $country,
-                        'count' => $count,
-                        'label' => $this->countryLabel($country),
-                    ],
-                )
-                ->values()
-                ->all();
-
-            if (filled($this->country)) {
-                $globalPositions = $globalChartTitles
-                    ->pluck('id')
-                    ->values()
-                    ->flip()
-                    ->map(fn (int $position): int => $position + 1)
-                    ->all();
-            }
-        }
-
         $isChartMode = $this->displayMode === 'chart';
-        $selectedCountryCode = str((string) $this->country)->trim()->upper()->toString();
-        $selectedCountryLabel = collect($chartCountryOptions)->firstWhere('code', $selectedCountryCode)['label'] ?? $selectedCountryCode;
         $pageOffset = $isChartMode ? (($titles->currentPage() - 1) * $this->perPage) : 0;
         $chartRows = [];
 
         if ($isChartMode) {
-            $chartTitles = collect($titles->items());
-            $popularityPositions = $chartTitles
-                ->sortBy(fn ($title) => $title->popularity_rank ?? PHP_INT_MAX)
-                ->values()
-                ->pluck('id')
-                ->flip();
-
-            foreach ($chartTitles as $index => $title) {
-                $chartRank = $pageOffset + $index + 1;
-                $popularityPosition = (($popularityPositions[$title->id] ?? $index) + 1);
-                $globalRank = $globalPositions[$title->id] ?? null;
-                $comparisonRank = $selectedCountryCode !== '' ? $globalRank : $popularityPosition;
-                $movementAmount = abs(($comparisonRank ?? $index + 1) - ($index + 1));
-                $movementDirection = ($index + 1) < ($comparisonRank ?? $index + 1)
-                    ? 'up'
-                    : (($index + 1) > ($comparisonRank ?? $index + 1) ? 'down' : 'steady');
-
+            foreach (collect($titles->items())->values() as $index => $title) {
                 $chartRows[$title->id] = [
-                    'comparisonLabel' => $selectedCountryCode !== '' && $globalRank
-                        ? 'Global #'.$globalRank
-                        : 'Popularity #'.$popularityPosition,
-                    'movementAmount' => $movementAmount,
-                    'movementDirection' => $movementDirection,
-                    'movementNote' => $selectedCountryCode !== '' ? 'vs global' : 'vs popularity',
-                    'rank' => $chartRank,
+                    'comparisonLabel' => $title->displayRatingCount() > 0
+                        ? number_format($title->displayRatingCount()).' votes'
+                        : 'Catalog rank',
+                    'movementAmount' => 0,
+                    'movementDirection' => 'steady',
+                    'movementNote' => 'catalog order',
+                    'rank' => $pageOffset + $index + 1,
                 ];
             }
         }
 
-        return view('livewire.catalog.title-browser', [
+        return [
             'chartRows' => $chartRows,
-            'chartCountryOptions' => $chartCountryOptions,
-            'country' => $this->country,
+            'chartCountryOptions' => [],
+            'country' => null,
             'displayMode' => $this->displayMode,
-            'globalPositions' => $globalPositions,
+            'emptyHeading' => $this->emptyHeading,
+            'emptyText' => $this->emptyText,
+            'globalPositions' => [],
             'isChartMode' => $isChartMode,
             'pageOffset' => $pageOffset,
             'perPage' => $this->perPage,
-            'selectedCountryCode' => $selectedCountryCode,
-            'selectedCountryLabel' => $selectedCountryLabel,
+            'selectedCountryCode' => '',
+            'selectedCountryLabel' => '',
             'titles' => $titles,
             'showSummary' => $this->showSummary,
-        ]);
+        ];
     }
 
-    private function countryLabel(string $country): string
+    public function render(): View
     {
-        if (class_exists(\Locale::class)) {
-            $label = \Locale::getDisplayRegion('-'.$country, app()->getLocale());
+        return view('livewire.catalog.title-browser');
+    }
 
-            if (filled($label)) {
-                return $label;
-            }
-        }
+    public function paginationSimpleView(): string
+    {
+        return 'livewire.pagination.island-simple';
+    }
 
-        return strtoupper($country);
+    public function paginationIslandName(): string
+    {
+        return 'title-browser-page';
     }
 }

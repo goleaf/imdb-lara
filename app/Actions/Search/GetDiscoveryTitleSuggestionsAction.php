@@ -2,11 +2,16 @@
 
 namespace App\Actions\Search;
 
+use App\Actions\Catalog\BuildPublicTitleIndexQueryAction;
 use App\Models\Title;
 use Illuminate\Database\Eloquent\Collection;
 
 class GetDiscoveryTitleSuggestionsAction
 {
+    public function __construct(
+        private BuildPublicTitleIndexQueryAction $buildPublicTitleIndexQuery,
+    ) {}
+
     /**
      * @return Collection<int, Title>
      */
@@ -18,19 +23,13 @@ class GetDiscoveryTitleSuggestionsAction
             return new Collection;
         }
 
-        return Title::query()
-            ->select([
-                'id',
-                'name',
-                'slug',
-                'title_type',
-                'release_year',
-                'popularity_rank',
+        return $this->buildPublicTitleIndexQuery
+            ->handle([
+                'search' => $search,
+                'searchMode' => 'discovery',
+                'sort' => 'popular',
+                'excludeEpisodes' => false,
             ])
-            ->publishedCatalog()
-            ->matchingSearch($search)
-            ->orderBy('popularity_rank')
-            ->orderBy('name')
             ->limit(max(1, min($limit, 8)))
             ->get();
     }

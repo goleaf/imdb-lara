@@ -3,9 +3,12 @@
 namespace App\Actions\Catalog;
 
 use App\Actions\Seo\PageSeoData;
-use App\Enums\MediaKind;
 use App\Enums\TitleType;
-use App\Models\MediaAsset;
+use App\Models\CatalogMediaAsset;
+use App\Models\MovieCertificate;
+use App\Models\MovieParentsGuideReview;
+use App\Models\MovieParentsGuideSection;
+use App\Models\MovieParentsGuideSeverityBreakdown;
 use App\Models\Title;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -15,8 +18,8 @@ class LoadTitleParentsGuideAction
     /**
      * @return array{
      *     title: Title,
-     *     poster: MediaAsset|null,
-     *     backdrop: MediaAsset|null,
+     *     poster: CatalogMediaAsset|null,
+     *     backdrop: CatalogMediaAsset|null,
      *     advisoryCount: int,
      *     spoilerCount: int,
      *     documentedVoteCount: int,
@@ -49,23 +52,21 @@ class LoadTitleParentsGuideAction
     public function handle(Title $title): array
     {
         $title->load([
-            'statistic:id,title_id,average_rating,rating_count,review_count,watchlist_count',
-            'mediaAssets' => fn ($query) => $query
-                ->select([
-                    'id',
-                    'mediable_type',
-                    'mediable_id',
-                    'kind',
-                    'url',
-                    'alt_text',
-                    'position',
-                    'is_primary',
-                ])
-                ->ordered(),
+            'titleImages:id,movie_id,position,url,width,height,type',
+            'primaryImageRecord:movie_id,url,width,height,type',
+            'certificateRecords:id,movie_id,certificate_rating_id,country_code,position',
+            'certificateRecords.certificateRating:id,name',
+            'certificateRecords.movieCertificateAttributes:movie_certificate_id,certificate_attribute_id,position',
+            'certificateRecords.movieCertificateAttributes.certificateAttribute:id,name',
+            'parentsGuideSections:id,movie_id,parents_guide_category_id,position',
+            'parentsGuideSections.parentsGuideCategory:id,code',
+            'parentsGuideSections.movieParentsGuideReviews:id,movie_parents_guide_section_id,text,is_spoiler,position',
+            'parentsGuideSections.movieParentsGuideSeverityBreakdowns:movie_parents_guide_section_id,parents_guide_severity_level_id,vote_count,position',
+            'parentsGuideSections.movieParentsGuideSeverityBreakdowns.parentsGuideSeverityLevel:id,name',
         ]);
 
-        $poster = MediaAsset::preferredFrom($title->mediaAssets, MediaKind::Poster, MediaKind::Backdrop);
-        $backdrop = MediaAsset::preferredFrom($title->mediaAssets, MediaKind::Backdrop, MediaKind::Poster);
+        $poster = $title->preferredPoster();
+        $backdrop = $title->preferredBackdrop();
         $advisorySections = $this->buildAdvisorySections($title);
         $severitySummary = $this->buildSeveritySummary($advisorySections);
         $certificateItems = $this->buildCertificateItems($title);
@@ -121,75 +122,69 @@ class LoadTitleParentsGuideAction
      */
     private function buildAdvisorySections(Title $title): Collection
     {
-        return collect(data_get($title->imdbPayloadSection('parentsGuide'), 'advisories', []))
-            ->map(function (mixed $advisory): ?array {
-                if (! is_array($advisory)) {
-                    return null;
-                }
-
-                $reviewTexts = collect(data_get($advisory, 'reviews', []))
-                    ->map(function (mixed $review): ?string {
-                        if (! is_array($review)) {
-                            return null;
-                        }
-
-                        return $this->nullableString(data_get($review, 'text'));
-                    })
+        return $title->parentsGuideSections
+            ->map(function (MovieParentsGuideSection $section): ?array {
+                $reviews = $section->movieParentsGuideReviews
+                    ->sortBy('position')
+                    ->values();
+                $nonSpoilerReviews = $reviews
+                    ->reject(fn (MovieParentsGuideReview $review): bool => $review->is_spoiler)
+                    ->pluck('text')
+                    ->map(fn (mixed $text): ?string => $this->nullableString($text))
                     ->filter()
                     ->values();
+                $text = $nonSpoilerReviews->implode(' ');
 
-                $text = $this->nullableString(data_get($advisory, 'text'))
-                    ?? ($reviewTexts->isNotEmpty() ? $reviewTexts->implode(' ') : null);
+                if ($text === '') {
+                    $text = $reviews
+                        ->pluck('text')
+                        ->map(fn (mixed $reviewText): ?string => $this->nullableString($reviewText))
+                        ->filter()
+                        ->implode(' ');
+                }
 
-                if ($text === null) {
+                if ($text === '') {
                     return null;
                 }
 
-                $severity = $this->nullableString(data_get($advisory, 'severity'));
-                $severityLabel = $severity !== null
-                    ? Str::of($severity)->replace(['_', '-'], ' ')->headline()->toString()
+                $breakdowns = $section->movieParentsGuideSeverityBreakdowns
+                    ->sortByDesc('vote_count')
+                    ->values();
+                $topBreakdown = $breakdowns->first();
+                $severityLabel = $topBreakdown?->parentsGuideSeverityLevel?->name
+                    ? Str::of($topBreakdown->parentsGuideSeverityLevel->name)->headline()->toString()
                     : 'Unrated';
-                $yesVotes = $this->firstNullableInt([
-                    data_get($advisory, 'votes.yes'),
-                    data_get($advisory, 'voteBreakdown.yes'),
-                    data_get($advisory, 'yesVotes'),
-                    data_get($advisory, 'upVotes'),
-                ]);
-                $noVotes = $this->firstNullableInt([
-                    data_get($advisory, 'votes.no'),
-                    data_get($advisory, 'voteBreakdown.no'),
-                    data_get($advisory, 'noVotes'),
-                    data_get($advisory, 'downVotes'),
-                ]);
-                $totalVotes = ($yesVotes !== null || $noVotes !== null)
-                    ? max(0, ($yesVotes ?? 0) + ($noVotes ?? 0))
-                    : $this->firstNullableInt([
-                        data_get($advisory, 'votes.total'),
-                        data_get($advisory, 'voteBreakdown.total'),
-                        data_get($advisory, 'voteCount'),
-                    ]);
-                $consensus = ($yesVotes !== null && $noVotes !== null && $totalVotes > 0)
-                    ? (int) round((max($yesVotes, $noVotes) / $totalVotes) * 100)
+                $totalVotes = $breakdowns->sum('vote_count');
+                $consensus = ($topBreakdown instanceof MovieParentsGuideSeverityBreakdown && $totalVotes > 0)
+                    ? (int) round(($topBreakdown->vote_count / $totalVotes) * 100)
                     : null;
+                $voteSplitLabel = $breakdowns->isNotEmpty()
+                    ? $breakdowns
+                        ->take(3)
+                        ->map(function (MovieParentsGuideSeverityBreakdown $breakdown): string {
+                            $severityName = $breakdown->parentsGuideSeverityLevel?->name
+                                ? Str::of($breakdown->parentsGuideSeverityLevel->name)->headline()->toString()
+                                : 'Unrated';
+
+                            return $severityName.' '.number_format((int) $breakdown->vote_count);
+                        })
+                        ->implode(' · ')
+                    : 'Vote record not available';
 
                 return [
-                    'category' => Str::of($this->nullableString(data_get($advisory, 'category')) ?? 'Advisory')
+                    'category' => Str::of($section->parentsGuideCategory?->code ?? 'Advisory')
                         ->replace(['_', '-'], ' ')
                         ->headline()
                         ->toString(),
                     'severityLabel' => $severityLabel,
                     'severityColor' => $this->severityColor($severityLabel),
                     'text' => Str::of($text)->squish()->toString(),
-                    'reviewCount' => $reviewTexts->count(),
-                    'yesVotes' => $yesVotes,
-                    'noVotes' => $noVotes,
-                    'totalVotes' => $totalVotes,
+                    'reviewCount' => $reviews->count(),
+                    'yesVotes' => null,
+                    'noVotes' => null,
+                    'totalVotes' => $totalVotes > 0 ? $totalVotes : null,
                     'consensus' => $consensus,
-                    'voteSplitLabel' => match (true) {
-                        $yesVotes !== null && $noVotes !== null => number_format($yesVotes).' / '.number_format($noVotes).' split',
-                        $totalVotes !== null => number_format($totalVotes).' recorded votes',
-                        default => 'Vote record not available',
-                    },
+                    'voteSplitLabel' => $voteSplitLabel,
                 ];
             })
             ->filter()
@@ -252,34 +247,23 @@ class LoadTitleParentsGuideAction
      */
     private function buildCertificateItems(Title $title): Collection
     {
-        return collect(data_get($title->imdbPayloadSection('certificates'), 'certificates', []))
-            ->map(function (mixed $certificate): ?array {
-                if (! is_array($certificate)) {
-                    return null;
-                }
-
-                $rating = $this->nullableString(data_get($certificate, 'rating'));
+        return $title->certificateRecords
+            ->map(function (MovieCertificate $certificate): ?array {
+                $rating = $this->nullableString($certificate->certificateRating?->name);
 
                 if ($rating === null) {
                     return null;
                 }
 
-                $attributes = collect(data_get($certificate, 'attributes', []))
-                    ->map(function (mixed $attribute): ?string {
-                        if (! is_string($attribute)) {
-                            return null;
-                        }
-
-                        return Str::of($attribute)->replace(['_', '-'], ' ')->headline()->toString();
-                    })
+                $attributes = $certificate->movieCertificateAttributes
+                    ->map(fn ($attribute): ?string => $this->nullableString($attribute->certificateAttribute?->name))
                     ->filter()
                     ->take(3)
                     ->implode(', ');
 
                 return [
                     'rating' => $rating,
-                    'country' => $this->nullableString(data_get($certificate, 'country.name'))
-                        ?? $this->nullableString(data_get($certificate, 'country.code')),
+                    'country' => $this->nullableString($certificate->country_code),
                     'attributes' => $attributes !== '' ? $attributes : null,
                 ];
             })
@@ -293,8 +277,13 @@ class LoadTitleParentsGuideAction
      */
     private function buildSpoilerItems(Title $title): Collection
     {
-        return collect(data_get($title->imdbPayloadSection('parentsGuide'), 'spoilers', []))
-            ->map(fn (mixed $spoiler): ?string => is_string($spoiler) ? trim($spoiler) : null)
+        return $title->parentsGuideSections
+            ->flatMap(
+                fn (MovieParentsGuideSection $section): Collection => $section->movieParentsGuideReviews
+                    ->filter(fn (MovieParentsGuideReview $review): bool => $review->is_spoiler)
+                    ->pluck('text'),
+            )
+            ->map(fn (mixed $spoiler): ?string => $this->nullableString($spoiler))
             ->filter()
             ->take(5)
             ->values();
@@ -308,31 +297,6 @@ class LoadTitleParentsGuideAction
             'mild' => 'slate',
             default => 'neutral',
         };
-    }
-
-    /**
-     * @param  array<int, mixed>  $values
-     */
-    private function firstNullableInt(array $values): ?int
-    {
-        foreach ($values as $value) {
-            $normalizedValue = $this->nullableInt($value);
-
-            if ($normalizedValue !== null) {
-                return $normalizedValue;
-            }
-        }
-
-        return null;
-    }
-
-    private function nullableInt(mixed $value): ?int
-    {
-        if (! is_scalar($value) || ! is_numeric((string) $value)) {
-            return null;
-        }
-
-        return (int) $value;
     }
 
     private function nullableString(mixed $value): ?string

@@ -1,11 +1,11 @@
-<div id="person-filmography" class="space-y-4">
+<div id="person-filmography" data-slot="person-filmography-panel" class="space-y-4">
     <x-ui.card class="sb-detail-section sb-person-filmography-shell !max-w-none">
         <div class="space-y-4">
             <div class="flex flex-wrap items-center justify-between gap-4">
                 <div>
                     <x-ui.heading level="h2" size="lg">Filmography</x-ui.heading>
                     <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                        Structured credit groups with poster-first rows and filters for a tighter view of the public career record.
+                        Filter imported MySQL credit groups by role family and reorder titles without leaving the profile page.
                     </x-ui.text>
                 </div>
 
@@ -16,12 +16,12 @@
 
             <div class="sb-person-filmography-toolbar">
                 <x-ui.field>
-                    <x-ui.label>Profession</x-ui.label>
+                    <x-ui.label>Credit group</x-ui.label>
                     <x-ui.combobox
                         wire:model.live="profession"
                         class="w-full"
                         size="sm"
-                        placeholder="All professions"
+                        placeholder="All groups"
                         clearable
                     >
                         @foreach ($professionOptions as $professionOption)
@@ -93,7 +93,7 @@
                         <div>
                             <x-ui.heading level="h3" size="md">{{ $group['label'] }}</x-ui.heading>
                             <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                {{ number_format($group['rows']->count()) }} title{{ $group['rows']->count() === 1 ? '' : 's' }} in this profession grouping.
+                                {{ number_format($group['rows']->count()) }} title{{ $group['rows']->count() === 1 ? '' : 's' }} in this credit grouping.
                             </x-ui.text>
                         </div>
                         <x-ui.badge variant="outline" color="neutral" icon="film">{{ number_format($group['rows']->count()) }} titles</x-ui.badge>

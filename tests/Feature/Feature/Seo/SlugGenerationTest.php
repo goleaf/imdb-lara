@@ -2,57 +2,49 @@
 
 namespace Tests\Feature\Feature\Seo;
 
-use App\Models\Person;
-use App\Models\Title;
-use App\Models\User;
-use App\Models\UserList;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
+use Tests\Concerns\InteractsWithRemoteCatalog;
+use Tests\Concerns\UsesCatalogOnlyApplication;
 use Tests\TestCase;
 
 class SlugGenerationTest extends TestCase
 {
-    use RefreshDatabase;
+    use InteractsWithRemoteCatalog;
+    use UsesCatalogOnlyApplication;
 
-    public function test_titles_and_people_normalize_provided_slugs_before_persisting(): void
+    public function test_titles_and_people_expose_slugged_route_keys_from_remote_identifiers(): void
     {
-        $title = Title::factory()->create([
-            'name' => 'Northern Signal',
-            'slug' => ' Northern Signal 2026 ',
-        ]);
+        $title = $this->sampleTitle();
+        $person = $this->samplePerson();
 
-        $person = Person::factory()->create([
-            'name' => 'Ava Mercer',
-            'slug' => ' Ava Mercer ',
-        ]);
-
-        $this->assertSame('northern-signal-2026', $title->fresh()->slug);
-        $this->assertSame('ava-mercer', $person->fresh()->slug);
+        $this->assertSame(
+            Str::slug($title->name).'-'.($title->tconst ?: $title->imdb_id ?: $title->id),
+            $title->slug,
+        );
+        $this->assertSame(
+            Str::slug($person->name).'-'.($person->nconst ?: $person->imdb_id ?: $person->id),
+            $person->slug,
+        );
     }
 
-    public function test_list_slugs_stay_clean_and_unique_within_each_profile_scope(): void
+    public function test_public_catalog_routes_resolve_remote_records_by_slug(): void
     {
-        $firstOwner = User::factory()->create();
-        $secondOwner = User::factory()->create();
+        $title = $this->sampleTitle();
+        $person = $this->samplePerson();
+        $genre = $this->sampleGenre();
 
-        $firstList = UserList::factory()->for($firstOwner)->create([
-            'name' => 'Weekend Marathon',
-            'slug' => ' Weekend Marathon ',
-        ]);
-        $secondList = UserList::query()->create([
-            'user_id' => $firstOwner->id,
-            'name' => 'Weekend Marathon',
-            'visibility' => 'public',
-            'is_watchlist' => false,
-        ]);
-        $thirdList = UserList::query()->create([
-            'user_id' => $secondOwner->id,
-            'name' => 'Weekend Marathon',
-            'visibility' => 'public',
-            'is_watchlist' => false,
-        ]);
+        $this->assertStringEndsWith('-g'.$genre->id, $genre->slug);
 
-        $this->assertSame('weekend-marathon', $firstList->fresh()->slug);
-        $this->assertSame('weekend-marathon-2', $secondList->fresh()->slug);
-        $this->assertSame('weekend-marathon', $thirdList->fresh()->slug);
+        $this->get(route('public.titles.show', ['title' => $title->slug]))
+            ->assertOk()
+            ->assertSee($title->name);
+
+        $this->get(route('public.people.show', ['person' => $person->slug]))
+            ->assertOk()
+            ->assertSee($person->name);
+
+        $this->get(route('public.genres.show', ['genre' => $genre->slug]))
+            ->assertOk()
+            ->assertSee($genre->name);
     }
 }

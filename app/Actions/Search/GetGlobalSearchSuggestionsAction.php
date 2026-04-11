@@ -2,20 +2,20 @@
 
 namespace App\Actions\Search;
 
+use App\Actions\Catalog\BuildPublicPeopleIndexQueryAction;
 use App\Models\Person;
 use App\Models\Title;
-use App\Models\UserList;
 use Illuminate\Database\Eloquent\Collection;
 
 class GetGlobalSearchSuggestionsAction
 {
     public function __construct(
-        protected BuildSearchPublicListsQueryAction $buildSearchPublicListsQuery,
+        private BuildPublicPeopleIndexQueryAction $buildPublicPeopleIndexQuery,
+        private BuildSearchTitleResultsQueryAction $buildSearchTitleResultsQuery,
     ) {}
 
     /**
      * @return array{
-     *     lists: Collection<int, UserList>,
      *     people: Collection<int, Person>,
      *     titles: Collection<int, Title>
      * }
@@ -26,7 +26,6 @@ class GetGlobalSearchSuggestionsAction
 
         if (mb_strlen($query) < 2) {
             return [
-                'lists' => new Collection,
                 'people' => new Collection,
                 'titles' => new Collection,
             ];
@@ -35,48 +34,18 @@ class GetGlobalSearchSuggestionsAction
         $limit = max(1, min($perGroup, 6));
 
         return [
-            'lists' => $this->buildSearchPublicListsQuery
-                ->handle($query)
+            'people' => $this->buildPublicPeopleIndexQuery
+                ->handle([
+                    'search' => $query,
+                    'sort' => 'popular',
+                ])
                 ->limit($limit)
                 ->get(),
-            'people' => Person::query()
-                ->select([
-                    'id',
-                    'name',
-                    'slug',
-                    'alternate_names',
-                    'known_for_department',
-                    'search_keywords',
-                    'popularity_rank',
-                    'is_published',
+            'titles' => $this->buildSearchTitleResultsQuery
+                ->handle([
+                    'search' => $query,
+                    'sort' => 'popular',
                 ])
-                ->published()
-                ->matchingSearch($query)
-                ->with([
-                    'mediaAssets:id,mediable_type,mediable_id,kind,url,alt_text,is_primary,position,published_at',
-                    'professions:id,person_id,profession,is_primary,sort_order',
-                ])
-                ->orderBy('popularity_rank')
-                ->orderBy('name')
-                ->limit($limit)
-                ->get(),
-            'titles' => Title::query()
-                ->select([
-                    'id',
-                    'name',
-                    'slug',
-                    'title_type',
-                    'release_year',
-                    'popularity_rank',
-                    'is_published',
-                ])
-                ->publishedCatalog()
-                ->matchingSearch($query)
-                ->with([
-                    'mediaAssets:id,mediable_type,mediable_id,kind,url,alt_text,is_primary,position,published_at',
-                ])
-                ->orderBy('popularity_rank')
-                ->orderBy('name')
                 ->limit($limit)
                 ->get(),
         ];

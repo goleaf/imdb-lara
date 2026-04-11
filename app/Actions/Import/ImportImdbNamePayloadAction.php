@@ -18,6 +18,7 @@ class ImportImdbNamePayloadAction
 
     public function __construct(
         private readonly BuildCompactImdbPayloadAction $buildCompactImdbPayloadAction,
+        private readonly EnsureLegacyImportPipelineIsEnabledAction $ensureLegacyImportPipelineIsEnabledAction,
         private readonly WriteImdbEndpointImportReportAction $writeImdbEndpointImportReportAction,
     ) {}
 
@@ -26,6 +27,8 @@ class ImportImdbNamePayloadAction
      */
     public function handle(array $payload, ?string $storagePath = null, array $options = []): Person
     {
+        $this->ensureLegacyImportPipelineIsEnabledAction->handle();
+
         $previousFillMissingOnly = $this->fillMissingOnly;
         $this->fillMissingOnly = (bool) ($options['fill_missing_only'] ?? false);
 

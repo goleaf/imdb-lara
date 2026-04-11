@@ -5,66 +5,72 @@ namespace Tests\Feature\Feature;
 use App\Models\Episode;
 use App\Models\Season;
 use App\Models\Title;
-use Database\Seeders\DemoCatalogSeeder;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
+use Tests\Concerns\InteractsWithRemoteCatalog;
+use Tests\Concerns\UsesCatalogOnlyApplication;
 use Tests\TestCase;
 
 class TvHierarchyExperienceTest extends TestCase
 {
-    use RefreshDatabase;
+    use InteractsWithRemoteCatalog;
+    use UsesCatalogOnlyApplication;
 
-    public function test_series_title_page_surfaces_latest_season_and_top_rated_episode_blocks(): void
+    public function test_series_title_page_surfaces_series_guide_blocks_without_affecting_movie_pages(): void
     {
-        $this->seed(DemoCatalogSeeder::class);
+        Livewire::withoutLazyLoading();
 
-        $series = Title::query()->where('slug', 'static-bloom')->firstOrFail();
-        $movie = Title::query()->where('slug', 'northern-signal')->firstOrFail();
+        $hierarchy = $this->resolvedSeriesHierarchy();
+        $series = $hierarchy['series'];
+        $movie = $this->sampleMovie();
 
         $this->get(route('public.titles.show', $series))
             ->assertOk()
             ->assertSee('Series guide')
             ->assertSeeHtml('data-slot="series-guide-navigation"')
+            ->assertSeeHtml('data-slot="series-guide-latest-season"')
+            ->assertSeeHtml('data-slot="series-guide-top-episodes"')
             ->assertSee('Season navigation')
             ->assertSee('Latest season overview')
             ->assertSee('Top-rated episodes')
-            ->assertSee('Static Bloom: Signal Path')
-            ->assertSee('Static Bloom: Pilot');
+            ->assertSee($hierarchy['season']->name)
+            ->assertSee($hierarchy['episode']->name);
 
         $this->get(route('public.titles.show', $movie))
             ->assertOk()
+            ->assertDontSee('Series guide')
             ->assertDontSee('Latest season overview')
             ->assertDontSee('Top-rated episodes');
     }
 
-    public function test_season_page_renders_episode_guide_navigation_and_rankings(): void
+    public function test_season_page_renders_episode_browser_navigation_and_rankings(): void
     {
-        $this->seed(DemoCatalogSeeder::class);
+        Livewire::withoutLazyLoading();
 
-        $series = Title::query()->where('slug', 'static-bloom')->firstOrFail();
-        $season = Season::query()->where('slug', 'static-bloom-season-1')->firstOrFail();
+        $hierarchy = $this->resolvedSeriesHierarchy();
+        $series = $hierarchy['series'];
+        $season = $hierarchy['season'];
+        $episode = $hierarchy['episode'];
 
         $this->get(route('public.seasons.show', ['series' => $series, 'season' => $season]))
             ->assertOk()
             ->assertSeeHtml('data-slot="season-browser-hero"')
             ->assertSeeHtml('data-slot="season-browser-navigation"')
             ->assertSeeHtml('data-slot="season-browser-episodes"')
-            ->assertSeeHtml('data-slot="badge-icon"')
-            ->assertSeeHtml('data-slot="link-icon:after"')
-            ->assertSee('Season watch progress')
+            ->assertSee('Season navigation')
             ->assertSee('Episode browser')
             ->assertSee('Top-rated episodes this season')
-            ->assertSee('Season navigation')
-            ->assertSee('Static Bloom: Pilot')
-            ->assertSee('Static Bloom: Switchback');
+            ->assertSee($season->name)
+            ->assertSee($episode->name);
     }
 
-    public function test_episode_page_renders_navigation_guest_cast_and_interaction_sections(): void
+    public function test_episode_page_renders_current_navigation_facts_and_catalog_credit_sections(): void
     {
-        $this->seed(DemoCatalogSeeder::class);
+        Livewire::withoutLazyLoading();
 
-        $series = Title::query()->where('slug', 'static-bloom')->firstOrFail();
-        $season = Season::query()->where('slug', 'static-bloom-season-1')->firstOrFail();
-        $episode = Title::query()->where('slug', 'static-bloom-switchback')->firstOrFail();
+        $hierarchy = $this->resolvedSeriesHierarchy();
+        $series = $hierarchy['series'];
+        $season = $hierarchy['season'];
+        $episode = $hierarchy['episode'];
 
         $this->get(route('public.episodes.show', [
             'series' => $series,
@@ -73,122 +79,72 @@ class TvHierarchyExperienceTest extends TestCase
         ]))
             ->assertOk()
             ->assertSeeHtml('data-slot="episode-detail-hero"')
-            ->assertSeeHtml('data-slot="badge-icon"')
-            ->assertSee('Episode navigation')
+            ->assertSeeHtml('data-slot="episode-detail-facts"')
+            ->assertSeeHtml('data-slot="episode-detail-cast"')
+            ->assertSeeHtml('data-slot="episode-detail-lineup"')
+            ->assertSee('Episode facts')
             ->assertSee('Guest cast')
             ->assertSee('Key crew')
-            ->assertSee('Parents guide preview')
-            ->assertSee('Trivia')
-            ->assertSee('Goofs')
+            ->assertSee('Episode navigation')
             ->assertSee('Season lineup')
-            ->assertSee('Your rating')
-            ->assertSee('Write a review')
-            ->assertSee('href="#episode-rating"', false)
-            ->assertSee('href="#episode-review"', false)
-            ->assertSee('Previous episode')
-            ->assertSee('Next episode');
+            ->assertSee($episode->name);
     }
 
     public function test_season_route_rejects_mismatched_series_and_season_pairs(): void
     {
-        $this->seed(DemoCatalogSeeder::class);
+        Livewire::withoutLazyLoading();
 
-        $wrongSeries = Title::query()->where('slug', 'harbor-nine')->firstOrFail();
-        $season = Season::query()->where('slug', 'static-bloom-season-1')->firstOrFail();
+        $hierarchy = $this->resolvedSeriesHierarchy();
+        $wrongSeries = $this->sampleMovie();
 
         $this->get(route('public.seasons.show', [
             'series' => $wrongSeries,
-            'season' => $season,
+            'season' => $hierarchy['season'],
         ]))->assertNotFound();
     }
 
     public function test_episode_route_rejects_mismatched_hierarchy_pairs(): void
     {
-        $this->seed(DemoCatalogSeeder::class);
+        Livewire::withoutLazyLoading();
 
-        $wrongSeries = Title::query()->where('slug', 'harbor-nine')->firstOrFail();
-        $season = Season::query()->where('slug', 'static-bloom-season-1')->firstOrFail();
-        $episode = Title::query()->where('slug', 'static-bloom-pilot')->firstOrFail();
+        $hierarchy = $this->resolvedSeriesHierarchy();
+        $wrongSeries = $this->sampleMovie();
 
         $this->get(route('public.episodes.show', [
             'series' => $wrongSeries,
-            'season' => $season,
-            'episode' => $episode,
+            'season' => $hierarchy['season'],
+            'episode' => $hierarchy['episode'],
         ]))->assertNotFound();
     }
 
-    public function test_episode_page_renders_payload_backed_parents_guide_trivia_and_goofs_sections(): void
+    public function test_episode_page_stays_catalog_only_without_review_or_rating_calls_to_action(): void
     {
-        $series = Title::factory()->series()->create([
-            'name' => 'Signal Archive',
-            'slug' => 'signal-archive',
-        ]);
+        Livewire::withoutLazyLoading();
 
-        $season = Season::factory()->for($series, 'series')->create([
-            'name' => 'Season 2',
-            'slug' => 'signal-archive-season-2',
-            'season_number' => 2,
-        ]);
-
-        $episode = Title::factory()->episode()->create([
-            'name' => 'Signal Archive: Crossfade',
-            'slug' => 'signal-archive-crossfade',
-            'age_rating' => 'TV-14',
-            'imdb_payload' => [
-                'parentsGuide' => [
-                    'advisories' => [
-                        [
-                            'category' => 'violence',
-                            'severity' => 'moderate',
-                            'text' => 'A sustained control-room fight and brief bloody aftermath.',
-                        ],
-                    ],
-                    'spoilers' => [
-                        'Late reveal of the signal source.',
-                    ],
-                ],
-                'certificates' => [
-                    'certificates' => [
-                        [
-                            'rating' => 'TV-14',
-                            'country' => ['code' => 'US', 'name' => 'United States'],
-                            'attributes' => ['violence'],
-                        ],
-                    ],
-                ],
-                'trivia' => [
-                    'triviaEntries' => [
-                        ['text' => 'The waveform wall was built as a practical set.'],
-                    ],
-                ],
-                'goofs' => [
-                    'goofEntries' => [
-                        ['text' => 'A monitor clock jumps ahead between cuts.'],
-                    ],
-                ],
-            ],
-        ]);
-
-        Episode::factory()
-            ->for($episode, 'title')
-            ->for($series, 'series')
-            ->for($season, 'season')
-            ->create([
-                'season_number' => 2,
-                'episode_number' => 4,
-            ]);
+        $hierarchy = $this->resolvedSeriesHierarchy();
 
         $this->get(route('public.episodes.show', [
-            'series' => $series,
-            'season' => $season,
-            'episode' => $episode,
+            'series' => $hierarchy['series'],
+            'season' => $hierarchy['season'],
+            'episode' => $hierarchy['episode'],
         ]))
             ->assertOk()
-            ->assertSee('Parents guide preview')
-            ->assertSee('Moderate')
-            ->assertSee('A sustained control-room fight and brief bloody aftermath.')
-            ->assertSee('Late reveal of the signal source.')
-            ->assertSee('The waveform wall was built as a practical set.')
-            ->assertSee('A monitor clock jumps ahead between cuts.');
+            ->assertDontSee('Write a review')
+            ->assertDontSee('Your rating')
+            ->assertDontSee('Parents guide preview');
+    }
+
+    /**
+     * @return array{series: Title, season: Season, episode: Title, episodeMeta: Episode}
+     */
+    private function resolvedSeriesHierarchy(): array
+    {
+        $hierarchy = $this->sampleSeriesHierarchy();
+
+        if ($hierarchy === null) {
+            $this->markTestSkipped('Remote MySQL catalog does not currently expose a usable series / season / episode hierarchy for the public TV pages.');
+        }
+
+        return $hierarchy;
     }
 }

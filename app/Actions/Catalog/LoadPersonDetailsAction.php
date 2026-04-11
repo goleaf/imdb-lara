@@ -3,12 +3,12 @@
 namespace App\Actions\Catalog;
 
 use App\Actions\Seo\PageSeoData;
-use App\Enums\MediaKind;
 use App\Models\AwardNomination;
 use App\Models\Credit;
-use App\Models\MediaAsset;
+use App\Models\NameBasicAlternativeName;
 use App\Models\Person;
 use App\Models\Title;
+use App\Models\TitleStatistic;
 use Illuminate\Support\Collection;
 
 class LoadPersonDetailsAction
@@ -16,423 +16,325 @@ class LoadPersonDetailsAction
     /**
      * @return array{
      *     person: Person,
-     *     headshot: MediaAsset|null,
-     *     photoGallery: Collection<int, MediaAsset>,
+     *     headshot: mixed,
+     *     photoGallery: Collection<int, mixed>,
      *     alternateNames: Collection<int, string>,
+     *     alternativeNameRows: Collection<int, NameBasicAlternativeName>,
      *     professionLabels: Collection<int, string>,
      *     biographyIntro: string|null,
      *     detailItems: Collection<int, array{label: string, value: string}>,
-     *     supplementalProfileItems: Collection<int, array{label: string, value: string}>,
      *     knownForTitles: Collection<int, Title>,
-     *     featuredKnownFor: Title|null,
-     *     secondaryKnownFor: Collection<int, Title>,
+     *     frequentCollaborators: Collection<int, array{person: Person, sharedTitles: Collection<int, Title>, sharedCount: int}>,
      *     relatedTitles: Collection<int, Title>,
+     *     careerProfileItems: Collection<int, array{label: string, value: string, copy: string}>,
+     *     creditDepartmentHighlights: Collection<int, array{label: string, count: int}>,
+     *     titleFormatHighlights: Collection<int, array{label: string, count: int}>,
      *     awardHighlights: Collection<int, AwardNomination>,
      *     awardWins: int,
      *     awardNominationsCount: int,
      *     publishedCreditCount: int,
-     *     awardBodiesCount: int,
-     *     trademarkItems: Collection<int, string>,
-     *     profileItems: Collection<int, array{label: string, value: string}>,
      *     heroProfileItems: Collection<int, array{label: string, value: string}>,
      *     biographyParagraphs: Collection<int, string>,
-     *     personDirectory: Collection<int, array{href: string, label: string}>,
-     *     collaborators: Collection<int, array{
-     *         person: Person,
-     *         sharedTitles: Collection<int, Title>,
-     *         sharedTitlesCount: int
-     *     }>
+     *     seo: PageSeoData
      * }
      */
     public function handle(Person $person): array
     {
         $person->load([
-            'mediaAssets' => fn ($query) => $query
-                ->select([
-                    'id',
-                    'mediable_type',
-                    'mediable_id',
-                    'kind',
-                    'url',
-                    'alt_text',
-                    'caption',
-                    'position',
-                    'published_at',
-                ])
-                ->ordered(),
-            'professions:id,person_id,department,profession,is_primary,sort_order',
+            'personImages:name_basic_id,position,url,width,height,type',
+            'alternativeNameRecords:name_basic_id,alternative_name,position',
+            'professionTerms:id,name',
+            'meterRanking:name_basic_id,current_rank,change_direction,difference',
             'credits' => fn ($query) => $query
-                ->select([
-                    'id',
-                    'title_id',
-                    'person_id',
-                    'department',
-                    'job',
-                    'character_name',
-                    'billing_order',
-                    'person_profession_id',
-                    'episode_id',
-                    'credited_as',
-                    'is_principal',
-                ])
+                ->select(['name_basic_id', 'movie_id', 'category', 'episode_count', 'position'])
                 ->with([
-                    'profession:id,person_id,department,profession,is_primary,sort_order',
                     'title' => fn ($titleQuery) => $titleQuery
                         ->select([
-                            'id',
-                            'name',
-                            'slug',
-                            'title_type',
-                            'release_year',
-                            'plot_outline',
-                            'popularity_rank',
-                            'is_published',
+                            'movies.id',
+                            'movies.tconst',
+                            'movies.imdb_id',
+                            'movies.primarytitle',
+                            'movies.originaltitle',
+                            'movies.titletype',
+                            'movies.isadult',
+                            'movies.startyear',
+                            'movies.endyear',
+                            'movies.runtimeminutes',
                         ])
-                        ->published()
+                        ->addSelect([
+                            'popularity_rank' => TitleStatistic::query()
+                                ->select('vote_count')
+                                ->whereColumn('movie_ratings.movie_id', 'movies.id')
+                                ->limit(1),
+                        ])
+                        ->publishedCatalog()
                         ->with([
-                            'mediaAssets:id,mediable_type,mediable_id,kind,url,alt_text,position,is_primary',
-                            'genres:id,name,slug',
-                            'statistic:id,title_id,average_rating,rating_count,review_count,watchlist_count',
+                            'genres:id,name',
+                            'statistic:movie_id,aggregate_rating,vote_count',
+                            'titleImages:id,movie_id,position,url,width,height,type',
+                            'primaryImageRecord:movie_id,url,width,height,type',
                         ]),
                 ])
-                ->orderBy('billing_order'),
+                ->orderBy('position')
+                ->limit(40),
             'awardNominations' => fn ($query) => $query
-                ->select([
-                    'id',
-                    'award_event_id',
-                    'award_category_id',
-                    'title_id',
-                    'person_id',
-                    'episode_id',
-                    'credited_name',
-                    'details',
-                    'is_winner',
-                    'sort_order',
-                ])
+                ->select(['movie_award_nominations.id', 'movie_award_nominations.movie_id', 'movie_award_nominations.event_imdb_id', 'movie_award_nominations.award_category_id', 'movie_award_nominations.award_year', 'movie_award_nominations.text', 'movie_award_nominations.is_winner', 'movie_award_nominations.winner_rank', 'movie_award_nominations.position'])
                 ->with([
-                    'awardEvent:id,award_id,name,slug,year',
-                    'awardEvent.award:id,name,slug',
-                    'awardCategory:id,award_id,name,slug',
-                    'title:id,name,slug,title_type,release_year',
-                    'episode:id,title_id,season_number,episode_number',
-                    'episode.title:id,name,slug',
+                    'awardEvent:imdb_id,name',
+                    'awardCategory:id,name',
+                    'title' => fn ($titleQuery) => $titleQuery->select([
+                        'movies.id',
+                        'movies.tconst',
+                        'movies.imdb_id',
+                        'movies.primarytitle',
+                        'movies.originaltitle',
+                        'movies.titletype',
+                        'movies.isadult',
+                        'movies.startyear',
+                        'movies.endyear',
+                        'movies.runtimeminutes',
+                    ]),
                 ])
                 ->orderByDesc('is_winner')
-                ->orderBy('sort_order'),
+                ->orderByDesc('award_year')
+                ->limit(8),
         ]);
 
-        $headshot = MediaAsset::preferredFrom($person->mediaAssets, MediaKind::Headshot, MediaKind::Gallery, MediaKind::Still);
-        $photoGallery = $person->mediaAssets
-            ->filter(fn (MediaAsset $mediaAsset): bool => in_array($mediaAsset->kind, [
-                MediaKind::Headshot,
-                MediaKind::Gallery,
-                MediaKind::Still,
-            ], true))
-            ->reject(fn (MediaAsset $mediaAsset): bool => $headshot?->is($mediaAsset) ?? false)
+        $headshot = $person->preferredHeadshot();
+        $photoGallery = $person->groupedMediaAssetsByKind()
+            ->flatten(1)
+            ->reject(fn ($asset) => $headshot && $asset->url === $headshot->url)
             ->take(8)
             ->values();
-
-        $alternateNames = collect([
-            $person->alternate_names,
-            ...(is_array($person->imdb_alternative_names) ? $person->imdb_alternative_names : []),
-        ])
-            ->flatMap(function (mixed $value): Collection {
-                if (is_string($value)) {
-                    return $this->tokenizeList($value);
-                }
-
-                return collect();
-            })
-            ->unique()
+        $alternativeNameRows = $person->alternativeNameRecords
+            ->filter(fn (NameBasicAlternativeName $alternativeNameRecord): bool => filled($alternativeNameRecord->alternative_name))
             ->values();
-        $professionLabels = $person->professions
-            ->pluck('profession')
+        $alternateNames = $alternativeNameRows
+            ->pluck('alternative_name')
+            ->concat($person->resolvedAlternateNames())
+            ->map(fn (mixed $value): string => trim((string) $value))
             ->filter()
             ->unique()
             ->values();
-        $biographyIntro = filled($person->short_biography)
-            ? $person->short_biography
-            : (filled($person->biography)
-                ? str($person->biography)->squish()->limit(220)->toString()
-                : null);
-
+        $professionLabels = collect($person->professionLabels(4))->values();
+        $biographyIntro = $person->summaryText();
         $creditedTitles = $person->credits
             ->pluck('title')
             ->filter(fn ($title): bool => $title instanceof Title)
             ->unique('id')
             ->values();
-
-        $titleRanks = $creditedTitles
-            ->map(function (Title $title) use ($person): array {
-                $relevantCredits = $person->credits->where('title_id', $title->id);
-
-                return [
-                    'title' => $title,
-                    'priority' => sprintf(
-                        '%d-%05.2f-%08d-%08d-%05d',
-                        $relevantCredits->contains('is_principal', true) ? 1 : 0,
-                        (float) ($title->statistic?->average_rating ?? 0),
-                        (int) ($title->statistic?->rating_count ?? 0),
-                        99999999 - (int) ($title->popularity_rank ?? 99999999),
-                        (int) ($title->release_year ?? 0),
-                    ),
-                ];
-            })
-            ->sortByDesc('priority')
-            ->values();
-
-        $knownForTitles = $titleRanks
+        $knownForTitles = $creditedTitles
+            ->sortByDesc(fn (Title $title): string => sprintf(
+                '%01d-%05.2f-%09d-%05d',
+                $person->credits->where('movie_id', $title->id)->contains(fn (Credit $credit) => $credit->is_principal) ? 1 : 0,
+                (float) ($title->statistic?->average_rating ?? 0),
+                (int) ($title->statistic?->rating_count ?? 0),
+                (int) ($title->release_year ?? 0),
+            ))
             ->take(6)
-            ->pluck('title')
             ->values();
-        $knownForIds = $knownForTitles->pluck('id')->all();
-
-        $relatedTitles = $titleRanks
-            ->reject(fn (array $item): bool => in_array($item['title']->id, $knownForIds, true))
+        $knownForTitleIds = $knownForTitles
+            ->pluck('id')
+            ->filter(fn (mixed $value): bool => is_numeric($value))
+            ->map(fn (mixed $value): int => (int) $value)
+            ->all();
+        $relatedTitles = $creditedTitles
+            ->reject(fn (Title $title): bool => in_array((int) $title->id, $knownForTitleIds, true))
+            ->sortByDesc(fn (Title $title): string => sprintf(
+                '%05.2f-%09d-%05d',
+                (float) ($title->statistic?->average_rating ?? 0),
+                (int) ($title->statistic?->rating_count ?? 0),
+                (int) ($title->release_year ?? 0),
+            ))
             ->take(6)
-            ->pluck('title')
             ->values();
-
-        $detailItems = collect([
-            ['label' => 'Born', 'value' => $person->birth_date?->format('M j, Y')],
-            ['label' => 'Place of birth', 'value' => $person->birth_place],
-            ['label' => 'Nationality', 'value' => $person->nationality],
-            ['label' => 'Died', 'value' => $person->death_date?->format('M j, Y')],
-            ['label' => 'Place of death', 'value' => $person->death_place],
-            ['label' => 'Known for', 'value' => $person->known_for_department],
-            ['label' => 'Published credits', 'value' => number_format($creditedTitles->count())],
-        ])->filter(fn (array $item): bool => filled($item['value']))->values();
-
-        $supplementalProfileItems = $this->buildSupplementalProfileItems($person);
-        $awardHighlights = $person->awardNominations
-            ->take(8)
-            ->values();
-        $trademarkItems = $this->buildTrademarkItems($person);
-        $awardWins = $person->awardNominations->where('is_winner', true)->count();
-        $awardNominationsCount = $person->awardNominations->count();
-        $publishedCreditCount = $creditedTitles->count();
-        $awardBodiesCount = $person->awardNominations
-            ->pluck('awardEvent.award.name')
-            ->filter()
+        $frequentCollaborators = collect();
+        $collaborationTitleIds = $knownForTitles
+            ->concat($relatedTitles)
+            ->pluck('id')
+            ->filter(fn (mixed $value): bool => is_numeric($value))
+            ->map(fn (mixed $value): int => (int) $value)
             ->unique()
-            ->count();
-        $profileItems = $detailItems
-            ->merge($supplementalProfileItems)
-            ->unique('label')
-            ->values();
-        $heroProfileItems = $profileItems->take(4)->values();
-        $biographySource = trim((string) ($person->biography ?: $person->short_biography));
-        $biographyParagraphs = collect(preg_split('/\R{2,}/', $biographySource) ?: [])
-            ->map(fn (string $paragraph): string => trim($paragraph))
-            ->filter()
-            ->values();
-        $featuredKnownFor = $knownForTitles->first();
-        $secondaryKnownFor = $featuredKnownFor
-            ? $knownForTitles->skip(1)->values()
-            : collect();
-        $personDirectory = collect([
-            ['href' => '#person-biography', 'label' => 'Biography'],
-            ['href' => '#person-known-for', 'label' => 'Known for'],
-            ['href' => '#person-awards', 'label' => 'Awards'],
-            ['href' => '#person-trademarks', 'label' => 'Trademarks'],
-            ['href' => '#person-filmography', 'label' => 'Filmography'],
-            ['href' => '#person-gallery', 'label' => 'Gallery'],
-            ['href' => '#person-collaborators', 'label' => 'Collaborators'],
-            ['href' => '#person-related-titles', 'label' => 'Related titles'],
-        ]);
+            ->values()
+            ->all();
 
-        $collaborators = collect();
-        $titleIds = $creditedTitles->pluck('id')->all();
-
-        if ($titleIds !== []) {
-            $collaborators = Credit::query()
-                ->select([
-                    'id',
-                    'title_id',
-                    'person_id',
-                    'department',
-                    'job',
-                    'character_name',
-                    'billing_order',
-                ])
-                ->whereIn('title_id', $titleIds)
-                ->where('person_id', '!=', $person->id)
+        if ($collaborationTitleIds !== []) {
+            $frequentCollaborators = Credit::query()
+                ->select(['name_basic_id', 'movie_id', 'category', 'episode_count', 'position'])
+                ->whereIn('movie_id', $collaborationTitleIds)
+                ->where('name_basic_id', '!=', $person->getKey())
                 ->with([
-                    'person' => fn ($query) => $query
+                    'person' => fn ($personQuery) => $personQuery
                         ->select([
                             'id',
-                            'name',
-                            'slug',
-                            'short_biography',
-                            'known_for_department',
-                            'is_published',
+                            'nconst',
+                            'imdb_id',
+                            'primaryname',
+                            'displayName',
+                            'alternativeNames',
+                            'primaryProfessions',
+                            'biography',
+                            'birthLocation',
+                            'deathLocation',
+                            'primaryImage_url',
+                            'primaryImage_width',
+                            'primaryImage_height',
                         ])
-                        ->published()
                         ->with([
-                            'mediaAssets' => fn ($mediaQuery) => $mediaQuery
-                                ->select(['id', 'mediable_type', 'mediable_id', 'kind', 'url', 'alt_text', 'position'])
-                                ->where('kind', MediaKind::Headshot)
-                                ->ordered()
-                                ->limit(1),
-                            'professions:id,person_id,department,profession,is_primary,sort_order',
+                            'personImages:name_basic_id,position,url,width,height,type',
+                            'professionTerms:id,name',
                         ]),
-                    'title' => fn ($query) => $query
-                        ->select(['id', 'name', 'slug', 'title_type', 'release_year', 'is_published'])
-                        ->published(),
+                    'title' => fn ($titleQuery) => $titleQuery
+                        ->select([
+                            'movies.id',
+                            'movies.tconst',
+                            'movies.imdb_id',
+                            'movies.primarytitle',
+                            'movies.originaltitle',
+                            'movies.titletype',
+                            'movies.isadult',
+                            'movies.startyear',
+                            'movies.endyear',
+                            'movies.runtimeminutes',
+                        ])
+                        ->publishedCatalog()
+                        ->with([
+                            'genres:id,name',
+                            'statistic:movie_id,aggregate_rating,vote_count',
+                            'titleImages:id,movie_id,position,url,width,height,type',
+                            'primaryImageRecord:movie_id,url,width,height,type',
+                        ]),
                 ])
+                ->orderBy('position')
                 ->get()
                 ->filter(fn (Credit $credit): bool => $credit->person instanceof Person && $credit->title instanceof Title)
-                ->groupBy('person_id')
+                ->groupBy(fn (Credit $credit): string => (string) $credit->person_id)
                 ->map(function (Collection $credits): array {
-                    /** @var Credit $leadCredit */
-                    $leadCredit = $credits->first();
+                    /** @var Person $collaborator */
+                    $collaborator = $credits->first()->person;
+                    /** @var Collection<int, Title> $sharedTitles */
+                    $sharedTitles = $credits
+                        ->pluck('title')
+                        ->filter(fn ($title): bool => $title instanceof Title)
+                        ->unique('id')
+                        ->take(3)
+                        ->values();
 
                     return [
-                        'person' => $leadCredit->person,
-                        'sharedTitles' => $credits
-                            ->pluck('title')
-                            ->filter(fn ($title): bool => $title instanceof Title)
-                            ->unique('id')
-                            ->take(3)
-                            ->values(),
-                        'sharedTitlesCount' => $credits
-                            ->pluck('title_id')
-                            ->unique()
-                            ->count(),
+                        'person' => $collaborator,
+                        'sharedTitles' => $sharedTitles,
+                        'sharedCount' => $sharedTitles->count(),
                     ];
                 })
-                ->sortByDesc('sharedTitlesCount')
+                ->sortByDesc(fn (array $item): int => $item['sharedCount'])
                 ->take(6)
                 ->values();
         }
-
-        $breadcrumbs = [
-            ['label' => 'Home', 'href' => route('public.home')],
-            ['label' => 'Browse People', 'href' => route('public.people.index')],
-            ['label' => $person->name],
-        ];
-
-        $defaultDescription = $person->known_for_department
-            ? sprintf('Browse biography, filmography, awards, and credits for %s, known for %s.', $person->name, $person->known_for_department)
-            : sprintf('Browse biography, filmography, awards, and credits for %s.', $person->name);
+        $detailItems = collect([
+            ['label' => 'Known for', 'value' => $person->known_for_department],
+            ['label' => 'Birth place', 'value' => $person->birth_place],
+            ['label' => 'Nationality', 'value' => $person->nationality],
+            ['label' => 'Published credits', 'value' => number_format($creditedTitles->count())],
+            ['label' => 'People meter', 'value' => $person->popularity_rank ? '#'.number_format($person->popularity_rank) : null],
+        ])->filter(fn (array $item): bool => filled($item['value']))->values();
+        $heroProfileItems = $detailItems->take(4)->values();
+        $creditDepartmentHighlights = $person->credits
+            ->groupBy(fn (Credit $credit): string => $credit->department)
+            ->map(fn (Collection $credits, string $label): array => [
+                'label' => $label,
+                'count' => $credits->count(),
+            ])
+            ->sortByDesc('count')
+            ->take(4)
+            ->values();
+        $titleFormatHighlights = $creditedTitles
+            ->groupBy(fn (Title $title): string => $title->typeLabel())
+            ->map(fn (Collection $titles, string $label): array => [
+                'label' => $label,
+                'count' => $titles->count(),
+            ])
+            ->sortByDesc('count')
+            ->take(4)
+            ->values();
+        $releaseYears = $creditedTitles
+            ->pluck('release_year')
+            ->filter(fn (mixed $year): bool => is_numeric($year))
+            ->map(fn (mixed $year): int => (int) $year)
+            ->sort()
+            ->values();
+        $releaseSpanLabel = match ($releaseYears->count()) {
+            0 => null,
+            1 => (string) $releaseYears->first(),
+            default => $releaseYears->first().' - '.$releaseYears->last(),
+        };
+        $topDepartment = $creditDepartmentHighlights->first();
+        $topFormat = $titleFormatHighlights->first();
+        $careerProfileItems = collect([
+            [
+                'label' => 'Primary lane',
+                'value' => is_array($topDepartment) ? $topDepartment['label'] : 'Catalog profile',
+                'copy' => is_array($topDepartment)
+                    ? number_format((int) $topDepartment['count']).' imported credits in the strongest department.'
+                    : 'The imported catalog has not grouped credits into departments yet.',
+            ],
+            [
+                'label' => 'Release span',
+                'value' => $releaseSpanLabel ?? 'Unscheduled',
+                'copy' => $releaseYears->isNotEmpty()
+                    ? 'Visible credits range from the earliest to the latest published title year.'
+                    : 'No release years are attached to the imported credit sample yet.',
+            ],
+            [
+                'label' => 'Top format',
+                'value' => is_array($topFormat) ? $topFormat['label'] : 'Mixed',
+                'copy' => is_array($topFormat)
+                    ? number_format((int) $topFormat['count']).' imported titles in the strongest format cluster.'
+                    : 'The imported titles are not grouped into a dominant format yet.',
+            ],
+        ])->values();
+        $biographyParagraphs = collect(preg_split('/\R{2,}/', (string) ($person->biography ?? '')) ?: [])
+            ->map(fn (string $paragraph): string => trim($paragraph))
+            ->filter()
+            ->values();
+        $awardHighlights = $person->awardNominations->values();
+        $awardWins = $awardHighlights->where('is_winner', true)->count();
+        $awardNominationsCount = $awardHighlights->count();
+        $publishedCreditCount = $creditedTitles->count();
 
         return [
             'person' => $person,
             'headshot' => $headshot,
             'photoGallery' => $photoGallery,
             'alternateNames' => $alternateNames,
+            'alternativeNameRows' => $alternativeNameRows,
             'professionLabels' => $professionLabels,
             'biographyIntro' => $biographyIntro,
             'detailItems' => $detailItems,
-            'supplementalProfileItems' => $supplementalProfileItems,
-            'profileItems' => $profileItems,
-            'heroProfileItems' => $heroProfileItems,
-            'biographyParagraphs' => $biographyParagraphs,
             'knownForTitles' => $knownForTitles,
-            'featuredKnownFor' => $featuredKnownFor,
-            'secondaryKnownFor' => $secondaryKnownFor,
+            'frequentCollaborators' => $frequentCollaborators,
             'relatedTitles' => $relatedTitles,
+            'careerProfileItems' => $careerProfileItems,
+            'creditDepartmentHighlights' => $creditDepartmentHighlights,
+            'titleFormatHighlights' => $titleFormatHighlights,
             'awardHighlights' => $awardHighlights,
             'awardWins' => $awardWins,
             'awardNominationsCount' => $awardNominationsCount,
             'publishedCreditCount' => $publishedCreditCount,
-            'awardBodiesCount' => $awardBodiesCount,
-            'trademarkItems' => $trademarkItems,
-            'personDirectory' => $personDirectory,
-            'collaborators' => $collaborators,
+            'heroProfileItems' => $heroProfileItems,
+            'biographyParagraphs' => $biographyParagraphs,
             'seo' => new PageSeoData(
-                title: $person->meta_title ?: ($person->name.' - Biography, Filmography & Credits'),
-                description: $person->meta_description ?: ($biographyIntro ? str($biographyIntro)->limit(155)->toString() : $defaultDescription),
+                title: $person->meta_title ?: $person->name,
+                description: $person->meta_description ?: ($biographyIntro ?: 'Browse biography, credits, and career highlights for '.$person->name.'.'),
                 canonical: route('public.people.show', $person),
                 openGraphType: 'profile',
                 openGraphImage: $headshot?->url,
                 openGraphImageAlt: $headshot?->alt_text ?: $person->name,
-                breadcrumbs: $breadcrumbs,
+                breadcrumbs: [
+                    ['label' => 'Home', 'href' => route('public.home')],
+                    ['label' => 'People', 'href' => route('public.people.index')],
+                    ['label' => $person->name],
+                ],
             ),
         ];
-    }
-
-    /**
-     * @return Collection<int, string>
-     */
-    private function tokenizeList(?string $value): Collection
-    {
-        return collect(preg_split('/[,|]/', (string) $value) ?: [])
-            ->map(fn (string $item): string => str($item)->trim()->toString())
-            ->filter()
-            ->values();
-    }
-
-    /**
-     * @return Collection<int, array{label: string, value: string}>
-     */
-    private function buildSupplementalProfileItems(Person $person): Collection
-    {
-        $details = $person->imdbPayloadSection('details');
-
-        $height = is_numeric(data_get($details, 'heightCm'))
-            ? (int) data_get($details, 'heightCm')
-            : null;
-        $meterDifference = is_numeric(data_get($details, 'meterRanking.difference'))
-            ? abs((int) data_get($details, 'meterRanking.difference'))
-            : null;
-        $meterDirection = $this->nullableString(data_get($details, 'meterRanking.changeDirection'));
-
-        return collect([
-            ['label' => 'Birth name', 'value' => $this->nullableString(data_get($details, 'birthName'))],
-            ['label' => 'Height', 'value' => $height ? $height.' cm' : null],
-            [
-                'label' => 'Meter movement',
-                'value' => $meterDirection && $meterDifference
-                    ? sprintf('%s %d place%s', str($meterDirection)->lower()->headline()->toString(), $meterDifference, $meterDifference === 1 ? '' : 's')
-                    : null,
-            ],
-            ['label' => 'Meter rank', 'value' => $person->popularity_rank ? '#'.number_format($person->popularity_rank) : null],
-        ])
-            ->filter(fn (array $item): bool => filled($item['value']))
-            ->values();
-    }
-
-    /**
-     * @return Collection<int, string>
-     */
-    private function buildTrademarkItems(Person $person): Collection
-    {
-        $details = $person->imdbPayloadSection('details');
-
-        return collect([
-            data_get($details, 'trademarks'),
-            data_get($details, 'tradeMarks'),
-            data_get($details, 'nameTrademarks'),
-            data_get($details, 'personalDetails.trademarks'),
-        ])
-            ->filter(fn (mixed $value): bool => is_array($value))
-            ->flatMap(function (array $items): Collection {
-                return collect($items)->map(function (mixed $item): ?string {
-                    if (is_array($item)) {
-                        return $this->nullableString(data_get($item, 'text'))
-                            ?? $this->nullableString(data_get($item, 'plainText'))
-                            ?? $this->nullableString(data_get($item, 'trademark'))
-                            ?? $this->nullableString(data_get($item, 'name'));
-                    }
-
-                    return is_string($item) ? trim($item) : null;
-                });
-            })
-            ->filter()
-            ->unique()
-            ->take(6)
-            ->values();
-    }
-
-    private function nullableString(mixed $value): ?string
-    {
-        if (! is_string($value)) {
-            return null;
-        }
-
-        $value = trim($value);
-
-        return $value === '' ? null : $value;
     }
 }

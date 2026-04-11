@@ -1,7 +1,13 @@
-<div class="space-y-4">
-    <div wire:loading.delay class="{{ $isChartMode ? 'space-y-3' : 'grid gap-4 md:grid-cols-2 xl:grid-cols-3' }}">
+<div>
+@island(name: 'title-browser-page')
+    @php
+        $view = $this->viewData;
+    @endphp
+
+<div class="space-y-4" data-slot="title-browser-island">
+    <div wire:loading.delay class="{{ $view['isChartMode'] ? 'space-y-3' : 'grid gap-4 md:grid-cols-2 xl:grid-cols-3' }}">
         @foreach (range(1, 6) as $index)
-            @if ($isChartMode)
+            @if ($view['isChartMode'])
                 <x-ui.card class="sb-chart-card !max-w-none overflow-hidden rounded-[1.45rem] p-3.5" wire:key="title-browser-skeleton-{{ $index }}">
                     <div class="grid gap-4 sm:grid-cols-[4.8rem_5.8rem_minmax(0,1fr)] xl:grid-cols-[5.4rem_6.4rem_minmax(0,1fr)_auto]">
                         <div class="space-y-2">
@@ -31,19 +37,19 @@
     </div>
 
     <div wire:loading.remove class="sb-results-shell space-y-4 rounded-[1.6rem] p-4 sm:p-5">
-        @if ($isChartMode)
+        @if ($view['isChartMode'])
             <div class="sb-chart-context-shell" data-slot="chart-context-shell">
                 <div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(18rem,0.92fr)] xl:items-start">
                     <div class="space-y-3">
                         <div class="sb-chart-context-kicker">
-                            {{ $selectedCountryCode !== '' ? 'Local vs Global' : 'Global Context' }}
+                            {{ $view['selectedCountryCode'] !== '' ? 'Local vs Global' : 'Global Context' }}
                         </div>
 
-                        @if ($selectedCountryCode !== '')
+                        @if ($view['selectedCountryCode'] !== '')
                             <div class="flex flex-wrap items-center gap-3">
-                                <x-ui.flag type="country" :code="$selectedCountryCode" class="size-5" />
+                                <x-ui.flag type="country" :code="$view['selectedCountryCode']" class="size-5" />
                                 <x-ui.heading level="h3" size="md" class="sb-chart-context-title">
-                                    {{ $selectedCountryLabel }} local chart
+                                    {{ $view['selectedCountryLabel'] }} local chart
                                 </x-ui.heading>
                                 <span class="sb-chart-context-pill">Compared with global</span>
                             </div>
@@ -62,21 +68,21 @@
                         @endif
                     </div>
 
-                    @if ($chartCountryOptions !== [])
+                    @if ($view['chartCountryOptions'] !== [])
                         <div class="space-y-3">
                             <div class="sb-chart-context-kicker">Country Lenses</div>
                             <div class="flex flex-wrap gap-2">
                                 <a
                                     href="{{ request()->fullUrlWithoutQuery(['country']) }}"
-                                    class="sb-chart-country-chip {{ $selectedCountryCode === '' ? 'sb-chart-country-chip--active' : '' }}"
+                                    class="sb-chart-country-chip {{ $view['selectedCountryCode'] === '' ? 'sb-chart-country-chip--active' : '' }}"
                                 >
                                     <span>Global</span>
                                 </a>
 
-                                @foreach ($chartCountryOptions as $chartCountry)
+                                @foreach ($view['chartCountryOptions'] as $chartCountry)
                                     <a
                                         href="{{ request()->fullUrlWithQuery(['country' => $chartCountry['code']]) }}"
-                                        class="sb-chart-country-chip {{ $selectedCountryCode === $chartCountry['code'] ? 'sb-chart-country-chip--active' : '' }}"
+                                        class="sb-chart-country-chip {{ $view['selectedCountryCode'] === $chartCountry['code'] ? 'sb-chart-country-chip--active' : '' }}"
                                     >
                                         <x-ui.flag type="country" :code="$chartCountry['code']" class="size-4" />
                                         <span>{{ $chartCountry['label'] }}</span>
@@ -90,40 +96,40 @@
             </div>
         @endif
 
-        <div class="{{ $isChartMode ? 'space-y-3' : 'grid gap-4 md:grid-cols-2 xl:grid-cols-3' }}">
-            @forelse ($titles as $title)
-                @if ($isChartMode)
+        <div class="{{ $view['isChartMode'] ? 'space-y-3' : 'grid gap-4 md:grid-cols-2 xl:grid-cols-3' }}">
+            @forelse ($view['titles'] as $title)
+                @if ($view['isChartMode'])
                     <div wire:key="title-browser-{{ $title->id }}">
                         <x-catalog.chart-title-card
                             :title="$title"
-                            :comparison-label="$chartRows[$title->id]['comparisonLabel']"
-                            :rank="$chartRows[$title->id]['rank']"
-                            :movement-amount="$chartRows[$title->id]['movementAmount']"
-                            :movement-direction="$chartRows[$title->id]['movementDirection']"
-                            :movement-note="$chartRows[$title->id]['movementNote']"
+                            :comparison-label="$view['chartRows'][$title->id]['comparisonLabel']"
+                            :rank="$view['chartRows'][$title->id]['rank']"
+                            :movement-amount="$view['chartRows'][$title->id]['movementAmount']"
+                            :movement-direction="$view['chartRows'][$title->id]['movementDirection']"
+                            :movement-note="$view['chartRows'][$title->id]['movementNote']"
                         />
                     </div>
                 @else
                     <div wire:key="title-browser-{{ $title->id }}">
-                        <x-catalog.title-card :title="$title" :show-summary="$showSummary" />
+                        <x-catalog.title-card :title="$title" :show-summary="$view['showSummary']" />
                     </div>
                 @endif
             @empty
-                <div class="{{ $isChartMode ? '' : 'md:col-span-2 xl:col-span-3' }}">
+                <div class="{{ $view['isChartMode'] ? '' : 'md:col-span-2 xl:col-span-3' }}">
                     <x-ui.empty class="rounded-box border border-dashed border-black/10 bg-white dark:border-white/10 dark:bg-neutral-900">
                         <x-ui.empty.media>
                             <x-ui.icon name="film" class="size-8 text-neutral-400 dark:text-neutral-500" />
                         </x-ui.empty.media>
-                        <x-ui.heading level="h3">{{ $emptyHeading }}</x-ui.heading>
+                        <x-ui.heading level="h3">{{ $view['emptyHeading'] }}</x-ui.heading>
                         <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
-                            @if ($isChartMode && $selectedCountryCode !== '')
-                                No chart titles are currently available for {{ $selectedCountryLabel }}.
+                            @if ($view['isChartMode'] && $view['selectedCountryCode'] !== '')
+                                No chart titles are currently available for {{ $view['selectedCountryLabel'] }}.
                             @else
-                                {{ $emptyText }}
+                                {{ $view['emptyText'] }}
                             @endif
                         </x-ui.text>
 
-                        @if ($isChartMode && $selectedCountryCode !== '')
+                        @if ($view['isChartMode'] && $view['selectedCountryCode'] !== '')
                             <div class="mt-4">
                                 <x-ui.button as="a" :href="request()->fullUrlWithoutQuery(['country'])" variant="outline" icon="globe-alt">
                                     Return to global chart
@@ -136,7 +142,9 @@
         </div>
 
         <div>
-            {{ $titles->links() }}
+            {{ $view['titles']->links() }}
         </div>
     </div>
+</div>
+@endisland
 </div>

@@ -2,97 +2,84 @@
 
 namespace Tests\Feature\Feature;
 
-use App\Models\Person;
-use App\Models\Title;
-use App\Models\User;
-use Database\Seeders\DemoCatalogSeeder;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Tests\Concerns\InteractsWithRemoteCatalog;
+use Tests\Concerns\UsesCatalogOnlyApplication;
 use Tests\TestCase;
 
 class PublicBrowsePagesTest extends TestCase
 {
-    use RefreshDatabase;
+    use InteractsWithRemoteCatalog;
+    use UsesCatalogOnlyApplication;
 
-    public function test_public_catalog_pages_render_seeded_content(): void
+    public function test_public_catalog_pages_render_the_mysql_backed_public_surface(): void
     {
-        $this->seed(DemoCatalogSeeder::class);
         Livewire::withoutLazyLoading();
 
-        $title = Title::query()->with(['credits.person', 'reviews.author'])->firstOrFail();
-        $person = Person::query()->with('credits.title')->firstOrFail();
-        $user = User::query()->whereHas('publicLists')->firstOrFail();
+        $title = $this->sampleTitle();
+        $person = $this->samplePerson();
+        $genre = $this->sampleGenre();
+        $year = $this->sampleReleaseYear();
 
         $this->get(route('public.home'))
             ->assertOk()
-            ->assertSee('Hero Spotlight')
-            ->assertSee('Trending Now')
-            ->assertSee('Northern Signal')
-            ->assertSee('Search The Global Catalog')
-            ->assertSeeInOrder(['Home', 'Discovery', 'All Titles', 'Movies', 'TV Shows', 'People', 'Lists', 'Awards', 'Charts', 'Latest Trailers', 'Latest Reviews', 'Advanced Search'])
-            ->assertSeeHtml('data-slot="badge-icon"');
+            ->assertSee('Catalog Spotlight')
+            ->assertSee('Trending titles');
 
         $this->get(route('public.discover'))
             ->assertOk()
             ->assertSee('Advanced Title Discovery')
-            ->assertSee('Radar Picks')
+            ->assertSeeHtml('data-slot="discover-filters-island"')
             ->assertSeeHtml('data-slot="discover-hero"')
             ->assertSeeHtml('data-slot="discover-advanced-filters"')
-            ->assertSeeHtml('data-slot="discover-results-shell"')
-            ->assertSee($title->name);
-
-        $this->get(route('public.titles.index'))
-            ->assertOk()
-            ->assertSee('Browse Titles')
-            ->assertSeeHtml('data-slot="browse-titles-hero"')
-            ->assertSee($title->name);
-
-        $this->get(route('public.titles.show', $title))
-            ->assertOk()
-            ->assertSeeHtml('data-slot="title-detail-hero"')
-            ->assertSee($title->name)
-            ->assertSee($title->credits->firstOrFail()->person->name)
-            ->assertSee($title->reviews->firstOrFail()->headline);
-
-        $this->get(route('public.people.index'))
-            ->assertOk()
-            ->assertSee('Browse People')
-            ->assertSeeHtml('data-slot="browse-people-hero"')
-            ->assertSee('Actors')
-            ->assertSee($person->name);
-
-        $this->get(route('public.people.show', $person))
-            ->assertOk()
-            ->assertSeeHtml('data-slot="people-detail-hero"')
-            ->assertSee($person->name)
-            ->assertSee('Known for')
-            ->assertSee('Filmography')
-            ->assertSee($person->credits->firstOrFail()->title->name);
+            ->assertSeeHtml('data-slot="discover-results-shell"');
 
         $this->get(route('public.awards.index'))
             ->assertOk()
             ->assertSee('Awards Archive')
-            ->assertSeeHtml('data-slot="awards-archive-hero"')
-            ->assertSeeHtml('data-slot="awards-archive-shell"')
-            ->assertSee('Celestial Screen Awards');
+            ->assertSeeHtml('data-slot="awards-archive-shell"');
 
-        $this->get(route('public.lists.index'))
+        $this->get(route('public.trailers.latest'))
             ->assertOk()
-            ->assertSee('Browse Public Lists')
-            ->assertSeeHtml('data-slot="public-lists-hero"')
-            ->assertSeeHtml('data-slot="public-lists-grid"')
-            ->assertSee('Weekend Marathon');
+            ->assertSee('Trailers')
+            ->assertSee('Trailer archive');
 
-        $this->get(route('public.users.show', $user))
+        $this->get(route('public.titles.index'))
             ->assertOk()
-            ->assertSeeHtml('data-slot="avatar"')
-            ->assertSeeHtml('data-slot="badge-icon"')
-            ->assertSee($user->name);
+            ->assertSee('Browse Titles')
+            ->assertSeeHtml('data-slot="title-browser-island"');
 
-        $this->get(route('public.search', ['q' => 'Signal']))
+        $this->get(route('public.genres.show', $genre))
             ->assertOk()
-            ->assertSee('Search')
-            ->assertSeeHtml('data-slot="search-surface"')
-            ->assertSee('Northern Signal');
+            ->assertSee($genre->name);
+
+        $this->get(route('public.years.show', ['year' => $year]))
+            ->assertOk()
+            ->assertSee((string) $year);
+
+        $this->get(route('public.titles.show', $title))
+            ->assertOk()
+            ->assertSee($title->name)
+            ->assertSee('Overview');
+
+        $this->get(route('public.people.index'))
+            ->assertOk()
+            ->assertSee('Browse People')
+            ->assertSeeHtml('data-slot="people-browser-island"')
+            ->assertSee('Actors')
+            ->assertSee('Catalog footprint')
+            ->assertSee('Top professions');
+
+        $this->get(route('public.people.show', $person))
+            ->assertOk()
+            ->assertSee($person->name)
+            ->assertSee('Known for')
+            ->assertSee('Filmography');
+
+        $this->get(route('public.search', ['q' => $this->searchTermFor($title)]))
+            ->assertOk()
+            ->assertSee('Search Results')
+            ->assertSeeHtml('data-slot="search-results-island"')
+            ->assertSee($title->name);
     }
 }

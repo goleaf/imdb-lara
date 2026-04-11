@@ -3,11 +3,10 @@
 namespace App\Actions\Catalog;
 
 use App\Actions\Seo\PageSeoData;
-use App\Enums\MediaKind;
 use App\Enums\TitleType;
-use App\Models\MediaAsset;
+use App\Models\CatalogMediaAsset;
+use App\Models\MovieBoxOffice;
 use App\Models\Title;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 class LoadTitleBoxOfficeAction
@@ -15,8 +14,8 @@ class LoadTitleBoxOfficeAction
     /**
      * @return array{
      *     title: Title,
-     *     poster: MediaAsset|null,
-     *     backdrop: MediaAsset|null,
+     *     poster: CatalogMediaAsset|null,
+     *     backdrop: CatalogMediaAsset|null,
      *     summaryCards: Collection<int, array{key: string, label: string, value: string, copy: string}>,
      *     rankCards: Collection<int, array{key: string, label: string, value: string, copy: string}>,
      *     comparisonCards: Collection<int, array{key: string, label: string, value: string, copy: string}>,
@@ -33,27 +32,17 @@ class LoadTitleBoxOfficeAction
     public function handle(Title $title): array
     {
         $title->load([
-            'mediaAssets' => fn ($query) => $query
-                ->select([
-                    'id',
-                    'mediable_type',
-                    'mediable_id',
-                    'kind',
-                    'url',
-                    'alt_text',
-                    'position',
-                    'is_primary',
-                ])
-                ->ordered(),
+            'titleImages:id,movie_id,position,url,width,height,type',
+            'primaryImageRecord:movie_id,url,width,height,type',
+            'boxOfficeRecord:movie_id,domestic_gross_amount,domestic_gross_currency_code,worldwide_gross_amount,worldwide_gross_currency_code,opening_weekend_gross_amount,opening_weekend_gross_currency_code,opening_weekend_end_year,opening_weekend_end_month,opening_weekend_end_day,production_budget_amount,production_budget_currency_code',
         ]);
 
-        $poster = MediaAsset::preferredFrom($title->mediaAssets, MediaKind::Poster, MediaKind::Backdrop);
-        $backdrop = MediaAsset::preferredFrom($title->mediaAssets, MediaKind::Backdrop, MediaKind::Poster);
-        $boxOffice = $title->imdbPayloadSection('boxOffice');
-        $summaryCards = $this->buildSummaryCards($boxOffice);
-        $marketRows = $this->buildMarketRows($boxOffice);
-        $comparisonCards = $this->buildComparisonCards($boxOffice, $marketRows->count());
-        $rankCards = $this->buildRankCards($title, $boxOffice);
+        $poster = $title->preferredPoster();
+        $backdrop = $title->preferredBackdrop();
+        $summaryCards = $this->buildSummaryCards($title->boxOfficeRecord);
+        $marketRows = collect();
+        $comparisonCards = $this->buildComparisonCards($title->boxOfficeRecord, $marketRows->count());
+        $rankCards = $this->buildRankCards($title->boxOfficeRecord);
         $spotlightMetric = $summaryCards->firstWhere('key', 'lifetimeGross') ?? $summaryCards->first();
         $secondaryMetric = is_array($spotlightMetric)
             ? $summaryCards->first(fn (array $metric): bool => $metric['key'] !== $spotlightMetric['key'])
@@ -97,12 +86,11 @@ class LoadTitleBoxOfficeAction
     }
 
     /**
-     * @param  array<string, mixed>|null  $boxOffice
      * @return Collection<int, array{key: string, label: string, value: string, copy: string}>
      */
-    private function buildSummaryCards(?array $boxOffice): Collection
+    private function buildSummaryCards(?MovieBoxOffice $boxOffice): Collection
     {
-        if ($boxOffice === null) {
+        if (! $boxOffice instanceof MovieBoxOffice) {
             return collect();
         }
 
@@ -111,8 +99,8 @@ class LoadTitleBoxOfficeAction
                 'key' => 'openingWeekend',
                 'label' => 'Opening Weekend',
                 'value' => $this->formatMoney(
-                    data_get($boxOffice, 'openingWeekendGross.amount'),
-                    data_get($boxOffice, 'openingWeekendGross.currency'),
+                    $boxOffice->opening_weekend_gross_amount,
+                    $boxOffice->opening_weekend_gross_currency_code,
                 ),
                 'copy' => 'Tracked theatrical debut from the imported gross record.',
             ],
@@ -120,17 +108,17 @@ class LoadTitleBoxOfficeAction
                 'key' => 'lifetimeGross',
                 'label' => 'Lifetime Gross',
                 'value' => $this->formatMoney(
-                    data_get($boxOffice, 'worldwideGross.amount'),
-                    data_get($boxOffice, 'worldwideGross.currency'),
+                    $boxOffice->worldwide_gross_amount,
+                    $boxOffice->worldwide_gross_currency_code,
                 ),
-                'copy' => 'Worldwide theatrical total carried by the current payload.',
+                'copy' => 'Worldwide theatrical total carried by the current import.',
             ],
             [
                 'key' => 'domesticGross',
                 'label' => 'Domestic Gross',
                 'value' => $this->formatMoney(
-                    data_get($boxOffice, 'domesticGross.amount'),
-                    data_get($boxOffice, 'domesticGross.currency'),
+                    $boxOffice->domestic_gross_amount,
+                    $boxOffice->domestic_gross_currency_code,
                 ),
                 'copy' => 'Primary home-market theatrical gross when available.',
             ],
@@ -138,8 +126,8 @@ class LoadTitleBoxOfficeAction
                 'key' => 'productionBudget',
                 'label' => 'Production Budget',
                 'value' => $this->formatMoney(
-                    data_get($boxOffice, 'budget.amount'),
-                    data_get($boxOffice, 'budget.currency'),
+                    $boxOffice->production_budget_amount,
+                    $boxOffice->production_budget_currency_code,
                 ),
                 'copy' => 'Budget reporting imported alongside the title dossier.',
             ],
@@ -149,19 +137,30 @@ class LoadTitleBoxOfficeAction
     }
 
     /**
-     * @param  array<string, mixed>|null  $boxOffice
      * @return Collection<int, array{key: string, label: string, value: string, copy: string}>
      */
-    private function buildComparisonCards(?array $boxOffice, int $reportedMarketCount): Collection
+    private function buildComparisonCards(?MovieBoxOffice $boxOffice, int $reportedMarketCount): Collection
     {
-        if ($boxOffice === null) {
+        if (! $boxOffice instanceof MovieBoxOffice) {
             return collect();
         }
 
-        $budget = $this->resolveMoneyFigure(data_get($boxOffice, 'budget'));
-        $openingWeekend = $this->resolveMoneyFigure(data_get($boxOffice, 'openingWeekendGross'));
-        $domesticGross = $this->resolveMoneyFigure(data_get($boxOffice, 'domesticGross'));
-        $lifetimeGross = $this->resolveMoneyFigure(data_get($boxOffice, 'worldwideGross'));
+        $budget = $this->resolveStoredMoneyFigure(
+            $boxOffice->production_budget_amount,
+            $boxOffice->production_budget_currency_code,
+        );
+        $openingWeekend = $this->resolveStoredMoneyFigure(
+            $boxOffice->opening_weekend_gross_amount,
+            $boxOffice->opening_weekend_gross_currency_code,
+        );
+        $domesticGross = $this->resolveStoredMoneyFigure(
+            $boxOffice->domestic_gross_amount,
+            $boxOffice->domestic_gross_currency_code,
+        );
+        $lifetimeGross = $this->resolveStoredMoneyFigure(
+            $boxOffice->worldwide_gross_amount,
+            $boxOffice->worldwide_gross_currency_code,
+        );
 
         return collect([
             $this->buildBudgetMultipleCard($lifetimeGross, $budget),
@@ -173,7 +172,7 @@ class LoadTitleBoxOfficeAction
                     'key' => 'reportedMarkets',
                     'label' => 'Reported Markets',
                     'value' => number_format($reportedMarketCount),
-                    'copy' => 'The current payload tracks theatrical runway coverage across these markets.',
+                    'copy' => 'The current import tracks theatrical runway coverage across these markets.',
                 ]
                 : null,
         ])
@@ -182,145 +181,72 @@ class LoadTitleBoxOfficeAction
     }
 
     /**
-     * @param  array<string, mixed>|null  $boxOffice
-     * @return Collection<int, array{market: string, weeksLabel: string|null, copy: string}>
-     */
-    private function buildMarketRows(?array $boxOffice): Collection
-    {
-        if ($boxOffice === null) {
-            return collect();
-        }
-
-        return collect(data_get($boxOffice, 'theatricalRuns', []))
-            ->map(function (mixed $run): ?array {
-                if (! is_array($run)) {
-                    return null;
-                }
-
-                $market = $this->nullableString(data_get($run, 'market'));
-                $weeks = $this->nullableInt(data_get($run, 'weeks'));
-
-                if ($market === null && $weeks === null) {
-                    return null;
-                }
-
-                $resolvedMarket = $market ?? 'Market pending';
-                $weeksLabel = $weeks !== null
-                    ? number_format($weeks).' '.str('week')->plural($weeks)
-                    : null;
-
-                return [
-                    'market' => $resolvedMarket,
-                    'weeksLabel' => $weeksLabel,
-                    'copy' => $weeksLabel !== null
-                        ? $weeksLabel.' in release tracked for this market.'
-                        : 'Market presence is recorded without a reported theatrical window.',
-                ];
-            })
-            ->filter()
-            ->values();
-    }
-
-    /**
-     * @param  array<string, mixed>|null  $boxOffice
      * @return Collection<int, array{key: string, label: string, value: string, copy: string}>
      */
-    private function buildRankCards(Title $title, ?array $boxOffice): Collection
+    private function buildRankCards(?MovieBoxOffice $boxOffice): Collection
     {
-        if ($boxOffice === null) {
+        if (! $boxOffice instanceof MovieBoxOffice) {
             return collect();
         }
 
-        /** @var Collection<string, array{label: string, path: string}> $metricDefinitions */
+        /** @var Collection<string, array{label: string, amountColumn: string, currencyColumn: string}> $metricDefinitions */
         $metricDefinitions = collect([
-            'openingWeekend' => ['label' => 'Opening Weekend', 'path' => 'openingWeekendGross'],
-            'lifetimeGross' => ['label' => 'Lifetime Gross', 'path' => 'worldwideGross'],
-            'domesticGross' => ['label' => 'Domestic Gross', 'path' => 'domesticGross'],
-            'productionBudget' => ['label' => 'Production Budget', 'path' => 'budget'],
+            'openingWeekend' => [
+                'label' => 'Opening Weekend',
+                'amountColumn' => 'opening_weekend_gross_amount',
+                'currencyColumn' => 'opening_weekend_gross_currency_code',
+            ],
+            'lifetimeGross' => [
+                'label' => 'Lifetime Gross',
+                'amountColumn' => 'worldwide_gross_amount',
+                'currencyColumn' => 'worldwide_gross_currency_code',
+            ],
+            'domesticGross' => [
+                'label' => 'Domestic Gross',
+                'amountColumn' => 'domestic_gross_amount',
+                'currencyColumn' => 'domestic_gross_currency_code',
+            ],
+            'productionBudget' => [
+                'label' => 'Production Budget',
+                'amountColumn' => 'production_budget_amount',
+                'currencyColumn' => 'production_budget_currency_code',
+            ],
         ]);
 
-        $trackedTitles = Title::query()
-            ->select(['id', 'imdb_payload'])
-            ->where('title_type', '!=', TitleType::Episode)
-            ->where(function (Builder $query) use ($title): void {
-                $query->where('is_published', true)
-                    ->orWhere('id', $title->getKey());
-            })
-            ->whereNotNull('imdb_payload')
-            ->get();
-
         return $metricDefinitions
-            ->map(function (array $metricDefinition, string $metricKey) use ($boxOffice, $title, $trackedTitles): ?array {
-                $currentFigure = $this->resolveMoneyFigure(data_get($boxOffice, $metricDefinition['path']));
+            ->map(function (array $metricDefinition, string $metricKey) use ($boxOffice): ?array {
+                $currentFigure = $this->resolveStoredMoneyFigure(
+                    $boxOffice->getAttribute($metricDefinition['amountColumn']),
+                    $boxOffice->getAttribute($metricDefinition['currencyColumn']),
+                );
 
                 if ($currentFigure === null) {
                     return null;
                 }
 
-                $rankedRows = $trackedTitles
-                    ->map(function (Title $trackedTitle) use ($metricDefinition, $currentFigure): ?array {
-                        $figure = $this->resolveMoneyFigure(
-                            data_get($trackedTitle->imdbPayloadSection('boxOffice'), $metricDefinition['path']),
-                        );
+                $trackedQuery = MovieBoxOffice::query()
+                    ->whereNotNull($metricDefinition['amountColumn'])
+                    ->where($metricDefinition['currencyColumn'], $currentFigure['currency']);
+                $trackedCount = (clone $trackedQuery)->count();
 
-                        if ($figure === null || $figure['currency'] !== $currentFigure['currency']) {
-                            return null;
-                        }
-
-                        return [
-                            'title_id' => $trackedTitle->getKey(),
-                            'amount' => $figure['amount'],
-                        ];
-                    })
-                    ->filter()
-                    ->sortByDesc('amount')
-                    ->values();
-
-                if ($rankedRows->isEmpty()) {
+                if ($trackedCount === 0) {
                     return null;
                 }
 
-                $rank = $this->resolveRankPosition($rankedRows, $title->getKey());
-
-                if ($rank === null) {
-                    return null;
-                }
-
-                $currencyCode = $currentFigure['currency'];
-                $currencyLabel = $currencyCode !== null ? ' '.strtoupper($currencyCode) : '';
+                $higherCount = (clone $trackedQuery)
+                    ->where($metricDefinition['amountColumn'], '>', $currentFigure['amount'])
+                    ->count();
+                $currencyLabel = $currentFigure['currency'] !== null ? ' '.$currentFigure['currency'] : '';
 
                 return [
                     'key' => $metricKey,
                     'label' => $metricDefinition['label'],
-                    'value' => '#'.$rank,
-                    'copy' => 'Out of '.number_format($rankedRows->count()).' tracked'.$currencyLabel.' records for this metric.',
+                    'value' => '#'.number_format($higherCount + 1),
+                    'copy' => 'Out of '.number_format($trackedCount).' tracked'.$currencyLabel.' records for this metric.',
                 ];
             })
             ->filter()
             ->values();
-    }
-
-    /**
-     * @param  Collection<int, array{title_id: int, amount: int}>  $rankedRows
-     */
-    private function resolveRankPosition(Collection $rankedRows, int $titleId): ?int
-    {
-        $currentRank = 0;
-        $previousAmount = null;
-
-        foreach ($rankedRows->values() as $index => $rankedRow) {
-            if ($previousAmount === null || $rankedRow['amount'] < $previousAmount) {
-                $currentRank = $index + 1;
-            }
-
-            if ($rankedRow['title_id'] === $titleId) {
-                return $currentRank;
-            }
-
-            $previousAmount = $rankedRow['amount'];
-        }
-
-        return null;
     }
 
     /**
@@ -410,25 +336,19 @@ class LoadTitleBoxOfficeAction
     /**
      * @return array{amount: int, currency: string|null, formatted: string}|null
      */
-    private function resolveMoneyFigure(mixed $value): ?array
+    private function resolveStoredMoneyFigure(mixed $amount, mixed $currency): ?array
     {
-        if (! is_array($value)) {
-            return null;
-        }
-
-        $amount = data_get($value, 'amount');
-
         if (! is_scalar($amount) || ! is_numeric((string) $amount)) {
             return null;
         }
 
         $normalizedAmount = max(0, (int) round((float) $amount));
-        $currency = $this->nullableString(data_get($value, 'currency'));
+        $currencyCode = $this->nullableString(is_scalar($currency) ? (string) $currency : null);
 
         return [
             'amount' => $normalizedAmount,
-            'currency' => $currency !== null ? strtoupper($currency) : null,
-            'formatted' => $this->formatMoney($normalizedAmount, $currency),
+            'currency' => $currencyCode !== null ? strtoupper($currencyCode) : null,
+            'formatted' => $this->formatMoney($normalizedAmount, $currencyCode),
         ];
     }
 
@@ -454,15 +374,6 @@ class LoadTitleBoxOfficeAction
         $value = trim($value);
 
         return $value !== '' ? $value : null;
-    }
-
-    private function nullableInt(mixed $value): ?int
-    {
-        if (! is_scalar($value) || ! is_numeric((string) $value)) {
-            return null;
-        }
-
-        return max(0, (int) $value);
     }
 
     private function formatMoney(mixed $amount, mixed $currency): ?string

@@ -74,10 +74,6 @@
                     <span class="sb-chart-stat">{{ number_format($title->displayRatingCount()) }} votes</span>
                 @endif
 
-                @if ($title->displayReviewCount() > 0)
-                    <span class="sb-chart-stat">{{ number_format($title->displayReviewCount()) }} reviews</span>
-                @endif
-
                 @if (filled($comparisonLabel))
                     <span class="sb-chart-stat">
                         <x-ui.icon name="globe-alt" class="size-3.5" />

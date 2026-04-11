@@ -1,4 +1,10 @@
-<div class="sb-discovery-layout grid gap-6 xl:grid-cols-[19.5rem_minmax(0,1fr)]">
+<div>
+@island(name: 'discover-results-page')
+    @php
+        $view = $this->viewData;
+    @endphp
+
+    <div class="sb-discovery-layout grid gap-6 xl:grid-cols-[19.5rem_minmax(0,1fr)]" data-slot="discover-filters-island">
     <aside class="self-start xl:sticky xl:top-24">
         <x-ui.card class="sb-filter-shell sb-discovery-sidebar !max-w-none rounded-[1.6rem] p-4 sm:p-5" data-slot="discover-advanced-filters">
             <div class="space-y-5">
@@ -11,7 +17,7 @@
                         </x-ui.text>
                     </div>
 
-                    @if ($activeFilterCount > 0)
+                    @if ($view['activeFilterCount'] > 0)
                         <x-ui.button type="button" variant="ghost" size="sm" icon="x-mark" wire:click="clearFilters">
                             Clear
                         </x-ui.button>
@@ -19,15 +25,15 @@
                 </div>
 
                 <div
-                    class="sb-discovery-active-shell {{ $activeFilters->isNotEmpty() ? 'sb-discovery-active-shell--active' : '' }}"
+                    class="sb-discovery-active-shell {{ $view['activeFilters']->isNotEmpty() ? 'sb-discovery-active-shell--active' : '' }}"
                     data-slot="discover-active-filters"
                 >
                     <div class="flex items-start justify-between gap-3">
                         <div class="space-y-1">
-                            <div class="sb-discovery-active-kicker">{{ $activeFilters->isNotEmpty() ? 'Current state' : 'Start broad' }}</div>
+                            <div class="sb-discovery-active-kicker">{{ $view['activeFilters']->isNotEmpty() ? 'Current state' : 'Start broad' }}</div>
                             <div class="sb-discovery-section-copy">
-                                @if ($activeFilters->isNotEmpty())
-                                    {{ $activeFilterCount }} filters are actively shaping the discovery results.
+                                @if ($view['activeFilters']->isNotEmpty())
+                                    {{ $view['activeFilterCount'] }} filters are actively shaping the discovery results.
                                 @else
                                     Everything is open. Start with a keyword, title type, or awards filter.
                                 @endif
@@ -35,13 +41,13 @@
                         </div>
 
                         <span class="sb-discovery-active-count">
-                            {{ $activeFilters->isNotEmpty() ? $activeFilterCount.' active' : 'All titles' }}
+                            {{ $view['activeFilters']->isNotEmpty() ? $view['activeFilterCount'].' active' : 'All titles' }}
                         </span>
                     </div>
 
-                    @if ($activeFilters->isNotEmpty())
+                    @if ($view['activeFilters']->isNotEmpty())
                         <div class="sb-discovery-active-filter-list">
-                            @foreach ($activeFilters as $activeFilter)
+                            @foreach ($view['activeFilters'] as $activeFilter)
                                 <span class="sb-search-chip sb-search-chip--accent sb-search-chip--tight">
                                     <x-ui.icon :name="$activeFilter['icon']" class="size-3" />
                                     {{ $activeFilter['label'] }}
@@ -51,7 +57,7 @@
                     @endif
                 </div>
 
-                <div class="sb-discovery-section-card {{ $keywordActive ? 'sb-discovery-section-card--active' : '' }}">
+                <div class="sb-discovery-section-card {{ $view['keywordActive'] ? 'sb-discovery-section-card--active' : '' }}">
                     <div class="flex items-start gap-3">
                         <div class="sb-discovery-section-icon">
                             <x-ui.icon name="magnifying-glass" class="size-4" />
@@ -62,7 +68,7 @@
                             <div class="sb-discovery-section-copy">Search titles, synonyms, or keyword-rich plot notes.</div>
                         </div>
 
-                        @if ($keywordActive)
+                        @if ($view['keywordActive'])
                             <span class="sb-discovery-section-state">Active</span>
                         @endif
                     </div>
@@ -77,7 +83,7 @@
                             clearable
                             class="sb-filter-control"
                         >
-                            @foreach ($searchSuggestions as $suggestedTitle)
+                            @foreach ($view['searchSuggestions'] as $suggestedTitle)
                                 <x-ui.autocomplete.item
                                     wire:key="discover-suggestion-{{ $suggestedTitle->id }}"
                                     :value="$suggestedTitle->name"
@@ -102,7 +108,7 @@
                     </x-ui.field>
                 </div>
 
-                <div class="sb-discovery-section-card {{ $coreFiltersActive ? 'sb-discovery-section-card--active' : '' }}">
+                <div class="sb-discovery-section-card {{ $view['coreFiltersActive'] ? 'sb-discovery-section-card--active' : '' }}">
                     <div class="flex items-start gap-3">
                         <div class="sb-discovery-section-icon">
                             <x-ui.icon name="film" class="size-4" />
@@ -113,7 +119,7 @@
                             <div class="sb-discovery-section-copy">Narrow the title pool by format, genre, and awards profile.</div>
                         </div>
 
-                        @if ($coreFiltersActive)
+                        @if ($view['coreFiltersActive'])
                             <span class="sb-discovery-section-state">Active</span>
                         @endif
                     </div>
@@ -122,7 +128,7 @@
                         <x-ui.field>
                             <x-ui.label>Title type</x-ui.label>
                             <x-ui.combobox wire:model.live="type" class="sb-filter-control w-full" placeholder="All types" clearable>
-                                @foreach ($titleTypes as $typeOption)
+                                @foreach ($view['titleTypes'] as $typeOption)
                                     <x-ui.combobox.option
                                         wire:key="discover-type-{{ $typeOption->value }}"
                                         value="{{ $typeOption->value }}"
@@ -137,7 +143,7 @@
                         <x-ui.field>
                             <x-ui.label>Genre</x-ui.label>
                             <x-ui.combobox wire:model.live="genre" class="sb-filter-control w-full" placeholder="All genres" clearable>
-                                @foreach ($genres as $genreOption)
+                                @foreach ($view['genres'] as $genreOption)
                                     <x-ui.combobox.option wire:key="discover-genre-{{ $genreOption->id }}" value="{{ $genreOption->slug }}" icon="tag">
                                         {{ $genreOption->name }}
                                     </x-ui.combobox.option>
@@ -148,7 +154,7 @@
                         <x-ui.field class="sm:col-span-2 xl:col-span-1">
                             <x-ui.label>Awards</x-ui.label>
                             <x-ui.combobox wire:model.live="awards" class="sb-filter-control w-full" placeholder="Any awards status" clearable>
-                                @foreach ($awardOptions as $awardOption)
+                                @foreach ($view['awardOptions'] as $awardOption)
                                     <x-ui.combobox.option wire:key="discover-awards-{{ $awardOption['value'] }}" value="{{ $awardOption['value'] }}" icon="trophy">
                                         {{ $awardOption['label'] }}
                                     </x-ui.combobox.option>
@@ -158,7 +164,7 @@
                     </div>
                 </div>
 
-                <div class="sb-discovery-section-card {{ $releaseFiltersActive ? 'sb-discovery-section-card--active' : '' }}">
+                <div class="sb-discovery-section-card {{ $view['releaseFiltersActive'] ? 'sb-discovery-section-card--active' : '' }}">
                     <div class="flex items-start gap-3">
                         <div class="sb-discovery-section-icon">
                             <x-ui.icon name="calendar-days" class="size-4" />
@@ -169,7 +175,7 @@
                             <div class="sb-discovery-section-copy">Work within a release window instead of a loose popularity browse.</div>
                         </div>
 
-                        @if ($releaseFiltersActive)
+                        @if ($view['releaseFiltersActive'])
                             <span class="sb-discovery-section-state">Active</span>
                         @endif
                     </div>
@@ -178,7 +184,7 @@
                         <x-ui.field>
                             <x-ui.label>Release from</x-ui.label>
                             <x-ui.combobox wire:model.live="yearFrom" class="sb-filter-control w-full" placeholder="Any year" clearable>
-                                @foreach ($years as $yearOption)
+                                @foreach ($view['years'] as $yearOption)
                                     <x-ui.combobox.option wire:key="discover-year-from-{{ $yearOption }}" value="{{ $yearOption }}" icon="calendar-days">
                                         {{ $yearOption }}
                                     </x-ui.combobox.option>
@@ -189,7 +195,7 @@
                         <x-ui.field>
                             <x-ui.label>Release to</x-ui.label>
                             <x-ui.combobox wire:model.live="yearTo" class="sb-filter-control w-full" placeholder="Any year" clearable>
-                                @foreach ($years as $yearOption)
+                                @foreach ($view['years'] as $yearOption)
                                     <x-ui.combobox.option wire:key="discover-year-to-{{ $yearOption }}" value="{{ $yearOption }}" icon="calendar-days">
                                         {{ $yearOption }}
                                     </x-ui.combobox.option>
@@ -199,7 +205,7 @@
                     </div>
                 </div>
 
-                <div class="sb-discovery-section-card {{ $signalFiltersActive ? 'sb-discovery-section-card--active' : '' }}">
+                <div class="sb-discovery-section-card {{ $view['signalFiltersActive'] ? 'sb-discovery-section-card--active' : '' }}">
                     <div class="flex items-start gap-3">
                         <div class="sb-discovery-section-icon">
                             <x-ui.icon name="star" class="size-4" />
@@ -210,7 +216,7 @@
                             <div class="sb-discovery-section-copy">Filter by critical strength, audience volume, and runtime commitment.</div>
                         </div>
 
-                        @if ($signalFiltersActive)
+                        @if ($view['signalFiltersActive'])
                             <span class="sb-discovery-section-state">Active</span>
                         @endif
                     </div>
@@ -219,7 +225,7 @@
                         <x-ui.field>
                             <x-ui.label>Rating</x-ui.label>
                             <x-ui.combobox wire:model.live="minimumRating" class="sb-filter-control w-full" placeholder="Any score" clearable>
-                                @foreach ($minimumRatings as $ratingFloor)
+                                @foreach ($view['minimumRatings'] as $ratingFloor)
                                     <x-ui.combobox.option wire:key="discover-rating-{{ $ratingFloor }}" value="{{ $ratingFloor }}" icon="star">
                                         {{ $ratingFloor }}+
                                     </x-ui.combobox.option>
@@ -230,7 +236,7 @@
                         <x-ui.field>
                             <x-ui.label>Vote count</x-ui.label>
                             <x-ui.combobox wire:model.live="votesMin" class="sb-filter-control w-full" placeholder="Any volume" clearable>
-                                @foreach ($voteThresholdOptions as $voteThresholdOption)
+                                @foreach ($view['voteThresholdOptions'] as $voteThresholdOption)
                                     <x-ui.combobox.option wire:key="discover-votes-{{ $voteThresholdOption['value'] }}" value="{{ $voteThresholdOption['value'] }}" icon="users">
                                         {{ $voteThresholdOption['label'] }}
                                     </x-ui.combobox.option>
@@ -241,7 +247,7 @@
                         <x-ui.field class="sm:col-span-2 xl:col-span-1">
                             <x-ui.label>Runtime</x-ui.label>
                             <x-ui.combobox wire:model.live="runtime" class="sb-filter-control w-full" placeholder="Any runtime" clearable>
-                                @foreach ($runtimeOptions as $runtimeOption)
+                                @foreach ($view['runtimeOptions'] as $runtimeOption)
                                     <x-ui.combobox.option wire:key="discover-runtime-{{ $runtimeOption['value'] }}" value="{{ $runtimeOption['value'] }}" icon="clock">
                                         {{ $runtimeOption['label'] }}
                                     </x-ui.combobox.option>
@@ -251,7 +257,7 @@
                     </div>
                 </div>
 
-                <div class="sb-discovery-section-card {{ $originFiltersActive ? 'sb-discovery-section-card--active' : '' }}">
+                <div class="sb-discovery-section-card {{ $view['originFiltersActive'] ? 'sb-discovery-section-card--active' : '' }}">
                     <div class="flex items-start gap-3">
                         <div class="sb-discovery-section-icon">
                             <x-ui.icon name="globe-alt" class="size-4" />
@@ -262,7 +268,7 @@
                             <div class="sb-discovery-section-copy">Surface titles by language and production country.</div>
                         </div>
 
-                        @if ($originFiltersActive)
+                        @if ($view['originFiltersActive'])
                             <span class="sb-discovery-section-state">Active</span>
                         @endif
                     </div>
@@ -271,7 +277,7 @@
                         <x-ui.field>
                             <x-ui.label>Language</x-ui.label>
                             <x-ui.combobox wire:model.live="language" class="sb-filter-control w-full" placeholder="Any language" clearable>
-                                @foreach ($languages as $languageOption)
+                                @foreach ($view['languages'] as $languageOption)
                                     <x-ui.combobox.option wire:key="discover-language-{{ $languageOption['value'] }}" value="{{ $languageOption['value'] }}" icon="language">
                                         {{ $languageOption['label'] }}
                                     </x-ui.combobox.option>
@@ -282,7 +288,7 @@
                         <x-ui.field>
                             <x-ui.label>Country</x-ui.label>
                             <x-ui.combobox wire:model.live="country" class="sb-filter-control w-full" placeholder="Any country" clearable>
-                                @foreach ($countries as $countryOption)
+                                @foreach ($view['countries'] as $countryOption)
                                     <x-ui.combobox.option wire:key="discover-country-{{ $countryOption['value'] }}" value="{{ $countryOption['value'] }}" icon="globe-alt">
                                         {{ $countryOption['label'] }}
                                     </x-ui.combobox.option>
@@ -292,7 +298,7 @@
                     </div>
                 </div>
 
-                <div class="sb-discovery-section-card {{ $orderingActive ? 'sb-discovery-section-card--active' : '' }}">
+                <div class="sb-discovery-section-card {{ $view['orderingActive'] ? 'sb-discovery-section-card--active' : '' }}">
                     <div class="flex items-start gap-3">
                         <div class="sb-discovery-section-icon">
                             <x-ui.icon name="bars-arrow-down" class="size-4" />
@@ -303,7 +309,7 @@
                             <div class="sb-discovery-section-copy">Re-rank the results area for popularity, ratings, trend, or recency.</div>
                         </div>
 
-                        @if ($orderingActive)
+                        @if ($view['orderingActive'])
                             <span class="sb-discovery-section-state">Active</span>
                         @endif
                     </div>
@@ -311,7 +317,7 @@
                     <x-ui.field>
                         <x-ui.label>Sort</x-ui.label>
                             <x-ui.combobox wire:model.live="sort" class="sb-filter-control w-full" placeholder="Sort titles">
-                                @foreach ($sortOptions as $sortOption)
+                                @foreach ($view['sortOptions'] as $sortOption)
                                     <x-ui.combobox.option wire:key="discover-sort-{{ $sortOption['value'] }}" value="{{ $sortOption['value'] }}" :icon="$sortOption['icon']">
                                         {{ $sortOption['label'] }}
                                     </x-ui.combobox.option>
@@ -336,23 +342,23 @@
 
                 <div class="sb-discovery-summary-stat">
                     <div class="sb-discovery-summary-label">Titles</div>
-                    <div class="sb-discovery-summary-value">{{ number_format($titleResultsCount) }}</div>
+                    <div class="sb-discovery-summary-value">{{ number_format($view['titleResultsCount']) }}</div>
                 </div>
 
                 <div class="sb-discovery-summary-stat">
                     <div class="sb-discovery-summary-label">Active filters</div>
-                    <div class="sb-discovery-summary-value">{{ number_format($activeFilterCount) }}</div>
+                    <div class="sb-discovery-summary-value">{{ number_format($view['activeFilterCount']) }}</div>
                 </div>
 
                 <div class="sb-discovery-summary-stat">
                     <div class="sb-discovery-summary-label">Sort</div>
-                    <div class="sb-discovery-summary-value text-[1.05rem]">{{ $sortLabel }}</div>
+                    <div class="sb-discovery-summary-value text-[1.05rem]">{{ $view['sortLabel'] }}</div>
                 </div>
             </div>
 
-            @if ($activeFilters->isNotEmpty())
+            @if ($view['activeFilters']->isNotEmpty())
                 <div class="sb-discovery-active-filter-bar">
-                    @foreach ($activeFilters as $activeFilter)
+                    @foreach ($view['activeFilters'] as $activeFilter)
                         <span class="sb-search-chip sb-search-chip--accent sb-search-chip--tight">
                             <x-ui.icon :name="$activeFilter['icon']" class="size-3" />
                             {{ $activeFilter['label'] }}
@@ -362,7 +368,7 @@
             @endif
         </x-ui.card>
 
-        <div wire:loading.delay wire:target="{{ $loadingTargets }}" class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div wire:loading.delay wire:target="{{ $view['loadingTargets'] }}" class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             @foreach (range(1, 6) as $index)
                 <x-ui.card class="sb-poster-card !max-w-none h-full overflow-hidden rounded-[1.4rem]" wire:key="discover-skeleton-{{ $index }}">
                     <div class="space-y-4">
@@ -375,14 +381,14 @@
             @endforeach
         </div>
 
-        <div wire:loading.remove wire:target="{{ $loadingTargets }}" class="sb-results-shell space-y-4 rounded-[1.6rem] p-4 sm:p-5">
+        <div wire:loading.remove wire:target="{{ $view['loadingTargets'] }}" class="sb-results-shell space-y-4 rounded-[1.6rem] p-4 sm:p-5">
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <div class="space-y-1">
                     <div class="sb-discovery-section-title">Discovery results</div>
                     <div class="sb-discovery-section-copy">Poster-led results update against the live filter rail without leaving the page.</div>
                 </div>
 
-                @if ($activeFilterCount > 0)
+                @if ($view['activeFilterCount'] > 0)
                     <x-ui.button type="button" variant="ghost" size="sm" icon="x-mark" wire:click="clearFilters">
                         Reset filters
                     </x-ui.button>
@@ -390,7 +396,7 @@
             </div>
 
             <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                @forelse ($titles as $title)
+                @forelse ($view['titles'] as $title)
                     <div wire:key="discover-title-{{ $title->id }}">
                         <x-catalog.title-card :title="$title" />
                     </div>
@@ -410,8 +416,10 @@
             </div>
 
             <div>
-                {{ $titles->links() }}
+                {{ $view['titles']->links() }}
             </div>
         </div>
     </div>
+</div>
+@endisland
 </div>

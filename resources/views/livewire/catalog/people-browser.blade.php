@@ -1,4 +1,10 @@
-<div class="space-y-4">
+<div>
+@island(name: 'people-browser-page')
+    @php
+        $view = $this->viewData;
+    @endphp
+
+<div class="space-y-4" data-slot="people-browser-island">
     <x-ui.card class="sb-filter-shell !max-w-none rounded-[1.6rem] p-5">
         <div class="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.7fr)_minmax(0,0.7fr)]">
             <x-ui.field>
@@ -21,7 +27,7 @@
                     placeholder="All professions"
                     clearable
                 >
-                    @foreach ($professions as $professionOption)
+                    @foreach ($view['professions'] as $professionOption)
                         <x-ui.combobox.option
                             wire:key="people-profession-{{ str($professionOption)->slug()->value() }}"
                             value="{{ $professionOption }}"
@@ -41,7 +47,7 @@
                     size="sm"
                     placeholder="Sort people"
                 >
-                    @foreach ($sortOptions as $sortOption)
+                    @foreach ($view['sortOptions'] as $sortOption)
                         <x-ui.combobox.option
                             wire:key="people-sort-{{ $sortOption['value'] }}"
                             value="{{ $sortOption['value'] }}"
@@ -70,7 +76,7 @@
 
     <div wire:loading.remove class="sb-results-shell space-y-4 rounded-[1.6rem] p-4 sm:p-5">
         <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            @forelse ($people as $person)
+            @forelse ($view['people'] as $person)
                 <x-catalog.person-card :person="$person" />
             @empty
                 <div class="sm:col-span-2 xl:col-span-3">
@@ -88,7 +94,9 @@
         </div>
 
         <div>
-            {{ $people->links() }}
+            {{ $view['people']->links() }}
         </div>
     </div>
+</div>
+@endisland
 </div>

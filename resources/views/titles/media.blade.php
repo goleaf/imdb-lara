@@ -330,7 +330,7 @@
                     <div class="flex items-center gap-3">
                         <x-ui.badge variant="outline" color="neutral" icon="play">{{ number_format($trailerAssets->count()) }} videos</x-ui.badge>
                         <x-ui.link :href="route('public.trailers.latest')" variant="ghost" iconAfter="arrow-right">
-                            Latest trailers
+                            Browse trailers
                         </x-ui.link>
                     </div>
                 </div>

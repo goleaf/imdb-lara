@@ -2,37 +2,37 @@
 
 namespace App\Models;
 
-use Database\Factories\TitleStatisticFactory;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TitleStatistic extends Model
 {
-    /** @use HasFactory<TitleStatisticFactory> */
-    use HasFactory;
+    protected $connection = 'imdb_mysql';
+
+    protected $table = 'movie_ratings';
+
+    protected $primaryKey = 'movie_id';
+
+    public $incrementing = false;
+
+    public $timestamps = false;
 
     /**
      * @var list<string>
      */
     protected $fillable = [
-        'title_id',
-        'rating_count',
-        'average_rating',
-        'metacritic_score',
-        'metacritic_review_count',
+        'movie_id',
+        'aggregate_rating',
+        'vote_count',
         'rating_distribution',
-        'review_count',
-        'watchlist_count',
-        'episodes_count',
-        'awards_nominated_count',
-        'awards_won_count',
     ];
 
     protected function casts(): array
     {
         return [
-            'average_rating' => 'decimal:2',
+            'movie_id' => 'integer',
+            'aggregate_rating' => 'decimal:2',
+            'vote_count' => 'integer',
             'rating_distribution' => 'array',
         ];
     }
@@ -59,14 +59,55 @@ class TitleStatistic extends Model
      */
     public function normalizedRatingDistribution(): array
     {
-        /** @var array<int|string, mixed>|null $distribution */
-        $distribution = $this->rating_distribution;
+        $distribution = $this->getAttribute('rating_distribution');
 
-        return self::normalizeRatingDistribution($distribution);
+        return self::normalizeRatingDistribution(
+            is_array($distribution) ? $distribution : null,
+        );
     }
 
     public function title(): BelongsTo
     {
-        return $this->belongsTo(Title::class);
+        return $this->belongsTo(Title::class, 'movie_id', 'id');
+    }
+
+    public function getTitleIdAttribute(): int
+    {
+        return (int) $this->movie_id;
+    }
+
+    public function getRatingCountAttribute(): int
+    {
+        return (int) ($this->vote_count ?? 0);
+    }
+
+    public function getAverageRatingAttribute(): ?float
+    {
+        return $this->aggregate_rating !== null ? (float) $this->aggregate_rating : null;
+    }
+
+    public function getReviewCountAttribute(): int
+    {
+        return 0;
+    }
+
+    public function getWatchlistCountAttribute(): int
+    {
+        return 0;
+    }
+
+    public function getEpisodesCountAttribute(): int
+    {
+        return 0;
+    }
+
+    public function getAwardsNominatedCountAttribute(): int
+    {
+        return 0;
+    }
+
+    public function getAwardsWonCountAttribute(): int
+    {
+        return 0;
     }
 }

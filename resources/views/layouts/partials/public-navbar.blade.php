@@ -48,16 +48,6 @@
     :active="request()->routeIs('public.people.*')"
 />
 
-@if ($hasPublicListsRoute)
-    <x-ui.navbar.item
-        :href="route('public.lists.index')"
-        label="Lists"
-        icon="queue-list"
-        class="sb-shell-topnav-item"
-        :active="request()->routeIs('public.lists.*')"
-    />
-@endif
-
 @if ($hasPublicAwardsRoute)
     <x-ui.navbar.item
         :href="route('public.awards.index')"
@@ -81,20 +71,10 @@
 @if ($hasPublicLatestTrailersRoute)
     <x-ui.navbar.item
         :href="route('public.trailers.latest')"
-        label="Latest Trailers"
+        label="Trailers"
         icon="play"
         class="sb-shell-topnav-item"
         :active="request()->routeIs('public.trailers.*')"
-    />
-@endif
-
-@if ($hasPublicLatestReviewsRoute)
-    <x-ui.navbar.item
-        :href="route('public.reviews.latest')"
-        label="Latest Reviews"
-        icon="chat-bubble-left-right"
-        class="sb-shell-topnav-item"
-        :active="request()->routeIs('public.reviews.*')"
     />
 @endif
 

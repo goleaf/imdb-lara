@@ -1,7 +1,18 @@
 @extends('layouts.public')
 
 @section('title', $title->meta_title ?: $title->name)
-@section('meta_description', $title->meta_description ?: ($title->plot_outline ?: 'Read credits, ratings, and reviews for '.$title->name.'.'))
+@section('meta_description', $title->meta_description ?: ($title->plot_outline ?: 'Browse cast, awards, genres, ratings, and release details for '.$title->name.'.'))
+
+@php
+    $akaAttributeRows = $akaAttributeRows ?? collect();
+    $akaTypeRows = $akaTypeRows ?? collect();
+    $awardCategoryRows = $awardCategoryRows ?? collect();
+    $awardEventRows = $awardEventRows ?? collect();
+    $certificateAttributeRows = $certificateAttributeRows ?? collect();
+    $certificateRatingRows = $certificateRatingRows ?? collect();
+    $companyRows = $companyRows ?? collect();
+    $interestHighlights = $interestHighlights ?? collect();
+@endphp
 
 @section('breadcrumbs')
     <x-ui.breadcrumbs.item :href="route('public.home')">Home</x-ui.breadcrumbs.item>
@@ -11,7 +22,7 @@
 
 @section('content')
     <section class="space-y-6">
-        <x-ui.card class="sb-detail-hero !max-w-none overflow-hidden p-0" data-slot="title-detail-hero">
+        <x-ui.card data-slot="title-detail-hero" class="sb-detail-hero !max-w-none overflow-hidden p-0">
             <div class="relative">
                 @if ($backdrop)
                     <img
@@ -25,7 +36,7 @@
                 @endif
 
                 <div class="relative grid gap-6 p-6 xl:grid-cols-[15rem_minmax(0,1fr)]">
-                    <div class="sb-poster-frame overflow-hidden rounded-[1.3rem] border border-black/5 bg-neutral-100 shadow-sm dark:border-white/10 dark:bg-neutral-800">
+                    <div class="overflow-hidden rounded-[1.3rem] border border-black/5 bg-neutral-100 shadow-sm dark:border-white/10 dark:bg-neutral-800">
                         @if ($poster)
                             <img
                                 src="{{ $poster->url }}"
@@ -39,58 +50,33 @@
                         @endif
                     </div>
 
-                    <div class="sb-detail-panel space-y-6 p-5 sm:p-6">
-                        <div class="space-y-5">
-                            <div class="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
-                                <div class="min-w-0 space-y-3">
-                                    <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
-                                        <span class="sb-detail-overline">{{ str($title->title_type->value)->headline() }}</span>
+                    <div class="space-y-6 p-5 sm:p-6">
+                        <div class="space-y-4">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="sb-detail-overline">{{ $title->typeLabel() }}</span>
+                                @if ($title->release_year)
+                                    <x-ui.badge variant="outline" color="slate" icon="calendar-days">{{ $title->release_year }}</x-ui.badge>
+                                @endif
+                                @if ($title->runtime_minutes)
+                                    <x-ui.badge variant="outline" color="neutral" icon="clock">{{ $title->runtime_minutes }} min</x-ui.badge>
+                                @endif
+                                @if ($title->age_rating)
+                                    <x-ui.badge variant="outline" color="neutral" icon="shield-check">{{ $title->age_rating }}</x-ui.badge>
+                                @endif
+                            </div>
 
-                                        @if ($title->release_year)
-                                            <a href="{{ route('public.years.show', ['year' => $title->release_year]) }}" class="sb-detail-meta-link">
-                                                {{ $title->release_year }}
-                                            </a>
-                                        @endif
+                            <div class="space-y-3">
+                                <x-ui.heading level="h1" size="xl" class="sb-detail-title">{{ $title->name }}</x-ui.heading>
 
-                                        @if ($title->runtime_minutes)
-                                            <span class="sb-detail-meta-chip">{{ $title->runtime_minutes }} min</span>
-                                        @endif
+                                @if ($title->original_name && $title->original_name !== $title->name)
+                                    <x-ui.text class="text-sm text-[#a99f92] dark:text-[#a99f92]">
+                                        Original title: {{ $title->original_name }}
+                                    </x-ui.text>
+                                @endif
 
-                                        @if ($title->age_rating)
-                                            <span class="sb-detail-meta-chip">{{ $title->age_rating }}</span>
-                                        @endif
-                                    </div>
-
-                                    <div class="space-y-2">
-                                        <x-ui.heading level="h1" size="xl" class="sb-detail-title">{{ $title->name }}</x-ui.heading>
-
-                                        @if (filled($title->original_name) && $title->original_name !== $title->name)
-                                            <x-ui.text class="text-sm text-[#a99f92] dark:text-[#a99f92]">
-                                                Original title: {{ $title->original_name }}
-                                            </x-ui.text>
-                                        @endif
-
-                                        @if (filled($title->tagline))
-                                            <x-ui.text class="text-base italic text-[#b8ad9d] dark:text-[#b8ad9d]">
-                                                {{ $title->tagline }}
-                                            </x-ui.text>
-                                        @endif
-
-                                        <x-ui.text class="sb-detail-copy max-w-4xl text-base">
-                                            {{ $title->plot_outline ?: 'A full plot outline has not been published yet.' }}
-                                        </x-ui.text>
-                                    </div>
-                                </div>
-
-                                <div class="sb-detail-rating-shell">
-                                    <div class="sb-detail-rating-label">Screenbase rating</div>
-                                    <div class="sb-detail-rating-value">
-                                        {{ $title->statistic?->average_rating ? number_format((float) $title->statistic->average_rating, 1) : 'N/A' }}
-                                    </div>
-                                    <div class="sb-detail-rating-copy">
-                                        {{ number_format($ratingCount) }} member ratings
-                                    </div>
-                                </div>
+                                <x-ui.text class="sb-detail-copy max-w-4xl text-base">
+                                    {{ $title->summaryText() ?: 'A full plot outline has not been published yet.' }}
+                                </x-ui.text>
                             </div>
 
                             @if ($title->genres->isNotEmpty())
@@ -102,75 +88,11 @@
                                     @endforeach
                                 </div>
                             @endif
-
-                            @if ($countries->isNotEmpty() || $languages->isNotEmpty())
-                                @if ($isSeriesLike)
-                                    <div class="sb-series-hero-facts">
-                                        @if ($countries->isNotEmpty())
-                                            <div class="sb-series-hero-fact">
-                                                <span class="sb-series-hero-fact-label">Origin</span>
-                                                <span class="sb-series-hero-fact-value flex flex-wrap gap-3">
-                                                    @foreach ($countries as $country)
-                                                        <span class="inline-flex items-center gap-2">
-                                                            <x-ui.flag type="country" :code="$country" class="size-4" />
-                                                            <span>{{ $country }}</span>
-                                                        </span>
-                                                    @endforeach
-                                                </span>
-                                            </div>
-                                        @endif
-
-                                        @if ($languages->isNotEmpty())
-                                            <div class="sb-series-hero-fact">
-                                                <span class="sb-series-hero-fact-label">Language</span>
-                                                <span class="sb-series-hero-fact-value flex flex-wrap gap-3">
-                                                    @foreach ($languages as $language)
-                                                        <span class="inline-flex items-center gap-2">
-                                                            <x-ui.flag type="language" :code="$language" class="size-4" />
-                                                            <span>{{ $language }}</span>
-                                                        </span>
-                                                    @endforeach
-                                                </span>
-                                            </div>
-                                        @endif
-                                    </div>
-                                @else
-                                    <div class="grid gap-3 md:grid-cols-2">
-                                        @if ($countries->isNotEmpty())
-                                            <div class="sb-title-fact-row">
-                                                <div class="sb-title-fact-label">Origin</div>
-                                                <div class="sb-title-fact-value flex flex-wrap gap-3">
-                                                    @foreach ($countries as $country)
-                                                        <span class="inline-flex items-center gap-2">
-                                                            <x-ui.flag type="country" :code="$country" class="size-4" />
-                                                            <span>{{ $country }}</span>
-                                                        </span>
-                                                    @endforeach
-                                                </div>
-                                            </div>
-                                        @endif
-
-                                        @if ($languages->isNotEmpty())
-                                            <div class="sb-title-fact-row">
-                                                <div class="sb-title-fact-label">Language</div>
-                                                <div class="sb-title-fact-value flex flex-wrap gap-3">
-                                                    @foreach ($languages as $language)
-                                                        <span class="inline-flex items-center gap-2">
-                                                            <x-ui.flag type="language" :code="$language" class="size-4" />
-                                                            <span>{{ $language }}</span>
-                                                        </span>
-                                                    @endforeach
-                                                </div>
-                                            </div>
-                                        @endif
-                                    </div>
-                                @endif
-                            @endif
                         </div>
 
-                        <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4{{ $isSeriesLike ? ' sb-detail-stat-grid--series' : '' }}">
+                        <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                             @foreach ($heroStats as $heroStat)
-                                <div class="sb-detail-stat{{ $isSeriesLike ? ' sb-detail-stat--series' : '' }} p-4">
+                                <div class="sb-detail-stat p-4">
                                     <div class="text-xs uppercase tracking-[0.2em] text-neutral-500 dark:text-neutral-400">{{ $heroStat['label'] }}</div>
                                     <div class="mt-2 text-2xl font-semibold">{{ $heroStat['value'] }}</div>
                                     <div class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
@@ -180,1148 +102,780 @@
                             @endforeach
                         </div>
 
-                        <div class="flex flex-col gap-3">
-                            <div class="flex flex-wrap gap-3">
-                                <x-ui.button as="a" href="#title-rating" icon="star" color="amber" class="sb-detail-primary-action">
-                                    Rate this title
+                        <div class="flex flex-wrap gap-3">
+                            @if ($primaryVideo?->url)
+                                <x-ui.button as="a" :href="$primaryVideo->url" icon="play" color="amber">
+                                    Watch trailer
                                 </x-ui.button>
-                                <x-ui.button as="a" href="#title-watchlist" variant="outline" color="amber" icon="bookmark" class="sb-detail-secondary-action">
-                                    Add to watchlist
+                            @endif
+                            <x-ui.button as="a" :href="$shareUrl" variant="outline" color="amber" icon="share">
+                                Share title
+                            </x-ui.button>
+                            @if ($isSeriesLike && $seasons->isNotEmpty())
+                                <x-ui.button as="a" href="#title-seasons" variant="ghost" icon="rectangle-stack">
+                                    Browse seasons
                                 </x-ui.button>
-                                <x-ui.button as="a" href="#title-watch-state" variant="outline" color="amber" icon="check-circle" class="sb-detail-secondary-action">
-                                    Mark watched
-                                </x-ui.button>
-                                <x-ui.button as="a" href="#title-reviews" variant="outline" color="amber" icon="chat-bubble-left-right" class="sb-detail-secondary-action">
-                                    Write review
-                                </x-ui.button>
-                                <x-ui.button as="a" href="#title-lists" variant="outline" color="amber" icon="queue-list" class="sb-detail-secondary-action">
-                                    Add to custom list
-                                </x-ui.button>
-                                <x-ui.modal.trigger :id="$shareModalId">
-                                    <x-ui.button type="button" variant="outline" color="amber" icon="share" class="sb-detail-secondary-action">
-                                        Share
-                                    </x-ui.button>
-                                </x-ui.modal.trigger>
-                            </div>
-
-                            <div class="flex flex-wrap gap-x-4 gap-y-2">
-                                <a href="{{ route('public.titles.cast', $title) }}" class="sb-detail-utility-link">
-                                    Full cast
-                                </a>
-                                <a href="{{ route('public.titles.media', $title) }}" class="sb-detail-utility-link">
-                                    Media gallery
-                                </a>
-                                @can('update', $title)
-                                    <a href="{{ route('admin.titles.edit', $title) }}" class="sb-detail-utility-link">
-                                        Edit title
-                                    </a>
-                                @endcan
-                            </div>
+                            @endif
                         </div>
                     </div>
                 </div>
             </div>
         </x-ui.card>
 
-        <div class="grid gap-4 xl:grid-cols-2">
-            <div id="title-watchlist">
-                <livewire:titles.watchlist-toggle :title="$title" :key="'watchlist-'.$title->id" />
-            </div>
-            <div id="title-watch-state">
-                <livewire:titles.watch-state-panel :title="$title" :key="'watch-state-'.$title->id" />
-            </div>
-        </div>
-
-        <x-ui.card class="sb-detail-section sb-title-directory-shell !max-w-none">
-            <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-                <div class="space-y-2">
-                    <div class="sb-title-directory-kicker">Title dossier</div>
-                    <x-ui.heading level="h2" size="lg" class="sb-title-directory-title">Deep discovery map</x-ui.heading>
-                    <x-ui.text class="max-w-3xl text-sm text-[#b8ad9d] dark:text-[#b8ad9d]">
-                        Jump straight to the sections that matter: editorial overview, credits, awards signal, parent guidance, release context, technical data, and connected titles.
-                    </x-ui.text>
-                </div>
-
-                <div class="flex flex-wrap gap-2">
-                    @foreach ($titleDirectory as $directoryItem)
-                        <a href="{{ $directoryItem['href'] }}" class="sb-title-directory-link">
-                            {{ $directoryItem['label'] }}
-                        </a>
-                    @endforeach
-                </div>
-            </div>
-        </x-ui.card>
-    </section>
-
-    <section class="grid gap-6 xl:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)]">
-        <div class="space-y-6">
-            <x-ui.card id="title-storyline" class="sb-detail-section !max-w-none">
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between gap-4">
-                        <x-ui.heading level="h2" size="lg">Storyline</x-ui.heading>
-                        @if ($title->synopsis)
-                            <x-ui.badge variant="outline" color="neutral" icon="document-text">Long plot available</x-ui.badge>
-                        @endif
-                    </div>
-
-                    <x-ui.text class="text-neutral-700 dark:text-neutral-200">
-                        {{ $title->plot_outline ?: 'A short plot outline has not been published yet.' }}
-                    </x-ui.text>
-
-                    @if (filled($title->synopsis))
-                        <x-ui.text class="text-sm leading-7 text-neutral-600 dark:text-neutral-300">
-                            {{ $title->synopsis }}
-                        </x-ui.text>
-                    @endif
-                </div>
-            </x-ui.card>
-
-            <x-ui.card id="title-credits" class="sb-detail-section !max-w-none">
-                <div class="space-y-5">
-                    <div class="flex flex-wrap items-center justify-between gap-4">
+        <div class="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
+            <div class="space-y-6">
+                <x-ui.card class="sb-detail-section !max-w-none">
+                    <div class="space-y-4">
                         <div>
-                            <x-ui.heading level="h2" size="lg">Cast</x-ui.heading>
+                            <x-ui.heading level="h2" size="lg">Overview</x-ui.heading>
                             <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                Principal on-screen performers credited to this title.
+                                Core release, origin, and catalog facts from the imported MySQL dataset.
                             </x-ui.text>
                         </div>
 
-                        <x-ui.link :href="route('public.titles.cast', $title)" variant="ghost" iconAfter="arrow-right">
-                            View full cast
-                        </x-ui.link>
-                    </div>
-
-                    <div class="grid gap-3">
-                        @forelse ($castPreview as $credit)
-                            <div class="flex items-start justify-between gap-3 rounded-box border border-black/5 px-4 py-3 dark:border-white/10">
-                                <div>
-                                    <div class="font-medium">
-                                        <a href="{{ route('public.people.show', $credit->person) }}" class="hover:opacity-80">
-                                            {{ $credit->person->name }}
-                                        </a>
+                        @if ($detailItems->isNotEmpty())
+                            <div class="grid gap-3 sm:grid-cols-2">
+                                @foreach ($detailItems as $item)
+                                    <div class="rounded-[1.1rem] border border-black/5 bg-white/70 p-4 dark:border-white/10 dark:bg-white/[0.02]">
+                                        <div class="text-xs uppercase tracking-[0.18em] text-neutral-500 dark:text-neutral-400">{{ $item['label'] }}</div>
+                                        <div class="mt-2 text-sm font-medium text-neutral-900 dark:text-neutral-100">{{ $item['value'] }}</div>
                                     </div>
-                                    <div class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
-                                        {{ $credit->character_name ?: ($credit->credited_as ?: 'Cast credit') }}
-                                    </div>
-                                </div>
+                                @endforeach
+                            </div>
+                        @endif
 
-                                @if ($credit->billing_order)
-                                    <x-ui.badge variant="outline" color="neutral" icon="hashtag">
-                                        #{{ $credit->billing_order }}
-                                    </x-ui.badge>
+                        @if ($countries->isNotEmpty() || $languages->isNotEmpty())
+                            <div class="grid gap-3 sm:grid-cols-2">
+                                @if ($countries->isNotEmpty())
+                                    <div class="rounded-[1.1rem] border border-black/5 bg-white/70 p-4 dark:border-white/10 dark:bg-white/[0.02]">
+                                        <div class="text-xs uppercase tracking-[0.18em] text-neutral-500 dark:text-neutral-400">Countries</div>
+                                        <div class="mt-3 flex flex-wrap gap-2">
+                                            @foreach ($countries as $country)
+                                                <span class="inline-flex items-center gap-2 rounded-full border border-black/5 bg-white/80 px-3 py-1.5 text-sm font-medium text-neutral-900 dark:border-white/10 dark:bg-white/[0.05] dark:text-neutral-100">
+                                                    <x-ui.flag type="country" :code="$country['code']" class="size-4" />
+                                                    <span>{{ $country['label'] }}</span>
+                                                    @if ($country['label'] !== $country['code'])
+                                                        <span class="text-xs uppercase tracking-[0.16em] text-neutral-500 dark:text-neutral-400">{{ $country['code'] }}</span>
+                                                    @endif
+                                                </span>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @if ($languages->isNotEmpty())
+                                    <div class="rounded-[1.1rem] border border-black/5 bg-white/70 p-4 dark:border-white/10 dark:bg-white/[0.02]">
+                                        <div class="text-xs uppercase tracking-[0.18em] text-neutral-500 dark:text-neutral-400">Languages</div>
+                                        <div class="mt-3 flex flex-wrap gap-2">
+                                            @foreach ($languages as $language)
+                                                <span class="inline-flex items-center gap-2 rounded-full border border-black/5 bg-white/80 px-3 py-1.5 text-sm font-medium text-neutral-900 dark:border-white/10 dark:bg-white/[0.05] dark:text-neutral-100">
+                                                    <x-ui.flag type="language" :code="$language['code']" class="size-4" />
+                                                    <span>{{ $language['label'] }}</span>
+                                                    @if ($language['label'] !== $language['code'])
+                                                        <span class="text-xs uppercase tracking-[0.16em] text-neutral-500 dark:text-neutral-400">{{ $language['code'] }}</span>
+                                                    @endif
+                                                </span>
+                                            @endforeach
+                                        </div>
+                                    </div>
                                 @endif
                             </div>
-                        @empty
-                            <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
-                                <x-ui.empty.media>
-                                    <x-ui.icon name="users" class="size-8 text-neutral-400 dark:text-neutral-500" />
-                                </x-ui.empty.media>
-                                <x-ui.heading level="h3">No cast has been published yet.</x-ui.heading>
-                            </x-ui.empty>
-                        @endforelse
+                        @endif
+
+                        @if ($certificateItems->isNotEmpty())
+                            <div class="flex flex-wrap gap-2">
+                                @foreach ($certificateItems as $certificateItem)
+                                    <x-ui.badge variant="outline" color="neutral" icon="shield-check">
+                                        {{ $certificateItem['rating'] }}{{ $certificateItem['country'] ? ' · '.$certificateItem['country'] : '' }}
+                                    </x-ui.badge>
+                                @endforeach
+                            </div>
+                        @endif
                     </div>
+                </x-ui.card>
 
-                    <div class="space-y-3">
-                        <div class="flex items-center justify-between gap-4">
-                            <x-ui.heading level="h3" size="md">Key crew</x-ui.heading>
-                            <x-ui.badge variant="outline" color="neutral" icon="rectangle-group">{{ number_format($crewPreview->count()) }} role groups</x-ui.badge>
-                        </div>
-
-                        <div class="grid gap-3 md:grid-cols-2">
-                            @forelse ($crewPreview as $group)
-                                <div class="rounded-box border border-black/5 p-4 dark:border-white/10">
-                                    <div class="flex items-center justify-between gap-3">
-                                        <div class="font-medium">{{ $group['role'] }}</div>
-                                        @if ($group['department'])
-                                            <x-ui.badge variant="outline" color="slate" icon="briefcase">{{ $group['department'] }}</x-ui.badge>
-                                        @endif
-                                    </div>
-
-                                    <div class="mt-3 space-y-2 text-sm text-neutral-600 dark:text-neutral-300">
-                                        @foreach ($group['credits'] as $credit)
-                                            <div>
-                                                <a href="{{ route('public.people.show', $credit->person) }}" class="font-medium text-neutral-800 hover:opacity-80 dark:text-neutral-100">
-                                                    {{ $credit->person->name }}
-                                                </a>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @empty
-                                <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10 md:col-span-2">
-                                    <x-ui.empty.media>
-                                        <x-ui.icon name="briefcase" class="size-8 text-neutral-400 dark:text-neutral-500" />
-                                    </x-ui.empty.media>
-                                    <x-ui.heading level="h3">No crew credits are available yet.</x-ui.heading>
-                                </x-ui.empty>
-                            @endforelse
-                        </div>
-                    </div>
-                </div>
-            </x-ui.card>
-
-            @if ($isSeriesLike)
-                <x-ui.card class="sb-detail-section sb-series-guide-shell !max-w-none" data-slot="series-guide-shell">
-                    <div class="space-y-5">
-                        <div class="flex flex-wrap items-center justify-between gap-4">
+                @if ($akaAttributeRows->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-aka-attributes" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
                             <div>
-                                <x-ui.heading level="h2" size="lg">Series guide</x-ui.heading>
+                                <x-ui.heading level="h2" size="lg">AKA attributes</x-ui.heading>
                                 <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                    Follow the season order, inspect the most recent run, and jump straight to standout episodes.
+                                    Raw rows imported from the <code>aka_attributes</code> table and linked to this movie through its AKA records.
                                 </x-ui.text>
                             </div>
 
-                            <x-ui.badge variant="outline" color="neutral" icon="tv">
-                                {{ number_format($title->seasons->count()) }} published seasons
-                            </x-ui.badge>
+                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 font-medium">id</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">name</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                            @foreach ($akaAttributeRows as $akaAttributeRow)
+                                                <tr>
+                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
+                                                        {{ $akaAttributeRow->id }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $akaAttributeRow->name }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
+                    </x-ui.card>
+                @endif
 
-                        @if ($title->seasons->isNotEmpty())
-                            <div class="space-y-3" data-slot="series-guide-navigation">
-                                <div class="flex flex-wrap items-center justify-between gap-3">
+                @if ($akaTypeRows->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-aka-types" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">AKA types</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Raw rows imported from the <code>aka_types</code> table and linked to this movie through its title AKA records.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 font-medium">id</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">name</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                            @foreach ($akaTypeRows as $akaTypeRow)
+                                                <tr>
+                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
+                                                        {{ $akaTypeRow->id }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $akaTypeRow->name }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                @if ($awardCategoryRows->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-award-categories" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Award categories</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Raw rows imported from the <code>award_categories</code> table and linked to this movie through its award nominations.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 font-medium">id</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">name</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                            @foreach ($awardCategoryRows as $awardCategoryRow)
+                                                <tr>
+                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
+                                                        {{ $awardCategoryRow->id }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $awardCategoryRow->name }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                @if ($awardEventRows->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-award-events" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Award events</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Raw rows imported from the <code>award_events</code> table and linked to this movie through its award nominations.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 font-medium">imdb_id</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">name</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                            @foreach ($awardEventRows as $awardEventRow)
+                                                <tr>
+                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
+                                                        {{ $awardEventRow->imdb_id }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $awardEventRow->name }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                @if ($certificateAttributeRows->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-certificate-attributes" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Certificate attributes</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Raw rows imported from the <code>certificate_attributes</code> table and linked to this movie through its certificate records.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 font-medium">id</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">name</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                            @foreach ($certificateAttributeRows as $certificateAttributeRow)
+                                                <tr>
+                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
+                                                        {{ $certificateAttributeRow->id }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $certificateAttributeRow->name }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                @if ($certificateRatingRows->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-certificate-ratings" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Certificate ratings</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Raw rows imported from the <code>certificate_ratings</code> table and linked to this movie through its certificate records.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 font-medium">id</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">name</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                            @foreach ($certificateRatingRows as $certificateRatingRow)
+                                                <tr>
+                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
+                                                        {{ $certificateRatingRow->id }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $certificateRatingRow->name }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                @if ($companyRows->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-companies" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Companies</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Raw rows imported from the <code>companies</code> table and linked to this movie through its company credit records.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 font-medium">imdb_id</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">name</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                            @foreach ($companyRows as $companyRow)
+                                                <tr>
+                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
+                                                        {{ $companyRow->imdb_id }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $companyRow->name }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                @if ($companyCreditAttributeRows->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-company-credit-attributes" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Company credit attributes</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Raw rows imported from the <code>company_credit_attributes</code> table and linked to this movie through its company credit records.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 font-medium">id</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">name</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                            @foreach ($companyCreditAttributeRows as $companyCreditAttributeRow)
+                                                <tr>
+                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
+                                                        {{ $companyCreditAttributeRow->id }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $companyCreditAttributeRow->name }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                @if ($interestHighlights->isNotEmpty())
+                    <x-ui.card data-slot="title-discovery-profile" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Discovery profile</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Imported interest tags and subgenre signals that shape related-title discovery across the MySQL catalog.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="flex flex-wrap gap-2">
+                                @foreach ($interestHighlights as $interestHighlight)
+                                    <a href="{{ $interestHighlight['href'] }}" class="sb-detail-chip">
+                                        {{ $interestHighlight['name'] }}
+                                        @if ($interestHighlight['isSubgenre'])
+                                            <span class="text-[0.7rem] uppercase tracking-[0.18em] text-[#988f82]">Subgenre</span>
+                                        @endif
+                                    </a>
+                                @endforeach
+                            </div>
+
+                            <x-ui.link :href="route('public.titles.metadata', $title)" variant="ghost" iconAfter="arrow-right">
+                                Open the full keywords and connections view
+                            </x-ui.link>
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                @if ($castPreview->isNotEmpty())
+                    <x-ui.card class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Featured cast</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Principal cast and on-screen talent linked from the imported credits table.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="grid gap-3 sm:grid-cols-2">
+                                @foreach ($castPreview as $credit)
+                                    @if ($credit->person)
+                                        <a href="{{ route('public.people.show', $credit->person) }}" class="rounded-[1.15rem] border border-black/5 bg-white/70 p-4 transition hover:bg-white dark:border-white/10 dark:bg-white/[0.02] dark:hover:bg-white/[0.05]">
+                                            <div class="flex items-center gap-3">
+                                                <x-ui.avatar
+                                                    :src="$credit->person->preferredHeadshot()?->url"
+                                                    :alt="$credit->person->preferredHeadshot()?->alt_text ?: $credit->person->name"
+                                                    :name="$credit->person->name"
+                                                    color="auto"
+                                                    class="!h-14 !w-14 shrink-0 border border-black/5 dark:border-white/10"
+                                                />
+                                                <div class="min-w-0">
+                                                    <div class="truncate font-medium text-neutral-900 dark:text-neutral-100">{{ $credit->person->name }}</div>
+                                                    <div class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">{{ $credit->job }}</div>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                @if ($crewGroups->isNotEmpty())
+                    <x-ui.card class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Key crew</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Behind-the-camera departments condensed into the key creative groups on this title.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="grid gap-4 md:grid-cols-2">
+                                @foreach ($crewGroups as $crewGroup)
+                                    <div class="rounded-[1.15rem] border border-black/5 bg-white/70 p-4 dark:border-white/10 dark:bg-white/[0.02]">
+                                        <div class="font-medium text-neutral-900 dark:text-neutral-100">{{ $crewGroup['role'] }}</div>
+                                        <div class="mt-3 space-y-2">
+                                            @foreach ($crewGroup['credits'] as $credit)
+                                                @if ($credit->person)
+                                                    <a href="{{ route('public.people.show', $credit->person) }}" class="flex items-center justify-between gap-3 text-sm text-neutral-600 transition hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-neutral-100">
+                                                        <span>{{ $credit->person->name }}</span>
+                                                        <x-ui.icon name="arrow-right" class="size-4" />
+                                                    </a>
+                                                @endif
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                @if ($isSeriesLike && $seasonNavigation->isNotEmpty())
+                    <x-ui.card id="title-seasons" data-slot="series-guide-navigation" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Series guide</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Season navigation, latest-season context, and standout episodes built from the imported season and episode index.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="space-y-3">
+                                <div class="text-xs uppercase tracking-[0.18em] text-neutral-500 dark:text-neutral-400">Season navigation</div>
+
+                                <div class="sb-season-nav-row">
+                                    @foreach ($seasonNavigation as $navigationSeason)
+                                        <a
+                                            href="{{ route('public.seasons.show', ['series' => $title, 'season' => $navigationSeason]) }}"
+                                            class="sb-season-nav-pill"
+                                        >
+                                            <span class="sb-season-nav-pill-title">Season {{ $navigationSeason->season_number }}</span>
+                                            <span class="sb-season-nav-pill-meta">{{ number_format((int) $navigationSeason->episodes_count) }} episodes</span>
+                                        </a>
+                                    @endforeach
+                                </div>
+
+                                <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                                    @foreach ($seasonNavigation as $navigationSeason)
+                                        <a href="{{ route('public.seasons.show', ['series' => $title, 'season' => $navigationSeason]) }}" class="rounded-[1.15rem] border border-black/5 bg-white/70 p-4 transition hover:bg-white dark:border-white/10 dark:bg-white/[0.02] dark:hover:bg-white/[0.05]">
+                                            <div class="font-medium text-neutral-900 dark:text-neutral-100">{{ $navigationSeason->name }}</div>
+                                            <div class="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
+                                                {{ number_format((int) $navigationSeason->episodes_count) }} episodes
+                                            </div>
+                                        </a>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.card>
+
+                    <div class="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
+                        <x-ui.card data-slot="series-guide-latest-season" class="sb-detail-section !max-w-none">
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between gap-4">
                                     <div>
-                                        <div class="sb-cast-section-label">Season navigation</div>
+                                        <x-ui.heading level="h2" size="lg">Latest season overview</x-ui.heading>
                                         <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                            Jump directly to any season and keep the latest run visually prioritized.
+                                            The newest season currently mapped inside the imported episode hierarchy.
                                         </x-ui.text>
                                     </div>
 
                                     @if ($latestSeason)
-                                        <x-ui.badge variant="outline" color="amber" icon="sparkles">Latest run</x-ui.badge>
+                                        <x-ui.badge variant="outline" color="slate" icon="rectangle-stack">
+                                            {{ $latestSeason->name }}
+                                        </x-ui.badge>
                                     @endif
                                 </div>
 
-                                <div class="sb-series-guide-nav">
-                                @foreach ($title->seasons as $season)
-                                    <a
-                                        href="{{ route('public.seasons.show', ['series' => $title, 'season' => $season]) }}"
-                                        class="sb-series-guide-pill{{ $latestSeason && $season->is($latestSeason) ? ' sb-series-guide-pill--active' : '' }}"
-                                    >
-                                        <span class="sb-series-guide-pill-title">Season {{ $season->season_number }}</span>
-                                        <span class="sb-series-guide-pill-meta">
-                                            {{ number_format($season->episodes_count) }} episodes
-                                            @if ($season->release_year)
-                                                · {{ $season->release_year }}
-                                            @endif
-                                        </span>
-                                        @if ($latestSeason && $season->is($latestSeason))
-                                            <span class="sb-series-guide-pill-flag">Latest</span>
-                                        @endif
-                                    </a>
-                                @endforeach
-                                </div>
-                            </div>
-                        @endif
+                                @if ($latestSeason)
+                                    <div class="rounded-[1.15rem] border border-black/5 bg-white/70 p-4 dark:border-white/10 dark:bg-white/[0.02]">
+                                        <div class="flex flex-wrap items-center justify-between gap-3">
+                                            <div>
+                                                <div class="font-medium text-neutral-900 dark:text-neutral-100">{{ $latestSeason->name }}</div>
+                                                <div class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+                                                    {{ number_format((int) $latestSeason->episodes_count) }} published episodes in the current guide.
+                                                </div>
+                                            </div>
 
-                        @if ($latestSeason)
-                            <div class="sb-series-latest-shell" data-slot="series-latest-preview">
-                                <div class="flex flex-wrap items-start justify-between gap-4">
-                                    <div>
-                                        <div class="sb-cast-section-label">Latest season overview</div>
-                                        <div class="mt-2 text-lg font-semibold sb-series-latest-title">
-                                            <a href="{{ route('public.seasons.show', ['series' => $title, 'season' => $latestSeason]) }}" class="hover:opacity-80">
-                                                {{ $latestSeason->name }}
-                                            </a>
+                                            <x-ui.link :href="route('public.seasons.show', ['series' => $title, 'season' => $latestSeason])" variant="ghost" iconAfter="arrow-right">
+                                                Open season page
+                                            </x-ui.link>
                                         </div>
-                                        <div class="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
-                                            {{ number_format($latestSeason->episodes_count) }} episodes
-                                            @if ($latestSeason->release_year)
-                                                · {{ $latestSeason->release_year }}
-                                            @endif
-                                        </div>
-                                        @if (filled($latestSeason->summary))
-                                            <x-ui.text class="mt-3 max-w-3xl text-sm text-neutral-600 dark:text-neutral-300">
-                                                {{ $latestSeason->summary }}
-                                            </x-ui.text>
-                                        @endif
                                     </div>
+                                @endif
 
-                                    <div class="flex flex-wrap items-center gap-2">
-                                        <x-ui.badge variant="outline" color="neutral" icon="queue-list">
-                                            {{ number_format($latestSeasonEpisodes->count()) }} preview episodes
-                                        </x-ui.badge>
-                                        <x-ui.link :href="route('public.seasons.show', ['series' => $title, 'season' => $latestSeason])" variant="ghost" iconAfter="arrow-right">
-                                            View season
-                                        </x-ui.link>
-                                    </div>
-                                </div>
-
-                                @if ($latestSeasonEpisodes->isNotEmpty())
-                                    <div class="sb-series-episode-grid">
+                                @if ($latestSeasonEpisodes->isNotEmpty() && $latestSeason)
+                                    <div class="grid gap-3">
                                         @foreach ($latestSeasonEpisodes as $episodeMeta)
-                                            <article class="sb-series-episode-card">
-                                                <a href="{{ route('public.episodes.show', ['series' => $title, 'season' => $latestSeason, 'episode' => $episodeMeta->title]) }}" class="sb-series-episode-card-media">
-                                                    @if ($episodeMeta->title->preferredDisplayImage() ?? $backdrop ?? $poster)
-                                                        <img
-                                                            src="{{ ($episodeMeta->title->preferredDisplayImage() ?? $backdrop ?? $poster)->url }}"
-                                                            alt="{{ ($episodeMeta->title->preferredDisplayImage() ?? $backdrop ?? $poster)->alt_text ?: $episodeMeta->title->name }}"
-                                                            class="sb-series-episode-card-image"
-                                                            loading="lazy"
-                                                        >
-                                                    @else
-                                                        <div class="sb-series-episode-card-empty">
-                                                            <x-ui.icon name="photo" class="size-10" />
-                                                        </div>
-                                                    @endif
-                                                </a>
-
-                                                <div class="space-y-3 p-4">
-                                                    <div class="flex flex-wrap items-center gap-2">
-                                                        <span class="sb-episode-meta-pill">Episode {{ $episodeMeta->episode_number }}</span>
-                                                        @if ($episodeMeta->aired_at)
-                                                            <span class="sb-episode-meta-pill">{{ $episodeMeta->aired_at->format('M j, Y') }}</span>
-                                                        @endif
-                                                        @if ($episodeMeta->title->runtime_minutes)
-                                                            <span class="sb-episode-meta-pill">{{ $episodeMeta->title->runtime_minutes }} min</span>
-                                                        @endif
-                                                        @if ($episodeMeta->title->statistic?->average_rating)
-                                                            <span class="sb-episode-meta-pill sb-episode-meta-pill--rating">
-                                                                <x-ui.icon name="star" class="size-4" />
-                                                                {{ number_format((float) $episodeMeta->title->statistic->average_rating, 1) }}
-                                                            </span>
-                                                        @endif
-                                                    </div>
-
+                                            <article class="rounded-[1.15rem] border border-black/5 bg-white/70 p-4 dark:border-white/10 dark:bg-white/[0.02]">
+                                                <div class="flex flex-wrap items-start justify-between gap-3">
                                                     <div class="space-y-2">
-                                                        <x-ui.heading level="h3" size="md" class="sb-series-latest-title">
+                                                        <div class="flex flex-wrap items-center gap-2">
+                                                            <x-ui.badge variant="outline" color="neutral" icon="rectangle-stack">
+                                                                Episode {{ $episodeMeta->episode_number }}
+                                                            </x-ui.badge>
+                                                            @if ($episodeMeta->aired_at)
+                                                                <x-ui.badge variant="outline" color="slate" icon="calendar-days">
+                                                                    {{ $episodeMeta->aired_at->format('M j, Y') }}
+                                                                </x-ui.badge>
+                                                            @endif
+                                                        </div>
+
+                                                        <x-ui.heading level="h3" size="md">
                                                             <a href="{{ route('public.episodes.show', ['series' => $title, 'season' => $latestSeason, 'episode' => $episodeMeta->title]) }}" class="hover:opacity-80">
                                                                 {{ $episodeMeta->title->name }}
                                                             </a>
                                                         </x-ui.heading>
-                                                        <x-ui.text class="sb-series-episode-card-copy">
-                                                            {{ str($episodeMeta->title->plot_outline ?: 'No public synopsis is available for this episode yet.')->limit(150) }}
+
+                                                        <x-ui.text class="text-sm text-neutral-600 dark:text-neutral-300">
+                                                            {{ $episodeMeta->title->summaryText() ?: 'No public synopsis is available for this episode yet.' }}
                                                         </x-ui.text>
+                                                    </div>
+
+                                                    <div class="text-right text-sm text-neutral-500 dark:text-neutral-400">
+                                                        <div>{{ $episodeMeta->title->displayAverageRating() ? number_format($episodeMeta->title->displayAverageRating(), 1) : 'N/A' }}</div>
+                                                        <div class="mt-1">{{ number_format((int) ($episodeMeta->title->statistic?->rating_count ?? 0)) }} votes</div>
                                                     </div>
                                                 </div>
                                             </article>
                                         @endforeach
                                     </div>
+                                @else
+                                    <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                        <x-ui.empty.media>
+                                            <x-ui.icon name="rectangle-stack" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                                        </x-ui.empty.media>
+                                        <x-ui.heading level="h3">Episode rows for the newest season have not been imported yet.</x-ui.heading>
+                                    </x-ui.empty>
                                 @endif
                             </div>
-                        @endif
-                    </div>
-                </x-ui.card>
+                        </x-ui.card>
 
-                <x-ui.card class="sb-detail-section sb-series-ranked-shell !max-w-none">
-                    <div class="space-y-4">
-                        <div class="flex items-center justify-between gap-4">
-                            <div>
-                                <x-ui.heading level="h2" size="lg">Top-rated episodes</x-ui.heading>
-                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                    Highest-rated episodes across the whole run, arranged for quick binge decisions.
-                                </x-ui.text>
-                            </div>
-                            <x-ui.badge variant="outline" color="neutral" icon="star">{{ number_format($topRatedEpisodes->count()) }} ranked</x-ui.badge>
-                        </div>
-
-                        @if ($topRatedEpisodes->isNotEmpty())
-                            <div class="grid gap-3">
-                                @foreach ($topRatedEpisodes as $episodeMeta)
-                                    <article class="sb-series-ranked-episode">
-                                        <div class="sb-series-ranked-rank">#{{ $loop->iteration }}</div>
-
-                                        <a
-                                            href="{{ route('public.episodes.show', ['series' => $title, 'season' => $episodeMeta->season, 'episode' => $episodeMeta->title]) }}"
-                                            class="sb-series-ranked-episode-media"
-                                        >
-                                            @if ($episodeMeta->title->preferredDisplayImage() ?? $backdrop ?? $poster)
-                                                <img
-                                                    src="{{ ($episodeMeta->title->preferredDisplayImage() ?? $backdrop ?? $poster)->url }}"
-                                                    alt="{{ ($episodeMeta->title->preferredDisplayImage() ?? $backdrop ?? $poster)->alt_text ?: $episodeMeta->title->name }}"
-                                                    class="sb-series-ranked-episode-image"
-                                                    loading="lazy"
-                                                >
-                                            @else
-                                                <div class="sb-series-ranked-episode-empty">
-                                                    <x-ui.icon name="photo" class="size-8" />
-                                                </div>
-                                            @endif
-                                        </a>
-
-                                        <div class="min-w-0 space-y-2">
-                                            <div class="font-medium">
-                                                <a href="{{ route('public.episodes.show', ['series' => $title, 'season' => $episodeMeta->season, 'episode' => $episodeMeta->title]) }}" class="hover:opacity-80">
-                                                    {{ $episodeMeta->title->name }}
-                                                </a>
-                                            </div>
-                                            <div class="flex flex-wrap gap-x-3 gap-y-1 text-sm text-neutral-500 dark:text-neutral-400">
-                                                <span>Season {{ $episodeMeta->season_number }}, episode {{ $episodeMeta->episode_number }}</span>
-                                                @if ($episodeMeta->season)
-                                                    <span>{{ $episodeMeta->season->name }}</span>
-                                                @endif
-                                                @if ($episodeMeta->aired_at)
-                                                    <span>{{ $episodeMeta->aired_at->format('M j, Y') }}</span>
-                                                @endif
-                                            </div>
-                                            <x-ui.text class="sb-series-ranked-episode-copy">
-                                                {{ str($episodeMeta->title->plot_outline ?: 'No public synopsis is available for this episode yet.')->limit(120) }}
-                                            </x-ui.text>
-                                        </div>
-
-                                        <x-ui.badge icon="star" color="amber">
-                                            {{ number_format((float) ($episodeMeta->title->statistic?->average_rating ?? 0), 1) }}
-                                        </x-ui.badge>
-                                    </article>
-                                @endforeach
-                            </div>
-                        @else
-                            <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
-                                <x-ui.empty.media>
-                                    <x-ui.icon name="star" class="size-8 text-neutral-400 dark:text-neutral-500" />
-                                </x-ui.empty.media>
-                                <x-ui.heading level="h3">Episode rankings are still coming together.</x-ui.heading>
-                                <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
-                                    Scores will appear here once members start rating individual episodes.
-                                </x-ui.text>
-                            </x-ui.empty>
-                        @endif
-                    </div>
-                </x-ui.card>
-            @endif
-
-            <x-ui.card id="title-awards" class="sb-detail-section !max-w-none">
-                <div class="space-y-4">
-                    <div class="flex flex-wrap items-center justify-between gap-4">
-                        <div>
-                            <x-ui.heading level="h2" size="lg">Awards</x-ui.heading>
-                            <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                Recognitions, nominations, and credited award moments connected to this title.
-                            </x-ui.text>
-                        </div>
-
-                        <x-ui.badge variant="outline" color="neutral" icon="trophy">
-                            {{ number_format((int) ($title->statistic?->awards_won_count ?? 0)) }} wins
-                        </x-ui.badge>
-                    </div>
-
-                    <div class="grid gap-3">
-                        @forelse ($awardHighlights as $awardNomination)
-                            <div class="rounded-box border border-black/5 px-4 py-3 dark:border-white/10">
-                                <div class="flex flex-wrap items-start justify-between gap-3">
-                                    <div>
-                                        <div class="font-medium">
-                                            {{ $awardNomination->awardEvent->award->name }}
-                                            @if ($awardNomination->awardEvent->year)
-                                                {{ $awardNomination->awardEvent->year }}
-                                            @endif
-                                        </div>
-                                        <div class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
-                                            {{ $awardNomination->awardCategory->name }}
-                                            @if ($awardNomination->credited_name)
-                                                · {{ $awardNomination->credited_name }}
-                                            @elseif ($awardNomination->person)
-                                                · {{ $awardNomination->person->name }}
-                                            @elseif ($awardNomination->episode?->title)
-                                                · {{ $awardNomination->episode->title->name }}
-                                            @endif
-                                        </div>
-                                    </div>
-
-                                    <x-ui.badge :color="$awardNomination->is_winner ? 'green' : 'neutral'" variant="outline" :icon="$awardNomination->is_winner ? 'trophy' : 'bookmark'">
-                                        {{ $awardNomination->is_winner ? 'Winner' : 'Nominee' }}
-                                    </x-ui.badge>
-                                </div>
-
-                                @if (filled($awardNomination->details))
-                                    <x-ui.text class="mt-3 text-sm text-neutral-600 dark:text-neutral-300">
-                                        {{ $awardNomination->details }}
-                                    </x-ui.text>
-                                @endif
-                            </div>
-                        @empty
-                            <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
-                                <x-ui.empty.media>
-                                    <x-ui.icon name="trophy" class="size-8 text-neutral-400 dark:text-neutral-500" />
-                                </x-ui.empty.media>
-                                <x-ui.heading level="h3">No awards have been linked yet.</x-ui.heading>
-                                <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
-                                    The awards record is ready for future import passes and manual curation.
-                                </x-ui.text>
-                            </x-ui.empty>
-                        @endforelse
-                    </div>
-                </div>
-            </x-ui.card>
-
-            <x-ui.card id="title-related" class="sb-detail-section !max-w-none">
-                <div class="space-y-4">
-                    <div class="flex flex-wrap items-center justify-between gap-4">
-                        <div>
-                            <x-ui.heading level="h2" size="lg">Related titles</x-ui.heading>
-                            <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                Sequels, connected stories, shared universes, and editorially linked entries from the wider catalog.
-                            </x-ui.text>
-                        </div>
-
-                        <div class="flex items-center gap-3">
-                            <x-ui.badge variant="outline" color="neutral" icon="film">
-                                {{ number_format($relatedTitles->count()) }} links
-                            </x-ui.badge>
-                            <x-ui.link :href="route('public.titles.metadata', $title)" variant="ghost" iconAfter="arrow-right">
-                                Open metadata map
-                            </x-ui.link>
-                        </div>
-                    </div>
-
-                    @if ($relatedTitles->isNotEmpty())
-                        <div class="grid gap-4">
-                            @foreach ($relatedTitles as $relatedItem)
-                                <div class="space-y-2">
-                                    <div class="flex items-center justify-between gap-3">
-                                        <div class="text-sm font-medium text-neutral-500 dark:text-neutral-400">
-                                            {{ $relatedItem['label'] }}
-                                        </div>
-                                        @if ($relatedItem['relationship']->weight)
-                                            <x-ui.badge variant="outline" color="slate" icon="scale">
-                                                Weight {{ $relatedItem['relationship']->weight }}
-                                            </x-ui.badge>
-                                        @endif
-                                    </div>
-
-                                    <x-catalog.title-card :title="$relatedItem['title']" :showSummary="false" />
-                                </div>
-                            @endforeach
-                        </div>
-                    @else
-                        <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
-                            <x-ui.empty.media>
-                                <x-ui.icon name="film" class="size-8 text-neutral-400 dark:text-neutral-500" />
-                            </x-ui.empty.media>
-                            <x-ui.heading level="h3">No related titles are linked yet.</x-ui.heading>
-                            <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
-                                Relationship data can expand here as the title graph deepens.
-                            </x-ui.text>
-                        </x-ui.empty>
-                    @endif
-                </div>
-            </x-ui.card>
-
-            <x-ui.card class="sb-detail-section !max-w-none">
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between gap-4">
-                        <div>
-                            <x-ui.heading level="h2" size="lg">Media gallery</x-ui.heading>
-                            <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                Posters, stills, backdrops, and trailer records in a dedicated gallery layout.
-                            </x-ui.text>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <x-ui.badge variant="outline" color="neutral" icon="photo">{{ number_format($galleryAssets->count()) }} assets</x-ui.badge>
-                            <x-ui.link :href="route('public.titles.media', $title)" variant="ghost" iconAfter="arrow-right">
-                                Open gallery
-                            </x-ui.link>
-                        </div>
-                    </div>
-
-                    @if ($galleryAssets->isNotEmpty())
-                        <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                            @foreach ($galleryAssets as $mediaAsset)
-                                <div class="overflow-hidden rounded-box border border-black/5 bg-neutral-100 dark:border-white/10 dark:bg-neutral-800">
-                                    <img
-                                        src="{{ $mediaAsset->url }}"
-                                        alt="{{ $mediaAsset->alt_text ?: $title->name }}"
-                                        class="aspect-video w-full object-cover"
-                                        loading="lazy"
-                                    >
-                                    @if (filled($mediaAsset->caption))
-                                        <div class="border-t border-black/5 px-3 py-2 text-sm text-neutral-600 dark:border-white/10 dark:text-neutral-300">
-                                            {{ $mediaAsset->caption }}
-                                        </div>
-                                    @endif
-                                </div>
-                            @endforeach
-                        </div>
-                    @else
-                        <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
-                            <x-ui.empty.media>
-                                <x-ui.icon name="photo" class="size-8 text-neutral-400 dark:text-neutral-500" />
-                            </x-ui.empty.media>
-                            <x-ui.heading level="h3">No gallery images are published yet.</x-ui.heading>
-                        </x-ui.empty>
-                    @endif
-                </div>
-            </x-ui.card>
-
-            <x-ui.card class="sb-detail-section !max-w-none">
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between gap-4">
-                        <div>
-                            <x-ui.heading level="h2" size="lg">Videos & trailers</x-ui.heading>
-                            <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                Trailer, clip, and featurette records attached directly to this title.
-                            </x-ui.text>
-                        </div>
-
-                        <x-ui.link :href="route('public.trailers.latest')" variant="ghost" iconAfter="arrow-right">
-                            Latest trailers
-                        </x-ui.link>
-                    </div>
-
-                    <div class="grid gap-3">
-                        @forelse ($title->titleVideos as $video)
-                            <div class="flex flex-wrap items-start justify-between gap-3 rounded-box border border-black/5 px-4 py-3 dark:border-white/10">
+                        <x-ui.card data-slot="series-guide-top-episodes" class="sb-detail-section !max-w-none">
+                            <div class="space-y-4">
                                 <div>
-                                    <div class="font-medium">{{ $video->caption ?: str($video->kind->value)->headline() }}</div>
-                                    <div class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
-                                        {{ str($video->kind->value)->headline() }}
-                                        @if ($video->provider)
-                                            · {{ str($video->provider)->headline() }}
-                                        @endif
-                                        @if ($video->published_at)
-                                            · {{ $video->published_at->format('M j, Y') }}
-                                        @endif
-                                    </div>
+                                    <x-ui.heading level="h2" size="lg">Top-rated episodes</x-ui.heading>
+                                    <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                        Highest-rated episodes across the published series guide.
+                                    </x-ui.text>
                                 </div>
 
-                                @if (filled($video->url))
-                                    <x-ui.button as="a" :href="$video->url" variant="outline" icon="play" target="_blank" rel="noreferrer">
-                                        Open video
-                                    </x-ui.button>
+                                @if ($topRatedEpisodes->isNotEmpty())
+                                    <div class="space-y-3">
+                                        @foreach ($topRatedEpisodes as $episodeMeta)
+                                            <a href="{{ route('public.episodes.show', ['series' => $title, 'season' => 'season-'.$episodeMeta->season_number, 'episode' => $episodeMeta->title]) }}" class="flex items-center justify-between gap-3 rounded-[1rem] border border-black/5 bg-white/70 px-4 py-3 transition hover:bg-white dark:border-white/10 dark:bg-white/[0.02] dark:hover:bg-white/[0.05]">
+                                                <div>
+                                                    <div class="font-medium text-neutral-900 dark:text-neutral-100">{{ $episodeMeta->title->name }}</div>
+                                                    <div class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+                                                        Season {{ $episodeMeta->season_number }} · Episode {{ $episodeMeta->episode_number }}
+                                                    </div>
+                                                </div>
+
+                                                <div class="text-right">
+                                                    <x-ui.badge color="amber" icon="star">
+                                                        {{ $episodeMeta->title->displayAverageRating() ? number_format($episodeMeta->title->displayAverageRating(), 1) : 'N/A' }}
+                                                    </x-ui.badge>
+                                                    <div class="mt-2 text-xs uppercase tracking-[0.16em] text-neutral-500 dark:text-neutral-400">
+                                                        {{ number_format((int) ($episodeMeta->title->statistic?->rating_count ?? 0)) }} votes
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                        <x-ui.empty.media>
+                                            <x-ui.icon name="star" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                                        </x-ui.empty.media>
+                                        <x-ui.heading level="h3">Episode ratings have not been imported for this series yet.</x-ui.heading>
+                                    </x-ui.empty>
                                 @endif
                             </div>
-                        @empty
-                            <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
-                                <x-ui.empty.media>
-                                    <x-ui.icon name="play-circle" class="size-8 text-neutral-400 dark:text-neutral-500" />
-                                </x-ui.empty.media>
-                                <x-ui.heading level="h3">No videos are published yet.</x-ui.heading>
-                                <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
-                                    Trailer links can appear here as soon as the media feed is connected.
-                                </x-ui.text>
-                            </x-ui.empty>
-                        @endforelse
+                        </x-ui.card>
                     </div>
-                </div>
-            </x-ui.card>
-        </div>
-
-        <div class="space-y-6">
-            <livewire:titles.rating-panel :title="$title" anchorId="title-rating" :key="'rating-'.$title->id" />
-
-            <div id="title-lists">
-                <livewire:titles.custom-list-picker :title="$title" :key="'custom-lists-'.$title->id" />
+                @endif
             </div>
 
-            <livewire:contributions.suggestion-form
-                contributableType="title"
-                :contributableId="$title->id"
-                :contributableLabel="$title->name"
-                :key="'title-contribution-'.$title->id"
-            />
-
-            <x-ui.card id="title-where-to-watch" class="sb-detail-section !max-w-none">
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between gap-4">
-                        <div>
-                            <x-ui.heading level="h2" size="lg">Where to watch</x-ui.heading>
-                            <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                Streaming and purchase availability can land here later without changing the title-page architecture.
-                            </x-ui.text>
-                        </div>
-                        <x-ui.badge variant="outline" color="neutral" icon="play-circle">
-                            Placeholder ready
-                        </x-ui.badge>
-                    </div>
-
-                    <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10" data-slot="title-watch-placeholder">
-                        <x-ui.empty.media>
-                            <x-ui.icon name="play-circle" class="size-8 text-neutral-400 dark:text-neutral-500" />
-                        </x-ui.empty.media>
-                        <x-ui.heading level="h3">Provider availability is not connected yet.</x-ui.heading>
-                        <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
-                            The block is in place for future watch-provider data, regional availability, and deep-link actions.
-                        </x-ui.text>
-                    </x-ui.empty>
-                </div>
-            </x-ui.card>
-
-            <x-ui.card class="sb-detail-section !max-w-none" data-slot="title-archive-extensions">
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between gap-4">
-                        <div>
-                            <x-ui.heading level="h2" size="lg">Quotes & soundtrack</x-ui.heading>
-                            <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                Trivia and goofs are already modeled. Quotes and soundtrack records have a reserved extension point here for later feed support.
-                            </x-ui.text>
-                        </div>
-                        <x-ui.badge variant="outline" color="neutral" icon="musical-note">
-                            Future-ready
-                        </x-ui.badge>
-                    </div>
-
-                    <div class="grid gap-3">
-                        <div class="sb-title-fact-row">
-                            <div class="sb-title-fact-label">Quotes</div>
-                            <div class="sb-title-fact-value text-neutral-500 dark:text-neutral-400">Reserved for future import support</div>
-                        </div>
-                        <div class="sb-title-fact-row">
-                            <div class="sb-title-fact-label">Soundtrack</div>
-                            <div class="sb-title-fact-value text-neutral-500 dark:text-neutral-400">Reserved for future import support</div>
-                        </div>
-                    </div>
-                </div>
-            </x-ui.card>
-
-            <x-ui.card class="sb-detail-section !max-w-none">
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between gap-4">
-                        <div>
-                            <x-ui.heading level="h2" size="lg">Quick facts</x-ui.heading>
-                            <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                Core identity, release context, origin markers, and production metadata.
-                            </x-ui.text>
-                        </div>
-                        <x-ui.badge variant="outline" color="neutral" icon="information-circle">
-                            {{ number_format($detailItems->count()) }} facts
-                        </x-ui.badge>
-                    </div>
-
-                    <div class="grid gap-3">
-                        @forelse ($detailItems as $item)
-                            <div class="sb-title-fact-row">
-                                <div class="sb-title-fact-label">{{ $item['label'] }}</div>
-                                <div class="sb-title-fact-value">{{ $item['value'] }}</div>
+            <div class="space-y-6">
+                @if ($awardHighlights->isNotEmpty())
+                    <x-ui.card class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Awards</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Highlighted nominations and wins connected to this title in the imported catalog.
+                                </x-ui.text>
                             </div>
-                        @empty
-                            <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
-                                <x-ui.empty.media>
-                                    <x-ui.icon name="information-circle" class="size-8 text-neutral-400 dark:text-neutral-500" />
-                                </x-ui.empty.media>
-                                <x-ui.heading level="h3">Detailed metadata is still being curated.</x-ui.heading>
-                            </x-ui.empty>
-                        @endforelse
-                    </div>
-                </div>
-            </x-ui.card>
 
-            <x-ui.card id="title-keywords" class="sb-detail-section !max-w-none">
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between gap-4">
-                        <div>
-                            <x-ui.heading level="h2" size="lg">Keywords</x-ui.heading>
-                            <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                Search cues, thematic hooks, and discovery language attached to this title.
-                            </x-ui.text>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <x-ui.badge variant="outline" color="neutral" icon="tag">
-                                {{ number_format($keywordItems->count()) }} cues
-                            </x-ui.badge>
-                            <x-ui.link :href="route('public.titles.metadata', $title)" variant="ghost" iconAfter="arrow-right">
-                                Open metadata map
-                            </x-ui.link>
-                        </div>
-                    </div>
+                            <div class="space-y-3">
+                                @foreach ($awardHighlights as $awardNomination)
+                                    <div class="rounded-[1.1rem] border border-black/5 bg-white/70 p-4 dark:border-white/10 dark:bg-white/[0.02]">
+                                        <div class="flex items-center justify-between gap-3">
+                                            <div>
+                                                <div class="font-medium text-neutral-900 dark:text-neutral-100">{{ $awardNomination->awardCategory?->name ?: 'Award nomination' }}</div>
+                                                <div class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+                                                    {{ $awardNomination->awardEvent?->name ?: 'Event' }}
+                                                    @if ($awardNomination->award_year)
+                                                        · {{ $awardNomination->award_year }}
+                                                    @endif
+                                                </div>
+                                            </div>
 
-                    @if ($keywordItems->isNotEmpty())
-                        <div class="flex flex-wrap gap-2">
-                            @foreach ($keywordItems as $keyword)
-                                <a href="{{ route('public.search', ['q' => $keyword]) }}">
-                                    <x-ui.badge variant="outline" color="neutral" icon="magnifying-glass">{{ $keyword }}</x-ui.badge>
-                                </a>
-                            @endforeach
-                        </div>
-                    @else
-                        <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
-                            <x-ui.empty.media>
-                                <x-ui.icon name="tag" class="size-8 text-neutral-400 dark:text-neutral-500" />
-                            </x-ui.empty.media>
-                            <x-ui.heading level="h3">Keyword discovery is still thin.</x-ui.heading>
-                            <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
-                                Search keywords will appear here as the editorial and import layers deepen.
-                            </x-ui.text>
-                        </x-ui.empty>
-                    @endif
-                </div>
-            </x-ui.card>
+                                            @if ($awardNomination->is_winner)
+                                                <x-ui.badge color="amber" icon="trophy">Winner</x-ui.badge>
+                                            @else
+                                                <x-ui.badge variant="outline" color="neutral" icon="bookmark">Nominee</x-ui.badge>
+                                            @endif
+                                        </div>
 
-            <x-ui.card id="title-release-dates" class="sb-detail-section !max-w-none">
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between gap-4">
-                        <div>
-                            <x-ui.heading level="h2" size="lg">Release dates</x-ui.heading>
-                            <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                Market-by-market launch context and the earliest confirmed release windows on file.
-                            </x-ui.text>
-                        </div>
-                        <x-ui.badge variant="outline" color="neutral" icon="calendar-days">
-                            {{ number_format($releaseDateItems->count()) }} dates
-                        </x-ui.badge>
-                    </div>
-
-                    <div class="grid gap-3">
-                        @forelse ($releaseDateItems as $releaseDateItem)
-                            <div class="sb-title-fact-row">
-                                <div class="sb-title-fact-label">{{ $releaseDateItem['country'] }}</div>
-                                <div class="sb-title-fact-value">{{ $releaseDateItem['date'] }}</div>
-                            </div>
-                        @empty
-                            <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
-                                <x-ui.empty.media>
-                                    <x-ui.icon name="calendar-days" class="size-8 text-neutral-400 dark:text-neutral-500" />
-                                </x-ui.empty.media>
-                                <x-ui.heading level="h3">No release history is published yet.</x-ui.heading>
-                            </x-ui.empty>
-                        @endforelse
-                    </div>
-                </div>
-            </x-ui.card>
-
-            <x-ui.card id="title-technical-specs" class="sb-detail-section !max-w-none">
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between gap-4">
-                        <div>
-                            <x-ui.heading level="h2" size="lg">Technical specs</x-ui.heading>
-                            <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                Format, runtime, serialized footprint, and core catalog measurements.
-                            </x-ui.text>
-                        </div>
-                        <x-ui.badge variant="outline" color="neutral" icon="cog-6-tooth">
-                            {{ number_format($technicalSpecItems->count()) }} specs
-                        </x-ui.badge>
-                    </div>
-
-                    <div class="grid gap-3">
-                        @forelse ($technicalSpecItems as $item)
-                            <div class="sb-title-fact-row">
-                                <div class="sb-title-fact-label">{{ $item['label'] }}</div>
-                                <div class="sb-title-fact-value">{{ $item['value'] }}</div>
-                            </div>
-                        @empty
-                            <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
-                                <x-ui.empty.media>
-                                    <x-ui.icon name="cog-6-tooth" class="size-8 text-neutral-400 dark:text-neutral-500" />
-                                </x-ui.empty.media>
-                                <x-ui.heading level="h3">Technical specs are not available yet.</x-ui.heading>
-                            </x-ui.empty>
-                        @endforelse
-                    </div>
-                </div>
-            </x-ui.card>
-
-            <x-ui.card id="title-parents-guide" class="sb-detail-section !max-w-none">
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between gap-4">
-                        <div>
-                            <x-ui.heading level="h2" size="lg">Parents guide</x-ui.heading>
-                            <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                Certification context, advisory signal, and spoiler-aware guidance for families and cautious viewers.
-                            </x-ui.text>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            @if ($title->age_rating)
-                                <x-ui.badge color="amber" icon="shield-check">{{ $title->age_rating }}</x-ui.badge>
-                            @endif
-                            <x-ui.link :href="route('public.titles.parents-guide', $title)" variant="ghost" iconAfter="arrow-right">
-                                Open full guide
-                            </x-ui.link>
-                        </div>
-                    </div>
-
-                    @if ($certificateItems->isNotEmpty())
-                        <div class="grid gap-3">
-                            @foreach ($certificateItems as $certificateItem)
-                                <div class="rounded-box border border-black/5 px-4 py-3 dark:border-white/10">
-                                    <div class="flex flex-wrap items-center justify-between gap-3">
-                                        <div class="font-medium">{{ $certificateItem['rating'] }}</div>
-                                        @if ($certificateItem['country'])
-                                            <div class="text-sm text-neutral-500 dark:text-neutral-400">{{ $certificateItem['country'] }}</div>
+                                        @if ($awardNomination->text)
+                                            <x-ui.text class="mt-3 text-sm text-neutral-600 dark:text-neutral-300">
+                                                {{ $awardNomination->text }}
+                                            </x-ui.text>
                                         @endif
                                     </div>
-                                    @if ($certificateItem['attributes'])
-                                        <x-ui.text class="mt-2 text-sm text-neutral-600 dark:text-neutral-300">
-                                            {{ $certificateItem['attributes'] }}
-                                        </x-ui.text>
-                                    @endif
-                                </div>
-                            @endforeach
-                        </div>
-                    @endif
-
-                    @if ($parentGuideItems->isNotEmpty())
-                        <div class="grid gap-3">
-                            @foreach ($parentGuideItems as $parentGuideItem)
-                                <div class="rounded-box border border-black/5 px-4 py-3 dark:border-white/10">
-                                    <div class="flex flex-wrap items-center justify-between gap-3">
-                                        <div class="font-medium">{{ $parentGuideItem['category'] }}</div>
-                                        @if ($parentGuideItem['severity'])
-                                            <x-ui.badge variant="outline" :color="$parentGuideItem['severityColor']" icon="exclamation-triangle">
-                                                {{ $parentGuideItem['severity'] }}
-                                            </x-ui.badge>
-                                        @endif
-                                    </div>
-                                    <x-ui.text class="mt-2 text-sm text-neutral-600 dark:text-neutral-300">
-                                        {{ $parentGuideItem['text'] }}
-                                    </x-ui.text>
-                                </div>
-                            @endforeach
-                        </div>
-                    @endif
-
-                    @if ($parentGuideSpoilers->isNotEmpty())
-                        <div class="rounded-box border border-black/5 px-4 py-3 dark:border-white/10">
-                            <div class="text-xs uppercase tracking-[0.18em] text-neutral-500 dark:text-neutral-400">Spoiler notes</div>
-                            <div class="mt-3 space-y-2">
-                                @foreach ($parentGuideSpoilers as $spoiler)
-                                    <x-ui.text class="text-sm text-neutral-600 dark:text-neutral-300">
-                                        {{ $spoiler }}
-                                    </x-ui.text>
                                 @endforeach
                             </div>
                         </div>
-                    @endif
+                    </x-ui.card>
+                @endif
 
-                    @if ($certificateItems->isEmpty() && $parentGuideItems->isEmpty() && $parentGuideSpoilers->isEmpty())
-                        <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
-                            <x-ui.empty.media>
-                                <x-ui.icon name="shield-check" class="size-8 text-neutral-400 dark:text-neutral-500" />
-                            </x-ui.empty.media>
-                            <x-ui.heading level="h3">Parents guide detail is still pending.</x-ui.heading>
-                            <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
-                                The page is ready for advisory imports, but this title does not yet carry structured guidance beyond its certification.
-                            </x-ui.text>
-                        </x-ui.empty>
-                    @endif
-                </div>
-            </x-ui.card>
-
-            <x-ui.card id="title-box-office" class="sb-detail-section !max-w-none">
-                <div class="space-y-4">
-                    <div class="flex flex-wrap items-center justify-between gap-4">
-                        <div>
-                            <x-ui.heading level="h2" size="lg">Box office</x-ui.heading>
-                            <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                Revenue milestones and theatrical run benchmarks when a title carries commercial reporting.
-                            </x-ui.text>
-                        </div>
-                        <div class="flex flex-wrap items-center gap-3">
-                            <x-ui.badge variant="outline" color="neutral" icon="banknotes">
-                                {{ number_format($boxOfficeItems->count()) }} entries
-                            </x-ui.badge>
-
-                            <x-ui.link :href="route('public.titles.box-office', $title)" variant="ghost" iconAfter="arrow-right">
-                                Open full report
-                            </x-ui.link>
-                        </div>
-                    </div>
-
-                    <div class="grid gap-3">
-                        @forelse ($boxOfficeItems as $boxOfficeItem)
-                            <div class="sb-title-fact-row">
-                                <div class="sb-title-fact-label">{{ $boxOfficeItem['label'] }}</div>
-                                <div class="sb-title-fact-value">{{ $boxOfficeItem['value'] }}</div>
-                            </div>
-                        @empty
-                            <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
-                                <x-ui.empty.media>
-                                    <x-ui.icon name="banknotes" class="size-8 text-neutral-400 dark:text-neutral-500" />
-                                </x-ui.empty.media>
-                                <x-ui.heading level="h3">Box office reporting is not published yet.</x-ui.heading>
-                                <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
-                                    Commercial reporting will appear here once title-specific grosses are available in the import feed.
+                @if ($galleryAssets->isNotEmpty())
+                    <x-ui.card class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Gallery</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Posters, backdrops, stills, and gallery images linked to this title.
                                 </x-ui.text>
-                            </x-ui.empty>
-                        @endforelse
-                    </div>
-                </div>
-            </x-ui.card>
+                            </div>
 
-            <x-ui.card class="sb-detail-section !max-w-none">
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between gap-4">
-                        <div>
-                            <x-ui.heading level="h2" size="lg">Ratings breakdown</x-ui.heading>
-                            <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                Audience score distribution, presented in a compact vertical scan.
-                            </x-ui.text>
+                            <div class="grid gap-3 grid-cols-2">
+                                @foreach ($galleryAssets as $asset)
+                                    <a href="{{ $asset->url }}" class="overflow-hidden rounded-[1.1rem] border border-black/5 bg-neutral-100 dark:border-white/10 dark:bg-neutral-800">
+                                        <img src="{{ $asset->url }}" alt="{{ $asset->alt_text ?: $title->name }}" class="aspect-[4/3] w-full object-cover">
+                                    </a>
+                                @endforeach
+                            </div>
                         </div>
-                        <x-ui.badge variant="outline" color="neutral" icon="chart-bar">
-                            {{ number_format($ratingCount) }} ratings
-                        </x-ui.badge>
-                    </div>
+                    </x-ui.card>
+                @endif
 
-                    @if ($ratingCount > 0)
-                        <div class="space-y-3">
-                            @foreach ($ratingsBreakdown as $bucket)
-                                <div class="grid grid-cols-[2.5rem_minmax(0,1fr)_3rem] items-center gap-3">
-                                    <div class="text-sm font-medium text-neutral-700 dark:text-neutral-200">{{ $bucket['score'] }}</div>
-                                    <div class="h-2 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-800">
-                                        <div
-                                            class="h-full rounded-full bg-amber-500 dark:bg-amber-400"
-                                            style="width: {{ $bucket['count'] > 0 ? max(8, (int) round(($bucket['count'] / $maxBreakdownCount) * 100)) : 0 }}%;"
-                                        ></div>
-                                    </div>
-                                    <div class="text-right text-sm text-neutral-500 dark:text-neutral-400">{{ $bucket['count'] }}</div>
-                                </div>
-                            @endforeach
-                        </div>
-                    @else
-                        <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
-                            <x-ui.empty.media>
-                                <x-ui.icon name="chart-bar" class="size-8 text-neutral-400 dark:text-neutral-500" />
-                            </x-ui.empty.media>
-                            <x-ui.heading level="h3">Not enough ratings yet.</x-ui.heading>
-                            <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
-                                The score distribution will appear once audience ratings start arriving.
-                            </x-ui.text>
-                        </x-ui.empty>
-                    @endif
-                </div>
-            </x-ui.card>
+                @if ($archiveLinks->isNotEmpty())
+                    <x-ui.card class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Archive Views</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Dedicated read-only surfaces for the imported MySQL data attached to this title.
+                                </x-ui.text>
+                            </div>
 
-            <x-ui.card id="title-trivia" class="sb-detail-section !max-w-none">
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between gap-4">
-                        <div>
-                            <x-ui.heading level="h2" size="lg">Trivia</x-ui.heading>
-                            <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                Behind-the-scenes notes and fan-favorite production facts, kept compact on the title page and expanded on the dedicated archive.
-                            </x-ui.text>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <x-ui.badge variant="outline" color="neutral" icon="sparkles">
-                                {{ $triviaTotalCount > 0 ? number_format($triviaTotalCount).' notes' : 'Reserved' }}
-                            </x-ui.badge>
-                            <x-ui.link :href="route('public.titles.trivia', $title)" variant="ghost" iconAfter="arrow-right">
-                                Open trivia dossier
-                            </x-ui.link>
-                        </div>
-                    </div>
+                            <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+                                @foreach ($archiveLinks as $archiveLink)
+                                    <a href="{{ $archiveLink['href'] }}" class="rounded-[1.15rem] border border-black/5 bg-white/70 p-4 transition hover:bg-white dark:border-white/10 dark:bg-white/[0.02] dark:hover:bg-white/[0.05]">
+                                        <div class="flex items-start justify-between gap-4">
+                                            <div class="space-y-2">
+                                                <div class="flex items-center gap-2">
+                                                    <x-ui.icon :name="$archiveLink['icon']" class="size-4 text-[#d6b574]" />
+                                                    <span class="font-medium text-neutral-900 dark:text-neutral-100">{{ $archiveLink['label'] }}</span>
+                                                </div>
+                                                <x-ui.text class="text-sm text-neutral-600 dark:text-neutral-300">
+                                                    {{ $archiveLink['copy'] }}
+                                                </x-ui.text>
+                                            </div>
 
-                    @if ($triviaItems->isNotEmpty())
-                        <div class="space-y-3">
-                            @foreach ($triviaItems->take(3) as $triviaItem)
-                                <article class="sb-fact-card sb-fact-card--compact sb-fact-card--trivia">
-                                    <div class="sb-fact-card-topline">
-                                        <div class="sb-fact-card-kicker">Trivia note {{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}</div>
-                                        <div class="flex flex-wrap items-center justify-end gap-2">
-                                            @if ($triviaItem['scoreLabel'])
-                                                <span class="sb-fact-interest sb-fact-interest--{{ $triviaItem['scoreTone'] }}">{{ $triviaItem['scoreLabel'] }}</span>
-                                            @endif
-                                            @if ($triviaItem['isSpoiler'])
-                                                <span class="sb-fact-spoiler">Spoiler</span>
-                                            @endif
+                                            <div class="shrink-0 text-right">
+                                                <x-ui.badge variant="outline" color="neutral">{{ $archiveLink['status'] }}</x-ui.badge>
+                                                <div class="mt-3 text-sm text-[#988f82]">Open view</div>
+                                            </div>
                                         </div>
-                                    </div>
-
-                                    <x-ui.text class="sb-fact-card-copy">{{ $triviaItem['text'] }}</x-ui.text>
-                                </article>
-                            @endforeach
-
-                            @if ($triviaTotalCount > $triviaItems->take(3)->count())
-                                <div class="sb-fact-card-note">
-                                    Showing {{ number_format($triviaItems->take(3)->count()) }} of {{ number_format($triviaTotalCount) }} trivia notes. Open the full page for the complete archive.
-                                </div>
-                            @endif
+                                    </a>
+                                @endforeach
+                            </div>
                         </div>
-                    @else
-                        <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
-                            <x-ui.empty.media>
-                                <x-ui.icon name="sparkles" class="size-8 text-neutral-400 dark:text-neutral-500" />
-                            </x-ui.empty.media>
-                            <x-ui.heading level="h3">Trivia has not been published for this title yet.</x-ui.heading>
-                            <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
-                                This module is intentionally present so title-specific trivia can land without changing the page architecture.
-                            </x-ui.text>
-                        </x-ui.empty>
-                    @endif
-                </div>
-            </x-ui.card>
-
-            <x-ui.card id="title-goofs" class="sb-detail-section !max-w-none">
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between gap-4">
-                        <div>
-                            <x-ui.heading level="h2" size="lg">Goofs</x-ui.heading>
-                            <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                Continuity slips and production mistakes, previewed here with the full archive separated into its own cleaner tab on the dedicated page.
-                            </x-ui.text>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <x-ui.badge variant="outline" color="neutral" icon="exclamation-circle">
-                                {{ $goofTotalCount > 0 ? number_format($goofTotalCount).' notes' : 'Reserved' }}
-                            </x-ui.badge>
-                            <x-ui.link :href="route('public.titles.trivia', $title)" variant="ghost" iconAfter="arrow-right">
-                                Open trivia dossier
-                            </x-ui.link>
-                        </div>
-                    </div>
-
-                    @if ($goofItems->isNotEmpty())
-                        <div class="space-y-3">
-                            @foreach ($goofItems->take(3) as $goofItem)
-                                <article class="sb-fact-card sb-fact-card--compact sb-fact-card--goof">
-                                    <div class="sb-fact-card-topline">
-                                        <div class="sb-fact-card-kicker">Goof record {{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}</div>
-                                        <div class="flex flex-wrap items-center justify-end gap-2">
-                                            @if ($goofItem['scoreLabel'])
-                                                <span class="sb-fact-interest sb-fact-interest--{{ $goofItem['scoreTone'] }}">{{ $goofItem['scoreLabel'] }}</span>
-                                            @endif
-                                            @if ($goofItem['isSpoiler'])
-                                                <span class="sb-fact-spoiler">Spoiler</span>
-                                            @endif
-                                        </div>
-                                    </div>
-
-                                    <x-ui.text class="sb-fact-card-copy">{{ $goofItem['text'] }}</x-ui.text>
-                                </article>
-                            @endforeach
-
-                            @if ($goofTotalCount > $goofItems->take(3)->count())
-                                <div class="sb-fact-card-note">
-                                    Showing {{ number_format($goofItems->take(3)->count()) }} of {{ number_format($goofTotalCount) }} goof notes. Open the full page for the complete archive.
-                                </div>
-                            @endif
-                        </div>
-                    @else
-                        <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
-                            <x-ui.empty.media>
-                                <x-ui.icon name="exclamation-circle" class="size-8 text-neutral-400 dark:text-neutral-500" />
-                            </x-ui.empty.media>
-                            <x-ui.heading level="h3">Goofs are not available for this title yet.</x-ui.heading>
-                            <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
-                                The layout keeps a dedicated place for goof records instead of hiding them behind a generic extension bucket.
-                            </x-ui.text>
-                        </x-ui.empty>
-                    @endif
-                </div>
-            </x-ui.card>
-        </div>
-    </section>
-
-    <section id="title-reviews" class="space-y-4">
-        <div class="flex items-center justify-between gap-4">
-            <div>
-                <x-ui.heading level="h2" size="lg">Reviews</x-ui.heading>
-                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                    Audience reactions, spoiler flags, and moderation-linked reporting for this title.
-                </x-ui.text>
+                    </x-ui.card>
+                @endif
             </div>
-
-            <x-ui.link :href="route('public.reviews.latest')" variant="ghost" iconAfter="arrow-right">
-                Latest reviews
-            </x-ui.link>
         </div>
 
-        <livewire:titles.review-composer :title="$title" anchorId="title-review" :key="'review-'.$title->id" />
-        <livewire:reviews.title-review-list :title="$title" :key="'title-reviews-'.$title->id" />
+        @if ($relatedTitles->isNotEmpty())
+            <section class="space-y-4">
+                <div class="flex items-center justify-between gap-4">
+                    <div>
+                        <div class="sb-page-kicker">Related titles</div>
+                        <x-ui.heading level="h2" size="lg">More from the same catalog neighborhood</x-ui.heading>
+                    </div>
+                </div>
+
+                <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    @foreach ($relatedTitles as $relatedTitle)
+                        <x-catalog.title-card :title="$relatedTitle" />
+                    @endforeach
+                </div>
+            </section>
+        @endif
     </section>
-
-    <x-ui.modal
-        :id="$shareModalId"
-        heading="Share title"
-        description="Copy the canonical title URL and send it anywhere."
-        width="lg"
-    >
-        <div class="space-y-4">
-            <x-ui.field>
-                <x-ui.label>Canonical URL</x-ui.label>
-                <x-ui.input :value="$shareUrl" copyable readonly />
-            </x-ui.field>
-
-            <x-ui.text class="text-sm text-neutral-500 dark:text-neutral-400">
-                Shared links resolve to the canonical public title page for {{ $title->name }}.
-            </x-ui.text>
-        </div>
-    </x-ui.modal>
 @endsection

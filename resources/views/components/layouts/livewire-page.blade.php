@@ -1,20 +1,3 @@
-@include('layouts.partials.app-shell', [
-    'shell' => app(\App\Actions\Seo\ResolvePageShellViewDataAction::class)->forLivewireLayout([
-        'pageTitle' => $pageTitle ?? 'Screenbase',
-        'pageDescription' => $pageDescription ?? 'Screenbase is a Livewire-driven IMDb-style platform for discovery, ratings, reviews, and curation.',
-        'pageRobots' => $pageRobots ?? 'index,follow',
-        'canonicalUrl' => $canonicalUrl ?? null,
-        'openGraphTitle' => $openGraphTitle ?? ($pageTitle ?? 'Screenbase'),
-        'openGraphDescription' => $openGraphDescription ?? ($pageDescription ?? null),
-        'openGraphType' => $openGraphType ?? 'website',
-        'openGraphImage' => $openGraphImage ?? null,
-        'openGraphImageAlt' => $openGraphImageAlt ?? null,
-        'twitterCard' => $twitterCard ?? 'summary',
-        'breadcrumbSchema' => $breadcrumbSchema ?? null,
-        'breadcrumbs' => $breadcrumbs ?? null,
-        'navbar' => isset($navbarView) ? view($navbarView)->render() : ($navbar ?? null),
-        'sidebar' => $sidebar ?? null,
-        'shellVariant' => $shellVariant ?? 'default',
-        'showFooter' => $showFooter ?? true,
-    ]),
-])
+@props(['shell'])
+
+@include('layouts.partials.app-shell', ['shell' => $shell])

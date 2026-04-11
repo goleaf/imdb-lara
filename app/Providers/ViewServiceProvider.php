@@ -27,11 +27,9 @@ class ViewServiceProvider extends ServiceProvider
             $view->with([
                 'hasPublicMoviesRoute' => Route::has('public.movies.index'),
                 'hasPublicSeriesRoute' => Route::has('public.series.index'),
-                'hasPublicListsRoute' => Route::has('public.lists.index'),
                 'hasPublicAwardsRoute' => Route::has('public.awards.index'),
                 'hasPublicTrendingRoute' => Route::has('public.trending'),
                 'hasPublicLatestTrailersRoute' => Route::has('public.trailers.latest'),
-                'hasPublicLatestReviewsRoute' => Route::has('public.reviews.latest'),
             ]);
         });
 

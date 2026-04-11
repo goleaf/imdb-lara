@@ -2,7 +2,12 @@
     'person',
 ])
 
-<x-ui.card class="sb-person-card !max-w-none h-full overflow-hidden rounded-[1.4rem] p-3">
+@php
+    $popularityRankLabel = $person->popularityRankBadgeLabel();
+    $awardNominationsLabel = $person->awardNominationsBadgeLabel();
+@endphp
+
+<x-ui.card data-slot="person-card" class="sb-person-card !max-w-none h-full overflow-hidden rounded-[1.4rem] p-3">
     <div class="flex h-full flex-col gap-4">
         <div class="flex items-start gap-4">
             <x-ui.avatar
@@ -43,11 +48,27 @@
                         {{ str($person->summaryText())->limit(140) }}
                     </x-ui.text>
                 @endif
+
+                @if ($popularityRankLabel || $awardNominationsLabel)
+                    <div data-slot="person-card-metrics" class="flex flex-wrap gap-2">
+                        @if ($popularityRankLabel)
+                            <x-ui.badge data-slot="person-card-popularity-rank" variant="outline" color="amber" icon="fire">
+                                {{ $popularityRankLabel }}
+                            </x-ui.badge>
+                        @endif
+
+                        @if ($awardNominationsLabel)
+                            <x-ui.badge data-slot="person-card-awards" variant="outline" color="slate" icon="trophy">
+                                {{ $awardNominationsLabel }}
+                            </x-ui.badge>
+                        @endif
+                    </div>
+                @endif
             </div>
         </div>
 
         <div class="mt-auto flex items-center justify-between gap-3 text-sm text-[#988f82] dark:text-[#988f82]">
-            <span>{{ number_format((int) ($person->credits_count ?? ($person->relationLoaded('credits') ? $person->credits->count() : 0))) }} credits</span>
+            <span>{{ $person->creditsBadgeLabel() }}</span>
             <x-ui.link :href="route('public.people.show', $person)" variant="ghost" iconAfter="arrow-right">
                 View profile
             </x-ui.link>

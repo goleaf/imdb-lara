@@ -2,27 +2,26 @@
 
 namespace Tests\Feature\Feature\Livewire;
 
-use App\Enums\TitleType;
+use App\Actions\Catalog\BuildPublicTitleIndexQueryAction;
+use App\Actions\Search\BuildDiscoveryQueryAction;
 use App\Livewire\Search\DiscoveryFilters;
-use App\Models\Genre;
 use App\Models\Title;
-use App\Models\TitleStatistic;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Tests\Concerns\InteractsWithRemoteCatalog;
+use Tests\Concerns\UsesCatalogOnlyApplication;
 use Tests\TestCase;
 
 class DiscoveryFiltersTest extends TestCase
 {
-    use RefreshDatabase;
+    use InteractsWithRemoteCatalog;
+    use UsesCatalogOnlyApplication;
 
     public function test_discovery_filters_render_combobox_controls_instead_of_native_selects(): void
     {
-        Genre::factory()->create([
-            'name' => 'Sci-Fi',
-            'slug' => 'sci-fi',
-        ]);
+        Livewire::withoutLazyLoading();
 
         Livewire::test(DiscoveryFilters::class)
+            ->assertSeeHtml('data-slot="discover-filters-island"')
             ->assertSeeHtml('data-slot="discover-active-filters"')
             ->assertSeeHtml('data-slot="autocomplete"')
             ->assertSeeHtml('data-slot="combobox-input"')
@@ -31,147 +30,238 @@ class DiscoveryFiltersTest extends TestCase
 
     public function test_discovery_filters_render_title_autocomplete_suggestions_for_matching_titles(): void
     {
-        Title::factory()->create([
-            'name' => 'Northern Signal',
-            'search_keywords' => 'signal, sci-fi',
-            'is_published' => true,
-        ]);
-        Title::factory()->create([
-            'name' => 'Signal North',
-            'search_keywords' => 'signal, thriller',
-            'is_published' => true,
-        ]);
+        Livewire::withoutLazyLoading();
 
-        Livewire::test(DiscoveryFilters::class)
-            ->set('search', 'Signal')
+        $title = $this->sampleTitle();
+
+        $this->get(route('public.discover', ['q' => $this->searchTermFor($title)]))
+            ->assertOk()
             ->assertSeeHtml('data-slot="autocomplete-item"')
-            ->assertSee('Northern Signal')
-            ->assertSee('Signal North');
+            ->assertSee($title->name);
     }
 
-    public function test_discovery_filters_search_by_text_genre_and_rating(): void
+    public function test_discovery_filters_return_the_matrix_for_exact_keyword_search(): void
     {
-        $sciFi = Genre::factory()->create([
-            'name' => 'Sci-Fi',
-            'slug' => 'sci-fi',
-        ]);
-        $drama = Genre::factory()->create([
-            'name' => 'Drama',
-            'slug' => 'drama',
-        ]);
+        Livewire::withoutLazyLoading();
 
-        $northernSignal = Title::factory()->movie()->create(['name' => 'Northern Signal']);
-        $mercuryVale = Title::factory()->series()->create(['name' => 'Mercury Vale']);
+        $matrix = Title::query()
+            ->select($this->remoteTitleColumns())
+            ->publishedCatalog()
+            ->where(function ($query): void {
+                $query
+                    ->where('movies.primarytitle', 'The Matrix')
+                    ->orWhere('movies.originaltitle', 'The Matrix');
+            })
+            ->orderBy('movies.startyear')
+            ->first();
 
-        $northernSignal->genres()->attach($sciFi);
-        $mercuryVale->genres()->attach($drama);
+        if (! $matrix instanceof Title) {
+            $this->markTestSkipped('The remote catalog does not expose The Matrix in the current dataset.');
+        }
 
-        TitleStatistic::factory()->for($northernSignal)->create([
-            'average_rating' => 8.4,
-        ]);
-        TitleStatistic::factory()->for($mercuryVale)->create([
-            'average_rating' => 6.1,
-        ]);
+        $this->get(route('public.discover', ['q' => 'the matrix']))
+            ->assertOk()
+            ->assertSee($matrix->name)
+            ->assertDontSee('No titles match the current filters.');
+    }
 
-        Livewire::test(DiscoveryFilters::class)
-            ->set('search', 'Northern')
-            ->assertSee('Northern Signal')
-            ->assertDontSee('Mercury Vale')
-            ->set('search', '')
-            ->set('genre', 'sci-fi')
-            ->assertSee('Northern Signal')
-            ->assertDontSee('Mercury Vale')
-            ->set('genre', null)
-            ->set('type', TitleType::Movie->value)
-            ->assertSee('Northern Signal')
-            ->assertDontSee('Mercury Vale')
-            ->set('type', null)
-            ->set('minimumRating', 8)
-            ->assertSee('Northern Signal')
-            ->assertDontSee('Mercury Vale');
+    public function test_discovery_filters_hydrate_the_matrix_from_the_query_string(): void
+    {
+        Livewire::withoutLazyLoading();
+
+        $matrix = Title::query()
+            ->select($this->remoteTitleColumns())
+            ->publishedCatalog()
+            ->where(function ($query): void {
+                $query
+                    ->where('movies.primarytitle', 'The Matrix')
+                    ->orWhere('movies.originaltitle', 'The Matrix');
+            })
+            ->orderBy('movies.startyear')
+            ->first();
+
+        if (! $matrix instanceof Title) {
+            $this->markTestSkipped('The remote catalog does not expose The Matrix in the current dataset.');
+        }
+
+        $this->get(route('public.discover', ['q' => 'the matrix']))
+            ->assertOk()
+            ->assertSee('Keyword: the matrix')
+            ->assertSee($matrix->name)
+            ->assertDontSee('No titles match the current filters.');
+    }
+
+    public function test_discovery_filters_search_by_text_genre_and_rating_against_remote_titles(): void
+    {
+        Livewire::withoutLazyLoading();
+
+        $title = Title::query()
+            ->select($this->remoteTitleColumns())
+            ->publishedCatalog()
+            ->whereHas('genres')
+            ->whereHas('statistic', fn ($query) => $query->where('aggregate_rating', '>=', 1))
+            ->with([
+                'genres:id,name',
+                'statistic:movie_id,aggregate_rating,vote_count',
+            ])
+            ->orderBy('movies.id')
+            ->firstOrFail();
+
+        $genre = $title->genres->firstOrFail();
+        $minimumRating = max(1, (int) floor($title->displayAverageRating() ?? 1));
+        $genreResultTitle = app(BuildPublicTitleIndexQueryAction::class)
+            ->handle([
+                'genre' => $genre->slug,
+                'sort' => 'popular',
+            ])
+            ->limit(12)
+            ->firstOrFail();
+        $ratingResultTitle = app(BuildPublicTitleIndexQueryAction::class)
+            ->handle([
+                'minimumRating' => $minimumRating,
+                'sort' => 'popular',
+            ])
+            ->limit(12)
+            ->firstOrFail();
+        $excludedTitle = Title::query()
+            ->select($this->remoteTitleColumns())
+            ->publishedCatalog()
+            ->whereKeyNot($title->id)
+            ->whereNotNull('movies.primarytitle')
+            ->orderBy('movies.id')
+            ->first();
+
+        $this->get(route('public.discover', ['q' => $this->searchTermFor($title)]))
+            ->assertOk()
+            ->assertSee($title->name);
+
+        if ($excludedTitle instanceof Title) {
+            $this->get(route('public.discover', ['q' => $this->searchTermFor($title)]))
+                ->assertOk()
+                ->assertDontSee($excludedTitle->name);
+        }
+
+        $this->get(route('public.discover', ['genre' => $genre->slug]))
+            ->assertOk()
+            ->assertSee($genreResultTitle->name)
+            ->assertDontSee('No titles match the current filters.');
+
+        $this->get(route('public.discover', ['minimumRating' => (string) $minimumRating]))
+            ->assertOk()
+            ->assertSee($ratingResultTitle->name);
     }
 
     public function test_discovery_filters_support_awards_release_runtime_language_and_country_filters(): void
     {
-        $awardWinner = Title::factory()->movie()->create([
-            'name' => 'Northern Signal',
-            'release_year' => 2024,
-            'release_date' => '2024-09-18',
-            'runtime_minutes' => 132,
-            'original_language' => 'en',
-            'origin_country' => 'US',
-        ]);
-        $awardNominee = Title::factory()->movie()->create([
-            'name' => 'Mercury Vale',
-            'release_year' => 2024,
-            'release_date' => '2024-05-10',
-            'runtime_minutes' => 98,
-            'original_language' => 'en',
-            'origin_country' => 'GB',
-        ]);
-        $arthouseClassic = Title::factory()->movie()->create([
-            'name' => 'Paris After Rain',
-            'release_year' => 2002,
-            'release_date' => '2002-02-14',
-            'runtime_minutes' => 141,
-            'original_language' => 'fr',
-            'origin_country' => 'FR',
-        ]);
+        Livewire::withoutLazyLoading();
 
-        TitleStatistic::factory()->for($awardWinner)->create([
-            'average_rating' => 8.8,
-            'rating_count' => 1800,
-            'awards_won_count' => 3,
-            'awards_nominated_count' => 6,
-        ]);
-        TitleStatistic::factory()->for($awardNominee)->create([
-            'average_rating' => 7.4,
-            'rating_count' => 600,
-            'awards_won_count' => 0,
-            'awards_nominated_count' => 4,
-        ]);
-        TitleStatistic::factory()->for($arthouseClassic)->create([
-            'average_rating' => 9.1,
-            'rating_count' => 2200,
-            'awards_won_count' => 5,
-            'awards_nominated_count' => 8,
-        ]);
+        $title = Title::query()
+            ->select($this->remoteTitleColumns())
+            ->publishedCatalog()
+            ->whereHas('awardNominations', fn ($query) => $query->where('is_winner', true))
+            ->whereHas('languages')
+            ->whereHas('countries')
+            ->whereNotNull('movies.startyear')
+            ->whereNotNull('movies.runtimeminutes')
+            ->with([
+                'countries:code,name',
+                'languages:code,name',
+            ])
+            ->orderBy('movies.id')
+            ->first();
 
-        Livewire::test(DiscoveryFilters::class)
+        if (! $title instanceof Title) {
+            $this->markTestSkipped('The remote catalog does not currently expose an award-winning title with language, country, and runtime metadata.');
+        }
+
+        $language = $title->languages->first()?->code;
+        $country = $title->countries->first()?->code;
+
+        if (! is_string($language) || $language === '' || ! is_string($country) || $country === '') {
+            $this->markTestSkipped('The selected remote award-winning title is missing language or country metadata.');
+        }
+
+        $runtimeFilter = match (true) {
+            $title->runtime_minutes < 30 => 'under-30',
+            $title->runtime_minutes <= 60 => '30-60',
+            $title->runtime_minutes <= 90 => '60-90',
+            $title->runtime_minutes <= 120 => '90-120',
+            default => '120-plus',
+        };
+
+        $this->get(route('public.discover', [
+            'awards' => 'winners',
+            'yearFrom' => (string) $title->release_year,
+            'yearTo' => (string) $title->release_year,
+            'runtime' => $runtimeFilter,
+            'language' => $language,
+            'country' => $country,
+        ]))
+            ->assertOk()
             ->assertSee('Awards')
             ->assertSee('Release from')
             ->assertSee('Vote count')
             ->assertSee('Country')
-            ->set('awards', 'winners')
-            ->set('yearFrom', '2020')
-            ->set('minimumRating', '8')
-            ->set('votesMin', '1000')
-            ->set('runtime', '120-plus')
-            ->set('language', 'en')
-            ->set('country', 'US')
-            ->assertSee('Northern Signal')
-            ->assertDontSee('Mercury Vale')
-            ->assertDontSee('Paris After Rain');
+            ->assertSee($title->name);
     }
 
     public function test_discovery_filters_make_active_filter_state_obvious(): void
     {
-        Genre::factory()->create([
-            'name' => 'Sci-Fi',
-            'slug' => 'sci-fi',
-        ]);
+        Livewire::withoutLazyLoading();
 
-        Title::factory()->movie()->create([
-            'name' => 'Northern Signal',
-            'search_keywords' => 'signal, sci-fi',
-        ]);
+        $title = $this->sampleTitle()->loadMissing('genres');
+        $genre = $title->genres->firstOrFail();
+        $search = $this->searchTermFor($title);
 
-        Livewire::test(DiscoveryFilters::class)
-            ->assertSee('All titles')
-            ->set('search', 'Signal')
-            ->set('genre', 'sci-fi')
+        $this->get(route('public.discover', [
+            'q' => $search,
+            'genre' => $genre->slug,
+        ]))
+            ->assertOk()
             ->assertSee('2 active')
-            ->assertSee('Keyword: Signal')
-            ->assertSee('Sci-Fi');
+            ->assertSee('Keyword: '.$search)
+            ->assertSee($genre->name);
+    }
+
+    public function test_discovery_pagination_buttons_are_scoped_to_the_results_island(): void
+    {
+        Livewire::withoutLazyLoading();
+
+        $paginator = app(BuildDiscoveryQueryAction::class)
+            ->handle([
+                'search' => '',
+                'genre' => null,
+                'type' => null,
+                'sort' => 'popular',
+                'minimumRating' => null,
+                'yearFrom' => null,
+                'yearTo' => null,
+                'votesMin' => null,
+                'language' => null,
+                'country' => null,
+                'runtime' => null,
+                'awards' => null,
+            ])
+            ->simplePaginate(12, pageName: 'discover');
+
+        if (! $paginator->hasMorePages()) {
+            $this->markTestSkipped('The remote catalog does not currently expose enough discovery titles to verify paginator controls.');
+        }
+
+        $nextResponse = $this->get(route('public.discover').'?q=');
+
+        $nextResponse->assertOk();
+        $this->assertMatchesRegularExpression(
+            '/dusk="nextPage\\.discover"[^>]*wire:island="discover-results-page"|wire:island="discover-results-page"[^>]*dusk="nextPage\\.discover"/',
+            $nextResponse->getContent(),
+        );
+
+        $previousResponse = $this->get(route('public.discover', ['discover' => 2]).'&q=');
+
+        $previousResponse->assertOk();
+        $this->assertMatchesRegularExpression(
+            '/dusk="previousPage\\.discover"[^>]*wire:island="discover-results-page"|wire:island="discover-results-page"[^>]*dusk="previousPage\\.discover"/',
+            $previousResponse->getContent(),
+        );
     }
 }
