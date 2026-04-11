@@ -566,6 +566,28 @@ class Title extends Model
     }
 
     /**
+     * @return SupportCollection<int, CompanyCreditCategory>
+     */
+    public function resolvedCompanyCreditCategories(): SupportCollection
+    {
+        if (! $this->relationLoaded('movieCompanyCredits')) {
+            return collect();
+        }
+
+        return $this->movieCompanyCredits
+            ->map(function (MovieCompanyCredit $movieCompanyCredit): ?CompanyCreditCategory {
+                if (! $movieCompanyCredit->relationLoaded('companyCreditCategory')) {
+                    return null;
+                }
+
+                return $movieCompanyCredit->companyCreditCategory;
+            })
+            ->filter(fn (mixed $companyCreditCategory): bool => $companyCreditCategory instanceof CompanyCreditCategory && filled($companyCreditCategory->name))
+            ->unique('id')
+            ->values();
+    }
+
+    /**
      * @return SupportCollection<int, AkaType>
      */
     public function resolvedAkaTypes(): SupportCollection

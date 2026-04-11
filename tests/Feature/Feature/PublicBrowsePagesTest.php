@@ -19,6 +19,7 @@ class PublicBrowsePagesTest extends TestCase
         $title = $this->sampleTitle();
         $person = $this->samplePerson();
         $genre = $this->sampleGenre();
+        $interestCategory = $this->sampleInterestCategory();
         $year = $this->sampleReleaseYear();
 
         $this->get(route('public.home'))
@@ -70,11 +71,24 @@ class PublicBrowsePagesTest extends TestCase
             ->assertSee('Catalog footprint')
             ->assertSee('Top professions');
 
+        $this->get(route('public.interest-categories.index'))
+            ->assertOk()
+            ->assertSee('Interest Categories')
+            ->assertSeeHtml('data-slot="interest-category-browser-island"')
+            ->assertSee('Catalog clusters')
+            ->assertSee('Top category lanes');
+
         $this->get(route('public.people.show', $person))
             ->assertOk()
             ->assertSee($person->name)
             ->assertSee('Known for')
             ->assertSee('Filmography');
+
+        $this->get(route('public.interest-categories.show', $interestCategory))
+            ->assertOk()
+            ->assertSee($interestCategory->name)
+            ->assertSee('Category overview')
+            ->assertSee('Related interests');
 
         $this->get(route('public.search', ['q' => $this->searchTermFor($title)]))
             ->assertOk()

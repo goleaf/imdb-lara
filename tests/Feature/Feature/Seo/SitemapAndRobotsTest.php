@@ -15,6 +15,7 @@ class SitemapAndRobotsTest extends TestCase
     public function test_sitemap_and_robots_include_public_catalog_endpoints(): void
     {
         $genre = $this->sampleGenre();
+        $interestCategory = $this->sampleInterestCategory();
         $title = Title::query()
             ->select(['id', 'tconst', 'primarytitle', 'isadult', 'startyear'])
             ->publishedCatalog()
@@ -28,6 +29,8 @@ class SitemapAndRobotsTest extends TestCase
             ->assertSee(route('public.home'), false)
             ->assertSee(route('public.awards.index'), false)
             ->assertSee(route('public.trailers.latest'), false)
+            ->assertSee(route('public.interest-categories.index'), false)
+            ->assertSee(route('public.interest-categories.show', $interestCategory), false)
             ->assertSee(route('public.genres.show', $genre), false)
             ->assertSee(route('public.years.show', ['year' => $year]), false)
             ->assertSee(route('public.titles.cast', $title), false)

@@ -46,6 +46,10 @@ class PublicMysqlCatalogSmokeTest extends TestCase
         $this->get(route('public.series.index'))
             ->assertOk()
             ->assertSee('Browse TV Shows');
+
+        $this->get(route('public.interest-categories.index'))
+            ->assertOk()
+            ->assertSee('Interest Categories');
     }
 
     public function test_public_people_routes_render_against_the_remote_mysql_catalog(): void
@@ -53,6 +57,7 @@ class PublicMysqlCatalogSmokeTest extends TestCase
         Livewire::withoutLazyLoading();
 
         $person = $this->samplePerson();
+        $interestCategory = $this->sampleInterestCategory();
 
         $this->get(route('public.people.index'))
             ->assertOk()
@@ -63,6 +68,11 @@ class PublicMysqlCatalogSmokeTest extends TestCase
             ->assertOk()
             ->assertSee($person->name)
             ->assertSee('Career profile');
+
+        $this->get(route('public.interest-categories.show', $interestCategory))
+            ->assertOk()
+            ->assertSee($interestCategory->name)
+            ->assertSee('Linked titles');
     }
 
     public function test_public_search_and_title_routes_render_against_the_remote_mysql_catalog(): void

@@ -6,6 +6,7 @@ use App\Enums\TitleType;
 use App\Models\Credit;
 use App\Models\Episode;
 use App\Models\Genre;
+use App\Models\InterestCategory;
 use App\Models\Person;
 use App\Models\Season;
 use App\Models\Title;
@@ -164,6 +165,21 @@ trait InteractsWithRemoteCatalog
             ->select(['genres.id', 'genres.name'])
             ->whereHas('titles', fn ($query) => $query->publishedCatalog())
             ->orderBy('genres.name')
+            ->firstOrFail();
+    }
+
+    private function sampleInterestCategory(): InterestCategory
+    {
+        return InterestCategory::query()
+            ->select(['interest_categories.id', 'interest_categories.name'])
+            ->whereHas('interests.movies')
+            ->withCount([
+                'interests',
+                'interests as title_linked_interests_count' => fn ($query) => $query->whereHas('movies'),
+            ])
+            ->orderByDesc('title_linked_interests_count')
+            ->orderByDesc('interests_count')
+            ->orderBy('interest_categories.name')
             ->firstOrFail();
     }
 

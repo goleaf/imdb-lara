@@ -10,6 +10,8 @@ use App\Models\CertificateAttribute;
 use App\Models\CertificateRating;
 use App\Models\Company;
 use App\Models\CompanyCreditAttribute;
+use App\Models\CompanyCreditCategory;
+use App\Models\Country;
 use App\Models\MovieCertificate;
 use App\Models\MovieCertificateAttribute;
 use App\Models\MovieCompanyCredit;
@@ -305,5 +307,83 @@ class TitleTest extends TestCase
         $this->assertCount(2, $resolvedCompanyCreditAttributes);
         $this->assertSame([3, 9], $resolvedCompanyCreditAttributes->pluck('id')->all());
         $this->assertSame(['streaming', 'imax'], $resolvedCompanyCreditAttributes->pluck('name')->all());
+    }
+
+    public function test_resolved_company_credit_categories_flattens_loaded_company_credit_relations(): void
+    {
+        $distribution = new CompanyCreditCategory;
+        $distribution->setRawAttributes([
+            'id' => 2,
+            'name' => 'distribution',
+        ], sync: true);
+
+        $production = new CompanyCreditCategory;
+        $production->setRawAttributes([
+            'id' => 5,
+            'name' => 'production',
+        ], sync: true);
+
+        $firstCompanyCredit = new MovieCompanyCredit([
+            'id' => 50,
+            'movie_id' => 1,
+            'company_credit_category_id' => 2,
+            'position' => 1,
+        ]);
+        $firstCompanyCredit->setRelation('companyCreditCategory', $distribution);
+
+        $duplicateCompanyCredit = new MovieCompanyCredit([
+            'id' => 51,
+            'movie_id' => 1,
+            'company_credit_category_id' => 2,
+            'position' => 2,
+        ]);
+        $duplicateCompanyCredit->setRelation('companyCreditCategory', $distribution);
+
+        $secondCompanyCredit = new MovieCompanyCredit([
+            'id' => 52,
+            'movie_id' => 1,
+            'company_credit_category_id' => 5,
+            'position' => 3,
+        ]);
+        $secondCompanyCredit->setRelation('companyCreditCategory', $production);
+
+        $title = new Title(['id' => 1, 'tconst' => 'tt0133093', 'primarytitle' => 'The Matrix']);
+        $title->setRelation('movieCompanyCredits', new EloquentCollection([$firstCompanyCredit, $duplicateCompanyCredit, $secondCompanyCredit]));
+
+        $resolvedCompanyCreditCategories = $title->resolvedCompanyCreditCategories();
+
+        $this->assertCount(2, $resolvedCompanyCreditCategories);
+        $this->assertSame([2, 5], $resolvedCompanyCreditCategories->pluck('id')->all());
+        $this->assertSame(['distribution', 'production'], $resolvedCompanyCreditCategories->pluck('name')->all());
+    }
+
+    public function test_resolved_countries_returns_loaded_country_rows(): void
+    {
+        $unitedStates = new Country;
+        $unitedStates->setRawAttributes([
+            'code' => 'US',
+            'name' => 'United States',
+        ], sync: true);
+
+        $duplicateUnitedStates = new Country;
+        $duplicateUnitedStates->setRawAttributes([
+            'code' => 'US',
+            'name' => 'United States',
+        ], sync: true);
+
+        $australia = new Country;
+        $australia->setRawAttributes([
+            'code' => 'AU',
+            'name' => 'Australia',
+        ], sync: true);
+
+        $title = new Title(['id' => 1, 'tconst' => 'tt0133093', 'primarytitle' => 'The Matrix']);
+        $title->setRelation('countries', new EloquentCollection([$unitedStates, $duplicateUnitedStates, $australia]));
+
+        $resolvedCountries = $title->resolvedCountries();
+
+        $this->assertCount(2, $resolvedCountries);
+        $this->assertSame(['US', 'AU'], $resolvedCountries->pluck('code')->all());
+        $this->assertSame(['United States', 'Australia'], $resolvedCountries->pluck('name')->all());
     }
 }

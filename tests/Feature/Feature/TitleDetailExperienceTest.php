@@ -382,4 +382,75 @@ class TitleDetailExperienceTest extends TestCase
             ->assertSee((string) $movieCompanyCreditAttribute->companyCreditAttribute->id)
             ->assertSee($movieCompanyCreditAttribute->companyCreditAttribute->name);
     }
+
+    public function test_title_page_surfaces_raw_company_credit_category_rows_when_available(): void
+    {
+        Livewire::withoutLazyLoading();
+
+        $movieCompanyCredit = MovieCompanyCredit::query()
+            ->select(['id', 'movie_id', 'company_credit_category_id', 'position'])
+            ->with([
+                'companyCreditCategory:id,name',
+            ])
+            ->whereHas('companyCreditCategory', fn ($query) => $query->whereNotNull('name'))
+            ->orderBy('movie_id')
+            ->orderBy('position')
+            ->first();
+
+        if (! $movieCompanyCredit instanceof MovieCompanyCredit || ! $movieCompanyCredit->companyCreditCategory) {
+            $this->markTestSkipped('The remote catalog does not currently expose movie company credit rows with linked categories.');
+        }
+
+        $title = Title::query()
+            ->select($this->remoteTitleColumns())
+            ->publishedCatalog()
+            ->whereKey($movieCompanyCredit->movie_id)
+            ->first();
+
+        if (! $title instanceof Title) {
+            $this->markTestSkipped('The selected movie company credit category row is not linked to a published title page.');
+        }
+
+        $this->get(route('public.titles.show', $title))
+            ->assertOk()
+            ->assertSeeHtml('data-slot="title-detail-company-credit-categories"')
+            ->assertSee('id')
+            ->assertSee('name')
+            ->assertSee((string) $movieCompanyCredit->companyCreditCategory->id)
+            ->assertSee($movieCompanyCredit->companyCreditCategory->name);
+    }
+
+    public function test_title_page_surfaces_raw_country_rows_when_available(): void
+    {
+        Livewire::withoutLazyLoading();
+
+        $title = Title::query()
+            ->select($this->remoteTitleColumns())
+            ->publishedCatalog()
+            ->whereHas('countries')
+            ->orderBy('movies.id')
+            ->first();
+
+        if (! $title instanceof Title) {
+            $this->markTestSkipped('The remote catalog does not currently expose a published title with countries.');
+        }
+
+        $response = $this->get(route('public.titles.show', $title))
+            ->assertOk()
+            ->assertSeeHtml('data-slot="title-detail-countries"')
+            ->assertSee('code')
+            ->assertSee('name');
+
+        $country = $title->load([
+            'countries:code,name',
+        ])->countries->first();
+
+        if ($country !== null) {
+            $response->assertSee(strtoupper((string) $country->code));
+
+            if ($country->name !== null) {
+                $response->assertSee($country->name);
+            }
+        }
+    }
 }

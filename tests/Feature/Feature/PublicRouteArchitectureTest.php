@@ -20,6 +20,7 @@ class PublicRouteArchitectureTest extends TestCase
         $movie = $this->sampleTitle();
         $series = $this->sampleSeries();
         $genre = $this->sampleGenre();
+        $interestCategory = $this->sampleInterestCategory();
         $person = $this->samplePerson();
         $year = $this->sampleReleaseYear();
         $castTitle = $this->sampleTitleWithCredits();
@@ -44,6 +45,10 @@ class PublicRouteArchitectureTest extends TestCase
         $this->get(route('public.people.index'))
             ->assertOk()
             ->assertSee('Browse People');
+
+        $this->get(route('public.interest-categories.index'))
+            ->assertOk()
+            ->assertSee('Interest Categories');
 
         $this->get(route('public.awards.index'))
             ->assertOk()
@@ -97,6 +102,11 @@ class PublicRouteArchitectureTest extends TestCase
             ->assertSee('Known for')
             ->assertSee('Filmography');
 
+        $this->get(route('public.interest-categories.show', $interestCategory))
+            ->assertOk()
+            ->assertSee($interestCategory->name)
+            ->assertSee('Category overview');
+
         $this->get(route('public.search', ['q' => $this->searchTermFor($movie)]))
             ->assertOk()
             ->assertSee('Search Results')
@@ -120,6 +130,8 @@ class PublicRouteArchitectureTest extends TestCase
         $this->assertTrue(Route::has('public.home'));
         $this->assertTrue(Route::has('public.awards.index'));
         $this->assertTrue(Route::has('public.trailers.latest'));
+        $this->assertTrue(Route::has('public.interest-categories.index'));
+        $this->assertTrue(Route::has('public.interest-categories.show'));
         $this->assertTrue(Route::has('public.titles.cast'));
         $this->assertTrue(Route::has('public.titles.media'));
         $this->assertTrue(Route::has('public.titles.box-office'));

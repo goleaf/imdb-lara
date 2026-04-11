@@ -13,6 +13,7 @@ use App\Models\CertificateAttribute;
 use App\Models\CertificateRating;
 use App\Models\Company;
 use App\Models\CompanyCreditAttribute;
+use App\Models\CompanyCreditCategory;
 use App\Models\Credit;
 use App\Models\Episode;
 use App\Models\MovieAka;
@@ -42,6 +43,7 @@ class LoadTitleDetailsAction
      *     certificateRatingRows: Collection<int, CertificateRating>,
      *     companyRows: Collection<int, Company>,
      *     companyCreditAttributeRows: Collection<int, CompanyCreditAttribute>,
+     *     companyCreditCategoryRows: Collection<int, CompanyCreditCategory>,
      *     detailItems: Collection<int, array{label: string, value: string}>,
      *     certificateItems: Collection<int, array{rating: string, country: string|null}>,
      *     awardHighlights: Collection<int, AwardNomination>,
@@ -103,9 +105,10 @@ class LoadTitleDetailsAction
             'certificateRecords.movieCertificateAttributes:movie_certificate_id,certificate_attribute_id,position',
             'certificateRecords.movieCertificateAttributes.certificateAttribute:id,name',
             'movieCompanyCredits' => fn ($query) => $query
-                ->select(['id', 'movie_id', 'company_imdb_id', 'position'])
+                ->select(['id', 'movie_id', 'company_imdb_id', 'company_credit_category_id', 'position'])
                 ->with([
                     'company:imdb_id,name',
+                    'companyCreditCategory:id,name',
                     'movieCompanyCreditAttributes' => fn ($movieCompanyCreditAttributeQuery) => $movieCompanyCreditAttributeQuery
                         ->select(['movie_company_credit_id', 'company_credit_attribute_id', 'position'])
                         ->with([
@@ -199,6 +202,7 @@ class LoadTitleDetailsAction
         $certificateRatingRows = $title->resolvedCertificateRatings();
         $companyRows = $title->resolvedCompanies();
         $companyCreditAttributeRows = $title->resolvedCompanyCreditAttributes();
+        $companyCreditCategoryRows = $title->resolvedCompanyCreditCategories();
         $countries = $title->countries
             ->map(fn ($country): array => [
                 'code' => strtoupper((string) $country->code),
@@ -412,6 +416,7 @@ class LoadTitleDetailsAction
             'certificateRatingRows' => $certificateRatingRows,
             'companyRows' => $companyRows,
             'companyCreditAttributeRows' => $companyCreditAttributeRows,
+            'companyCreditCategoryRows' => $companyCreditCategoryRows,
             'detailItems' => $detailItems,
             'certificateItems' => $certificateItems,
             'awardHighlights' => $title->awardNominations->values(),

@@ -498,6 +498,44 @@
                     </x-ui.card>
                 @endif
 
+                @if ($companyCreditCategoryRows->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-company-credit-categories" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Company credit categories</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Raw rows imported from the <code>company_credit_categories</code> table and linked to this movie through its company credit records.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 font-medium">id</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">name</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                            @foreach ($companyCreditCategoryRows as $companyCreditCategoryRow)
+                                                <tr>
+                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
+                                                        {{ $companyCreditCategoryRow->id }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $companyCreditCategoryRow->name }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.card>
+                @endif
+
                 @if ($interestHighlights->isNotEmpty())
                     <x-ui.card data-slot="title-discovery-profile" class="sb-detail-section !max-w-none">
                         <div class="space-y-4">
