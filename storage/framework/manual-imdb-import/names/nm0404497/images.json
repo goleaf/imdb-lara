@@ -1,0 +1,23 @@
+{
+    "images": [
+        {
+            "url": "https://m.media-amazon.com/images/M/MV5BZjVjZTQ4NDAtNzUyOC00MDUwLTk0YzctYWVkZjg0ZjNjYWU3XkEyXkFqcGc@._V1_.jpg",
+            "width": 577,
+            "height": 768,
+            "type": "publicity"
+        },
+        {
+            "url": "https://m.media-amazon.com/images/M/MV5BNjg3Yjc4MTQtNDc3MC00NzViLWE4ZjItMmI2Yjk0NGFjNmMyXkEyXkFqcGc@._V1_.jpg",
+            "width": 798,
+            "height": 968,
+            "type": "publicity"
+        },
+        {
+            "url": "https://m.media-amazon.com/images/M/MV5BY2M1MzBlYzgtOWYzNi00N2MzLTk2MWEtZTEzY2Q2ZjAzZGY4XkEyXkFqcGc@._V1_.jpg",
+            "width": 810,
+            "height": 531,
+            "type": "behind_the_scenes"
+        }
+    ],
+    "totalCount": 3
+}

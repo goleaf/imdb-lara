@@ -2,6 +2,7 @@
 
 namespace App\Actions\Search;
 
+use App\Models\InterestCategory;
 use App\Models\Person;
 use App\Models\Title;
 use Illuminate\Database\Eloquent\Collection;
@@ -18,7 +19,17 @@ class BuildGlobalSearchViewDataAction
      * @return array{
      *     hasSearchTerm: bool,
      *     hasSuggestions: bool,
+     *     visibleSections: list<array{
+     *         chipClass: string,
+     *         copy: string,
+     *         icon: string,
+     *         items: Collection<int, InterestCategory|Person|Title>,
+     *         key: 'interestCategories'|'people'|'titles',
+     *         label: string,
+     *         panelClass: string
+     *     }>,
      *     suggestions: array{
+     *         interestCategories: Collection<int, InterestCategory>,
      *         people: Collection<int, Person>,
      *         titles: Collection<int, Title>
      *     },
@@ -40,6 +51,9 @@ class BuildGlobalSearchViewDataAction
         );
 
         $visibleSuggestions = [
+            'interestCategories' => $suggestions['interestCategories']
+                ->take($perGroup)
+                ->values(),
             'people' => $this->pruneTopCatalogMatch->handle(
                 $suggestions['people'],
                 $topSuggestion['type'] === 'person' ? $topSuggestion['record'] : null,
@@ -51,13 +65,79 @@ class BuildGlobalSearchViewDataAction
                 $perGroup,
             ),
         ];
+        $visibleSections = $this->buildVisibleSections($visibleSuggestions);
 
         return [
             'hasSearchTerm' => mb_strlen($trimmedQuery) >= 2,
-            'hasSuggestions' => $visibleSuggestions['titles']->isNotEmpty() || $visibleSuggestions['people']->isNotEmpty(),
+            'hasSuggestions' => $visibleSections !== [],
             'suggestions' => $visibleSuggestions,
+            'visibleSections' => $visibleSections,
             'topSuggestion' => $topSuggestion,
             'trimmedQuery' => $trimmedQuery,
         ];
+    }
+
+    /**
+     * @param  array{
+     *     interestCategories: Collection<int, InterestCategory>,
+     *     people: Collection<int, Person>,
+     *     titles: Collection<int, Title>
+     * }  $visibleSuggestions
+     * @return list<array{
+     *     chipClass: string,
+     *     copy: string,
+     *     icon: string,
+     *     items: Collection<int, InterestCategory|Person|Title>,
+     *     key: 'interestCategories'|'people'|'titles',
+     *     label: string,
+     *     panelClass: string
+     * }>
+     */
+    private function buildVisibleSections(array $visibleSuggestions): array
+    {
+        /** @var array<int, array{
+         *     chipClass: string,
+         *     copy: string,
+         *     icon: string,
+         *     items: Collection<int, InterestCategory|Person|Title>,
+         *     key: 'interestCategories'|'people'|'titles',
+         *     label: string,
+         *     panelClass: string
+         * }> $sections
+         */
+        $sections = collect([
+            [
+                'key' => 'titles',
+                'label' => 'Titles',
+                'icon' => 'film',
+                'copy' => 'Poster-led matches with year and type.',
+                'panelClass' => 'sb-search-panel--titles',
+                'chipClass' => 'sb-search-chip--accent',
+                'items' => $visibleSuggestions['titles'],
+            ],
+            [
+                'key' => 'people',
+                'label' => 'People',
+                'icon' => 'user',
+                'copy' => 'Portrait-first profiles with profession cues.',
+                'panelClass' => 'sb-search-panel--people',
+                'chipClass' => 'sb-search-chip--people',
+                'items' => $visibleSuggestions['people'],
+            ],
+            [
+                'key' => 'interestCategories',
+                'label' => 'Themes',
+                'icon' => 'squares-2x2',
+                'copy' => 'Interest-category lanes from the imported discovery graph.',
+                'panelClass' => 'sb-search-panel--people',
+                'chipClass' => 'sb-search-chip--people',
+                'items' => $visibleSuggestions['interestCategories'],
+            ],
+        ])
+            ->filter(fn (array $section): bool => $section['items']->isNotEmpty())
+            ->values()
+            ->all();
+
+        return $sections;
     }
 }

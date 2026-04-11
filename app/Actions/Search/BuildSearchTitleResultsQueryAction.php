@@ -15,6 +15,7 @@ class BuildSearchTitleResultsQueryAction
      * @param  array{
      *     search?: string,
      *     genre?: string|null,
+     *     theme?: string|null,
      *     ratingMin?: int|float|string|null,
      *     ratingMax?: int|float|string|null,
      *     votesMin?: int|string|null,

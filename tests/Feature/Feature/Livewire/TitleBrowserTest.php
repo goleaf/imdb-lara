@@ -65,7 +65,9 @@ class TitleBrowserTest extends TestCase
             'pageName' => 'movies',
         ])
             ->assertSeeHtml('data-slot="title-browser-island"')
-            ->assertSee($includedTitle->name);
+            ->assertSee($includedTitle->name)
+            ->assertDontSeeHtml('title-browser-skeleton-1')
+            ->assertSeeHtml(route('public.genres.show', $genre));
 
         if ($excludedTitle instanceof Title) {
             $component->assertDontSee($excludedTitle->name);
@@ -84,5 +86,60 @@ class TitleBrowserTest extends TestCase
         ])
             ->assertSee('No documentaries found.')
             ->assertSee('Try another route into the catalog.');
+    }
+
+    public function test_title_browser_supports_theme_filtered_public_catalog_pages(): void
+    {
+        Livewire::withoutLazyLoading();
+
+        $interestCategory = $this->sampleInterestCategory();
+        $results = app(BuildPublicTitleIndexQueryAction::class)
+            ->handle([
+                'theme' => $interestCategory->slug,
+                'sort' => 'popular',
+                'excludeEpisodes' => true,
+            ])
+            ->limit(12)
+            ->get();
+
+        if ($results->isEmpty()) {
+            $this->markTestSkipped('The remote catalog did not return any public titles for the sampled theme filter.');
+        }
+
+        Livewire::test(TitleBrowser::class, [
+            'theme' => $interestCategory->slug,
+            'pageName' => 'titles',
+        ])
+            ->assertSeeHtml('data-slot="title-browser-island"')
+            ->assertSee($results->first()->name);
+    }
+
+    public function test_title_browser_can_render_trending_collections_without_pagination(): void
+    {
+        Livewire::withoutLazyLoading();
+
+        $results = app(BuildPublicTitleIndexQueryAction::class)
+            ->handle([
+                'sort' => 'trending',
+                'excludeEpisodes' => true,
+            ])
+            ->limit(12)
+            ->get();
+
+        if ($results->isEmpty()) {
+            $this->markTestSkipped('The remote catalog did not return any trending titles for the sampled title browser.');
+        }
+
+        Livewire::test(TitleBrowser::class, [
+            'sort' => 'trending',
+            'showAll' => true,
+            'pageName' => 'trending',
+            'displayMode' => 'chart',
+        ])
+            ->assertSeeHtml('data-slot="title-browser-island"')
+            ->assertSee($results->first()->name)
+            ->assertDontSee('catalog order')
+            ->assertDontSeeHtml('title-browser-skeleton-1')
+            ->assertDontSeeHtml('aria-label="Pagination Navigation"');
     }
 }

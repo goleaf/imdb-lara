@@ -25,8 +25,15 @@ class TitleMediaGalleryExperienceTest extends TestCase
             ->assertSeeHtml('data-slot="title-media-stills"')
             ->assertSeeHtml('data-slot="title-media-backdrops"')
             ->assertSeeHtml('data-slot="title-media-trailers"')
+            ->assertSeeHtml('data-slot="title-media-trailer-list"')
+            ->assertSeeHtml('data-slot="title-media-lightbox"')
+            ->assertSee('openLightbox(')
+            ->assertSee('Close lightbox')
+            ->assertSeeHtml('text-[#f4eee5] decoration-white/20 hover:text-white')
             ->assertSee('Back to title')
-            ->assertSee('Browse trailers');
+            ->assertSee('Browse trailers')
+            ->assertDontSee('Watch featured trailer')
+            ->assertDontSee('Clips and supporting video records');
     }
 
     public function test_title_detail_page_links_to_the_media_gallery_route(): void

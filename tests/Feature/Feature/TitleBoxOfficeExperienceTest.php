@@ -13,7 +13,7 @@ class TitleBoxOfficeExperienceTest extends TestCase
 
     public function test_title_box_office_page_renders_the_remote_catalog_report_shell(): void
     {
-        $title = $this->sampleTitleWithBoxOffice();
+        $title = $this->sampleTitleWithReportedBoxOfficeFigures();
 
         $this->get(route('public.titles.box-office', $title))
             ->assertOk()
@@ -24,8 +24,15 @@ class TitleBoxOfficeExperienceTest extends TestCase
             ->assertSeeHtml('data-slot="title-box-office-ranks"')
             ->assertSeeHtml('data-slot="title-box-office-comparisons"')
             ->assertSeeHtml('data-slot="title-box-office-markets"')
+            ->assertSeeHtml('text-[#f4eee5] decoration-white/20 hover:text-white')
             ->assertSee('Revenue Dashboard')
-            ->assertSee('Ranked Positions');
+            ->assertSee('Ranked Positions')
+            ->assertSee('Reporting Footprint')
+            ->assertSee('Figure coverage')
+            ->assertDontSee('Reporting status')
+            ->assertDontSee('Comparison availability')
+            ->assertDontSee('Pending')
+            ->assertDontSee('Waiting');
     }
 
     public function test_title_detail_page_links_to_the_box_office_route(): void

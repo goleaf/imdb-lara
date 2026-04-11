@@ -2,8 +2,6 @@
 
 namespace App\Livewire\Pages\Public;
 
-use App\Actions\Catalog\GetFeaturedGenresAction;
-use App\Actions\Catalog\GetFeaturedTitlesAction;
 use App\Actions\Seo\PageSeoData;
 use App\Livewire\Pages\Concerns\RendersPageView;
 use Illuminate\Contracts\View\View;
@@ -13,18 +11,14 @@ class DiscoverPage extends Component
 {
     use RendersPageView;
 
-    public function render(
-        GetFeaturedGenresAction $getFeaturedGenres,
-        GetFeaturedTitlesAction $getFeaturedTitles,
-    ): View {
+    public function render(): View
+    {
         $breadcrumbs = [
             ['label' => 'Home', 'href' => route('public.home')],
             ['label' => 'Discovery'],
         ];
 
         return $this->renderPageView('discover.index', [
-            'featuredGenres' => $getFeaturedGenres->handle(),
-            'featuredTitles' => $getFeaturedTitles->handle(3),
             'seo' => new PageSeoData(
                 title: 'Discovery',
                 description: 'Use Screenbase advanced discovery filters to explore titles by type, release date, awards, ratings, votes, language, runtime, and country.',
@@ -32,7 +26,7 @@ class DiscoverPage extends Component
                 breadcrumbs: $breadcrumbs,
                 paginationPageName: 'discover',
                 preserveQueryString: true,
-                allowedQueryParameters: ['q', 'genre', 'type', 'sort', 'minimumRating', 'yearFrom', 'yearTo', 'votesMin', 'language', 'country', 'runtime', 'awards'],
+                allowedQueryParameters: ['q', 'genre', 'theme', 'type', 'sort', 'minimumRating', 'yearFrom', 'yearTo', 'votesMin', 'language', 'country', 'runtime', 'awards'],
             ),
         ]);
     }

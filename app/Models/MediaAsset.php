@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\MediaKind;
+use App\Models\Concerns\FormatsRuntimeLabels;
 use Database\Factories\MediaAssetFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,9 +14,10 @@ use Illuminate\Support\Collection;
 
 class MediaAsset extends Model
 {
+    use FormatsRuntimeLabels;
+
     /** @use HasFactory<MediaAssetFactory> */
     use HasFactory;
-
     use SoftDeletes;
 
     /**
@@ -143,11 +145,7 @@ class MediaAsset extends Model
 
     public function durationMinutesLabel(): ?string
     {
-        if (! $this->duration_seconds) {
-            return null;
-        }
-
-        return max(1, (int) ceil($this->duration_seconds / 60)).' min';
+        return self::formatSecondsAsMinutesLabel($this->duration_seconds);
     }
 
     public function durationSecondsLabel(): ?string

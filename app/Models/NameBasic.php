@@ -147,19 +147,4 @@ class NameBasic extends ImdbModel
     {
         return $this->hasMany(NameTriviaSummary::class, 'name_basic_id', 'id');
     }
-
-    public function titleCrewDirectors(): HasMany
-    {
-        return $this->hasMany(TitleCrewDirector::class, 'name_basic_id', 'id');
-    }
-
-    public function titleCrewWriters(): HasMany
-    {
-        return $this->hasMany(TitleCrewWriter::class, 'name_basic_id', 'id');
-    }
-
-    public function titlePrincipals(): HasMany
-    {
-        return $this->hasMany(TitlePrincipal::class, 'nconst', 'nconst');
-    }
 }

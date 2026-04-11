@@ -30,7 +30,7 @@ class GetInterestCategoryDirectorySnapshotAction
             now()->addMinutes(10),
             function (): array {
                 $topCategories = InterestCategory::query()
-                    ->select(['interest_categories.id', 'interest_categories.name'])
+                    ->selectDirectoryColumns()
                     ->withDirectoryMetrics()
                     ->orderByDesc('title_linked_interests_count')
                     ->orderByDesc('interests_count')
@@ -49,9 +49,7 @@ class GetInterestCategoryDirectorySnapshotAction
                 return [
                     'categoryCount' => InterestCategory::query()->count(),
                     'interestCount' => Interest::query()->count(),
-                    'titleLinkedInterestCount' => Interest::query()
-                        ->whereHas('movies')
-                        ->count(),
+                    'titleLinkedInterestCount' => Interest::query()->linkedToPublishedTitles()->count(),
                     'subgenreInterestCount' => Interest::query()
                         ->where('interests.is_subgenre', true)
                         ->count(),

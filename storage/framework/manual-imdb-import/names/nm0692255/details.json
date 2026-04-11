@@ -1,0 +1,20 @@
+{
+    "id": "nm0692255",
+    "displayName": "Ray Porter",
+    "primaryImage": {
+        "url": "https://m.media-amazon.com/images/M/MV5BNGYzZGQ4NDMtOGNjYi00ZDE3LWI5NmItZDk0ZWY3YmZiZjdmXkEyXkFqcGc@._V1_.jpg",
+        "width": 3840,
+        "height": 4800
+    },
+    "primaryProfessions": [
+        "actor"
+    ],
+    "biography": "Raymond Porter is an American actor and audio-book narrator who is widely known for portraying Darkseid from Zack Snyder's Justice League, the 2021 extended director's cut of the 2017 DC film. He did minor roles in The Runaways, Argo and Almost Famous. He did voice acting work for BioShock 2, Curious George, The Scarecrow and The Little Engine That Could.",
+    "heightCm": 183,
+    "birthDate": {
+        "year": 1965,
+        "month": 7,
+        "day": 9
+    },
+    "birthLocation": "Indiana, USA"
+}

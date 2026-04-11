@@ -38,4 +38,9 @@ class NameCreditCharacter extends ImdbModel
     {
         return $this->belongsTo(NameCredit::class, 'name_credit_id', 'id');
     }
+
+    public function credit(): BelongsTo
+    {
+        return $this->belongsTo(Credit::class, 'name_credit_id', 'id');
+    }
 }

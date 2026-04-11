@@ -205,6 +205,41 @@ class DiscoveryFiltersTest extends TestCase
             ->assertSee($title->name);
     }
 
+    public function test_discovery_filters_support_theme_filters_against_remote_titles(): void
+    {
+        Livewire::withoutLazyLoading();
+
+        $interestCategory = $this->sampleInterestCategory();
+        $themeResultTitle = app(BuildDiscoveryQueryAction::class)
+            ->handle([
+                'search' => '',
+                'genre' => null,
+                'theme' => $interestCategory->slug,
+                'type' => null,
+                'sort' => 'popular',
+                'minimumRating' => null,
+                'yearFrom' => null,
+                'yearTo' => null,
+                'votesMin' => null,
+                'language' => null,
+                'country' => null,
+                'runtime' => null,
+                'awards' => null,
+            ])
+            ->limit(12)
+            ->first();
+
+        if (! $themeResultTitle instanceof Title) {
+            $this->markTestSkipped('The remote catalog does not currently expose a visible title for the sampled interest category.');
+        }
+
+        $this->get(route('public.discover', ['theme' => $interestCategory->slug]))
+            ->assertOk()
+            ->assertSee('Theme')
+            ->assertSee($interestCategory->name)
+            ->assertSee($themeResultTitle->name);
+    }
+
     public function test_discovery_filters_make_active_filter_state_obvious(): void
     {
         Livewire::withoutLazyLoading();

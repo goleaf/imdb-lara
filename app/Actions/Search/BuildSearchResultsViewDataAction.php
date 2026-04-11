@@ -2,11 +2,15 @@
 
 namespace App\Actions\Search;
 
+use App\Actions\Catalog\BuildPublicInterestCategoryIndexQueryAction;
 use App\Actions\Catalog\BuildPublicPeopleIndexQueryAction;
+use App\Models\Person;
+use App\Models\Title;
 
 class BuildSearchResultsViewDataAction
 {
     public function __construct(
+        private BuildPublicInterestCategoryIndexQueryAction $buildPublicInterestCategoryIndexQuery,
         private BuildPublicPeopleIndexQueryAction $buildPublicPeopleIndexQuery,
         private BuildSearchTitleResultsQueryAction $buildSearchTitleResultsQuery,
         private GetSearchFilterOptionsAction $getSearchFilterOptions,
@@ -25,6 +29,7 @@ class BuildSearchResultsViewDataAction
      *     runtime: ?string,
      *     sort: string,
      *     status: ?string,
+     *     theme: ?string,
      *     type: ?string,
      *     votesMin: ?string,
      *     yearFrom: ?string,
@@ -46,6 +51,7 @@ class BuildSearchResultsViewDataAction
             'search' => $searchQuery,
             'sort' => $filters['sort'] ?? 'popular',
             'status' => $filters['status'] ?? null,
+            'theme' => $filters['theme'] ?? null,
             'type' => $filters['type'] ?? null,
             'votesMin' => $filters['votesMin'] ?? null,
             'yearFrom' => $filters['yearFrom'] ?? null,
@@ -66,12 +72,18 @@ class BuildSearchResultsViewDataAction
                 'sort' => 'popular',
             ])->limit($resultsPerLane)->get()
             : collect();
+        $interestCategories = mb_strlen($searchQuery) >= 2
+            ? $this->buildPublicInterestCategoryIndexQuery->handle([
+                'search' => $searchQuery,
+                'sort' => 'popular',
+            ])->limit(6)->get()
+            : collect();
 
-        $topMatch = $this->resolveSearchTopMatch->handle(
+        $topMatch = $this->enrichTopMatch($this->resolveSearchTopMatch->handle(
             $searchQuery,
             $topTitleMatch,
             $people->first(),
-        );
+        ));
 
         $visibleTitles = $this->pruneTopCatalogMatch->handle(
             $titleResults,
@@ -89,14 +101,19 @@ class BuildSearchResultsViewDataAction
         return [
             'activeFilterCount' => $this->activeFilterCount($filters),
             'filterOptions' => $this->getSearchFilterOptions->handle(),
-            'hasAnyResults' => $topMatch['record'] !== null || $visibleTitles->isNotEmpty() || $visiblePeople->isNotEmpty(),
+            'hasAnyResults' => $topMatch['record'] !== null
+                || $visibleTitles->isNotEmpty()
+                || $visiblePeople->isNotEmpty()
+                || $interestCategories->isNotEmpty(),
+            'interestCategories' => $interestCategories,
+            'interestCategoryCount' => $interestCategories->count(),
             'people' => $visiblePeople,
             'peopleCount' => $visiblePeople->count(),
             'queryCopy' => $searchQuery !== ''
-                ? 'MySQL-backed title and people matches, with title filters kept separate so the catalog remains easy to narrow down.'
-                : 'Search the imported IMDb catalog, then refine title results by type, year, rating, runtime, language, and country.',
+                ? 'MySQL-backed title, people, and theme matches, with title filters kept separate so the catalog remains easy to narrow down.'
+                : 'Search the imported IMDb catalog across titles, people, and theme lanes, then refine title results by type, year, rating, runtime, language, and country.',
             'queryHeadline' => $searchQuery !== '' ? 'Results for “'.$searchQuery.'”' : 'Search the catalog',
-            'searchLoadingTargets' => 'query,type,genre,yearFrom,yearTo,ratingMin,ratingMax,votesMin,language,country,runtime,status,sort',
+            'searchLoadingTargets' => 'query,type,genre,theme,yearFrom,yearTo,ratingMin,ratingMax,votesMin,language,country,runtime,status,sort',
             'titleResultsCount' => $visibleTitles->count(),
             'titles' => $titles,
             'topMatch' => $topMatch,
@@ -111,6 +128,7 @@ class BuildSearchResultsViewDataAction
         return collect([
             $filters['type'] ?? null,
             $filters['genre'] ?? null,
+            $filters['theme'] ?? null,
             $filters['yearFrom'] ?? null,
             $filters['yearTo'] ?? null,
             $filters['ratingMin'] ?? null,
@@ -121,5 +139,27 @@ class BuildSearchResultsViewDataAction
             $filters['runtime'] ?? null,
             $filters['status'] ?? null,
         ])->filter(fn (?string $value): bool => filled($value))->count();
+    }
+
+    /**
+     * @param  array{record: Person|Title|null, type: 'person'|'title'|null}  $topMatch
+     * @return array{
+     *     record: Person|Title|null,
+     *     type: 'person'|'title'|null,
+     *     popularityRankLabel?: string|null,
+     *     awardNominationsLabel?: string|null
+     * }
+     */
+    private function enrichTopMatch(array $topMatch): array
+    {
+        if ($topMatch['type'] !== 'person' || ! $topMatch['record'] instanceof Person) {
+            return $topMatch;
+        }
+
+        return [
+            ...$topMatch,
+            'popularityRankLabel' => $topMatch['record']->popularityRankBadgeLabel(),
+            'awardNominationsLabel' => $topMatch['record']->awardNominationsBadgeLabel(),
+        ];
     }
 }

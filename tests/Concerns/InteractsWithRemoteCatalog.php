@@ -10,9 +10,78 @@ use App\Models\InterestCategory;
 use App\Models\Person;
 use App\Models\Season;
 use App\Models\Title;
+use Throwable;
 
 trait InteractsWithRemoteCatalog
 {
+    private static bool $remoteCatalogAvailabilityChecked = false;
+
+    private static ?string $remoteCatalogAvailabilitySkipReason = null;
+
+    protected function ensureRemoteCatalogAvailable(): void
+    {
+        if (self::$remoteCatalogAvailabilitySkipReason !== null) {
+            $this->markTestSkipped(self::$remoteCatalogAvailabilitySkipReason);
+        }
+
+        if (self::$remoteCatalogAvailabilityChecked) {
+            return;
+        }
+
+        self::$remoteCatalogAvailabilityChecked = true;
+
+        try {
+            Title::query()
+                ->select(['movies.id'])
+                ->publishedCatalog()
+                ->limit(1)
+                ->value('movies.id');
+        } catch (Throwable $throwable) {
+            if (! $this->shouldSkipBecauseRemoteCatalogIsUnavailable($throwable)) {
+                throw $throwable;
+            }
+
+            self::$remoteCatalogAvailabilitySkipReason = sprintf(
+                'Remote IMDb MySQL catalog is temporarily unavailable: %s',
+                $this->remoteCatalogUnavailableReason($throwable),
+            );
+
+            $this->markTestSkipped(self::$remoteCatalogAvailabilitySkipReason);
+        }
+    }
+
+    protected function shouldSkipBecauseRemoteCatalogIsUnavailable(Throwable $throwable): bool
+    {
+        $message = $throwable->getMessage();
+
+        return str_contains($message, 'max_connections_per_hour')
+            || str_contains($message, 'SQLSTATE[HY000] [1226]')
+            || str_contains($message, 'Connection refused')
+            || str_contains($message, 'php_network_getaddresses')
+            || str_contains($message, 'No route to host');
+    }
+
+    protected function remoteCatalogUnavailableReason(Throwable $throwable): string
+    {
+        $message = preg_replace('/\s+/', ' ', trim($throwable->getMessage()));
+
+        if (str_contains($message, 'max_connections_per_hour') || str_contains($message, 'SQLSTATE[HY000] [1226]')) {
+            return 'the remote MySQL server hit its hourly connection quota';
+        }
+
+        return $message;
+    }
+
+    protected function markRemoteCatalogUnavailable(Throwable $throwable): never
+    {
+        self::$remoteCatalogAvailabilitySkipReason ??= sprintf(
+            'Remote IMDb MySQL catalog is temporarily unavailable: %s',
+            $this->remoteCatalogUnavailableReason($throwable),
+        );
+
+        $this->markTestSkipped(self::$remoteCatalogAvailabilitySkipReason);
+    }
+
     /**
      * @return list<string>
      */
@@ -230,6 +299,28 @@ trait InteractsWithRemoteCatalog
             ->first();
 
         return $title instanceof Title ? $title : $this->sampleTitle();
+    }
+
+    private function sampleTitleWithReportedBoxOfficeFigures(): Title
+    {
+        $title = Title::query()
+            ->select($this->remoteTitleColumns())
+            ->publishedCatalog()
+            ->whereHas('boxOfficeRecord', function ($query): void {
+                $query->whereNotNull('worldwide_gross_amount')
+                    ->orWhereNotNull('domestic_gross_amount')
+                    ->orWhereNotNull('opening_weekend_gross_amount')
+                    ->orWhereNotNull('production_budget_amount');
+            })
+            ->whereNotNull('movies.primarytitle')
+            ->orderBy('movies.id')
+            ->first();
+
+        if ($title instanceof Title) {
+            return $title;
+        }
+
+        $this->markTestSkipped('The remote catalog does not currently expose a published title with filled box-office figures.');
     }
 
     private function sampleTitleWithParentsGuide(): Title

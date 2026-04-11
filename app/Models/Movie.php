@@ -231,34 +231,4 @@ class Movie extends ImdbModel
     {
         return $this->hasMany(NameCredit::class, 'movie_id', 'id');
     }
-
-    public function titleAkas(): HasMany
-    {
-        return $this->hasMany(TitleAka::class, 'titleid', 'tconst');
-    }
-
-    public function titleCrews(): HasMany
-    {
-        return $this->hasMany(TitleCrew::class, 'tconst', 'tconst');
-    }
-
-    public function parentTitleEpisodes(): HasMany
-    {
-        return $this->hasMany(TitleEpisode::class, 'parenttconst', 'tconst');
-    }
-
-    public function titleEpisodes(): HasMany
-    {
-        return $this->hasMany(TitleEpisode::class, 'tconst', 'tconst');
-    }
-
-    public function titlePrincipals(): HasMany
-    {
-        return $this->hasMany(TitlePrincipal::class, 'tconst', 'tconst');
-    }
-
-    public function titleRatings(): HasMany
-    {
-        return $this->hasMany(TitleRating::class, 'tconst', 'tconst');
-    }
 }

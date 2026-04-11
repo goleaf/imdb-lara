@@ -39,6 +39,11 @@ class MovieCertificate extends ImdbModel
         return $this->belongsTo(Movie::class, 'movie_id', 'id');
     }
 
+    public function title(): BelongsTo
+    {
+        return $this->belongsTo(Title::class, 'movie_id', 'id');
+    }
+
     public function certificateRating(): BelongsTo
     {
         return $this->belongsTo(CertificateRating::class, 'certificate_rating_id', 'id');
@@ -47,5 +52,12 @@ class MovieCertificate extends ImdbModel
     public function movieCertificateAttributes(): HasMany
     {
         return $this->hasMany(MovieCertificateAttribute::class, 'movie_certificate_id', 'id');
+    }
+
+    public function resolvedCountryLabel(): ?string
+    {
+        $fallbackName = $this->relationLoaded('country') ? $this->country?->name : null;
+
+        return Country::labelForCode($this->country_code, $fallbackName);
     }
 }

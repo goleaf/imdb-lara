@@ -206,9 +206,9 @@ new class extends Component
                                         Follow the title page for credits, reviews, ratings, and full catalog context.
                                     </x-ui.text>
 
-                                    <x-ui.button as="a" :href="route('public.titles.show', $featuredTitle)" variant="outline" icon="film">
+                                    <x-ui.button.light-outline :href="route('public.titles.show', $featuredTitle)" icon="film">
                                         View title page
-                                    </x-ui.button>
+                                    </x-ui.button.light-outline>
                                 </div>
                             </div>
                         </div>

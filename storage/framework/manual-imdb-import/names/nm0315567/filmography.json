@@ -1,0 +1,1619 @@
+{
+    "credits": [
+        {
+            "title": {
+                "id": "tt0944947",
+                "type": "tvSeries",
+                "primaryTitle": "Game of Thrones",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BMTNhMDJmNmYtNDQ5OS00ODdlLWE0ZDAtZTgyYTIwNDY3OTU3XkEyXkFqcGc@._V1_.jpg",
+                    "width": 550,
+                    "height": 824
+                },
+                "startYear": 2011,
+                "endYear": 2019,
+                "genres": [
+                    "Action",
+                    "Adventure",
+                    "Drama",
+                    "Fantasy"
+                ],
+                "rating": {
+                    "aggregateRating": 9.2,
+                    "voteCount": 2603410
+                },
+                "originCountries": [
+                    {
+                        "code": "US",
+                        "name": "United States"
+                    },
+                    {
+                        "code": "GB",
+                        "name": "United Kingdom"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Dothraki Crone"
+            ],
+            "episodeCount": 1
+        },
+        {
+            "title": {
+                "id": "tt2527336",
+                "type": "movie",
+                "primaryTitle": "Star Wars: Episode VIII - The Last Jedi",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BMjQ1MzcxNjg4N15BMl5BanBnXkFtZTgwNzgwMjY4MzI@._V1_.jpg",
+                    "width": 800,
+                    "height": 1185
+                },
+                "startYear": 2017,
+                "genres": [
+                    "Action",
+                    "Adventure",
+                    "Fantasy",
+                    "Sci-Fi"
+                ],
+                "rating": {
+                    "aggregateRating": 6.8,
+                    "voteCount": 716595
+                },
+                "metacritic": {
+                    "score": 84,
+                    "reviewCount": 56
+                },
+                "originCountries": [
+                    {
+                        "code": "US",
+                        "name": "United States"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Canady's First Order Commander"
+            ]
+        },
+        {
+            "title": {
+                "id": "tt9218128",
+                "type": "movie",
+                "primaryTitle": "Gladiator II",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BMWYzZTM5ZGQtOGE5My00NmM2LWFlMDEtMGNjYjdmOWM1MzA1XkEyXkFqcGc@._V1_.jpg",
+                    "width": 878,
+                    "height": 1300
+                },
+                "startYear": 2024,
+                "genres": [
+                    "Action",
+                    "Adventure",
+                    "Drama"
+                ],
+                "rating": {
+                    "aggregateRating": 6.5,
+                    "voteCount": 293243
+                },
+                "metacritic": {
+                    "score": 64,
+                    "reviewCount": 62
+                },
+                "originCountries": [
+                    {
+                        "code": "GB",
+                        "name": "United Kingdom"
+                    },
+                    {
+                        "code": "US",
+                        "name": "United States"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Leta",
+                "Lucilla's Servant"
+            ]
+        },
+        {
+            "title": {
+                "id": "tt4786824",
+                "type": "tvSeries",
+                "primaryTitle": "The Crown",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BODcyODZlZDMtZGE0Ni00NjBhLWJlYTAtZDdlNWY3MzkwMGVhXkEyXkFqcGc@._V1_.jpg",
+                    "width": 1500,
+                    "height": 2222
+                },
+                "startYear": 2016,
+                "endYear": 2023,
+                "genres": [
+                    "Biography",
+                    "Drama",
+                    "History"
+                ],
+                "rating": {
+                    "aggregateRating": 8.6,
+                    "voteCount": 280329
+                },
+                "originCountries": [
+                    {
+                        "code": "GB",
+                        "name": "United Kingdom"
+                    },
+                    {
+                        "code": "US",
+                        "name": "United States"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Salma, Mohamed's Secretary"
+            ],
+            "episodeCount": 3
+        },
+        {
+            "title": {
+                "id": "tt12042730",
+                "type": "movie",
+                "primaryTitle": "Project Hail Mary",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BNTkwNzJiYTctNzI3NC00NjE1LTlhYjktY2Q5MTdmMWFmNzcxXkEyXkFqcGc@._V1_.jpg",
+                    "width": 2765,
+                    "height": 4096
+                },
+                "startYear": 2026,
+                "genres": [
+                    "Adventure",
+                    "Comedy",
+                    "Sci-Fi"
+                ],
+                "rating": {
+                    "aggregateRating": 8.4,
+                    "voteCount": 178625
+                },
+                "originCountries": [
+                    {
+                        "code": "US",
+                        "name": "United States"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Dr. Lokken"
+            ]
+        },
+        {
+            "title": {
+                "id": "tt2431438",
+                "type": "tvSeries",
+                "primaryTitle": "Sense8",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BMjA4MTEyMzcwMl5BMl5BanBnXkFtZTgwMTIwODczNTM@._V1_.jpg",
+                    "width": 1382,
+                    "height": 2048
+                },
+                "startYear": 2015,
+                "endYear": 2018,
+                "genres": [
+                    "Drama",
+                    "Mystery",
+                    "Sci-Fi",
+                    "Thriller"
+                ],
+                "rating": {
+                    "aggregateRating": 8.2,
+                    "voteCount": 171217
+                },
+                "originCountries": [
+                    {
+                        "code": "US",
+                        "name": "United States"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "River El-Sadawi"
+            ],
+            "episodeCount": 1
+        },
+        {
+            "title": {
+                "id": "tt0489974",
+                "type": "tvSeries",
+                "primaryTitle": "Carnival Row",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BNzgzYmQ0OTYtMjMwMS00ZGI2LWE5MjMtMWViZjkwMGY4NGZmXkEyXkFqcGc@._V1_.jpg",
+                    "width": 1944,
+                    "height": 2880
+                },
+                "startYear": 2019,
+                "endYear": 2023,
+                "genres": [
+                    "Crime",
+                    "Drama",
+                    "Fantasy",
+                    "Mystery",
+                    "Thriller"
+                ],
+                "rating": {
+                    "aggregateRating": 7.7,
+                    "voteCount": 88389
+                },
+                "originCountries": [
+                    {
+                        "code": "US",
+                        "name": "United States"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Mima Danu"
+            ],
+            "episodeCount": 1
+        },
+        {
+            "title": {
+                "id": "tt2582576",
+                "type": "movie",
+                "primaryTitle": "Sand Castle",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BMDFmNGUwYTMtNDMyMC00YWM2LWEwOTktNTM1YWI0NDRiMDY3XkEyXkFqcGc@._V1_.jpg",
+                    "width": 826,
+                    "height": 1218
+                },
+                "startYear": 2017,
+                "genres": [
+                    "Action",
+                    "Drama",
+                    "War"
+                ],
+                "rating": {
+                    "aggregateRating": 6.3,
+                    "voteCount": 30708
+                },
+                "metacritic": {
+                    "score": 45,
+                    "reviewCount": 7
+                },
+                "originCountries": [
+                    {
+                        "code": "US",
+                        "name": "United States"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Fatma"
+            ]
+        },
+        {
+            "title": {
+                "id": "tt1693592",
+                "type": "tvSeries",
+                "primaryTitle": "Vera",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BZjMwOWYzOWUtOWNjYS00MTNjLWJjMWYtMzZhMWY4NzlhYjc5XkEyXkFqcGc@._V1_.jpg",
+                    "width": 675,
+                    "height": 1000
+                },
+                "startYear": 2011,
+                "endYear": 2025,
+                "genres": [
+                    "Crime",
+                    "Drama",
+                    "Mystery"
+                ],
+                "rating": {
+                    "aggregateRating": 8.2,
+                    "voteCount": 24294
+                },
+                "originCountries": [
+                    {
+                        "code": "GB",
+                        "name": "United Kingdom"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Ava Caswell"
+            ],
+            "episodeCount": 1
+        },
+        {
+            "title": {
+                "id": "tt2568204",
+                "type": "tvSeries",
+                "primaryTitle": "Tyrant",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BNzY4NTg3MzEzMV5BMl5BanBnXkFtZTgwODU5ODgxOTE@._V1_.jpg",
+                    "width": 1000,
+                    "height": 1500
+                },
+                "startYear": 2014,
+                "endYear": 2016,
+                "genres": [
+                    "Action",
+                    "Drama",
+                    "Thriller"
+                ],
+                "rating": {
+                    "aggregateRating": 7.7,
+                    "voteCount": 24146
+                },
+                "originCountries": [
+                    {
+                        "code": "US",
+                        "name": "United States"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Nasrin Al-Yazbek"
+            ],
+            "episodeCount": 2
+        },
+        {
+            "title": {
+                "id": "tt7134096",
+                "type": "movie",
+                "primaryTitle": "The Rhythm Section",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BNmMxMjliODctY2M1Ni00NmFjLThiN2EtOTFhYjVmNmZiMTQxXkEyXkFqcGc@._V1_.jpg",
+                    "width": 2037,
+                    "height": 3000
+                },
+                "startYear": 2020,
+                "genres": [
+                    "Action",
+                    "Drama",
+                    "Mystery",
+                    "Thriller"
+                ],
+                "rating": {
+                    "aggregateRating": 5.4,
+                    "voteCount": 21319
+                },
+                "metacritic": {
+                    "score": 45,
+                    "reviewCount": 36
+                },
+                "originCountries": [
+                    {
+                        "code": "GB",
+                        "name": "United Kingdom"
+                    },
+                    {
+                        "code": "ES",
+                        "name": "Spain"
+                    },
+                    {
+                        "code": "IE",
+                        "name": "Ireland"
+                    },
+                    {
+                        "code": "US",
+                        "name": "United States"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Alia Kaif"
+            ]
+        },
+        {
+            "title": {
+                "id": "tt3021686",
+                "type": "tvMiniSeries",
+                "primaryTitle": "The Honorable Woman",
+                "originalTitle": "The Honourable Woman",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BNTE1MTM2NjkzN15BMl5BanBnXkFtZTgwNDU5MDUzMjE@._V1_.jpg",
+                    "width": 974,
+                    "height": 1500
+                },
+                "startYear": 2014,
+                "endYear": 2014,
+                "genres": [
+                    "Drama",
+                    "Thriller"
+                ],
+                "rating": {
+                    "aggregateRating": 7.9,
+                    "voteCount": 12088
+                },
+                "originCountries": [
+                    {
+                        "code": "GB",
+                        "name": "United Kingdom"
+                    },
+                    {
+                        "code": "US",
+                        "name": "United States"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Alima Meshal"
+            ],
+            "episodeCount": 1
+        },
+        {
+            "title": {
+                "id": "tt5754602",
+                "type": "tvSeries",
+                "primaryTitle": "4 Blocks",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BYTNlZGU1MWItNWI0Yy00MWJmLWE3OGItZjI5Yjc3NmU2ZDM2XkEyXkFqcGc@._V1_.jpg",
+                    "width": 1524,
+                    "height": 1000
+                },
+                "startYear": 2017,
+                "endYear": 2019,
+                "genres": [
+                    "Crime",
+                    "Drama"
+                ],
+                "rating": {
+                    "aggregateRating": 8.1,
+                    "voteCount": 10734
+                },
+                "originCountries": [
+                    {
+                        "code": "DE",
+                        "name": "Germany"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Sharifa Sahadi"
+            ],
+            "episodeCount": 5
+        },
+        {
+            "title": {
+                "id": "tt5936448",
+                "type": "tvSeries",
+                "primaryTitle": "Riviera",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BMTA4OWU0MTctNmQyNy00MWUyLWIxOTUtN2MwZWE5Y2ZmMGFjXkEyXkFqcGc@._V1_.jpg",
+                    "width": 1280,
+                    "height": 1809
+                },
+                "startYear": 2017,
+                "endYear": 2020,
+                "genres": [
+                    "Drama",
+                    "Mystery",
+                    "Thriller"
+                ],
+                "rating": {
+                    "aggregateRating": 6.7,
+                    "voteCount": 9788
+                },
+                "originCountries": [
+                    {
+                        "code": "GB",
+                        "name": "United Kingdom"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Amelie Lambert"
+            ],
+            "episodeCount": 1
+        },
+        {
+            "title": {
+                "id": "tt3922704",
+                "type": "tvSeries",
+                "primaryTitle": "No Offence",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BMTI0NDgwOTEtMjljNS00NGFkLTg3N2MtZDdkOGQ3MGE3NjEyXkEyXkFqcGc@._V1_.jpg",
+                    "width": 1000,
+                    "height": 1426
+                },
+                "startYear": 2015,
+                "endYear": 2018,
+                "genres": [
+                    "Crime",
+                    "Drama",
+                    "Mystery"
+                ],
+                "rating": {
+                    "aggregateRating": 8,
+                    "voteCount": 7627
+                },
+                "originCountries": [
+                    {
+                        "code": "GB",
+                        "name": "United Kingdom"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Aaliyah Bata"
+            ],
+            "episodeCount": 1
+        },
+        {
+            "title": {
+                "id": "tt9204128",
+                "type": "tvSeries",
+                "primaryTitle": "The Mallorca Files",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BZTFmNmU5MjUtYTI0Yy00MmU5LWFjNGItY2UwOGMwNTI5ODhkXkEyXkFqcGc@._V1_.jpg",
+                    "width": 2000,
+                    "height": 3000
+                },
+                "startYear": 2019,
+                "genres": [
+                    "Crime",
+                    "Drama",
+                    "Mystery"
+                ],
+                "rating": {
+                    "aggregateRating": 6.8,
+                    "voteCount": 4345
+                },
+                "originCountries": [
+                    {
+                        "code": "GB",
+                        "name": "United Kingdom"
+                    },
+                    {
+                        "code": "FR",
+                        "name": "France"
+                    },
+                    {
+                        "code": "DE",
+                        "name": "Germany"
+                    },
+                    {
+                        "code": "ES",
+                        "name": "Spain"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Zahra Cubo"
+            ],
+            "episodeCount": 1
+        },
+        {
+            "title": {
+                "id": "tt12879632",
+                "type": "tvSeries",
+                "primaryTitle": "The Baby",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BYmQ5Y2UyMTUtZWU3MC00MTI0LWI3N2EtYjgxMmMzNDgxOGQ2XkEyXkFqcGc@._V1_.jpg",
+                    "width": 768,
+                    "height": 1138
+                },
+                "startYear": 2022,
+                "endYear": 2022,
+                "genres": [
+                    "Comedy",
+                    "Horror",
+                    "Mystery"
+                ],
+                "rating": {
+                    "aggregateRating": 6.3,
+                    "voteCount": 4181
+                },
+                "originCountries": [
+                    {
+                        "code": "GB",
+                        "name": "United Kingdom"
+                    },
+                    {
+                        "code": "US",
+                        "name": "United States"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Mrs. Eaves"
+            ],
+            "episodeCount": 7
+        },
+        {
+            "title": {
+                "id": "tt2076897",
+                "type": "movie",
+                "primaryTitle": "My Brother the Devil",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BMTc5MzE0MTI1N15BMl5BanBnXkFtZTcwMjcwMzYyOQ@@._V1_.jpg",
+                    "width": 1382,
+                    "height": 2048
+                },
+                "startYear": 2012,
+                "genres": [
+                    "Crime",
+                    "Drama",
+                    "Romance"
+                ],
+                "rating": {
+                    "aggregateRating": 6.5,
+                    "voteCount": 3447
+                },
+                "metacritic": {
+                    "score": 71,
+                    "reviewCount": 14
+                },
+                "originCountries": [
+                    {
+                        "code": "GB",
+                        "name": "United Kingdom"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Hanan"
+            ]
+        },
+        {
+            "title": {
+                "id": "tt12696314",
+                "type": "tvEpisode",
+                "primaryTitle": "Aftermath",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BYmNlMWE3YjMtZjlkNi00YTQxLWExZmItNjljM2Q1Zjk4YTEyXkEyXkFqcGc@._V1_.jpg",
+                    "width": 1499,
+                    "height": 843
+                },
+                "startYear": 2023,
+                "genres": [
+                    "Biography",
+                    "Drama",
+                    "History"
+                ],
+                "rating": {
+                    "aggregateRating": 8.2,
+                    "voteCount": 3446
+                },
+                "originCountries": [
+                    {
+                        "code": "GB",
+                        "name": "United Kingdom"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Salma, Mohamed's Secretary"
+            ]
+        },
+        {
+            "title": {
+                "id": "tt12696310",
+                "type": "tvEpisode",
+                "primaryTitle": "Dis-Moi Oui",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BYzUxNzRkYTEtMjVhZC00NjA1LWFlNzQtZGFiODNhNGY4ZWM3XkEyXkFqcGc@._V1_.jpg",
+                    "width": 7671,
+                    "height": 3835
+                },
+                "startYear": 2023,
+                "genres": [
+                    "Biography",
+                    "Drama",
+                    "History"
+                ],
+                "rating": {
+                    "aggregateRating": 8.1,
+                    "voteCount": 3222
+                },
+                "originCountries": [
+                    {
+                        "code": "GB",
+                        "name": "United Kingdom"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Salma, Mohamed's Secretary"
+            ]
+        },
+        {
+            "title": {
+                "id": "tt5133742",
+                "type": "tvMiniSeries",
+                "primaryTitle": "The Last Post",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BMTExMDM4ODk5MTVeQTJeQWpwZ15BbWU4MDA0MjY2MjQz._V1_.jpg",
+                    "width": 1344,
+                    "height": 2048
+                },
+                "startYear": 2017,
+                "endYear": 2017,
+                "genres": [
+                    "Drama",
+                    "History",
+                    "Romance",
+                    "War"
+                ],
+                "rating": {
+                    "aggregateRating": 7.3,
+                    "voteCount": 3142
+                },
+                "originCountries": [
+                    {
+                        "code": "GB",
+                        "name": "United Kingdom"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Alima Saeed"
+            ],
+            "episodeCount": 2
+        },
+        {
+            "title": {
+                "id": "tt0184122",
+                "type": "tvSeries",
+                "primaryTitle": "Holby City",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BYjRlNWJhYzUtNjhjYS00MGFhLWE4MzItNDAxZDk0YjY4YzI2XkEyXkFqcGc@._V1_.jpg",
+                    "width": 1127,
+                    "height": 1600
+                },
+                "startYear": 1999,
+                "endYear": 2022,
+                "genres": [
+                    "Drama"
+                ],
+                "rating": {
+                    "aggregateRating": 5.8,
+                    "voteCount": 3046
+                },
+                "originCountries": [
+                    {
+                        "code": "GB",
+                        "name": "United Kingdom"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Amina Khalid"
+            ],
+            "episodeCount": 1
+        },
+        {
+            "title": {
+                "id": "tt12696308",
+                "type": "tvEpisode",
+                "primaryTitle": "Two Photographs",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BMTNlNGI5NmEtNDQzNy00ODdjLWJiMmEtNzA3ZGMwYWFiMWY1XkEyXkFqcGc@._V1_.jpg",
+                    "width": 5461,
+                    "height": 2730
+                },
+                "startYear": 2023,
+                "genres": [
+                    "Biography",
+                    "Drama",
+                    "History"
+                ],
+                "rating": {
+                    "aggregateRating": 7.8,
+                    "voteCount": 2869
+                },
+                "originCountries": [
+                    {
+                        "code": "GB",
+                        "name": "United Kingdom"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Salma, Mohamed's Secretary"
+            ]
+        },
+        {
+            "title": {
+                "id": "tt33359676",
+                "type": "tvSeries",
+                "primaryTitle": "Maigret",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BMTFhYjA0MTgtYTMxMy00MWUyLThkOTYtODhhNTk3ZjBhNzI1XkEyXkFqcGc@._V1_.jpg",
+                    "width": 2000,
+                    "height": 3000
+                },
+                "startYear": 2025,
+                "genres": [
+                    "Crime",
+                    "Drama",
+                    "Mystery"
+                ],
+                "rating": {
+                    "aggregateRating": 7.1,
+                    "voteCount": 1917
+                },
+                "originCountries": [
+                    {
+                        "code": "US",
+                        "name": "United States"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Justine Cuendet"
+            ],
+            "episodeCount": 2
+        },
+        {
+            "title": {
+                "id": "tt11261148",
+                "type": "videoGame",
+                "primaryTitle": "Diablo IV",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BZmM2NDdlNzAtZjVmMC00MjIyLTg4YmItNGVhNjNmMTcwZDY0XkEyXkFqcGc@._V1_.jpg",
+                    "width": 1200,
+                    "height": 1800
+                },
+                "startYear": 2023,
+                "genres": [
+                    "Action",
+                    "Adventure",
+                    "Fantasy",
+                    "Horror"
+                ],
+                "rating": {
+                    "aggregateRating": 7.6,
+                    "voteCount": 1740
+                },
+                "originCountries": [
+                    {
+                        "code": "US",
+                        "name": "United States"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Timue"
+            ]
+        },
+        {
+            "title": {
+                "id": "tt8524580",
+                "type": "tvSeries",
+                "primaryTitle": "Druck",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BYzFmMGM5NDEtZDY3Ni00ZWQ3LWFiZmItNzJjZmU1ZDFhY2ZkXkEyXkFqcGc@._V1_.jpg",
+                    "width": 1417,
+                    "height": 1890
+                },
+                "startYear": 2018,
+                "endYear": 2022,
+                "genres": [
+                    "Drama",
+                    "Romance"
+                ],
+                "rating": {
+                    "aggregateRating": 7.8,
+                    "voteCount": 1629
+                },
+                "originCountries": [
+                    {
+                        "code": "DE",
+                        "name": "Germany"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Raheema Thalia Mahmood"
+            ],
+            "episodeCount": 4
+        },
+        {
+            "title": {
+                "id": "tt5760190",
+                "type": "tvMiniSeries",
+                "primaryTitle": "Hatton Garden",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BOTJkMTFjNDItNjUyZi00MzE4LWJmZDEtODFlMTE3ZGY2OThmXkEyXkFqcGc@._V1_.jpg",
+                    "width": 1062,
+                    "height": 1500
+                },
+                "startYear": 2019,
+                "endYear": 2019,
+                "genres": [
+                    "Crime",
+                    "Drama"
+                ],
+                "rating": {
+                    "aggregateRating": 7.2,
+                    "voteCount": 1239
+                },
+                "originCountries": [
+                    {
+                        "code": "GB",
+                        "name": "United Kingdom"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Armita"
+            ],
+            "episodeCount": 3
+        },
+        {
+            "title": {
+                "id": "tt5954556",
+                "type": "movie",
+                "primaryTitle": "The Flood",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BZDVhZGMzMzMtZDg3ZC00ZjFhLTg2ZjMtMjc3ZjQxNDczODEzXkEyXkFqcGc@._V1_.jpg",
+                    "width": 2025,
+                    "height": 3000
+                },
+                "startYear": 2019,
+                "genres": [
+                    "Drama"
+                ],
+                "rating": {
+                    "aggregateRating": 5.7,
+                    "voteCount": 1182
+                },
+                "metacritic": {
+                    "score": 56,
+                    "reviewCount": 6
+                },
+                "originCountries": [
+                    {
+                        "code": "GB",
+                        "name": "United Kingdom"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Fatima"
+            ]
+        },
+        {
+            "title": {
+                "id": "tt27433128",
+                "type": "tvMiniSeries",
+                "primaryTitle": "Pauline",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BNzdkNmUzZTgtOTNlNS00ODAyLTg1NTEtYzNmMWU0ZmY0MDQ4XkEyXkFqcGc@._V1_.jpg",
+                    "width": 855,
+                    "height": 1285
+                },
+                "startYear": 2024,
+                "genres": [
+                    "Drama",
+                    "Fantasy",
+                    "Thriller"
+                ],
+                "rating": {
+                    "aggregateRating": 5.8,
+                    "voteCount": 755
+                },
+                "originCountries": [
+                    {
+                        "code": "DE",
+                        "name": "Germany"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Eira"
+            ],
+            "episodeCount": 6
+        },
+        {
+            "title": {
+                "id": "tt5566946",
+                "type": "movie",
+                "primaryTitle": "We the Kings",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BYWEzNWNmOTYtZWVhNS00MWE5LTllOGYtMjU1ZTdiNjJhOWViXkEyXkFqcGc@._V1_.jpg",
+                    "width": 1400,
+                    "height": 2076
+                },
+                "startYear": 2018,
+                "genres": [
+                    "Thriller"
+                ],
+                "rating": {
+                    "aggregateRating": 5.4,
+                    "voteCount": 411
+                },
+                "originCountries": [
+                    {
+                        "code": "GB",
+                        "name": "United Kingdom"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Dr. Khal"
+            ]
+        },
+        {
+            "title": {
+                "id": "tt12886396",
+                "type": "tvEpisode",
+                "primaryTitle": "The Arrival",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BOThhYjU4MTEtMDI3Yi00MGNhLWEwMGQtZmVmZTdjM2Y4NjI2XkEyXkFqcGc@._V1_.jpg",
+                    "width": 1584,
+                    "height": 1057
+                },
+                "startYear": 2022,
+                "genres": [
+                    "Comedy",
+                    "Horror",
+                    "Mystery"
+                ],
+                "rating": {
+                    "aggregateRating": 7,
+                    "voteCount": 360
+                },
+                "originCountries": [
+                    {
+                        "code": "GB",
+                        "name": "United Kingdom"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Mrs. Eaves"
+            ]
+        },
+        {
+            "title": {
+                "id": "tt12886404",
+                "type": "tvEpisode",
+                "primaryTitle": "The Seduction",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BZmVmZTZiZGEtMWQzOC00MjkzLWI4NTItZDZkMDhmY2YzNTQxXkEyXkFqcGc@._V1_.jpg",
+                    "width": 1584,
+                    "height": 1057
+                },
+                "startYear": 2022,
+                "genres": [
+                    "Comedy",
+                    "Horror",
+                    "Mystery"
+                ],
+                "rating": {
+                    "aggregateRating": 6.7,
+                    "voteCount": 270
+                },
+                "originCountries": [
+                    {
+                        "code": "GB",
+                        "name": "United Kingdom"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Mrs. Eaves"
+            ]
+        },
+        {
+            "title": {
+                "id": "tt27827440",
+                "type": "tvSeries",
+                "primaryTitle": "Faithless",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BNGEyNmI3Y2ItMWZkMC00M2M1LTlmMGEtMWYzODIyZmExMzhlXkEyXkFqcGc@._V1_.jpg",
+                    "width": 4480,
+                    "height": 5582
+                },
+                "startYear": 2024,
+                "genres": [
+                    "Comedy",
+                    "Drama"
+                ],
+                "rating": {
+                    "aggregateRating": 6.5,
+                    "voteCount": 241
+                },
+                "originCountries": [
+                    {
+                        "code": "IE",
+                        "name": "Ireland"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Aunt Afaf"
+            ],
+            "episodeCount": 1
+        },
+        {
+            "title": {
+                "id": "tt12886406",
+                "type": "tvEpisode",
+                "primaryTitle": "The Bulldozer",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BYjgxNWI2OTItMWE0YS00OTg1LWFiNzctMmVjMzQ1Mzk2MTcwXkEyXkFqcGc@._V1_.jpg",
+                    "width": 1584,
+                    "height": 1020
+                },
+                "startYear": 2022,
+                "genres": [
+                    "Comedy",
+                    "Horror",
+                    "Mystery"
+                ],
+                "rating": {
+                    "aggregateRating": 6.9,
+                    "voteCount": 231
+                },
+                "originCountries": [
+                    {
+                        "code": "GB",
+                        "name": "United Kingdom"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Mrs. Eaves"
+            ]
+        },
+        {
+            "title": {
+                "id": "tt12886416",
+                "type": "tvEpisode",
+                "primaryTitle": "The Mother",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BNmU2OTA0YjAtZTlhYS00YjgzLTk1MzUtMmExMTc0OWU3YTc3XkEyXkFqcGc@._V1_.jpg",
+                    "width": 1584,
+                    "height": 1056
+                },
+                "startYear": 2022,
+                "genres": [
+                    "Comedy",
+                    "Horror",
+                    "Mystery"
+                ],
+                "rating": {
+                    "aggregateRating": 6.6,
+                    "voteCount": 219
+                },
+                "originCountries": [
+                    {
+                        "code": "GB",
+                        "name": "United Kingdom"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Mrs. Eaves"
+            ]
+        },
+        {
+            "title": {
+                "id": "tt12886420",
+                "type": "tvEpisode",
+                "primaryTitle": "The Rage",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BNmJkZmI3NTMtNzk5Yy00MDFjLTkwNjktNDgxMzQ4NDljNDhhXkEyXkFqcGc@._V1_.jpg",
+                    "width": 1920,
+                    "height": 1080
+                },
+                "startYear": 2022,
+                "genres": [
+                    "Comedy",
+                    "Horror",
+                    "Mystery"
+                ],
+                "rating": {
+                    "aggregateRating": 6.5,
+                    "voteCount": 190
+                },
+                "originCountries": [
+                    {
+                        "code": "GB",
+                        "name": "United Kingdom"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Mrs. Eaves"
+            ]
+        },
+        {
+            "title": {
+                "id": "tt32370635",
+                "type": "movie",
+                "primaryTitle": "The Life of Wishes",
+                "originalTitle": "Das Leben der Wünsche",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BMDA1Yzg2YWItNDhlZi00OWRjLWE0N2QtODk0ZmRhNzQyMDBlXkEyXkFqcGc@._V1_.jpg",
+                    "width": 1130,
+                    "height": 1600
+                },
+                "startYear": 2025,
+                "genres": [
+                    "Comedy",
+                    "Drama",
+                    "Fantasy"
+                ],
+                "rating": {
+                    "aggregateRating": 4,
+                    "voteCount": 180
+                },
+                "originCountries": [
+                    {
+                        "code": "DE",
+                        "name": "Germany"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Dr. Erika Schmitt"
+            ]
+        },
+        {
+            "title": {
+                "id": "tt12886426",
+                "type": "tvEpisode",
+                "primaryTitle": "The Curse",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BMmFlYjVmZjYtMDkzMy00YTdjLWFhYmQtNDQ0Y2IxOTBmNzAwXkEyXkFqcGc@._V1_.jpg",
+                    "width": 1584,
+                    "height": 1056
+                },
+                "startYear": 2022,
+                "genres": [
+                    "Comedy",
+                    "Horror",
+                    "Mystery"
+                ],
+                "rating": {
+                    "aggregateRating": 6.5,
+                    "voteCount": 176
+                },
+                "originCountries": [
+                    {
+                        "code": "GB",
+                        "name": "United Kingdom"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Mrs. Eaves"
+            ]
+        },
+        {
+            "title": {
+                "id": "tt12886428",
+                "type": "tvEpisode",
+                "primaryTitle": "The Possession",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BODUyY2U0YTItZmIxNi00ZjhlLTlkMzAtNTAyMDNjOGFlMzg4XkEyXkFqcGc@._V1_.jpg",
+                    "width": 1920,
+                    "height": 1080
+                },
+                "startYear": 2022,
+                "genres": [
+                    "Comedy",
+                    "Horror",
+                    "Mystery"
+                ],
+                "rating": {
+                    "aggregateRating": 6.4,
+                    "voteCount": 166
+                },
+                "originCountries": [
+                    {
+                        "code": "GB",
+                        "name": "United Kingdom"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Mrs. Eaves"
+            ]
+        },
+        {
+            "title": {
+                "id": "tt21097902",
+                "type": "tvSeries",
+                "primaryTitle": "A Thin Line",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BMTU5NGU0MTYtMTBkYi00YmIxLTg0NjctMWE5M2ViZGQ0ZjhkXkEyXkFqcGc@._V1_.jpg",
+                    "width": 1200,
+                    "height": 1800
+                },
+                "startYear": 2023,
+                "genres": [
+                    "Crime",
+                    "Drama",
+                    "Thriller"
+                ],
+                "rating": {
+                    "aggregateRating": 5.2,
+                    "voteCount": 152
+                },
+                "originCountries": [
+                    {
+                        "code": "DE",
+                        "name": "Germany"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Dominique Wandler"
+            ],
+            "episodeCount": 4
+        },
+        {
+            "title": {
+                "id": "tt0096036",
+                "type": "movie",
+                "primaryTitle": "Sarikat Sayfeya",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BZmY0MjQyOTItNTkzMi00YmFjLTkxYzQtNGU3NTA5MjUxZjYwXkEyXkFqcGc@._V1_.jpg",
+                    "width": 707,
+                    "height": 968
+                },
+                "startYear": 1988,
+                "genres": [
+                    "Drama"
+                ],
+                "rating": {
+                    "aggregateRating": 7.2,
+                    "voteCount": 149
+                },
+                "originCountries": [
+                    {
+                        "code": "EG",
+                        "name": "Egypt"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Sister"
+            ]
+        },
+        {
+            "title": {
+                "id": "tt32397726",
+                "type": "video",
+                "primaryTitle": "Harry Potter and the Goblet of Fire",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BMDAwNmY4YjgtMjFlNS00NTM2LThhMzQtNDI3YzQ1NzNlOTI3XkEyXkFqcGc@._V1_.jpg",
+                    "width": 1000,
+                    "height": 1000
+                },
+                "startYear": 2026,
+                "genres": [
+                    "Action",
+                    "Adventure",
+                    "Fantasy"
+                ],
+                "rating": {
+                    "aggregateRating": 9.4,
+                    "voteCount": 112
+                },
+                "originCountries": [
+                    {
+                        "code": "GB",
+                        "name": "United Kingdom"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "The Sphinx"
+            ]
+        },
+        {
+            "title": {
+                "id": "tt8140140",
+                "type": "movie",
+                "primaryTitle": "The Accidental Rebel",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BNmY5NWMzMmYtMDMwNC00YTM0LTljYTctYzY5ZDM4ZmUyN2MxXkEyXkFqcGc@._V1_.jpg",
+                    "width": 2480,
+                    "height": 3508
+                },
+                "startYear": 2019,
+                "genres": [
+                    "Drama"
+                ],
+                "rating": {
+                    "aggregateRating": 6.2,
+                    "voteCount": 62
+                },
+                "originCountries": [
+                    {
+                        "code": "DE",
+                        "name": "Germany"
+                    },
+                    {
+                        "code": "GB",
+                        "name": "United Kingdom"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Miriam Reza"
+            ]
+        },
+        {
+            "title": {
+                "id": "tt27457560",
+                "type": "tvEpisode",
+                "primaryTitle": "Nichts Besonderes",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BMTQzYTdiNzItNTMxNi00ZjkyLTk0NjMtMjcxNmUxM2FjNzI3XkEyXkFqcGc@._V1_.jpg",
+                    "width": 1253,
+                    "height": 623
+                },
+                "startYear": 2024,
+                "genres": [
+                    "Drama",
+                    "Fantasy",
+                    "Thriller"
+                ],
+                "rating": {
+                    "aggregateRating": 7.6,
+                    "voteCount": 62
+                }
+            },
+            "category": "actress",
+            "characters": [
+                "Eira"
+            ]
+        },
+        {
+            "title": {
+                "id": "tt0105102",
+                "type": "movie",
+                "primaryTitle": "The Party: Nature Morte",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BNDQ0ODY2MzMtNjA3MS00MDc5LWI3ODgtNDU1Mzc5MDg2YjhjXkEyXkFqcGc@._V1_.jpg",
+                    "width": 1393,
+                    "height": 1984
+                },
+                "startYear": 1991,
+                "genres": [
+                    "Drama"
+                ],
+                "rating": {
+                    "aggregateRating": 5.9,
+                    "voteCount": 48
+                },
+                "originCountries": [
+                    {
+                        "code": "DE",
+                        "name": "Germany"
+                    }
+                ]
+            },
+            "category": "actress"
+        },
+        {
+            "title": {
+                "id": "tt10489416",
+                "type": "tvEpisode",
+                "primaryTitle": "Du bist wie du bist",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BNmQzMTFhYjgtMWY5ZS00NTAzLTliNzItYWNiNGJlOWZiYzhjXkEyXkFqcGc@._V1_.jpg",
+                    "width": 1280,
+                    "height": 720
+                },
+                "startYear": 2019,
+                "genres": [
+                    "Drama",
+                    "Romance"
+                ],
+                "rating": {
+                    "aggregateRating": 8.3,
+                    "voteCount": 27
+                }
+            },
+            "category": "actress",
+            "characters": [
+                "Raheema Thalia Mahmood"
+            ]
+        },
+        {
+            "title": {
+                "id": "tt0092290",
+                "type": "movie",
+                "primaryTitle": "Zischke",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BMTY5MTE3NTQ4OF5BMl5BanBnXkFtZTcwMTkyODg5Mg@@._V1_.jpg",
+                    "width": 450,
+                    "height": 600
+                },
+                "startYear": 1986,
+                "genres": [
+                    "Drama"
+                ],
+                "rating": {
+                    "aggregateRating": 6.7,
+                    "voteCount": 16
+                },
+                "originCountries": [
+                    {
+                        "code": "XWG",
+                        "name": "West Germany"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Tamina"
+            ]
+        },
+        {
+            "title": {
+                "id": "tt0122068",
+                "type": "movie",
+                "primaryTitle": "Follow Me",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BODYzMTRhZTEtNGZkZC00NzliLTg5NGItMDRmNjYxMDAxZWQxXkEyXkFqcGc@._V1_.jpg",
+                    "width": 650,
+                    "height": 920
+                },
+                "startYear": 1989,
+                "rating": {
+                    "aggregateRating": 5.5,
+                    "voteCount": 10
+                },
+                "originCountries": [
+                    {
+                        "code": "XWG",
+                        "name": "West Germany"
+                    }
+                ]
+            },
+            "category": "actress",
+            "characters": [
+                "Dame"
+            ]
+        }
+    ],
+    "totalCount": 49
+}

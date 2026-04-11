@@ -1,0 +1,87 @@
+{
+    "schemaVersion": 1,
+    "imdbId": "nm18332965",
+    "downloadedAt": "2026-04-11T03:21:09+00:00",
+    "sourceUrl": "https://api.imdbapi.dev/names/nm18332965",
+    "details": {
+        "id": "nm18332965",
+        "displayName": "Olivia Alcott",
+        "primaryProfessions": [
+            "actress"
+        ],
+        "biography": "Olivia Alcott is known for We Were Figures (2026)."
+    },
+    "images": {
+        "images": []
+    },
+    "filmography": {
+        "credits": [
+            {
+                "title": {
+                    "id": "tt12042730",
+                    "type": "movie",
+                    "primaryTitle": "Project Hail Mary",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNTkwNzJiYTctNzI3NC00NjE1LTlhYjktY2Q5MTdmMWFmNzcxXkEyXkFqcGc@._V1_.jpg",
+                        "width": 2765,
+                        "height": 4096
+                    },
+                    "startYear": 2026,
+                    "genres": [
+                        "Adventure",
+                        "Comedy",
+                        "Sci-Fi"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.4,
+                        "voteCount": 178625
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Maddy"
+                ]
+            }
+        ],
+        "totalCount": 1
+    },
+    "relationships": {
+        "relationships": []
+    },
+    "trivia": {
+        "triviaEntries": []
+    },
+    "artifacts": {
+        "details": {
+            "path": "details.json",
+            "url": "https://api.imdbapi.dev/names/nm18332965",
+            "has_payload": true
+        },
+        "images": {
+            "path": "images.json",
+            "url": "https://api.imdbapi.dev/names/nm18332965/images",
+            "has_payload": true
+        },
+        "filmography": {
+            "path": "filmography.json",
+            "url": "https://api.imdbapi.dev/names/nm18332965/filmography",
+            "has_payload": true
+        },
+        "relationships": {
+            "path": "relationships.json",
+            "url": "https://api.imdbapi.dev/names/nm18332965/relationships",
+            "has_payload": true
+        },
+        "trivia": {
+            "path": "trivia.json",
+            "url": "https://api.imdbapi.dev/names/nm18332965/trivia",
+            "has_payload": true
+        }
+    }
+}

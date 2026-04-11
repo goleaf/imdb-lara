@@ -1,0 +1,29 @@
+{
+    "images": [
+        {
+            "url": "https://m.media-amazon.com/images/M/MV5BN2U3NGYwMjItNzQ2OS00NzkwLWI4OTQtNGRlZmIxYzZhNjA3XkEyXkFqcGc@._V1_.jpg",
+            "width": 3840,
+            "height": 4887,
+            "type": "publicity"
+        },
+        {
+            "url": "https://m.media-amazon.com/images/M/MV5BMzgxMmFjZjYtN2Y0MC00MGFjLWJiYTgtOWU4NzQ5OWMxYjMxXkEyXkFqcGc@._V1_.jpg",
+            "width": 1270,
+            "height": 691,
+            "type": "still_frame"
+        },
+        {
+            "url": "https://m.media-amazon.com/images/M/MV5BNTkwNzJiYTctNzI3NC00NjE1LTlhYjktY2Q5MTdmMWFmNzcxXkEyXkFqcGc@._V1_.jpg",
+            "width": 2765,
+            "height": 4096,
+            "type": "poster"
+        },
+        {
+            "url": "https://m.media-amazon.com/images/M/MV5BM2M2MmU1ZTItMjBlYi00ZGE0LWI3NGUtMTljYTUwOWJjZDQxXkEyXkFqcGc@._V1_.jpg",
+            "width": 2765,
+            "height": 4096,
+            "type": "poster"
+        }
+    ],
+    "totalCount": 4
+}

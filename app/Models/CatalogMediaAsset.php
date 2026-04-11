@@ -3,12 +3,23 @@
 namespace App\Models;
 
 use App\Enums\MediaKind;
+use App\Models\Concerns\FormatsRuntimeLabels;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
 class CatalogMediaAsset extends Model
 {
+    use FormatsRuntimeLabels;
+
+    /**
+     * @var list<string>
+     */
+    private const GENERIC_MEDIA_TEXT = [
+        'title image',
+        'media asset',
+    ];
+
     protected $connection = 'imdb_mysql';
 
     public $timestamps = false;
@@ -102,13 +113,37 @@ class CatalogMediaAsset extends Model
         return $this->kind?->label() ?? 'Media Asset';
     }
 
-    public function durationMinutesLabel(): ?string
+    public function meaningfulCaption(): ?string
     {
-        if (! $this->duration_seconds) {
-            return null;
+        foreach ([$this->caption, $this->alt_text] as $candidate) {
+            if ($this->isMeaningfulMediaText($candidate)) {
+                return trim((string) $candidate);
+            }
         }
 
-        return max(1, (int) ceil($this->duration_seconds / 60)).' min';
+        return null;
+    }
+
+    public function accessibleAltText(?string $fallback = null): string
+    {
+        if ($this->isMeaningfulMediaText($this->alt_text)) {
+            return trim((string) $this->alt_text);
+        }
+
+        if ($this->isMeaningfulMediaText($fallback)) {
+            return trim((string) $fallback);
+        }
+
+        if ($caption = $this->meaningfulCaption()) {
+            return $caption;
+        }
+
+        return 'Media image';
+    }
+
+    public function durationMinutesLabel(): ?string
+    {
+        return self::formatSecondsAsMinutesLabel($this->duration_seconds);
     }
 
     public function durationSecondsLabel(): ?string
@@ -118,5 +153,18 @@ class CatalogMediaAsset extends Model
         }
 
         return number_format($this->duration_seconds).' sec';
+    }
+
+    private function isMeaningfulMediaText(?string $text): bool
+    {
+        if (! filled($text)) {
+            return false;
+        }
+
+        return ! in_array(
+            mb_strtolower(trim((string) $text)),
+            self::GENERIC_MEDIA_TEXT,
+            true,
+        );
     }
 }

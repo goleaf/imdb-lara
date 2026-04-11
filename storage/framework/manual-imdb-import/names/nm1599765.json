@@ -1,0 +1,997 @@
+{
+    "schemaVersion": 1,
+    "imdbId": "nm1599765",
+    "downloadedAt": "2026-04-11T03:21:04+00:00",
+    "sourceUrl": "https://api.imdbapi.dev/names/nm1599765",
+    "details": {
+        "id": "nm1599765",
+        "displayName": "Piotr Baumann",
+        "primaryProfessions": [
+            "actor"
+        ],
+        "biography": "Piotr Baumann is known for Spies of Warsaw (2013), Fortitude (2015) and Life Before Life (2020)."
+    },
+    "images": {
+        "images": []
+    },
+    "filmography": {
+        "credits": [
+            {
+                "title": {
+                    "id": "tt12042730",
+                    "type": "movie",
+                    "primaryTitle": "Project Hail Mary",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNTkwNzJiYTctNzI3NC00NjE1LTlhYjktY2Q5MTdmMWFmNzcxXkEyXkFqcGc@._V1_.jpg",
+                        "width": 2765,
+                        "height": 4096
+                    },
+                    "startYear": 2026,
+                    "genres": [
+                        "Adventure",
+                        "Comedy",
+                        "Sci-Fi"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.4,
+                        "voteCount": 178625
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Piotr"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt0780653",
+                    "type": "movie",
+                    "primaryTitle": "The Wolfman",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTI4OTVlZGItNjAzNi00OTg2LWI4MTAtOTZhMDNhY2UwOGVhXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1013,
+                        "height": 1500
+                    },
+                    "startYear": 2010,
+                    "genres": [
+                        "Drama",
+                        "Fantasy",
+                        "Horror",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.9,
+                        "voteCount": 117516
+                    },
+                    "metacritic": {
+                        "score": 43,
+                        "reviewCount": 36
+                    },
+                    "originCountries": [
+                        {
+                            "code": "JP",
+                            "name": "Japan"
+                        },
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Gypsy"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt3498622",
+                    "type": "tvSeries",
+                    "primaryTitle": "Fortitude",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYzM4ODc4NjItM2RkNy00NWE0LTk1NTMtNjIyYjgyYzEwM2EwXkEyXkFqcGc@._V1_.jpg",
+                        "width": 600,
+                        "height": 900
+                    },
+                    "startYear": 2015,
+                    "endYear": 2018,
+                    "genres": [
+                        "Drama",
+                        "Horror",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.3,
+                        "voteCount": 24973
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Russian Miner"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt0377260",
+                    "type": "tvSeries",
+                    "primaryTitle": "Shameless",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYmM0NGVmZmYtODc5NS00Y2JlLTg5ZTAtODczNjllNmY1YjYzXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1050,
+                        "height": 1483
+                    },
+                    "startYear": 2004,
+                    "endYear": 2013,
+                    "genres": [
+                        "Comedy",
+                        "Crime",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8,
+                        "voteCount": 20655
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Poley"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt10720914",
+                    "type": "tvSeries",
+                    "primaryTitle": "McDonald & Dodds",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZTkwNWI4MzItNjU1OS00MTNkLTlkNWItNmY2M2EyMzZlZWM0XkEyXkFqcGc@._V1_.jpg",
+                        "width": 992,
+                        "height": 1488
+                    },
+                    "startYear": 2020,
+                    "endYear": 2024,
+                    "genres": [
+                        "Comedy",
+                        "Crime",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.6,
+                        "voteCount": 10185
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Snake Man"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt0088512",
+                    "type": "tvSeries",
+                    "primaryTitle": "EastEnders",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYjVjMTU3YTUtZmYzYy00NzQzLWFjYzYtNjljYzRmOTZmZTdmXkEyXkFqcGc@._V1_.jpg",
+                        "width": 960,
+                        "height": 1440
+                    },
+                    "startYear": 1985,
+                    "genres": [
+                        "Crime",
+                        "Drama",
+                        "Romance"
+                    ],
+                    "rating": {
+                        "aggregateRating": 4.8,
+                        "voteCount": 10013
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Konrad Topolski"
+                ],
+                "episodeCount": 13
+            },
+            {
+                "title": {
+                    "id": "tt0108967",
+                    "type": "tvSeries",
+                    "primaryTitle": "A Touch of Frost",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZGFkZDg3YjQtMjBjZi00YjFkLThjNmMtYTQ1MTdhNWJmNDQxXkEyXkFqcGc@._V1_.jpg",
+                        "width": 600,
+                        "height": 814
+                    },
+                    "startYear": 1992,
+                    "endYear": 2010,
+                    "genres": [
+                        "Crime",
+                        "Drama",
+                        "Mystery"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.9,
+                        "voteCount": 9786
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Toma"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt4337894",
+                    "type": "tvMiniSeries",
+                    "primaryTitle": "You, Me and the Apocalypse",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTgzMzQyMzQ5OF5BMl5BanBnXkFtZTgwMzU3NDAxNzE@._V1_.jpg",
+                        "width": 2400,
+                        "height": 3050
+                    },
+                    "startYear": 2015,
+                    "endYear": 2022,
+                    "genres": [
+                        "Comedy",
+                        "Drama",
+                        "Sci-Fi",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.6,
+                        "voteCount": 8352
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        },
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Mortician"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt0053494",
+                    "type": "tvSeries",
+                    "primaryTitle": "Coronation Street",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOTc3MjI4MzYtNmI2Ni00NmNmLWIyYTMtZGYwOGIzZDY3NDIyXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1056,
+                        "height": 1500
+                    },
+                    "startYear": 1960,
+                    "genres": [
+                        "Crime",
+                        "Drama",
+                        "Romance",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.6,
+                        "voteCount": 6597
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Jan Lozinski"
+                ],
+                "episodeCount": 41
+            },
+            {
+                "title": {
+                    "id": "tt0084987",
+                    "type": "tvSeries",
+                    "primaryTitle": "The Bill",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTkxNTY0NTU4MV5BMl5BanBnXkFtZTcwNzM5MzM2MQ@@._V1_.jpg",
+                        "width": 353,
+                        "height": 500
+                    },
+                    "startYear": 1984,
+                    "endYear": 2010,
+                    "genres": [
+                        "Crime",
+                        "Drama",
+                        "Mystery"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.7,
+                        "voteCount": 4577
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Marek Lato"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt12809802",
+                    "type": "tvSeries",
+                    "primaryTitle": "Splinter Cell: Deathwatch",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMjAzODQ5YzUtYTEwZi00NDI5LTg1NDktNDk0NDg3ZjgyYzBmXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1500,
+                        "height": 2222
+                    },
+                    "startYear": 2025,
+                    "genres": [
+                        "Animation",
+                        "Action",
+                        "Adventure",
+                        "Sci-Fi",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.9,
+                        "voteCount": 4396
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        },
+                        {
+                            "code": "CA",
+                            "name": "Canada"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Goon",
+                    "Operative",
+                    "Salesman",
+                    "Priest"
+                ],
+                "episodeCount": 8
+            },
+            {
+                "title": {
+                    "id": "tt0096555",
+                    "type": "tvSeries",
+                    "primaryTitle": "Casualty",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOWQzMTMxYzgtZWIzZS00NTVjLTllMjktYzc2ZDdmNGNhNjA5XkEyXkFqcGc@._V1_.jpg",
+                        "width": 367,
+                        "height": 500
+                    },
+                    "startYear": 1986,
+                    "genres": [
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.2,
+                        "voteCount": 4029
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Jakub Novak"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt2343137",
+                    "type": "tvMiniSeries",
+                    "primaryTitle": "Spies of Warsaw",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZjE4ZDhkZTItNGExNi00NzhiLWJmODItNmE5ZmMyNTRjNGRjXkEyXkFqcGc@._V1_.jpg",
+                        "width": 838,
+                        "height": 1257
+                    },
+                    "startYear": 2013,
+                    "endYear": 2013,
+                    "genres": [
+                        "Action",
+                        "Adventure",
+                        "Drama",
+                        "Romance",
+                        "War"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.7,
+                        "voteCount": 2760
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        },
+                        {
+                            "code": "FR",
+                            "name": "France"
+                        },
+                        {
+                            "code": "PL",
+                            "name": "Poland"
+                        },
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Maxim Mostow",
+                    "Maxim Mostov"
+                ],
+                "episodeCount": 3
+            },
+            {
+                "title": {
+                    "id": "tt8439934",
+                    "type": "movie",
+                    "primaryTitle": "Black Ops",
+                    "originalTitle": "Stairs",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BY2E5OTJiMjgtODdjOS00NTIyLWIxNzMtYjEzYTk3MTQwZDgzXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1125,
+                        "height": 1653
+                    },
+                    "startYear": 2019,
+                    "genres": [
+                        "Action",
+                        "Horror",
+                        "Sci-Fi"
+                    ],
+                    "rating": {
+                        "aggregateRating": 3.9,
+                        "voteCount": 2690
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Pavel"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt6620620",
+                    "type": "tvSeries",
+                    "primaryTitle": "GameFace",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BM2M3ZDA0ZjQtYzYzNC00NWIyLTgwNTUtMzRkZjRhYWI1NTg2XkEyXkFqcGc@._V1_.jpg",
+                        "width": 583,
+                        "height": 672
+                    },
+                    "startYear": 2017,
+                    "endYear": 2019,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.7,
+                        "voteCount": 2576
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Ivan"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt0241383",
+                    "type": "tvSeries",
+                    "primaryTitle": "Doctors",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNGU1MGViOTctNjcyOS00YmZmLTkyZjctYmJjM2MzOTE3ZGRlXkEyXkFqcGc@._V1_.jpg",
+                        "width": 592,
+                        "height": 841
+                    },
+                    "startYear": 2000,
+                    "endYear": 2024,
+                    "genres": [
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 4.5,
+                        "voteCount": 2096
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Stanislav 'Stan' Walkowska"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt0472984",
+                    "type": "tvSeries",
+                    "primaryTitle": "The Street",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMDExMDMzY2QtOTQ0Ny00ZDVmLWJmZDEtMmU0ZmQxOGM1YzZhXkEyXkFqcGc@._V1_.jpg",
+                        "width": 838,
+                        "height": 1257
+                    },
+                    "startYear": 2006,
+                    "endYear": 2009,
+                    "genres": [
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.2,
+                        "voteCount": 1582
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Marek"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt6980988",
+                    "type": "movie",
+                    "primaryTitle": "Treasures from the Wreck of the Unbelievable",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMzQyZTZmN2MtNGM0NS00YTdmLWFkZDUtNTU3YTZlNDc2ZmNkXkEyXkFqcGc@._V1_.jpg",
+                        "width": 594,
+                        "height": 850
+                    },
+                    "startYear": 2017,
+                    "genres": [
+                        "Documentary"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6,
+                        "voteCount": 1556
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Piotr"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt6980988",
+                    "type": "movie",
+                    "primaryTitle": "Treasures from the Wreck of the Unbelievable",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMzQyZTZmN2MtNGM0NS00YTdmLWFkZDUtNTU3YTZlNDc2ZmNkXkEyXkFqcGc@._V1_.jpg",
+                        "width": 594,
+                        "height": 850
+                    },
+                    "startYear": 2017,
+                    "genres": [
+                        "Documentary"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6,
+                        "voteCount": 1556
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "self",
+                "characters": [
+                    "Piotr"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt8255490",
+                    "type": "movie",
+                    "primaryTitle": "Christmas Survival",
+                    "originalTitle": "Surviving Christmas with the Relatives",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNmZkNmJiMjktNTRkYS00YjAxLTkzZDEtM2I2N2ZhYmU4ZTdjXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1242,
+                        "height": 1888
+                    },
+                    "startYear": 2018,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.2,
+                        "voteCount": 1341
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Jan"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt14956188",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Dinner First, Talk Later",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BODVmNmE1YjctODY2My00MTNjLWJlYzQtNzM5NGU4YmU1NzAzXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1600,
+                        "height": 900
+                    },
+                    "startYear": 2025,
+                    "genres": [
+                        "Animation",
+                        "Action",
+                        "Adventure",
+                        "Sci-Fi",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.2,
+                        "voteCount": 366
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        },
+                        {
+                            "code": "CA",
+                            "name": "Canada"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Priest"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt4417756",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Still Stuff Worth Fighting For",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYTBjYTY0MDEtZTBjMi00NjViLWFkMGYtNDA1ZGMxMGEyYjNjXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1136,
+                        "height": 640
+                    },
+                    "startYear": 2015,
+                    "genres": [
+                        "Comedy",
+                        "Drama",
+                        "Sci-Fi",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.4,
+                        "voteCount": 244
+                    }
+                },
+                "category": "actor",
+                "characters": [
+                    "Mortician"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt10275378",
+                    "type": "videoGame",
+                    "primaryTitle": "Close to the Sun",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZGM1MWYzYTMtOTFiNy00ZGU1LTk3NDUtZTZhMTVkNjA1MTYxXkEyXkFqcGc@._V1_.jpg",
+                        "width": 780,
+                        "height": 1080
+                    },
+                    "startYear": 2019,
+                    "genres": [
+                        "Adventure",
+                        "Horror"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.1,
+                        "voteCount": 179
+                    }
+                },
+                "category": "actor",
+                "characters": [
+                    "Ludwig"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt14904388",
+                    "type": "tvShort",
+                    "primaryTitle": "A Bear Named Wojtek",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZWExYzZlZjEtNjMwNy00NWY2LThmODAtY2Y5NTgzZGFmMWZhXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1920,
+                        "height": 2498
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Animation",
+                        "Short"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.6,
+                        "voteCount": 174
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        },
+                        {
+                            "code": "PL",
+                            "name": "Poland"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Piotr"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt17077910",
+                    "type": "tvSeries",
+                    "primaryTitle": "Rough Cut",
+                    "originalTitle": "Dal Y Mellt",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMjE1M2M2MDMtMmVmNi00YWY2LTlkNTYtNDExNWQ4MTdlZDFkXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1112,
+                        "height": 1384
+                    },
+                    "startYear": 2022,
+                    "genres": [
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.3,
+                        "voteCount": 103
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Polish"
+                ],
+                "episodeCount": 3
+            },
+            {
+                "title": {
+                    "id": "tt0254007",
+                    "type": "tvSeries",
+                    "primaryTitle": "Belonging",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNjQwNDM1MTMtYjYwMi00NDg3LTgwN2EtNzZkZjg4MDA4ZWNmXkEyXkFqcGc@._V1_.jpg",
+                        "width": 632,
+                        "height": 387
+                    },
+                    "startYear": 2000,
+                    "endYear": 2009,
+                    "genres": [
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.5,
+                        "voteCount": 70
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Tadeusz"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt1261712",
+                    "type": "tvEpisode",
+                    "primaryTitle": "The Hero",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BY2JiZjhkMGYtMDVhMi00ZmViLTlmZDItNzQxNzFlZjU5NzkwXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1366,
+                        "height": 768
+                    },
+                    "startYear": 2009,
+                    "genres": [
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.8,
+                        "voteCount": 67
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Marek"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt7452088",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Onion",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZmRjM2U0YTMtY2FmMy00MmNmLWEyYzUtNjI3MWQyMDczNTMwXkEyXkFqcGc@._V1_.jpg",
+                        "width": 2644,
+                        "height": 1480
+                    },
+                    "startYear": 2017,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.9,
+                        "voteCount": 65
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Ivan"
+                ]
+            }
+        ],
+        "totalCount": 42
+    },
+    "relationships": {
+        "relationships": []
+    },
+    "trivia": {
+        "triviaEntries": []
+    },
+    "artifacts": {
+        "details": {
+            "path": "details.json",
+            "url": "https://api.imdbapi.dev/names/nm1599765",
+            "has_payload": true
+        },
+        "images": {
+            "path": "images.json",
+            "url": "https://api.imdbapi.dev/names/nm1599765/images",
+            "has_payload": true
+        },
+        "filmography": {
+            "path": "filmography.json",
+            "url": "https://api.imdbapi.dev/names/nm1599765/filmography",
+            "has_payload": true
+        },
+        "relationships": {
+            "path": "relationships.json",
+            "url": "https://api.imdbapi.dev/names/nm1599765/relationships",
+            "has_payload": true
+        },
+        "trivia": {
+            "path": "trivia.json",
+            "url": "https://api.imdbapi.dev/names/nm1599765/trivia",
+            "has_payload": true
+        }
+    }
+}

@@ -2,11 +2,6 @@
     'person',
 ])
 
-@php
-    $popularityRankLabel = $person->popularityRankBadgeLabel();
-    $awardNominationsLabel = $person->awardNominationsBadgeLabel();
-@endphp
-
 <x-ui.card data-slot="person-card" class="sb-person-card !max-w-none h-full overflow-hidden rounded-[1.4rem] p-3">
     <div class="flex h-full flex-col gap-4">
         <div class="flex items-start gap-4">
@@ -49,17 +44,17 @@
                     </x-ui.text>
                 @endif
 
-                @if ($popularityRankLabel || $awardNominationsLabel)
+                @if ($person->popularityRankBadgeLabel() || $person->awardNominationsBadgeLabel())
                     <div data-slot="person-card-metrics" class="flex flex-wrap gap-2">
-                        @if ($popularityRankLabel)
+                        @if ($person->popularityRankBadgeLabel())
                             <x-ui.badge data-slot="person-card-popularity-rank" variant="outline" color="amber" icon="fire">
-                                {{ $popularityRankLabel }}
+                                {{ $person->popularityRankBadgeLabel() }}
                             </x-ui.badge>
                         @endif
 
-                        @if ($awardNominationsLabel)
+                        @if ($person->awardNominationsBadgeLabel())
                             <x-ui.badge data-slot="person-card-awards" variant="outline" color="slate" icon="trophy">
-                                {{ $awardNominationsLabel }}
+                                {{ $person->awardNominationsBadgeLabel() }}
                             </x-ui.badge>
                         @endif
                     </div>

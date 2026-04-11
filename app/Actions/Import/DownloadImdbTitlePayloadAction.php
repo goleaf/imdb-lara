@@ -4,6 +4,7 @@ namespace App\Actions\Import;
 
 use App\Models\ImdbTitleImport;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use JsonException;
 use RuntimeException;
@@ -29,17 +30,15 @@ class DownloadImdbTitlePayloadAction
      *     payload: array<string, mixed>,
      *     payload_hash: string,
      *     source_url: string,
-     *     storage_path: string
+     *     storage_path: string|null
      * }
      */
-    public function handle(string $imdbId, string $storageDirectory, string $urlTemplate, bool $force = false): array
+    public function handle(string $imdbId, ?string $storageDirectory, string $urlTemplate, bool $force = false): array
     {
-        $storagePath = rtrim($storageDirectory, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.$imdbId.'.json';
-        $artifactDirectory = rtrim($storageDirectory, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.$imdbId;
+        $storagePath = $this->bundleStoragePath($storageDirectory, $imdbId);
+        $artifactDirectory = $this->artifactDirectory($storageDirectory, $imdbId);
 
-        File::ensureDirectoryExists($storageDirectory);
-
-        if (! $force && File::exists($storagePath)) {
+        if ($storagePath !== null && ! $force && File::exists($storagePath)) {
             $existingPayload = $this->decodePayload(File::get($storagePath));
 
             if ($this->canReuseExistingBundle($existingPayload, $artifactDirectory)) {
@@ -61,10 +60,13 @@ class DownloadImdbTitlePayloadAction
         $sourceUrl = $this->resolveSourceUrl($imdbId, $urlTemplate);
         $payload = $this->buildBundle($imdbId, $sourceUrl, $artifactDirectory);
 
-        File::put($storagePath, json_encode(
-            $payload,
-            JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR,
-        ));
+        if ($storagePath !== null) {
+            File::ensureDirectoryExists(dirname($storagePath));
+            File::put($storagePath, json_encode(
+                $payload,
+                JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR,
+            ));
+        }
 
         $result = [
             'downloaded' => true,
@@ -86,11 +88,22 @@ class DownloadImdbTitlePayloadAction
      *     payload: array<string, mixed>,
      *     payload_hash: string,
      *     source_url: string,
-     *     storage_path: string
+     *     storage_path: string|null
      * }  $result
      */
     private function trackImportArtifact(array $result): void
     {
+        if ($result['storage_path'] === null) {
+            return;
+        }
+
+        $importModel = new ImdbTitleImport;
+        $connection = $importModel->getConnectionName();
+
+        if (! Schema::connection($connection)->hasTable($importModel->getTable())) {
+            return;
+        }
+
         ImdbTitleImport::query()->updateOrCreate(
             ['imdb_id' => $result['imdb_id']],
             [
@@ -106,7 +119,7 @@ class DownloadImdbTitlePayloadAction
     /**
      * @return array<string, mixed>
      */
-    private function buildBundle(string $imdbId, string $sourceUrl, string $artifactDirectory): array
+    private function buildBundle(string $imdbId, string $sourceUrl, ?string $artifactDirectory): array
     {
         $artifacts = [];
         $downloadedAt = now()->toIso8601String();
@@ -291,7 +304,7 @@ class DownloadImdbTitlePayloadAction
      * @param  array<string, mixed>  $artifacts
      * @return array<string, array<string, mixed>>
      */
-    private function downloadGraphqlTitleArtifacts(string $imdbId, string $artifactDirectory, array &$artifacts): array
+    private function downloadGraphqlTitleArtifacts(string $imdbId, ?string $artifactDirectory, array &$artifacts): array
     {
         if (! $this->fetchImdbGraphqlAction->enabled()) {
             return [];
@@ -318,11 +331,16 @@ class DownloadImdbTitlePayloadAction
             }
 
             $this->writeJsonArtifact($artifactDirectory, $relativePath, $payloads[$artifactKey]);
-            data_set($artifacts, $artifactKey, [
-                'path' => $relativePath,
+            $artifact = [
                 'url' => (string) config('services.imdb.graphql.url', 'https://graph.imdbapi.dev/v1'),
                 'has_payload' => true,
-            ]);
+            ];
+
+            if ($artifactDirectory !== null) {
+                $artifact['path'] = $relativePath;
+            }
+
+            data_set($artifacts, $artifactKey, $artifact);
         }
 
         return $payloads;
@@ -336,8 +354,12 @@ class DownloadImdbTitlePayloadAction
         );
     }
 
-    private function canReuseExistingBundle(array $payload, string $artifactDirectory): bool
+    private function canReuseExistingBundle(array $payload, ?string $artifactDirectory): bool
     {
+        if ($artifactDirectory === null) {
+            return false;
+        }
+
         return (int) data_get($payload, 'schemaVersion', 0) >= 3
             && File::exists($artifactDirectory.DIRECTORY_SEPARATOR.'manifest.json');
     }
@@ -347,7 +369,7 @@ class DownloadImdbTitlePayloadAction
      * @return array<string, mixed>|null
      */
     private function downloadArtifact(
-        string $artifactDirectory,
+        ?string $artifactDirectory,
         string $relativePath,
         string $url,
         array &$artifacts,
@@ -364,11 +386,16 @@ class DownloadImdbTitlePayloadAction
         }
 
         $this->writeJsonArtifact($artifactDirectory, $relativePath, $payload);
-        data_set($artifacts, $artifactKey, [
-            'path' => str_replace(DIRECTORY_SEPARATOR, '/', $relativePath),
+        $artifact = [
             'url' => $url,
             'has_payload' => $payload !== null,
-        ]);
+        ];
+
+        if ($artifactDirectory !== null) {
+            $artifact['path'] = str_replace(DIRECTORY_SEPARATOR, '/', $relativePath);
+        }
+
+        data_set($artifacts, $artifactKey, $artifact);
 
         return $payload;
     }
@@ -423,7 +450,7 @@ class DownloadImdbTitlePayloadAction
      * @return array<string, array<string, mixed>|null>
      */
     private function downloadArtifactsConcurrently(
-        string $artifactDirectory,
+        ?string $artifactDirectory,
         array &$artifacts,
         array $requests,
         int $concurrency,
@@ -473,11 +500,16 @@ class DownloadImdbTitlePayloadAction
             }
 
             $this->writeJsonArtifact($artifactDirectory, $request['relative_path'], $payloads[$artifactKey]);
-            data_set($artifacts, $artifactKey, [
-                'path' => str_replace(DIRECTORY_SEPARATOR, '/', $request['relative_path']),
+            $artifact = [
                 'url' => $url,
                 'has_payload' => $payloads[$artifactKey] !== null,
-            ]);
+            ];
+
+            if ($artifactDirectory !== null) {
+                $artifact['path'] = str_replace(DIRECTORY_SEPARATOR, '/', $request['relative_path']);
+            }
+
+            data_set($artifacts, $artifactKey, $artifact);
         }
 
         return $payloads;
@@ -645,8 +677,12 @@ class DownloadImdbTitlePayloadAction
         return $value === '' ? null : $value;
     }
 
-    private function writeJsonArtifact(string $artifactDirectory, string $relativePath, mixed $payload): string
+    private function writeJsonArtifact(?string $artifactDirectory, string $relativePath, mixed $payload): ?string
     {
+        if ($artifactDirectory === null) {
+            return null;
+        }
+
         $path = $artifactDirectory.DIRECTORY_SEPARATOR.str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $relativePath);
 
         File::ensureDirectoryExists(dirname($path));
@@ -656,5 +692,38 @@ class DownloadImdbTitlePayloadAction
         ));
 
         return $path;
+    }
+
+    private function bundleStoragePath(?string $storageDirectory, string $imdbId): ?string
+    {
+        $storageDirectory = $this->normalizeStorageDirectory($storageDirectory);
+
+        if ($storageDirectory === null) {
+            return null;
+        }
+
+        return $storageDirectory.DIRECTORY_SEPARATOR.$imdbId.'.json';
+    }
+
+    private function artifactDirectory(?string $storageDirectory, string $imdbId): ?string
+    {
+        $storageDirectory = $this->normalizeStorageDirectory($storageDirectory);
+
+        if ($storageDirectory === null) {
+            return null;
+        }
+
+        return $storageDirectory.DIRECTORY_SEPARATOR.$imdbId;
+    }
+
+    private function normalizeStorageDirectory(?string $storageDirectory): ?string
+    {
+        if (! is_string($storageDirectory)) {
+            return null;
+        }
+
+        $storageDirectory = rtrim($storageDirectory, DIRECTORY_SEPARATOR);
+
+        return $storageDirectory === '' ? null : $storageDirectory;
     }
 }

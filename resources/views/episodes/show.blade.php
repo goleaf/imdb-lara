@@ -54,8 +54,8 @@
                                 @if ($episodeMeta?->aired_at)
                                     <x-ui.badge variant="outline" color="neutral" icon="calendar-days">{{ $episodeMeta->aired_at->format('M j, Y') }}</x-ui.badge>
                                 @endif
-                                @if ($episode->runtime_minutes)
-                                    <x-ui.badge variant="outline" color="neutral" icon="clock">{{ $episode->runtime_minutes }} min</x-ui.badge>
+                                @if ($episode->runtimeMinutesLabel())
+                                    <x-ui.badge variant="outline" color="neutral" icon="clock">{{ $episode->runtimeMinutesLabel() }}</x-ui.badge>
                                 @endif
                             </div>
 

@@ -27,4 +27,15 @@ class PersonTest extends TestCase
         $this->assertSame('Actor', $person->primaryProfessionLabel());
         $this->assertSame('Cast', $person->known_for_department);
     }
+
+    public function test_summary_text_prefers_loaded_short_biography_attribute(): void
+    {
+        $person = new Person;
+        $person->setRawAttributes([
+            'short_biography' => 'A concise profile.',
+            'biography' => 'A longer biography that should not be used first.',
+        ], sync: true);
+
+        $this->assertSame('A concise profile.', $person->summaryText());
+    }
 }

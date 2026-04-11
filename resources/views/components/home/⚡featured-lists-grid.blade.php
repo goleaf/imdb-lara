@@ -66,9 +66,9 @@ new class extends Component
                 </x-ui.text>
             </div>
 
-            <x-ui.link :href="route('public.lists.index')" variant="ghost">
+            <x-ui.link.light :href="route('public.lists.index')">
                 See all lists
-            </x-ui.link>
+            </x-ui.link.light>
         </div>
 
         @if ($errorMessage)
@@ -153,9 +153,9 @@ new class extends Component
 
                             <div class="mt-auto flex items-center justify-between gap-3">
                                 <x-ui.badge variant="outline" color="neutral" icon="at-symbol">{{ '@'.$list->user->username }}</x-ui.badge>
-                                <x-ui.link :href="route('public.lists.show', [$list->user, $list])" variant="ghost">
+                                <x-ui.link.light :href="route('public.lists.show', [$list->user, $list])">
                                     View list
-                                </x-ui.link>
+                                </x-ui.link.light>
                             </div>
                         </div>
                     </x-ui.card>

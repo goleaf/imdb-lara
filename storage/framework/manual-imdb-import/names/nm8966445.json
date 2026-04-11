@@ -1,0 +1,692 @@
+{
+    "schemaVersion": 1,
+    "imdbId": "nm8966445",
+    "downloadedAt": "2026-04-11T03:17:10+00:00",
+    "sourceUrl": "https://api.imdbapi.dev/names/nm8966445",
+    "details": {
+        "id": "nm8966445",
+        "displayName": "Travis Jay",
+        "primaryImage": {
+            "url": "https://m.media-amazon.com/images/M/MV5BZGY2YmU1NGEtZjgwNS00OGUzLWE1MTctNmZlNzdjZmVlN2VmXkEyXkFqcGc@._V1_.jpg",
+            "width": 4480,
+            "height": 5807
+        },
+        "primaryProfessions": [
+            "actor",
+            "writer"
+        ],
+        "biography": "Travis Jay is a stand-up comedian, actor and radio presenter and Leicester Mercury Comedian of the Year nominee.\n\nA phenomenal live act, Travis most recently performed his 2021/22 show Travis Jay Live to a sold out Bloomsbury Theatre, which was also filmed as a special and will be released in 2022. He has previously played to sold out crowds at the world-famous West End Palladium Theatre as part of the U Got Jokes Comedy show and performed alongside Dave Chappelle for Dave Chappelle and Friends directed by Stan Lathan in 2018 which subsequently led to him supporting Chappelle in London as part of his world tour. Travis made his Edinburgh Fringe debut in 2019 with his show Funny, Petty, Cool which achieved widespread critical acclaim and recently supported Britain's Got Talent golden-buzzer winning comedian Kojo Anim on his UK tour in 2020.\n\nOn television, Travis is a regular on Late Night Mash (DAVE), and as a writer and voice artist for the rebooted Spitting Image (Britbox) and has appeared on shows including Stand Up Sketch Show (ITV2), Mo Gilligan: Black, British & Funny (Channel 4) and Drunk History and Comedy Central Live (Comedy Central).\n\nTravis plays teacher Theo, in the second series of Princess Mirror-Belle for CBBC. He will be appearing in the upcoming series of Deep Fake Neighbour Wars for ITVX.\n\nTravis has also created and co-presents the popular weekly boxing podcast Undefeated with fellow comedian KG tha Comedian.\n\n'He's Amazing'...Dave Chappelle",
+        "heightCm": 188,
+        "birthLocation": "Lewisham, London, England, UK"
+    },
+    "images": {
+        "images": [
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BZDIyZjI5NjQtMDlkYi00YTEyLThkZjktMTkzMDIzZWFmZmQ0XkEyXkFqcGc@._V1_.jpg",
+                "width": 5760,
+                "height": 3840,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BM2Y0YTRmMDEtZWVjZC00MTY4LWFmMTktOWVmY2U5OTQ1ZDQzXkEyXkFqcGc@._V1_.jpg",
+                "width": 4480,
+                "height": 6720,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BMzIyZTk2NjEtZmJkYi00ZTA5LWFkZmEtNTBjYmQzMjAxYjZiXkEyXkFqcGc@._V1_.jpg",
+                "width": 1080,
+                "height": 927,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BMTg1YzFiOTYtZTBjNi00MGZhLTllNjQtYjVjODk0ZTg0ZTM2XkEyXkFqcGc@._V1_.jpg",
+                "width": 1080,
+                "height": 1549,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BYzEyNTI4NzctNDViMy00MWYwLWI3ODgtOWVkNzEyY2M0N2RjXkEyXkFqcGc@._V1_.jpg",
+                "width": 1080,
+                "height": 1322,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BMjU0NmY4ZGMtZWVkYy00ZDUwLTk1ODMtMjA5ZTFiZGUzMDg4XkEyXkFqcGc@._V1_.jpg",
+                "width": 4480,
+                "height": 5807,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BZGY2YmU1NGEtZjgwNS00OGUzLWE1MTctNmZlNzdjZmVlN2VmXkEyXkFqcGc@._V1_.jpg",
+                "width": 4480,
+                "height": 5807,
+                "type": "publicity"
+            }
+        ],
+        "totalCount": 7
+    },
+    "filmography": {
+        "credits": [
+            {
+                "title": {
+                    "id": "tt12042730",
+                    "type": "movie",
+                    "primaryTitle": "Project Hail Mary",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNTkwNzJiYTctNzI3NC00NjE1LTlhYjktY2Q5MTdmMWFmNzcxXkEyXkFqcGc@._V1_.jpg",
+                        "width": 2765,
+                        "height": 4096
+                    },
+                    "startYear": 2026,
+                    "genres": [
+                        "Adventure",
+                        "Comedy",
+                        "Sci-Fi"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.4,
+                        "voteCount": 178625
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Tilt-a-Whirl"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt16283758",
+                    "type": "tvSeries",
+                    "primaryTitle": "Supacell",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNjk1MGM0ZmMtOGYwYS00ZTdiLTgxYzItOGM1NTZmNGEwMGI4XkEyXkFqcGc@._V1_.jpg",
+                        "width": 450,
+                        "height": 630
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Action",
+                        "Adventure",
+                        "Drama",
+                        "Sci-Fi"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7,
+                        "voteCount": 21580
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "John"
+                ],
+                "episodeCount": 4
+            },
+            {
+                "title": {
+                    "id": "tt0088512",
+                    "type": "tvSeries",
+                    "primaryTitle": "EastEnders",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYjVjMTU3YTUtZmYzYy00NzQzLWFjYzYtNjljYzRmOTZmZTdmXkEyXkFqcGc@._V1_.jpg",
+                        "width": 960,
+                        "height": 1440
+                    },
+                    "startYear": 1985,
+                    "genres": [
+                        "Crime",
+                        "Drama",
+                        "Romance"
+                    ],
+                    "rating": {
+                        "aggregateRating": 4.8,
+                        "voteCount": 10013
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Doctor"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt11347766",
+                    "type": "tvSeries",
+                    "primaryTitle": "Spitting Image",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BODc0ZjEzZjYtNWYzOS00ZTIxLTk0M2QtMmU3ZWNiOWQ5ZTZjXkEyXkFqcGc@._V1_.jpg",
+                        "width": 720,
+                        "height": 1080
+                    },
+                    "startYear": 2020,
+                    "endYear": 2021,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.6,
+                        "voteCount": 840
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "writer",
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt15170856",
+                    "type": "tvSeries",
+                    "primaryTitle": "Late Night Mash",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNWFkNTUwNDQtODU5MS00YzM3LWI3MTEtYjFjYTU5YWZkZmFjXkEyXkFqcGc@._V1_.jpg",
+                        "width": 2000,
+                        "height": 3000
+                    },
+                    "startYear": 2021,
+                    "endYear": 2022,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.8,
+                        "voteCount": 155
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Andrew McMahon - Pervert facilitator",
+                    "Dr. Bill James",
+                    "Webbo Bagbums - Can't believe he's still talking about this",
+                    "Stephen Ryan",
+                    "Mark Fisher - Free and easy",
+                    "James Bond",
+                    "Wayne Hayes",
+                    "Steve Hayes"
+                ],
+                "episodeCount": 8
+            },
+            {
+                "title": {
+                    "id": "tt21371376",
+                    "type": "tvSeries",
+                    "primaryTitle": "Deep Fake Neighbour Wars",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYzY3MWMzMzktMGUzMy00ZjE1LTk0ZmYtYTcwNTZlNjA1YzBkXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1175,
+                        "height": 1763
+                    },
+                    "startYear": 2023,
+                    "endYear": 2023,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 4.6,
+                        "voteCount": 150
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Floyd Mayweather",
+                    "Usain Bolt"
+                ],
+                "episodeCount": 2
+            },
+            {
+                "title": {
+                    "id": "tt21371376",
+                    "type": "tvSeries",
+                    "primaryTitle": "Deep Fake Neighbour Wars",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYzY3MWMzMzktMGUzMy00ZjE1LTk0ZmYtYTcwNTZlNjA1YzBkXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1175,
+                        "height": 1763
+                    },
+                    "startYear": 2023,
+                    "endYear": 2023,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 4.6,
+                        "voteCount": 150
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "writer",
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt9651888",
+                    "type": "tvSeries",
+                    "primaryTitle": "The Stand Up Sketch Show",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZmU2Y2U3MjUtZWM2Mi00M2E3LWI0NTktYTY1NzZlMmM5NDA5XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1175,
+                        "height": 1763
+                    },
+                    "startYear": 2019,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.4,
+                        "voteCount": 122
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt9651888",
+                    "type": "tvSeries",
+                    "primaryTitle": "The Stand Up Sketch Show",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZmU2Y2U3MjUtZWM2Mi00M2E3LWI0NTktYTY1NzZlMmM5NDA5XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1175,
+                        "height": 1763
+                    },
+                    "startYear": 2019,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.4,
+                        "voteCount": 122
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "self",
+                "characters": [
+                    "Self"
+                ],
+                "episodeCount": 6
+            },
+            {
+                "title": {
+                    "id": "tt13387500",
+                    "type": "tvSeries",
+                    "primaryTitle": "Princess Mirror-Belle",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOTY1YjM5NDEtMmExZS00M2QzLTkyZDItNWRiMWVkMGI2YzQzXkEyXkFqcGc@._V1_.jpg",
+                        "width": 783,
+                        "height": 1186
+                    },
+                    "startYear": 2021,
+                    "endYear": 2022,
+                    "genres": [
+                        "Drama",
+                        "Family",
+                        "Fantasy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.8,
+                        "voteCount": 42
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Theo"
+                ],
+                "episodeCount": 5
+            },
+            {
+                "title": {
+                    "id": "tt13210836",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Episode #1.10",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZGIzMjRkMjktYzA3ZC00NTljLWIyODYtN2Q1MTFiZmI0NmEyXkEyXkFqcGc@._V1_.jpg",
+                        "width": 809,
+                        "height": 455
+                    },
+                    "startYear": 2020,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.8,
+                        "voteCount": 31
+                    }
+                },
+                "category": "writer"
+            },
+            {
+                "title": {
+                    "id": "tt15264258",
+                    "type": "tvSeries",
+                    "primaryTitle": "Comedy Central, Drunk history: Black Stories",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZTQxZWU0YTYtOTNmNS00Yzc1LWI0M2UtZGE5NzFhYmFkOWVlXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1200,
+                        "height": 664
+                    },
+                    "startYear": 2021,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 3.6,
+                        "voteCount": 27
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Storyteller"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt2640850",
+                    "type": "tvSeries",
+                    "primaryTitle": "Brothers with No Game",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMjUzNTIxMTktMzg4MS00MGM0LWFlZDQtY2UwNDU2ZTFlNjFjXkEyXkFqcGc@._V1_.jpg",
+                        "width": 600,
+                        "height": 888
+                    },
+                    "startYear": 2012,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.4,
+                        "voteCount": 24
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "TJ"
+                ],
+                "episodeCount": 3
+            },
+            {
+                "title": {
+                    "id": "tt2384975",
+                    "type": "short",
+                    "primaryTitle": "12",
+                    "startYear": 2012,
+                    "genres": [
+                        "Short",
+                        "Drama",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.8,
+                        "voteCount": 14
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        },
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Rioter"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt29456916",
+                    "type": "tvSeries",
+                    "primaryTitle": "The Culture Capsule",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOTJhZmZmYmQtZDlkMi00YzkxLWFjMDUtODYwZGEyNThhMWQ0XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1080,
+                        "height": 1920
+                    },
+                    "startYear": 2021,
+                    "endYear": 2021,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "self",
+                "characters": [
+                    "Self"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt21042684",
+                    "type": "tvMovie",
+                    "primaryTitle": "Mo Gilligan: Black British & Funny",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMmExZDFhYTctMGZmZC00MjE5LTg1YjItOWQ2ODljNzZlN2I4XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1416,
+                        "height": 1770
+                    },
+                    "startYear": 2020,
+                    "genres": [
+                        "Documentary"
+                    ],
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "self",
+                "characters": [
+                    "Self"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt15367882",
+                    "type": "movie",
+                    "primaryTitle": "Absolutely Marvellous",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNzhmOTNiZGYtNGJkZC00OGRhLTk0ZGItODczMzQ1ZWQ4N2QxXkEyXkFqcGc@._V1_.jpg",
+                        "width": 2048,
+                        "height": 1365
+                    },
+                    "genres": [
+                        "Documentary"
+                    ],
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "self",
+                "characters": [
+                    "Self"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt13154052",
+                    "type": "tvSeries",
+                    "primaryTitle": "Comedy Central at the Edinburgh Fringe",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZWMxMDMxNzUtNjI1Yy00ZWJjLWIwNDctYzBlMDZmNThkZDIwXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1280,
+                        "height": 1920
+                    },
+                    "startYear": 2020,
+                    "endYear": 2020,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "self",
+                "characters": [
+                    "Self"
+                ],
+                "episodeCount": 2
+            },
+            {
+                "title": {
+                    "id": "tt10157864",
+                    "type": "tvMiniSeries",
+                    "primaryTitle": "Ministry of Justice",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYmVmYjkwNmMtMDE4Ni00NjQ5LThiODItZTU4ZWIxZWZjNmQ1XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1920,
+                        "height": 1080
+                    },
+                    "startYear": 2018,
+                    "endYear": 2018,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Various"
+                ],
+                "episodeCount": 2
+            }
+        ],
+        "totalCount": 19
+    },
+    "relationships": {
+        "relationships": [
+            {
+                "name": {
+                    "id": "nm1048217",
+                    "displayName": "Angie Le Mar",
+                    "alternativeNames": [
+                        "Angie LeMar"
+                    ],
+                    "primaryProfessions": [
+                        "actress",
+                        "producer",
+                        "writer"
+                    ]
+                },
+                "relationType": "parent"
+            }
+        ]
+    },
+    "trivia": {
+        "triviaEntries": []
+    },
+    "artifacts": {
+        "details": {
+            "path": "details.json",
+            "url": "https://api.imdbapi.dev/names/nm8966445",
+            "has_payload": true
+        },
+        "images": {
+            "path": "images.json",
+            "url": "https://api.imdbapi.dev/names/nm8966445/images",
+            "has_payload": true
+        },
+        "filmography": {
+            "path": "filmography.json",
+            "url": "https://api.imdbapi.dev/names/nm8966445/filmography",
+            "has_payload": true
+        },
+        "relationships": {
+            "path": "relationships.json",
+            "url": "https://api.imdbapi.dev/names/nm8966445/relationships",
+            "has_payload": true
+        },
+        "trivia": {
+            "path": "trivia.json",
+            "url": "https://api.imdbapi.dev/names/nm8966445/trivia",
+            "has_payload": true
+        }
+    }
+}

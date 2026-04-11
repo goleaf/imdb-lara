@@ -12,8 +12,8 @@
         
         // active link state
         'data-active-link:bg-[--alpha(var(--color-primary)_/5%)] 
-         data-active-link:!text-[var(--color-primary)] 
-         data-active-link:[&_[data-slot=icon]]:!text-[var(--color-primary)]',
+         data-active-link:!text-[#f4eee5]
+         data-active-link:[&_[data-slot=icon]]:!text-[#f4eee5]',
 
         // add hover state only if the item isn't already active 
         '[&:not([data-active-link])]:hover:bg-[--alpha(var(--color-primary)_/5%)]
@@ -21,7 +21,7 @@
          [&:not([data-active-link])]:hover:[&_[data-slot=icon]]:!text-[var(--color-primary)]',
         'dark:text-neutral-200 text-neutral-600',
         // icon styles
-        '[&_[data-slot=icon]]:dark:text-neutral-400 [&_[data-slot=icon]]:text-neutral-600 data-[active-link]:text-[var(--color-primary)]',
+        '[&_[data-slot=icon]]:dark:text-neutral-400 [&_[data-slot=icon]]:text-neutral-600',
         
         'px-2 gap-x-1 py-1 rounded-box',
         // if there is a badge reduce the right padding for better UI

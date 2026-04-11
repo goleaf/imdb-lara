@@ -50,8 +50,8 @@
                                         {{ $title->release_year }}
                                     </a>
                                 @endif
-                                @if ($title->runtime_minutes)
-                                    <span class="sb-cast-meta-item">{{ $title->runtime_minutes }} min</span>
+                                @if ($title->runtimeMinutesLabel())
+                                    <span class="sb-cast-meta-item">{{ $title->runtimeMinutesLabel() }}</span>
                                 @endif
                                 @if ($title->statistic?->average_rating)
                                     <span class="sb-cast-meta-item sb-cast-meta-item--rating">
@@ -88,9 +88,7 @@
                         </div>
 
                         <div class="flex flex-wrap gap-3">
-                            <x-ui.button as="a" :href="route('public.titles.show', $title)" variant="outline" color="amber" icon="arrow-left">
-                                Back to title
-                            </x-ui.button>
+                            <x-catalog.back-link :href="route('public.titles.show', $title)" label="Back to title" />
                             <x-ui.button as="a" href="#title-cast-section" variant="outline" icon="users">
                                 Jump to cast
                             </x-ui.button>

@@ -67,9 +67,9 @@ new class extends Component
                 </x-ui.text>
             </div>
 
-            <x-ui.link :href="route('public.reviews.latest')" variant="ghost">
+            <x-ui.link.light :href="route('public.reviews.latest')">
                 See all reviews
-            </x-ui.link>
+            </x-ui.link.light>
         </div>
 
         @if ($errorMessage)
@@ -136,9 +136,13 @@ new class extends Component
                                     {{ str($review->body)->limit(220) }}
                                 </x-ui.text>
 
-                                <x-ui.link :href="route('public.titles.show', $review->title)" variant="ghost">
+                                <x-ui.button.light-outline
+                                    :href="route('public.titles.show', $review->title)"
+                                    size="sm"
+                                    iconAfter="arrow-right"
+                                >
                                     View title page
-                                </x-ui.link>
+                                </x-ui.button.light-outline>
                             </div>
                         </div>
                     </x-ui.card>

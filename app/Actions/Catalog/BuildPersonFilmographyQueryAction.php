@@ -5,6 +5,7 @@ namespace App\Actions\Catalog;
 use App\Models\Credit;
 use App\Models\Person;
 use App\Models\Title;
+use App\Models\TitleStatistic;
 use Illuminate\Support\Collection;
 
 class BuildPersonFilmographyQueryAction
@@ -31,6 +32,7 @@ class BuildPersonFilmographyQueryAction
 
         $credits = Credit::query()
             ->select([
+                'name_credits.id',
                 'name_credits.name_basic_id',
                 'name_credits.movie_id',
                 'name_credits.category',
@@ -38,28 +40,20 @@ class BuildPersonFilmographyQueryAction
                 'name_credits.position',
             ])
             ->where('name_credits.name_basic_id', $person->getKey())
+            ->ordered()
             ->with([
+                'nameCreditCharacters:name_credit_id,position,character_name',
                 'title' => fn ($query) => $query
-                    ->select([
-                        'movies.id',
-                        'movies.tconst',
-                        'movies.imdb_id',
-                        'movies.primarytitle',
-                        'movies.originaltitle',
-                        'movies.titletype',
-                        'movies.isadult',
-                        'movies.startyear',
-                        'movies.endyear',
-                        'movies.runtimeminutes',
+                    ->selectCatalogCardColumns()
+                    ->addSelect([
+                        'popularity_rank' => TitleStatistic::query()
+                            ->select('vote_count')
+                            ->whereColumn('movie_ratings.movie_id', 'movies.id')
+                            ->limit(1),
                     ])
                     ->published()
-                    ->with([
-                        'statistic:movie_id,aggregate_rating,vote_count',
-                        'titleImages:id,movie_id,position,url,width,height,type',
-                        'primaryImageRecord:movie_id,url,width,height,type',
-                    ]),
+                    ->withCatalogCardRelations(),
             ])
-            ->orderBy('name_credits.position')
             ->get()
             ->filter(fn (Credit $credit): bool => $credit->title instanceof Title)
             ->values();

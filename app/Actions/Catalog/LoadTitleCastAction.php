@@ -36,6 +36,10 @@ class LoadTitleCastAction
 
     private const PAGE_SIZE = 24;
 
+    public function __construct(
+        private readonly HydrateTitleCastCatalogAction $hydrateTitleCastCatalogAction,
+    ) {}
+
     /**
      * @return array{
      *     title: Title,
@@ -58,12 +62,19 @@ class LoadTitleCastAction
      */
     public function handle(Title $title): array
     {
-        $title->load([
-            'statistic:movie_id,aggregate_rating,vote_count',
-            'titleImages:id,movie_id,position,url,width,height,type',
-            'primaryImageRecord:movie_id,url,width,height,type',
-            'plotRecord:movie_id,plot',
-        ]);
+        if ($this->shouldHydrateCatalog($title)) {
+            try {
+                $title = $this->hydrateTitleCastCatalogAction->handle($title);
+            } catch (\Throwable $exception) {
+                logger()->warning(sprintf(
+                    'Title cast hydration failed for [%s]. %s',
+                    $title->imdb_id ?: $title->tconst ?: $title->getKey(),
+                    $exception->getMessage(),
+                ));
+            }
+        }
+
+        $title->loadMissing(Title::catalogHeroRelations());
 
         $poster = $title->preferredPoster();
         $backdrop = $title->preferredBackdrop();
@@ -133,33 +144,49 @@ class LoadTitleCastAction
     {
         $query = $title->credits()
             ->select([
+                'name_credits.id',
                 'name_credits.name_basic_id',
                 'name_credits.movie_id',
                 'name_credits.category',
                 'name_credits.episode_count',
                 'name_credits.position',
             ])
+            ->whereHas('person')
+            ->ordered()
+            ->withPersonPreview()
             ->with([
-                'person' => fn ($personQuery) => $personQuery->select([
-                    'name_basics.id',
-                    'name_basics.nconst',
-                    'name_basics.imdb_id',
-                    'name_basics.primaryname',
-                    'name_basics.displayName',
-                    'name_basics.primaryImage_url',
-                    'name_basics.primaryImage_width',
-                    'name_basics.primaryImage_height',
-                ]),
+                'nameCreditCharacters:name_credit_id,position,character_name',
             ]);
 
         if ($castOnly) {
-            return $query->whereIn('name_credits.category', self::CAST_CATEGORIES);
+            return $query->cast();
         }
 
-        return $query->where(function (Builder $crewQuery): void {
-            $crewQuery
-                ->whereNull('name_credits.category')
-                ->orWhereNotIn('name_credits.category', self::CAST_CATEGORIES);
-        });
+        return $query->crew();
+    }
+
+    private function shouldHydrateCatalog(Title $title): bool
+    {
+        $credits = $title->credits();
+
+        if (! $credits->exists()) {
+            return true;
+        }
+
+        if ($title->credits()->whereDoesntHave('person')->exists()) {
+            return true;
+        }
+
+        if (! $title->credits()->whereIn('category', self::CAST_CATEGORIES)->exists()) {
+            return true;
+        }
+
+        return ! $title->credits()
+            ->where(function (Builder $crewQuery): void {
+                $crewQuery
+                    ->whereNull('category')
+                    ->orWhereNotIn('category', self::CAST_CATEGORIES);
+            })
+            ->exists();
     }
 }

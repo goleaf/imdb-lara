@@ -1,25 +1,15 @@
-@php
-if (! isset($scrollTo)) {
-    $scrollTo = 'body';
-}
-
-$scrollIntoViewJsSnippet = ($scrollTo !== false)
-    ? <<<JS
-       (\$el.closest('{$scrollTo}') || document.querySelector('{$scrollTo}')).scrollIntoView()
-    JS
-    : '';
-
-$islandName = method_exists($this, 'paginationIslandName')
-    ? $this->paginationIslandName()
-    : null;
-@endphp
-
 <div>
+    @php
+        $buttonClasses = 'relative inline-flex items-center rounded-full border px-4 py-2 text-sm font-semibold leading-5 transition duration-150';
+        $enabledClasses = $buttonClasses.' border-[#322b21] bg-[#151310] text-[#f4eee5] hover:border-[#5b4b33] hover:bg-[#1d1914] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#d6b574]/25';
+        $disabledClasses = $buttonClasses.' cursor-default border-[#2a251d] bg-[#12100d] text-[#7c7468]';
+    @endphp
+
     @if ($paginator->hasPages())
         <nav role="navigation" aria-label="Pagination Navigation" class="flex justify-between">
             <span>
                 @if ($paginator->onFirstPage())
-                    <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-default leading-5 rounded-md dark:text-gray-600 dark:bg-gray-800 dark:border-gray-600">
+                    <span class="{{ $disabledClasses }}">
                         {!! __('pagination.previous') !!}
                     </span>
                 @else
@@ -29,10 +19,10 @@ $islandName = method_exists($this, 'paginationIslandName')
                             dusk="previousPage"
                             wire:key="cursor-{{ $paginator->getCursorName() }}-{{ $paginator->previousCursor()->encode() }}"
                             wire:click="setPage('{{ $paginator->previousCursor()->encode() }}','{{ $paginator->getCursorName() }}')"
-                            @if (filled($islandName)) wire:island="{{ $islandName }}" @endif
-                            x-on:click="{{ $scrollIntoViewJsSnippet }}"
+                            @if (method_exists($this, 'paginationIslandName') && filled($this->paginationIslandName())) wire:island="{{ $this->paginationIslandName() }}" @endif
+                            @if (($scrollTo ?? 'body') !== false) x-on:click="($el.closest('{{ $scrollTo ?? 'body' }}') || document.querySelector('{{ $scrollTo ?? 'body' }}')).scrollIntoView()" @endif
                             wire:loading.attr="disabled"
-                            class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 leading-5 rounded-md hover:text-gray-500 focus:outline-none focus:ring ring-blue-300 focus:border-blue-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:focus:border-blue-700 dark:active:bg-gray-700 dark:active:text-gray-300"
+                            class="{{ $enabledClasses }}"
                         >
                             {!! __('pagination.previous') !!}
                         </button>
@@ -40,11 +30,11 @@ $islandName = method_exists($this, 'paginationIslandName')
                         <button
                             type="button"
                             wire:click="previousPage('{{ $paginator->getPageName() }}')"
-                            @if (filled($islandName)) wire:island="{{ $islandName }}" @endif
-                            x-on:click="{{ $scrollIntoViewJsSnippet }}"
+                            @if (method_exists($this, 'paginationIslandName') && filled($this->paginationIslandName())) wire:island="{{ $this->paginationIslandName() }}" @endif
+                            @if (($scrollTo ?? 'body') !== false) x-on:click="($el.closest('{{ $scrollTo ?? 'body' }}') || document.querySelector('{{ $scrollTo ?? 'body' }}')).scrollIntoView()" @endif
                             wire:loading.attr="disabled"
                             dusk="previousPage{{ $paginator->getPageName() == 'page' ? '' : '.' . $paginator->getPageName() }}"
-                            class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 leading-5 rounded-md hover:text-gray-500 focus:outline-none focus:ring ring-blue-300 focus:border-blue-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:focus:border-blue-700 dark:active:bg-gray-700 dark:active:text-gray-300"
+                            class="{{ $enabledClasses }}"
                         >
                             {!! __('pagination.previous') !!}
                         </button>
@@ -60,10 +50,10 @@ $islandName = method_exists($this, 'paginationIslandName')
                             dusk="nextPage"
                             wire:key="cursor-{{ $paginator->getCursorName() }}-{{ $paginator->nextCursor()->encode() }}"
                             wire:click="setPage('{{ $paginator->nextCursor()->encode() }}','{{ $paginator->getCursorName() }}')"
-                            @if (filled($islandName)) wire:island="{{ $islandName }}" @endif
-                            x-on:click="{{ $scrollIntoViewJsSnippet }}"
+                            @if (method_exists($this, 'paginationIslandName') && filled($this->paginationIslandName())) wire:island="{{ $this->paginationIslandName() }}" @endif
+                            @if (($scrollTo ?? 'body') !== false) x-on:click="($el.closest('{{ $scrollTo ?? 'body' }}') || document.querySelector('{{ $scrollTo ?? 'body' }}')).scrollIntoView()" @endif
                             wire:loading.attr="disabled"
-                            class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 leading-5 rounded-md hover:text-gray-500 focus:outline-none focus:ring ring-blue-300 focus:border-blue-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:focus:border-blue-700 dark:active:bg-gray-700 dark:active:text-gray-300"
+                            class="{{ $enabledClasses }}"
                         >
                             {!! __('pagination.next') !!}
                         </button>
@@ -71,17 +61,17 @@ $islandName = method_exists($this, 'paginationIslandName')
                         <button
                             type="button"
                             wire:click="nextPage('{{ $paginator->getPageName() }}')"
-                            @if (filled($islandName)) wire:island="{{ $islandName }}" @endif
-                            x-on:click="{{ $scrollIntoViewJsSnippet }}"
+                            @if (method_exists($this, 'paginationIslandName') && filled($this->paginationIslandName())) wire:island="{{ $this->paginationIslandName() }}" @endif
+                            @if (($scrollTo ?? 'body') !== false) x-on:click="($el.closest('{{ $scrollTo ?? 'body' }}') || document.querySelector('{{ $scrollTo ?? 'body' }}')).scrollIntoView()" @endif
                             wire:loading.attr="disabled"
                             dusk="nextPage{{ $paginator->getPageName() == 'page' ? '' : '.' . $paginator->getPageName() }}"
-                            class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 leading-5 rounded-md hover:text-gray-500 focus:outline-none focus:ring ring-blue-300 focus:border-blue-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:focus:border-blue-700 dark:active:bg-gray-700 dark:active:text-gray-300"
+                            class="{{ $enabledClasses }}"
                         >
                             {!! __('pagination.next') !!}
                         </button>
                     @endif
                 @else
-                    <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-default leading-5 rounded-md dark:text-gray-600 dark:bg-gray-800 dark:border-gray-600">
+                    <span class="{{ $disabledClasses }}">
                         {!! __('pagination.next') !!}
                     </span>
                 @endif

@@ -15,14 +15,14 @@ class DownloadImdbStarMeterChartAction
 
     /**
      * @return array{
-     *     chart_path: string,
-     *     manifest_path: string,
-     *     names: list<array{imdb_id: string, path: string, payload: array<string, mixed>}>,
+     *     chart_path: string|null,
+     *     manifest_path: string|null,
+     *     names: list<array{imdb_id: string, path: string|null, payload: array<string, mixed>}>,
      *     source_url: string,
-     *     storage_directory: string
+     *     storage_directory: string|null
      * }
      */
-    public function handle(string $storageDirectory): array
+    public function handle(?string $storageDirectory = null): array
     {
         $endpoint = $this->resolveImdbApiUrlAction->endpoint('chart.starmeter');
 
@@ -34,30 +34,34 @@ class DownloadImdbStarMeterChartAction
         $payload = $this->fetchImdbJsonAction->paginate($sourceUrl, 'names') ?? ['names' => []];
         $names = $this->normalizeNames(data_get($payload, 'names'));
         $downloadedAt = now()->toIso8601String();
-        $chartDirectory = rtrim($storageDirectory, DIRECTORY_SEPARATOR);
-        $namesDirectory = $chartDirectory.DIRECTORY_SEPARATOR.'names';
-        $chartPath = $chartDirectory.DIRECTORY_SEPARATOR.'chart.json';
-        $manifestPath = $chartDirectory.DIRECTORY_SEPARATOR.'manifest.json';
+        $chartDirectory = $this->normalizeStorageDirectory($storageDirectory);
+        $namesDirectory = $chartDirectory !== null ? $chartDirectory.DIRECTORY_SEPARATOR.'names' : null;
+        $chartPath = $chartDirectory !== null ? $chartDirectory.DIRECTORY_SEPARATOR.'chart.json' : null;
+        $manifestPath = $chartDirectory !== null ? $chartDirectory.DIRECTORY_SEPARATOR.'manifest.json' : null;
 
-        File::ensureDirectoryExists($namesDirectory);
-        File::put($chartPath, $this->encodeJson($payload));
-        File::put($manifestPath, $this->encodeJson([
-            'sourceUrl' => $sourceUrl,
-            'downloadedAt' => $downloadedAt,
-            'namesCount' => count($names),
-            'chartPath' => 'chart.json',
-        ]));
+        if ($namesDirectory !== null && $chartPath !== null && $manifestPath !== null) {
+            File::ensureDirectoryExists($namesDirectory);
+            File::put($chartPath, $this->encodeJson($payload));
+            File::put($manifestPath, $this->encodeJson([
+                'sourceUrl' => $sourceUrl,
+                'downloadedAt' => $downloadedAt,
+                'namesCount' => count($names),
+                'chartPath' => 'chart.json',
+            ]));
+        }
 
         $nameArtifacts = [];
 
         foreach ($names as $namePayload) {
             $imdbId = (string) data_get($namePayload, 'id');
-            $namePath = $namesDirectory.DIRECTORY_SEPARATOR.$imdbId.'.json';
-            $detailsPath = $namesDirectory.DIRECTORY_SEPARATOR.$imdbId.DIRECTORY_SEPARATOR.'details.json';
+            $namePath = $namesDirectory !== null ? $namesDirectory.DIRECTORY_SEPARATOR.$imdbId.'.json' : null;
+            $detailsPath = $namesDirectory !== null ? $namesDirectory.DIRECTORY_SEPARATOR.$imdbId.DIRECTORY_SEPARATOR.'details.json' : null;
 
-            File::ensureDirectoryExists(dirname($detailsPath));
-            File::put($namePath, $this->encodeJson($namePayload));
-            File::put($detailsPath, $this->encodeJson($namePayload));
+            if ($namePath !== null && $detailsPath !== null) {
+                File::ensureDirectoryExists(dirname($detailsPath));
+                File::put($namePath, $this->encodeJson($namePayload));
+                File::put($detailsPath, $this->encodeJson($namePayload));
+            }
 
             $nameArtifacts[] = [
                 'imdb_id' => $imdbId,
@@ -101,5 +105,16 @@ class DownloadImdbStarMeterChartAction
         } catch (JsonException $exception) {
             throw new RuntimeException('Failed to encode IMDb star meter chart payload.', previous: $exception);
         }
+    }
+
+    private function normalizeStorageDirectory(?string $storageDirectory): ?string
+    {
+        if (! is_string($storageDirectory)) {
+            return null;
+        }
+
+        $storageDirectory = rtrim($storageDirectory, DIRECTORY_SEPARATOR);
+
+        return $storageDirectory === '' ? null : $storageDirectory;
     }
 }

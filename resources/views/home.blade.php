@@ -1,7 +1,7 @@
 @extends('layouts.public')
 
 @section('title', 'Home')
-@section('meta_description', 'Browse the imported IMDb catalog through trending titles, top rated movies and series, featured genres, and people pages.')
+@section('meta_description', 'Browse the imported IMDb catalog through trending titles, top rated movies and series, featured genres, people pages, and interest-category lanes.')
 
 @section('content')
     <section class="space-y-6">
@@ -89,9 +89,9 @@
                                         View title page
                                     </x-ui.button>
                                     @if ($heroTrailer?->url)
-                                        <x-ui.button as="a" :href="$heroTrailer->url" variant="outline" icon="play">
+                                        <x-ui.button.light-outline :href="$heroTrailer->url" icon="play">
                                             Watch trailer
-                                        </x-ui.button>
+                                        </x-ui.button.light-outline>
                                     @endif
                                     <x-ui.button as="a" :href="route('public.discover')" variant="ghost" icon="sparkles">
                                         Open discovery
@@ -111,9 +111,9 @@
                                     <x-ui.button as="a" :href="route('public.discover')" icon="sparkles">
                                         Start discovering
                                     </x-ui.button>
-                                    <x-ui.button as="a" :href="route('public.search')" variant="outline" icon="magnifying-glass">
+                                    <x-ui.button.light-outline :href="route('public.search')" icon="magnifying-glass">
                                         Search the catalog
-                                    </x-ui.button>
+                                    </x-ui.button.light-outline>
                                 </div>
                             @endif
                         </div>
@@ -146,9 +146,10 @@
                         The public catalog is split into focused browse routes instead of one overloaded index.
                     </x-ui.text>
                     <div class="flex flex-wrap gap-2">
-                        <x-ui.button as="a" :href="route('public.movies.index')" variant="outline" icon="film">Movies</x-ui.button>
-                        <x-ui.button as="a" :href="route('public.series.index')" variant="outline" icon="tv">TV Shows</x-ui.button>
-                        <x-ui.button as="a" :href="route('public.people.index')" variant="outline" icon="users">People</x-ui.button>
+                        <x-ui.button.light-outline :href="route('public.movies.index')" icon="film">Movies</x-ui.button.light-outline>
+                        <x-ui.button.light-outline :href="route('public.series.index')" icon="tv">TV Shows</x-ui.button.light-outline>
+                        <x-ui.button.light-outline :href="route('public.people.index')" icon="users">People</x-ui.button.light-outline>
+                        <x-ui.button.light-outline :href="route('public.interest-categories.index')" icon="squares-2x2">Themes</x-ui.button.light-outline>
                     </div>
                 </div>
             </x-ui.card>
@@ -175,21 +176,50 @@
                         Jump directly into trending, top rated pages, or a full-text catalog search.
                     </x-ui.text>
                     <div class="flex flex-wrap gap-2">
-                        <x-ui.button as="a" :href="route('public.trending')" variant="outline" icon="bolt">Trending</x-ui.button>
-                        <x-ui.button as="a" :href="route('public.rankings.movies')" variant="outline" icon="star">Top Movies</x-ui.button>
-                        <x-ui.button as="a" :href="route('public.trailers.latest')" variant="outline" icon="play">Trailers</x-ui.button>
-                        <x-ui.button as="a" :href="route('public.search')" variant="outline" icon="magnifying-glass">Search</x-ui.button>
+                        <x-ui.button.light-outline :href="route('public.trending')" icon="bolt">Trending</x-ui.button.light-outline>
+                        <x-ui.button.light-outline :href="route('public.rankings.movies')" icon="star">Top Movies</x-ui.button.light-outline>
+                        <x-ui.button.light-outline :href="route('public.trailers.latest')" icon="play">Trailers</x-ui.button.light-outline>
+                        <x-ui.button.light-outline :href="route('public.search')" icon="magnifying-glass">Search</x-ui.button.light-outline>
                     </div>
                 </div>
             </x-ui.card>
         </div>
 
-        @php
-            $featuredAwardEntry = $awardsSpotlightEntries->first();
-            $supportingAwardEntries = $awardsSpotlightEntries->slice(1)->values();
-            $featuredTrailerTitle = $latestTrailerTitles->first();
-            $supportingTrailerTitles = $latestTrailerTitles->slice(1)->values();
-        @endphp
+        <x-ui.card class="!max-w-none overflow-hidden p-0" data-slot="home-theme-lanes">
+            <div class="space-y-5 p-5 sm:p-6">
+                <div class="flex items-start justify-between gap-4">
+                    <div class="space-y-2">
+                        <div class="sb-page-kicker">Interest-category archive</div>
+                        <x-ui.heading level="h2" size="lg">Theme lanes</x-ui.heading>
+                    </div>
+                    <x-ui.link.light :href="route('public.interest-categories.index')" iconAfter="arrow-right">
+                        Browse themes
+                    </x-ui.link.light>
+                </div>
+
+                @if ($featuredInterestCategories->isNotEmpty())
+                    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                        @foreach ($featuredInterestCategories as $interestCategory)
+                            <x-catalog.interest-category-card :interest-category="$interestCategory">
+                                <x-ui.badge variant="outline" color="neutral" icon="sparkles">
+                                    Discovery lane
+                                </x-ui.badge>
+                            </x-catalog.interest-category-card>
+                        @endforeach
+                    </div>
+                @else
+                    <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                        <x-ui.empty.media>
+                            <x-ui.icon name="squares-2x2" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                        </x-ui.empty.media>
+                        <x-ui.heading level="h3">No theme lanes are published yet.</x-ui.heading>
+                        <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
+                            This section fills automatically once the imported interest-category graph exposes title-linked discovery lanes.
+                        </x-ui.text>
+                    </x-ui.empty>
+                @endif
+            </div>
+        </x-ui.card>
 
         <div class="grid gap-6 xl:grid-cols-[minmax(0,1.02fr)_minmax(0,0.98fr)]">
             <x-ui.card class="!max-w-none overflow-hidden p-0" data-slot="home-awards-spotlight">
@@ -202,9 +232,9 @@
                                 A quick pass through award-recognized titles already linked to the imported event, category, and nominee tables.
                             </x-ui.text>
                         </div>
-                        <x-ui.link :href="route('public.awards.index')" variant="ghost" iconAfter="arrow-right">
+                        <x-ui.link.light :href="route('public.awards.index')" iconAfter="arrow-right">
                             Open awards
-                        </x-ui.link>
+                        </x-ui.link.light>
                     </div>
 
                     @if ($featuredAwardEntry)
@@ -256,9 +286,9 @@
                                 </div>
 
                                 <div class="flex flex-wrap gap-3">
-                                    <x-ui.button as="a" :href="route('public.titles.show', $featuredAwardEntry['title'])" variant="outline" icon="film">
+                                    <x-ui.button.light-outline :href="route('public.titles.show', $featuredAwardEntry['title'])" icon="film">
                                         View title page
-                                    </x-ui.button>
+                                    </x-ui.button.light-outline>
                                     <x-ui.button as="a" :href="route('public.awards.index')" variant="ghost" icon="trophy">
                                         Browse archive
                                     </x-ui.button>
@@ -313,18 +343,15 @@
                                 Trailer-linked titles pulled directly from the imported video rows, with fast paths into the title page or the full trailer archive.
                             </x-ui.text>
                         </div>
-                        <x-ui.link :href="route('public.trailers.latest')" variant="ghost" iconAfter="arrow-right">
+                        <x-ui.link.light :href="route('public.trailers.latest')" iconAfter="arrow-right">
                             Open trailers
-                        </x-ui.link>
+                        </x-ui.link.light>
                     </div>
 
                     @if ($featuredTrailerTitle)
                         <div class="space-y-4">
                             <div class="overflow-hidden rounded-[1.25rem] border border-black/5 bg-neutral-100 shadow-sm dark:border-white/10 dark:bg-neutral-800">
-                                @if ($featuredTrailerTitle->preferredBackdrop() || $featuredTrailerTitle->preferredPoster())
-                                    @php
-                                        $featuredTrailerAsset = $featuredTrailerTitle->preferredBackdrop() ?: $featuredTrailerTitle->preferredPoster();
-                                    @endphp
+                                @if ($featuredTrailerAsset)
                                     <img
                                         src="{{ $featuredTrailerAsset->url }}"
                                         alt="{{ $featuredTrailerAsset->alt_text ?: $featuredTrailerTitle->name }}"
@@ -363,9 +390,9 @@
                                             Watch trailer
                                         </x-ui.button>
                                     @endif
-                                    <x-ui.button as="a" :href="route('public.titles.show', $featuredTrailerTitle)" variant="outline" icon="film">
+                                    <x-ui.button.light-outline :href="route('public.titles.show', $featuredTrailerTitle)" icon="film">
                                         View title page
-                                    </x-ui.button>
+                                    </x-ui.button.light-outline>
                                 </div>
                             </div>
                         </div>
@@ -425,9 +452,9 @@
                     <div class="sb-page-kicker">Live chart</div>
                     <x-ui.heading level="h2" size="lg">Trending titles</x-ui.heading>
                 </div>
-                <x-ui.link :href="route('public.trending')" variant="ghost" iconAfter="arrow-right">
+                <x-ui.link.light :href="route('public.trending')" iconAfter="arrow-right">
                     Open trending
-                </x-ui.link>
+                </x-ui.link.light>
             </div>
 
             <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -443,9 +470,9 @@
                     <div class="sb-page-kicker">Top rated</div>
                     <x-ui.heading level="h2" size="lg">Movies</x-ui.heading>
                 </div>
-                <x-ui.link :href="route('public.rankings.movies')" variant="ghost" iconAfter="arrow-right">
+                <x-ui.link.light :href="route('public.rankings.movies')" iconAfter="arrow-right">
                     Full movie chart
-                </x-ui.link>
+                </x-ui.link.light>
             </div>
 
             <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -461,9 +488,9 @@
                     <div class="sb-page-kicker">Top rated</div>
                     <x-ui.heading level="h2" size="lg">Series</x-ui.heading>
                 </div>
-                <x-ui.link :href="route('public.rankings.series')" variant="ghost" iconAfter="arrow-right">
+                <x-ui.link.light :href="route('public.rankings.series')" iconAfter="arrow-right">
                     Full series chart
-                </x-ui.link>
+                </x-ui.link.light>
             </div>
 
             <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -479,9 +506,9 @@
                     <div class="sb-page-kicker">Editors' picks</div>
                     <x-ui.heading level="h2" size="lg">Featured titles</x-ui.heading>
                 </div>
-                <x-ui.link :href="route('public.discover')" variant="ghost" iconAfter="arrow-right">
+                <x-ui.link.light :href="route('public.discover')" iconAfter="arrow-right">
                     Discovery
-                </x-ui.link>
+                </x-ui.link.light>
             </div>
 
             <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -497,9 +524,9 @@
                     <div class="sb-page-kicker">Profiles</div>
                     <x-ui.heading level="h2" size="lg">Popular people</x-ui.heading>
                 </div>
-                <x-ui.link :href="route('public.people.index')" variant="ghost" iconAfter="arrow-right">
+                <x-ui.link.light :href="route('public.people.index')" iconAfter="arrow-right">
                     Browse people
-                </x-ui.link>
+                </x-ui.link.light>
             </div>
 
             <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">

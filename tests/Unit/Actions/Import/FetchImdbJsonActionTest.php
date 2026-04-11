@@ -4,13 +4,17 @@ namespace Tests\Unit\Actions\Import;
 
 use App\Actions\Import\FetchImdbJsonAction;
 use Carbon\CarbonInterval;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Sleep;
+use Tests\Concerns\UsesCatalogOnlyApplication;
 use Tests\TestCase;
 
 class FetchImdbJsonActionTest extends TestCase
 {
+    use UsesCatalogOnlyApplication;
+
     public function test_it_waits_one_second_between_consecutive_requests(): void
     {
         config()->set('services.imdb.inter_request_delay_microseconds', 1_000_000);
@@ -111,6 +115,71 @@ class FetchImdbJsonActionTest extends TestCase
         Sleep::assertSlept(
             fn (CarbonInterval $duration): bool => (int) $duration->totalMicroseconds === 1_000_000,
             1,
+        );
+    }
+
+    public function test_it_retries_connection_failures_five_times_before_succeeding(): void
+    {
+        config()->set('services.imdb.inter_request_delay_microseconds', 0);
+        config()->set('services.imdb.retry_attempts', 5);
+        config()->set('services.imdb.retry_delay_milliseconds', 250);
+
+        $attempts = 0;
+
+        Http::preventStrayRequests();
+        Http::fake(function (Request $request) use (&$attempts) {
+            $attempts++;
+
+            if ($attempts < 5) {
+                throw new ConnectionException('cURL error 2: getaddrinfo() thread failed to start');
+            }
+
+            return Http::response([
+                'url' => $request->url(),
+            ], 200);
+        });
+
+        $action = app(FetchImdbJsonAction::class);
+
+        $payload = $action->get('https://api.imdbapi.dev/names/nm3142672');
+
+        $this->assertSame('https://api.imdbapi.dev/names/nm3142672', $payload['url']);
+        $this->assertSame(5, $attempts);
+        Sleep::assertSleptTimes(4);
+        Sleep::assertSlept(
+            fn (CarbonInterval $duration): bool => (int) $duration->totalMicroseconds === 250_000,
+            4,
+        );
+    }
+
+    public function test_it_retries_failed_responses_five_times_before_succeeding(): void
+    {
+        config()->set('services.imdb.inter_request_delay_microseconds', 0);
+        config()->set('services.imdb.retry_attempts', 5);
+        config()->set('services.imdb.retry_delay_milliseconds', 250);
+
+        Http::preventStrayRequests();
+        Http::fake([
+            'api.imdbapi.dev/names/nm3142672' => Http::sequence()
+                ->push(['error' => 'temporary'], 500)
+                ->push(['error' => 'temporary'], 500)
+                ->push(['error' => 'temporary'], 500)
+                ->push(['error' => 'temporary'], 500)
+                ->push([
+                    'url' => 'https://api.imdbapi.dev/names/nm3142672',
+                ], 200),
+        ]);
+
+        $action = app(FetchImdbJsonAction::class);
+
+        $payload = $action->get('https://api.imdbapi.dev/names/nm3142672');
+
+        $this->assertSame('https://api.imdbapi.dev/names/nm3142672', $payload['url']);
+        Http::assertSentCount(5);
+        Sleep::assertSleptTimes(4);
+        Sleep::assertSlept(
+            fn (CarbonInterval $duration): bool => (int) $duration->totalMicroseconds === 250_000,
+            4,
         );
     }
 

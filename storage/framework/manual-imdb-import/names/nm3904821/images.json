@@ -1,0 +1,17 @@
+{
+    "images": [
+        {
+            "url": "https://m.media-amazon.com/images/M/MV5BZTM2NWU4MGYtN2Y5ZC00YTU4LTgyMTYtYjc2YWYxZTc5MDM0XkEyXkFqcGc@._V1_.jpg",
+            "width": 3300,
+            "height": 4401,
+            "type": "publicity"
+        },
+        {
+            "url": "https://m.media-amazon.com/images/M/MV5BNDc1MjA2MjAyOF5BMl5BanBnXkFtZTgwMzYwOTk0MDI@._V1_.jpg",
+            "width": 1856,
+            "height": 2784,
+            "type": "still_frame"
+        }
+    ],
+    "totalCount": 2
+}

@@ -33,10 +33,9 @@ class LoadEpisodeDetailsAction
      */
     public function handle(Title $series, Season $season, Title $episode): array
     {
-        $series->load([
+        $series->loadMissing([
             'seasons:movie_id,season,episode_count',
-            'titleImages:id,movie_id,position,url,width,height,type',
-            'primaryImageRecord:movie_id,url,width,height,type',
+            ...Title::catalogHeroRelations(),
         ]);
 
         $season->load([
@@ -44,60 +43,18 @@ class LoadEpisodeDetailsAction
                 ->select(['episode_movie_id', 'movie_id', 'season', 'episode_number', 'release_year', 'release_month', 'release_day'])
                 ->with([
                     'title' => fn ($titleQuery) => $titleQuery
-                        ->select([
-                            'movies.id',
-                            'movies.tconst',
-                            'movies.imdb_id',
-                            'movies.primarytitle',
-                            'movies.originaltitle',
-                            'movies.titletype',
-                            'movies.isadult',
-                            'movies.startyear',
-                            'movies.endyear',
-                            'movies.runtimeminutes',
-                        ])
-                        ->with([
-                            'statistic:movie_id,aggregate_rating,vote_count',
-                            'plotRecord:movie_id,plot',
-                        ]),
+                        ->selectCatalogCardColumns()
+                        ->withCatalogHeroRelations(),
                 ])
                 ->orderBy('episode_number'),
         ]);
 
-        $episode->load([
+        $episode->loadMissing([
             'episodeMeta:episode_movie_id,movie_id,season,episode_number,release_year,release_month,release_day',
             'genres:id,name',
-            'credits' => fn ($query) => $query
-                ->select(['name_basic_id', 'movie_id', 'category', 'episode_count', 'position'])
-                ->with([
-                    'person' => fn ($personQuery) => $personQuery
-                        ->select([
-                            'id',
-                            'nconst',
-                            'imdb_id',
-                            'primaryname',
-                            'displayName',
-                            'alternativeNames',
-                            'primaryProfessions',
-                            'biography',
-                            'birthLocation',
-                            'deathLocation',
-                            'primaryImage_url',
-                            'primaryImage_width',
-                            'primaryImage_height',
-                        ])
-                        ->with([
-                            'personImages:name_basic_id,position,url,width,height,type',
-                            'professionTerms:id,name',
-                        ]),
-                ])
-                ->orderBy('position')
-                ->limit(24),
-            'statistic:movie_id,aggregate_rating,vote_count',
-            'titleImages:id,movie_id,position,url,width,height,type',
-            'primaryImageRecord:movie_id,url,width,height,type',
-            'plotRecord:movie_id,plot',
+            ...Title::catalogHeroRelations(),
         ]);
+        $this->loadEpisodeCredits($episode);
 
         $seasonNavigation = $series->seasons->values();
         $seasonEpisodes = $season->episodes
@@ -123,7 +80,7 @@ class LoadEpisodeDetailsAction
             ->values();
         $detailItems = collect([
             ['label' => 'Air date', 'value' => $episode->episodeMeta?->aired_at?->format('M j, Y')],
-            ['label' => 'Runtime', 'value' => $episode->runtime_minutes ? $episode->runtime_minutes.' min' : null],
+            ['label' => 'Runtime', 'value' => $episode->runtimeMinutesLabel()],
             ['label' => 'Season / episode', 'value' => $episode->episodeMeta ? sprintf('S%02dE%02d', $episode->episodeMeta->season_number, $episode->episodeMeta->episode_number) : null],
             ['label' => 'Series', 'value' => $series->name],
         ])->filter(fn (array $item): bool => filled($item['value']))->values();
@@ -161,5 +118,18 @@ class LoadEpisodeDetailsAction
                 ],
             ),
         ];
+    }
+
+    private function loadEpisodeCredits(Title $episode): void
+    {
+        $episode->setRelation('credits', $episode->credits()
+            ->select(['name_credits.id', 'name_credits.name_basic_id', 'name_credits.movie_id', 'name_credits.category', 'name_credits.episode_count', 'name_credits.position'])
+            ->ordered()
+            ->withPersonPreview()
+            ->with([
+                'nameCreditCharacters:name_credit_id,position,character_name',
+            ])
+            ->limit(24)
+            ->get());
     }
 }

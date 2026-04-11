@@ -19,29 +19,23 @@ class LoadTitleBoxOfficeAction
      *     summaryCards: Collection<int, array{key: string, label: string, value: string, copy: string}>,
      *     rankCards: Collection<int, array{key: string, label: string, value: string, copy: string}>,
      *     comparisonCards: Collection<int, array{key: string, label: string, value: string, copy: string}>,
-     *     marketRows: Collection<int, array{market: string, weeksLabel: string|null, copy: string}>,
+     *     heroContextCards: Collection<int, array{key: string, label: string, value: string, copy: string}>,
+     *     reportingRows: Collection<int, array{key: string, label: string, badge: string|null, copy: string}>,
      *     reportedFigureCount: int,
-     *     reportedMarketCount: int,
+     *     reportedCoverageCount: int,
      *     spotlightMetric: array{key: string, label: string, value: string, copy: string}|null,
-     *     secondaryMetric: array{key: string, label: string, value: string, copy: string}|null,
-     *     spotlightRank: array{key: string, label: string, value: string, copy: string}|null,
-     *     budgetMultiple: array{key: string, label: string, value: string, copy: string}|null,
      *     seo: PageSeoData
      * }
      */
     public function handle(Title $title): array
     {
-        $title->load([
-            'titleImages:id,movie_id,position,url,width,height,type',
-            'primaryImageRecord:movie_id,url,width,height,type',
-            'boxOfficeRecord:movie_id,domestic_gross_amount,domestic_gross_currency_code,worldwide_gross_amount,worldwide_gross_currency_code,opening_weekend_gross_amount,opening_weekend_gross_currency_code,opening_weekend_end_year,opening_weekend_end_month,opening_weekend_end_day,production_budget_amount,production_budget_currency_code',
-        ]);
+        $title->loadMissing(Title::catalogBoxOfficeRelations());
 
         $poster = $title->preferredPoster();
         $backdrop = $title->preferredBackdrop();
         $summaryCards = $this->buildSummaryCards($title->boxOfficeRecord);
-        $marketRows = collect();
-        $comparisonCards = $this->buildComparisonCards($title->boxOfficeRecord, $marketRows->count());
+        $reportingRows = $this->buildReportingRows($title->boxOfficeRecord, $summaryCards);
+        $comparisonCards = $this->buildComparisonCards($title->boxOfficeRecord, $reportingRows->count());
         $rankCards = $this->buildRankCards($title->boxOfficeRecord);
         $spotlightMetric = $summaryCards->firstWhere('key', 'lifetimeGross') ?? $summaryCards->first();
         $secondaryMetric = is_array($spotlightMetric)
@@ -49,6 +43,13 @@ class LoadTitleBoxOfficeAction
             : $summaryCards->first();
         $spotlightRank = is_array($spotlightMetric) ? $rankCards->firstWhere('key', $spotlightMetric['key']) : null;
         $budgetMultiple = $comparisonCards->firstWhere('key', 'budgetMultiple');
+        $heroContextCards = $this->buildHeroContextCards(
+            $title->boxOfficeRecord,
+            $summaryCards,
+            is_array($secondaryMetric) ? $secondaryMetric : null,
+            is_array($spotlightRank) ? $spotlightRank : null,
+            is_array($budgetMultiple) ? $budgetMultiple : null,
+        );
         $openGraphType = in_array($title->title_type, [TitleType::Series, TitleType::MiniSeries], true)
             ? 'video.tv_show'
             : 'video.movie';
@@ -60,16 +61,14 @@ class LoadTitleBoxOfficeAction
             'summaryCards' => $summaryCards,
             'rankCards' => $rankCards,
             'comparisonCards' => $comparisonCards,
-            'marketRows' => $marketRows,
+            'heroContextCards' => $heroContextCards,
+            'reportingRows' => $reportingRows,
             'reportedFigureCount' => $summaryCards->count(),
-            'reportedMarketCount' => $marketRows->count(),
+            'reportedCoverageCount' => $reportingRows->count(),
             'spotlightMetric' => is_array($spotlightMetric) ? $spotlightMetric : null,
-            'secondaryMetric' => is_array($secondaryMetric) ? $secondaryMetric : null,
-            'spotlightRank' => is_array($spotlightRank) ? $spotlightRank : null,
-            'budgetMultiple' => is_array($budgetMultiple) ? $budgetMultiple : null,
             'seo' => new PageSeoData(
                 title: $title->name.' Box Office Report',
-                description: 'Review opening weekend, lifetime gross, budget, ranked positions, and market coverage for '.$title->name.'.',
+                description: 'Review opening weekend, lifetime gross, budget, ranked positions, and reporting footprint for '.$title->name.'.',
                 canonical: route('public.titles.box-office', $title),
                 openGraphType: $openGraphType,
                 openGraphImage: $backdrop?->url ?? $poster?->url,
@@ -139,7 +138,7 @@ class LoadTitleBoxOfficeAction
     /**
      * @return Collection<int, array{key: string, label: string, value: string, copy: string}>
      */
-    private function buildComparisonCards(?MovieBoxOffice $boxOffice, int $reportedMarketCount): Collection
+    private function buildComparisonCards(?MovieBoxOffice $boxOffice, int $reportedCoverageCount): Collection
     {
         if (! $boxOffice instanceof MovieBoxOffice) {
             return collect();
@@ -167,12 +166,12 @@ class LoadTitleBoxOfficeAction
             $this->buildDomesticShareCard($domesticGross, $lifetimeGross),
             $this->buildInternationalGrossCard($domesticGross, $lifetimeGross),
             $this->buildOpeningShareCard($openingWeekend, $lifetimeGross),
-            $reportedMarketCount > 0
+            $reportedCoverageCount > 0
                 ? [
-                    'key' => 'reportedMarkets',
-                    'label' => 'Reported Markets',
-                    'value' => number_format($reportedMarketCount),
-                    'copy' => 'The current import tracks theatrical runway coverage across these markets.',
+                    'key' => 'reportedFields',
+                    'label' => 'Imported Fields',
+                    'value' => number_format($reportedCoverageCount),
+                    'copy' => 'Commercial fields currently populated on the imported box-office row.',
                 ]
                 : null,
         ])
@@ -331,6 +330,238 @@ class LoadTitleBoxOfficeAction
             'value' => number_format($share, 1).'%',
             'copy' => 'How much of the lifetime total arrived during opening weekend.',
         ];
+    }
+
+    /**
+     * @param  Collection<int, array{key: string, label: string, value: string, copy: string}>  $summaryCards
+     * @return Collection<int, array{key: string, label: string, badge: string|null, copy: string}>
+     */
+    private function buildReportingRows(?MovieBoxOffice $boxOffice, Collection $summaryCards): Collection
+    {
+        if (! $boxOffice instanceof MovieBoxOffice) {
+            return collect();
+        }
+
+        $reportedCurrenciesLabel = $this->formatReportedCurrenciesLabel($boxOffice);
+        $openingWeekendCloseDate = $this->formatOpeningWeekendCloseDate($boxOffice);
+
+        return collect([
+            filled($boxOffice->worldwide_gross_amount)
+                ? [
+                    'key' => 'lifetimeGross',
+                    'label' => 'Lifetime gross reporting',
+                    'badge' => $this->formatCurrencyBadge($boxOffice->worldwide_gross_currency_code),
+                    'copy' => 'Worldwide theatrical gross is populated on the imported box-office row.',
+                ]
+                : null,
+            filled($boxOffice->domestic_gross_amount)
+                ? [
+                    'key' => 'domesticGross',
+                    'label' => 'Domestic gross reporting',
+                    'badge' => $this->formatCurrencyBadge($boxOffice->domestic_gross_currency_code),
+                    'copy' => 'Home-market theatrical gross is available for this title.',
+                ]
+                : null,
+            filled($boxOffice->opening_weekend_gross_amount)
+                ? [
+                    'key' => 'openingWeekend',
+                    'label' => 'Opening weekend reporting',
+                    'badge' => $openingWeekendCloseDate ?? $this->formatCurrencyBadge($boxOffice->opening_weekend_gross_currency_code),
+                    'copy' => $openingWeekendCloseDate !== null
+                        ? 'Opening weekend gross is present with a tracked weekend close date.'
+                        : 'Opening weekend gross is attached on the imported commercial row.',
+                ]
+                : null,
+            filled($boxOffice->production_budget_amount)
+                ? [
+                    'key' => 'productionBudget',
+                    'label' => 'Production budget reporting',
+                    'badge' => $this->formatCurrencyBadge($boxOffice->production_budget_currency_code),
+                    'copy' => 'Budget reporting is available for revenue and multiple comparisons.',
+                ]
+                : null,
+            $reportedCurrenciesLabel !== null
+                ? [
+                    'key' => 'reportedCurrencies',
+                    'label' => 'Reported currencies',
+                    'badge' => $reportedCurrenciesLabel,
+                    'copy' => 'Distinct currency codes currently attached to the imported commercial fields.',
+                ]
+                : null,
+            $summaryCards->isNotEmpty()
+                ? [
+                    'key' => 'figureCoverage',
+                    'label' => 'Figure coverage',
+                    'badge' => $summaryCards->count().' / 4',
+                    'copy' => 'Headline commercial fields currently populated on the title\'s box-office record.',
+                ]
+                : null,
+        ])
+            ->filter(fn (mixed $row): bool => is_array($row))
+            ->values();
+    }
+
+    /**
+     * @param  Collection<int, array{key: string, label: string, value: string, copy: string}>  $summaryCards
+     * @param  array{key: string, label: string, value: string, copy: string}|null  $secondaryMetric
+     * @param  array{key: string, label: string, value: string, copy: string}|null  $spotlightRank
+     * @param  array{key: string, label: string, value: string, copy: string}|null  $budgetMultiple
+     * @return Collection<int, array{key: string, label: string, value: string, copy: string}>
+     */
+    private function buildHeroContextCards(
+        ?MovieBoxOffice $boxOffice,
+        Collection $summaryCards,
+        ?array $secondaryMetric,
+        ?array $spotlightRank,
+        ?array $budgetMultiple,
+    ): Collection {
+        return collect([
+            $this->formatRankCardForHero($spotlightRank),
+            $budgetMultiple,
+            $this->buildOpeningWeekendCloseDateCard($boxOffice),
+            $this->buildFigureCoverageCard($summaryCards),
+            $this->buildReportedCurrenciesCard($boxOffice),
+            $secondaryMetric,
+        ])
+            ->filter(fn (mixed $card): bool => is_array($card))
+            ->unique('key')
+            ->take(2)
+            ->values();
+    }
+
+    /**
+     * @param  array{key: string, label: string, value: string, copy: string}|null  $spotlightRank
+     * @return array{key: string, label: string, value: string, copy: string}|null
+     */
+    private function formatRankCardForHero(?array $spotlightRank): ?array
+    {
+        if ($spotlightRank === null) {
+            return null;
+        }
+
+        return [
+            'key' => $spotlightRank['key'].'Rank',
+            'label' => $spotlightRank['label'].' rank',
+            'value' => $spotlightRank['value'],
+            'copy' => $spotlightRank['copy'],
+        ];
+    }
+
+    /**
+     * @param  Collection<int, array{key: string, label: string, value: string, copy: string}>  $summaryCards
+     * @return array{key: string, label: string, value: string, copy: string}|null
+     */
+    private function buildFigureCoverageCard(Collection $summaryCards): ?array
+    {
+        if ($summaryCards->isEmpty()) {
+            return null;
+        }
+
+        return [
+            'key' => 'figureCoverage',
+            'label' => 'Figure coverage',
+            'value' => $summaryCards->count().' / 4',
+            'copy' => 'Headline commercial fields currently populated on the imported box-office row.',
+        ];
+    }
+
+    /**
+     * @return array{key: string, label: string, value: string, copy: string}|null
+     */
+    private function buildOpeningWeekendCloseDateCard(?MovieBoxOffice $boxOffice): ?array
+    {
+        $openingWeekendCloseDate = $this->formatOpeningWeekendCloseDate($boxOffice);
+
+        if ($openingWeekendCloseDate === null) {
+            return null;
+        }
+
+        return [
+            'key' => 'openingWeekendCloseDate',
+            'label' => 'Weekend closed',
+            'value' => $openingWeekendCloseDate,
+            'copy' => 'Calendar close date stored alongside the opening-weekend gross figure.',
+        ];
+    }
+
+    /**
+     * @return array{key: string, label: string, value: string, copy: string}|null
+     */
+    private function buildReportedCurrenciesCard(?MovieBoxOffice $boxOffice): ?array
+    {
+        $reportedCurrenciesLabel = $this->formatReportedCurrenciesLabel($boxOffice);
+
+        if ($reportedCurrenciesLabel === null) {
+            return null;
+        }
+
+        return [
+            'key' => 'reportedCurrencies',
+            'label' => 'Reported currencies',
+            'value' => $reportedCurrenciesLabel,
+            'copy' => 'Distinct currency codes attached to the imported commercial figures.',
+        ];
+    }
+
+    private function formatOpeningWeekendCloseDate(?MovieBoxOffice $boxOffice): ?string
+    {
+        if (! $boxOffice instanceof MovieBoxOffice) {
+            return null;
+        }
+
+        if (
+            ! is_int($boxOffice->opening_weekend_end_year)
+            || ! is_int($boxOffice->opening_weekend_end_month)
+            || ! is_int($boxOffice->opening_weekend_end_day)
+        ) {
+            return null;
+        }
+
+        if (! checkdate(
+            $boxOffice->opening_weekend_end_month,
+            $boxOffice->opening_weekend_end_day,
+            $boxOffice->opening_weekend_end_year,
+        )) {
+            return null;
+        }
+
+        return sprintf(
+            '%s %d, %d',
+            now()->setDate(
+                $boxOffice->opening_weekend_end_year,
+                $boxOffice->opening_weekend_end_month,
+                $boxOffice->opening_weekend_end_day,
+            )->format('M'),
+            $boxOffice->opening_weekend_end_day,
+            $boxOffice->opening_weekend_end_year,
+        );
+    }
+
+    private function formatReportedCurrenciesLabel(?MovieBoxOffice $boxOffice): ?string
+    {
+        if (! $boxOffice instanceof MovieBoxOffice) {
+            return null;
+        }
+
+        $currencyCodes = array_values(array_unique(array_filter([
+            $this->formatCurrencyBadge($boxOffice->domestic_gross_currency_code),
+            $this->formatCurrencyBadge($boxOffice->worldwide_gross_currency_code),
+            $this->formatCurrencyBadge($boxOffice->opening_weekend_gross_currency_code),
+            $this->formatCurrencyBadge($boxOffice->production_budget_currency_code),
+        ])));
+
+        if ($currencyCodes === []) {
+            return null;
+        }
+
+        return implode(' / ', $currencyCodes);
+    }
+
+    private function formatCurrencyBadge(mixed $currency): ?string
+    {
+        $currencyCode = $this->nullableString(is_scalar($currency) ? (string) $currency : null);
+
+        return $currencyCode !== null ? strtoupper($currencyCode) : null;
     }
 
     /**

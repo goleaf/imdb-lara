@@ -1,0 +1,363 @@
+{
+    "schemaVersion": 1,
+    "imdbId": "nm1197689",
+    "downloadedAt": "2026-04-11T03:12:56+00:00",
+    "sourceUrl": "https://api.imdbapi.dev/names/nm1197689",
+    "details": {
+        "id": "nm1197689",
+        "displayName": "Sandra Hüller",
+        "primaryImage": {
+            "url": "https://m.media-amazon.com/images/M/MV5BOGM2NzE5ODAtZjdiMi00YzgwLWI3YTItZWExMTE2MjM4MmE3XkEyXkFqcGc@._V1_.jpg",
+            "width": 837,
+            "height": 1488
+        },
+        "primaryProfessions": [
+            "actress",
+            "miscellaneous",
+            "soundtrack"
+        ],
+        "biography": "Sandra Hüller was born in Suhl. She studied acting at the Ernst Busch Academy of Dramatic Arts in Berlin. For her performance of Anneliese Michel in Hans-Christian Schmid's drama Requiem she won The Silver Bear for Best Actress. She is internationally known for her starring role in Maren Ade's Toni Erdmann, for which she won among others the European Film Award and the Toronto Film Critics Association Award for Best Actress.",
+        "heightCm": 173,
+        "birthDate": {
+            "year": 1978,
+            "month": 4,
+            "day": 30
+        },
+        "birthLocation": "Suhl, East Germany [now Suhl, Thuringia, Germany]"
+    },
+    "images": {
+        "images": [
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BYjE5NTQzYmEtMzA2Yi00NTc4LWE3OTEtMDM3OWJiMWU2ZjNiXkEyXkFqcGc@._V1_.jpg",
+                "width": 1920,
+                "height": 1040,
+                "type": "still_frame"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BNWZjMmU3YTktZjY4ZS00NWY4LThlMDgtNWRhZDBhN2NlZDVmXkEyXkFqcGc@._V1_.jpg",
+                "width": 1920,
+                "height": 1040,
+                "type": "still_frame"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BMTY0MzI3MzM1NV5BMl5BanBnXkFtZTgwNjQ3ODUxMjE@._V1_.jpg",
+                "width": 2953,
+                "height": 1476,
+                "type": "still_frame"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BOWE0YjJiNTgtMmFhYi00YjBjLWE3MmUtMjY5ODRjMjNkZjUwXkEyXkFqcGc@._V1_.jpg",
+                "width": 800,
+                "height": 1200,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BNzc1OTUyMzctYTUzNi00ODE2LThmOTAtNTE1NzFkZjJhNDZjXkEyXkFqcGc@._V1_.jpg",
+                "width": 3552,
+                "height": 1920,
+                "type": "still_frame"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BNDlmNjMzY2MtODE4MS00NWViLTgxYzItMWI1NDkyNjRjYmE4XkEyXkFqcGc@._V1_.jpg",
+                "width": 8192,
+                "height": 5462,
+                "type": "event"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BZjY0ODU2MmItNzBjZi00NGY0LTkzMTQtN2VhMmM5NWY0ZDNmXkEyXkFqcGc@._V1_.jpg",
+                "width": 3552,
+                "height": 1920,
+                "type": "still_frame"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BZWQ1Mjg5NzgtYThiOC00OTA5LThhYWMtMGQ3ZGYwOTlkMjc3XkEyXkFqcGc@._V1_.jpg",
+                "width": 1998,
+                "height": 1080,
+                "type": "still_frame"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BZTAzZmUxMzctMTNjZi00Zjg1LWI5MTMtNWI1YzIzY2Y0ZjI3XkEyXkFqcGc@._V1_.jpg",
+                "width": 3508,
+                "height": 1973,
+                "type": "still_frame"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BNTJlMWJiMDAtN2I3OS00MDg1LTk4M2MtMzRlNzhmZDJlMzI0XkEyXkFqcGc@._V1_.jpg",
+                "width": 2560,
+                "height": 3725,
+                "type": "event"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BNzI4ZGUxNzktNTMxNS00ZDg4LTg5OWEtNGY1YjUxMDdmMzEwXkEyXkFqcGc@._V1_.jpg",
+                "width": 3579,
+                "height": 5369,
+                "type": "event"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BOGFhY2VkNDQtYTJhMS00OWMzLWJmYTQtYjdjYzU2MjM1ODhkXkEyXkFqcGc@._V1_.jpg",
+                "width": 4332,
+                "height": 2438,
+                "type": "still_frame"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BMTExMTQwMTMtMTM2ZC00NmFkLTgwYmEtNjRjYTcwN2RkZTQxXkEyXkFqcGc@._V1_.jpg",
+                "width": 342,
+                "height": 513,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BNTI0MDVlMjItYThlZi00NWM5LTg2MGEtMWUwNWJjNzVmNjE2XkEyXkFqcGc@._V1_.jpg",
+                "width": 280,
+                "height": 420,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BYWY3MmNjYTAtZTE1ZC00MGVjLTliM2MtM2FhZGJkNzUxZjQ2XkEyXkFqcGc@._V1_.jpg",
+                "width": 355,
+                "height": 516,
+                "type": "poster"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BMzk5ZGZlZGMtOWQ4My00NzU5LTg2MjItMTM3MTRhMDYwM2YyXkEyXkFqcGc@._V1_.jpg",
+                "width": 1300,
+                "height": 731,
+                "type": "still_frame"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BOGM2NzE5ODAtZjdiMi00YzgwLWI3YTItZWExMTE2MjM4MmE3XkEyXkFqcGc@._V1_.jpg",
+                "width": 837,
+                "height": 1488,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BZDFjOTEwOGItOGI5NS00OTBhLWE1YmEtMjBhZTM2NDI4NjU3XkEyXkFqcGc@._V1_.jpg",
+                "width": 1200,
+                "height": 1800,
+                "type": "poster"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BYzc1NzZjNGQtZDQ0NC00NmY4LWJkOWEtZTlkODY5YTA2YWJkXkEyXkFqcGc@._V1_.jpg",
+                "width": 1408,
+                "height": 792,
+                "type": "still_frame"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BZjk2MDQ5MGYtMDMwOC00YmU4LTg4YTUtOTgwZDg1NDViNDhmXkEyXkFqcGc@._V1_.jpg",
+                "width": 1280,
+                "height": 720,
+                "type": "event"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BYjE5NTQzYmEtMzA2Yi00NTc4LWE3OTEtMDM3OWJiMWU2ZjNiXkEyXkFqcGc@._V1_.jpg",
+                "width": 1920,
+                "height": 1040,
+                "type": "still_frame"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BNWZjMmU3YTktZjY4ZS00NWY4LThlMDgtNWRhZDBhN2NlZDVmXkEyXkFqcGc@._V1_.jpg",
+                "width": 1920,
+                "height": 1040,
+                "type": "still_frame"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BMTY0MzI3MzM1NV5BMl5BanBnXkFtZTgwNjQ3ODUxMjE@._V1_.jpg",
+                "width": 2953,
+                "height": 1476,
+                "type": "still_frame"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BOWE0YjJiNTgtMmFhYi00YjBjLWE3MmUtMjY5ODRjMjNkZjUwXkEyXkFqcGc@._V1_.jpg",
+                "width": 800,
+                "height": 1200,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BNzc1OTUyMzctYTUzNi00ODE2LThmOTAtNTE1NzFkZjJhNDZjXkEyXkFqcGc@._V1_.jpg",
+                "width": 3552,
+                "height": 1920,
+                "type": "still_frame"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BNDlmNjMzY2MtODE4MS00NWViLTgxYzItMWI1NDkyNjRjYmE4XkEyXkFqcGc@._V1_.jpg",
+                "width": 8192,
+                "height": 5462,
+                "type": "event"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BZjY0ODU2MmItNzBjZi00NGY0LTkzMTQtN2VhMmM5NWY0ZDNmXkEyXkFqcGc@._V1_.jpg",
+                "width": 3552,
+                "height": 1920,
+                "type": "still_frame"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BZWQ1Mjg5NzgtYThiOC00OTA5LThhYWMtMGQ3ZGYwOTlkMjc3XkEyXkFqcGc@._V1_.jpg",
+                "width": 1998,
+                "height": 1080,
+                "type": "still_frame"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BZTAzZmUxMzctMTNjZi00Zjg1LWI5MTMtNWI1YzIzY2Y0ZjI3XkEyXkFqcGc@._V1_.jpg",
+                "width": 3508,
+                "height": 1973,
+                "type": "still_frame"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BNTJlMWJiMDAtN2I3OS00MDg1LTk4M2MtMzRlNzhmZDJlMzI0XkEyXkFqcGc@._V1_.jpg",
+                "width": 2560,
+                "height": 3725,
+                "type": "event"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BNzI4ZGUxNzktNTMxNS00ZDg4LTg5OWEtNGY1YjUxMDdmMzEwXkEyXkFqcGc@._V1_.jpg",
+                "width": 3579,
+                "height": 5369,
+                "type": "event"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BOGFhY2VkNDQtYTJhMS00OWMzLWJmYTQtYjdjYzU2MjM1ODhkXkEyXkFqcGc@._V1_.jpg",
+                "width": 4332,
+                "height": 2438,
+                "type": "still_frame"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BMTExMTQwMTMtMTM2ZC00NmFkLTgwYmEtNjRjYTcwN2RkZTQxXkEyXkFqcGc@._V1_.jpg",
+                "width": 342,
+                "height": 513,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BNTI0MDVlMjItYThlZi00NWM5LTg2MGEtMWUwNWJjNzVmNjE2XkEyXkFqcGc@._V1_.jpg",
+                "width": 280,
+                "height": 420,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BYWY3MmNjYTAtZTE1ZC00MGVjLTliM2MtM2FhZGJkNzUxZjQ2XkEyXkFqcGc@._V1_.jpg",
+                "width": 355,
+                "height": 516,
+                "type": "poster"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BMzk5ZGZlZGMtOWQ4My00NzU5LTg2MjItMTM3MTRhMDYwM2YyXkEyXkFqcGc@._V1_.jpg",
+                "width": 1300,
+                "height": 731,
+                "type": "still_frame"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BOGM2NzE5ODAtZjdiMi00YzgwLWI3YTItZWExMTE2MjM4MmE3XkEyXkFqcGc@._V1_.jpg",
+                "width": 837,
+                "height": 1488,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BZDFjOTEwOGItOGI5NS00OTBhLWE1YmEtMjBhZTM2NDI4NjU3XkEyXkFqcGc@._V1_.jpg",
+                "width": 1200,
+                "height": 1800,
+                "type": "poster"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BYzc1NzZjNGQtZDQ0NC00NmY4LWJkOWEtZTlkODY5YTA2YWJkXkEyXkFqcGc@._V1_.jpg",
+                "width": 1408,
+                "height": 792,
+                "type": "still_frame"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BZjk2MDQ5MGYtMDMwOC00YmU4LTg4YTUtOTgwZDg1NDViNDhmXkEyXkFqcGc@._V1_.jpg",
+                "width": 1280,
+                "height": 720,
+                "type": "event"
+            }
+        ],
+        "totalCount": 129
+    },
+    "filmography": null,
+    "relationships": {
+        "relationships": []
+    },
+    "trivia": {
+        "triviaEntries": [
+            {
+                "id": "nt0157878",
+                "text": "She studied at the Ernst Busch Acting Academy in Berlin from 1996 to 2000.",
+                "interestCount": 17,
+                "voteCount": 19
+            },
+            {
+                "id": "nt0157879",
+                "text": "She acted at the Theaterhaus Jena from 1999 to 2001. After that she acted at the Schauspiel Leipzig from 2001 to 2002. She then accepted an invitation to join the Theater Basel where she acted from 2002 to 2006.",
+                "interestCount": 9,
+                "voteCount": 10
+            },
+            {
+                "id": "nt0157880",
+                "text": "She was named Best Newcomer Actress by the Theater Heute in 2003 for her performances in \"Romeo und Julia\" and \"Die sexuellen Neurosen unserer Eltern\" at the Theater Basel.",
+                "interestCount": 19,
+                "voteCount": 19
+            },
+            {
+                "id": "nt1456138",
+                "text": "For her performance in Requiem (2006), she was one of three consecutive German winners of the Silver Bear for Best Actress at Berlin Film Festival: she was preceded by Julia Jentsch in Sophie Scholl: The Final Days (2005) and followed by Nina Hoss in Yella (2007).",
+                "interestCount": 19,
+                "voteCount": 21
+            },
+            {
+                "id": "nt2211487",
+                "text": "She has starred in German, Austrian, British, and French films.",
+                "interestCount": 22,
+                "voteCount": 24
+            },
+            {
+                "id": "nt2211488",
+                "text": "Hüller speaks German, French, and English.",
+                "interestCount": 39,
+                "voteCount": 39
+            },
+            {
+                "id": "nt2330104",
+                "text": "She has a daughter, Ruby (b.2011).",
+                "interestCount": 16,
+                "voteCount": 17
+            },
+            {
+                "id": "nt2379141",
+                "text": "She starred in two films that were nominated for Best Picture at the 2024 Academy Awards, The Zone of Interest (2023) and Anatomy of a Fall (2023).",
+                "interestCount": 19,
+                "voteCount": 20
+            },
+            {
+                "id": "nt2406975",
+                "text": "Was invited to join the Actors branch of the Academy of Motion Picture Arts & Sciences (AMPAS) in 2024.",
+                "interestCount": 3,
+                "voteCount": 5
+            }
+        ],
+        "totalCount": 9
+    },
+    "artifacts": {
+        "details": {
+            "path": "details.json",
+            "url": "https://api.imdbapi.dev/names/nm1197689",
+            "has_payload": true
+        },
+        "images": {
+            "path": "images.json",
+            "url": "https://api.imdbapi.dev/names/nm1197689/images",
+            "has_payload": true
+        },
+        "filmography": {
+            "path": "filmography.json",
+            "url": "https://api.imdbapi.dev/names/nm1197689/filmography",
+            "has_payload": false
+        },
+        "relationships": {
+            "path": "relationships.json",
+            "url": "https://api.imdbapi.dev/names/nm1197689/relationships",
+            "has_payload": true
+        },
+        "trivia": {
+            "path": "trivia.json",
+            "url": "https://api.imdbapi.dev/names/nm1197689/trivia",
+            "has_payload": true
+        }
+    }
+}

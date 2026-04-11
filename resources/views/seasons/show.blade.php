@@ -78,9 +78,9 @@
                             <div class="sb-season-browser-stat">
                                 <div class="sb-cast-summary-label">Average runtime</div>
                                 <div class="sb-cast-summary-value">
-                                    {{ $currentSeasonRuntimeAverage ? number_format((float) $currentSeasonRuntimeAverage, 0) : 'N/A' }}
+                                    {{ $currentSeasonRuntimeAverageLabel ?? 'N/A' }}
                                 </div>
-                                <div class="sb-cast-summary-copy">Minutes per episode.</div>
+                                <div class="sb-cast-summary-copy">Per episode across this season.</div>
                             </div>
                         </div>
 

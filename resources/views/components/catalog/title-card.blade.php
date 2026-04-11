@@ -6,6 +6,8 @@
     'trackingWatchedAt' => null,
 ])
 
+@php($summaryText = $title->summaryText())
+
 <x-ui.card class="sb-poster-card !max-w-none h-full overflow-hidden rounded-[1.4rem] p-3">
     <div class="flex h-full flex-col gap-4">
         <a
@@ -50,9 +52,9 @@
                     </a>
                 </x-ui.heading>
 
-                @if ($showSummary && filled($title->plot_outline))
+                @if ($showSummary && filled($summaryText))
                     <x-ui.text class="text-sm leading-6 text-[#aca293] dark:text-[#aca293]">
-                        {{ str($title->plot_outline)->limit(140) }}
+                        {{ str($summaryText)->limit(140) }}
                     </x-ui.text>
                 @endif
             </div>
@@ -95,9 +97,9 @@
 
             <div class="mt-auto flex items-center justify-between gap-3 text-sm text-[#988f82] dark:text-[#988f82]">
                 <span>{{ number_format($title->displayRatingCount()) }} votes</span>
-                <x-ui.link :href="route('public.titles.show', $title)" variant="ghost" iconAfter="arrow-right">
+                <x-ui.button.light-action :href="route('public.titles.show', $title)" icon="film">
                     View title
-                </x-ui.link>
+                </x-ui.button.light-action>
             </div>
 
             @if ($slot->isNotEmpty())

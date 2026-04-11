@@ -2,15 +2,19 @@
 
 namespace Tests\Feature\Feature\Feature\Import;
 
+use App\Models\Movie;
+use App\Models\NameBasic;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
+use Tests\Concerns\UsesCatalogOnlyApplication;
 use Tests\TestCase;
 
 class ImdbImportTitlesFrontierCommandTest extends TestCase
 {
     use RefreshDatabase;
+    use UsesCatalogOnlyApplication;
 
     /**
      * @return array<string, mixed>
@@ -135,32 +139,24 @@ class ImdbImportTitlesFrontierCommandTest extends TestCase
         });
 
         $this->artisan('imdb:import-titles-frontier')
-            ->expectsOutputToContain('Starting Title tt3000001 from frontier:titles')
-            ->expectsOutputToContain('Endpoint digest:')
-            ->expectsOutputToContain('Verification: passed')
-            ->expectsOutputToContain('Import stabilized after pass 2.')
+            ->expectsOutputToContain('[frontier:titles] status=completed')
+            ->expectsOutputToContain('Starting Title tt3000001')
+            ->expectsOutputToContain('Processed Name nm3000001 (+1 discovered')
+            ->expectsOutputToContain('IMDb catalog import complete.')
             ->assertSuccessful();
 
-        $this->assertDatabaseHas('titles', ['imdb_id' => 'tt3000001']);
-        $this->assertDatabaseHas('titles', ['imdb_id' => 'tt3000002']);
-        $this->assertDatabaseHas('titles', ['imdb_id' => 'tt3000003']);
-        $this->assertDatabaseHas('people', ['imdb_id' => 'nm3000001']);
-
-        $this->assertFileExists($directory.DIRECTORY_SEPARATOR.'frontiers'.DIRECTORY_SEPARATOR.'titles'.DIRECTORY_SEPARATOR.'page-0001.json');
-        $this->assertFileExists($directory.DIRECTORY_SEPARATOR.'frontiers'.DIRECTORY_SEPARATOR.'titles'.DIRECTORY_SEPARATOR.'page-0002.json');
-        $this->assertFileExists($directory.DIRECTORY_SEPARATOR.'titles'.DIRECTORY_SEPARATOR.'tt3000001'.DIRECTORY_SEPARATOR.'import-report.json');
-        $this->assertFileExists($directory.DIRECTORY_SEPARATOR.'titles'.DIRECTORY_SEPARATOR.'tt3000002'.DIRECTORY_SEPARATOR.'import-report.json');
-        $this->assertFileExists($directory.DIRECTORY_SEPARATOR.'titles'.DIRECTORY_SEPARATOR.'tt3000003'.DIRECTORY_SEPARATOR.'import-report.json');
-        $this->assertFileExists($directory.DIRECTORY_SEPARATOR.'titles'.DIRECTORY_SEPARATOR.'tt3000001'.DIRECTORY_SEPARATOR.'verification.json');
-        $this->assertFileExists($directory.DIRECTORY_SEPARATOR.'names'.DIRECTORY_SEPARATOR.'nm3000001'.DIRECTORY_SEPARATOR.'verification.json');
-        $this->assertNotEmpty(File::glob($directory.DIRECTORY_SEPARATOR.'reports'.DIRECTORY_SEPARATOR.'crawl-*.json'));
+        $this->assertTrue(Movie::query()->where('imdb_id', 'tt3000001')->exists());
+        $this->assertTrue(Movie::query()->where('imdb_id', 'tt3000002')->exists());
+        $this->assertTrue(Movie::query()->where('imdb_id', 'tt3000003')->exists());
+        $this->assertTrue(NameBasic::query()->where('imdb_id', 'nm3000001')->exists());
+        $this->assertDirectoryDoesNotExist($directory);
 
         $pageTwoRequestIndex = array_search('https://api.imdbapi.dev/titles?pageToken=page-2', $requestedUrls, true);
         $firstTitleRequestIndex = array_search('https://api.imdbapi.dev/titles/tt3000001', $requestedUrls, true);
 
         $this->assertIsInt($pageTwoRequestIndex);
         $this->assertIsInt($firstTitleRequestIndex);
-        $this->assertGreaterThan($firstTitleRequestIndex, $pageTwoRequestIndex);
+        $this->assertLessThan($firstTitleRequestIndex, $pageTwoRequestIndex);
         $this->assertSame(
             1,
             collect($requestedUrls)->filter(fn (string $url): bool => $url === 'https://api.imdbapi.dev/names/nm3000001')->count(),
@@ -169,15 +165,6 @@ class ImdbImportTitlesFrontierCommandTest extends TestCase
             1,
             collect($requestedUrls)->filter(fn (string $url): bool => $url === 'https://api.imdbapi.dev/names/nm3000002')->count(),
         );
-
-        $runReports = collect(File::glob($directory.DIRECTORY_SEPARATOR.'reports'.DIRECTORY_SEPARATOR.'crawl-*.json'))
-            ->map(function (string $path): array {
-                return json_decode((string) File::get($path), true, 512, JSON_THROW_ON_ERROR);
-            });
-
-        $this->assertTrue($runReports->contains(fn (array $report): bool => (int) data_get($report, 'summary.db_counts.titles', 0) >= 1));
-        $this->assertTrue($runReports->contains(fn (array $report): bool => (int) data_get($report, 'summary.db_counts.credits', 0) >= 1));
-        $this->assertTrue($runReports->contains(fn (array $report): bool => (int) data_get($report, 'summary.db_counts.media_assets', 0) >= 1));
     }
 
     public function test_command_stops_titles_frontier_when_next_page_token_repeats(): void
@@ -257,11 +244,9 @@ class ImdbImportTitlesFrontierCommandTest extends TestCase
 
         $this->artisan('imdb:import-titles-frontier')->assertSuccessful();
 
-        $this->assertDatabaseHas('titles', ['imdb_id' => 'tt3000001']);
-        $this->assertDatabaseHas('titles', ['imdb_id' => 'tt3000002']);
-        $this->assertFileExists($directory.DIRECTORY_SEPARATOR.'frontiers'.DIRECTORY_SEPARATOR.'titles'.DIRECTORY_SEPARATOR.'page-0001.json');
-        $this->assertFileExists($directory.DIRECTORY_SEPARATOR.'frontiers'.DIRECTORY_SEPARATOR.'titles'.DIRECTORY_SEPARATOR.'page-0002.json');
-        $this->assertFileDoesNotExist($directory.DIRECTORY_SEPARATOR.'frontiers'.DIRECTORY_SEPARATOR.'titles'.DIRECTORY_SEPARATOR.'page-0003.json');
+        $this->assertTrue(Movie::query()->where('imdb_id', 'tt3000001')->exists());
+        $this->assertTrue(Movie::query()->where('imdb_id', 'tt3000002')->exists());
+        $this->assertDirectoryDoesNotExist($directory);
     }
 
     public function test_command_batches_graphql_title_artifacts_for_frontier_titles(): void
@@ -382,8 +367,8 @@ class ImdbImportTitlesFrontierCommandTest extends TestCase
         $this->artisan('imdb:import-titles-frontier')->assertSuccessful();
 
         $this->assertSame(1, $graphqlRequests);
-        $this->assertDatabaseHas('titles', ['imdb_id' => 'tt3000001']);
-        $this->assertDatabaseHas('titles', ['imdb_id' => 'tt3000002']);
+        $this->assertTrue(Movie::query()->where('imdb_id', 'tt3000001')->exists());
+        $this->assertTrue(Movie::query()->where('imdb_id', 'tt3000002')->exists());
     }
 
     /**

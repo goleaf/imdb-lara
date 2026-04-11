@@ -9,6 +9,17 @@ use Illuminate\Support\Facades\Cache;
 
 class GetHeroSpotlightAction
 {
+    /**
+     * @var list<string>
+     */
+    private const FEATURED_CREDIT_CATEGORIES = [
+        'actor',
+        'actress',
+        'director',
+        'writer',
+        'producer',
+    ];
+
     public function __construct(
         private BuildPublicTitleIndexQueryAction $buildPublicTitleIndexQuery,
     ) {}
@@ -33,38 +44,36 @@ class GetHeroSpotlightAction
                     ])
                     ->with([
                         'titleVideos:imdb_id,movie_id,video_type_id,name,description,width,height,runtime_seconds,position',
-                        'credits' => fn ($creditQuery) => $creditQuery
-                            ->select(['name_basic_id', 'movie_id', 'category', 'episode_count', 'position'])
-                            ->whereIn('category', ['actor', 'actress', 'director', 'writer', 'producer'])
-                            ->with([
-                                'person' => fn ($personQuery) => $personQuery
-                                    ->select([
-                                        'id',
-                                        'nconst',
-                                        'imdb_id',
-                                        'primaryname',
-                                        'displayName',
-                                        'alternativeNames',
-                                        'primaryProfessions',
-                                        'biography',
-                                        'birthLocation',
-                                        'deathLocation',
-                                        'primaryImage_url',
-                                        'primaryImage_width',
-                                        'primaryImage_height',
-                                    ])
-                                    ->with([
-                                        'personImages:name_basic_id,position,url,width,height,type',
-                                        'professionTerms:id,name',
-                                    ])
-                                    ->limit(8),
-                            ])
-                            ->orderBy('position')
-                            ->limit(8),
                     ]);
 
-                return $query->first();
+                $title = $query->first();
+
+                if (! $title instanceof Title) {
+                    return null;
+                }
+
+                $this->loadFeaturedCredits($title);
+
+                return $title;
             },
         );
+    }
+
+    private function loadFeaturedCredits(Title $title): void
+    {
+        $title->setRelation('credits', $title->credits()
+            ->select([
+                'name_credits.id',
+                'name_credits.name_basic_id',
+                'name_credits.movie_id',
+                'name_credits.category',
+                'name_credits.episode_count',
+                'name_credits.position',
+            ])
+            ->whereIn('name_credits.category', self::FEATURED_CREDIT_CATEGORIES)
+            ->ordered()
+            ->withPersonPreview()
+            ->limit(8)
+            ->get());
     }
 }

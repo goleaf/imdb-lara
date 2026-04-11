@@ -49,7 +49,7 @@
         <x-ui.input
             wire:model.live.debounce.180ms="query"
             name="global_search"
-            placeholder="Search titles and people"
+            placeholder="Search titles, people, and themes"
             left-icon="magnifying-glass"
             clearable
             kbd="/"
@@ -71,9 +71,9 @@
             <div class="mb-4 flex items-start justify-between gap-3">
                 <div class="space-y-1">
                     <div class="sb-auth-kicker">Global Search</div>
-                    <div class="sb-search-group-title">Find titles and people fast</div>
+                    <div class="sb-search-group-title">Find titles, people, and themes fast</div>
                     <div class="sb-search-group-copy">
-                        Live grouped suggestions from the imported catalog, with posters and portraits.
+                        Live grouped suggestions from the imported catalog, with posters, portraits, and theme lanes.
                     </div>
                 </div>
 
@@ -87,23 +87,28 @@
                 </button>
             </div>
 
-            <div wire:loading.delay wire:target="query" class="grid gap-3 xl:grid-cols-2">
-                @foreach (['titles', 'people'] as $group)
-                    <div class="sb-search-panel rounded-[1.35rem] p-4 {{ $group === 'titles' ? 'sb-search-panel--titles' : 'sb-search-panel--people' }}">
-                        <div class="space-y-3">
-                            <x-ui.skeleton.text class="w-1/3" />
-                            @foreach (range(1, 3) as $index)
-                                <div class="flex items-center gap-3" wire:key="global-search-skeleton-{{ $group }}-{{ $index }}">
-                                    <x-ui.skeleton class="{{ $group === 'titles' ? 'h-20 w-14 rounded-[1rem]' : 'h-16 w-16 rounded-[1rem]' }}" />
-                                    <div class="min-w-0 flex-1 space-y-2">
-                                        <x-ui.skeleton.text class="w-2/3" />
-                                        <x-ui.skeleton.text class="w-1/2" />
-                                    </div>
-                                </div>
-                            @endforeach
+            <div wire:loading.delay wire:target="query" class="sb-search-panel rounded-[1.35rem] border border-white/8 bg-white/[0.03] p-4">
+                <div class="space-y-3">
+                    <div>
+                        <div class="sb-search-group-title inline-flex items-center gap-2">
+                            <x-ui.icon name="magnifying-glass" class="size-4 text-[#d6b574]" />
+                            <span>Searching the catalog</span>
+                        </div>
+                        <div class="sb-search-group-copy">
+                            Titles, people, and theme lanes are updating live.
                         </div>
                     </div>
-                @endforeach
+
+                    @foreach (range(1, 4) as $index)
+                        <div class="flex items-center gap-3" wire:key="global-search-skeleton-row-{{ $index }}">
+                            <x-ui.skeleton class="h-16 w-16 rounded-[1rem]" />
+                            <div class="min-w-0 flex-1 space-y-2">
+                                <x-ui.skeleton.text class="w-2/3" />
+                                <x-ui.skeleton.text class="w-1/2" />
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
             </div>
 
             <div wire:loading.remove wire:target="query" class="space-y-4">
@@ -210,143 +215,155 @@
                     @endif
 
                     @if ($hasSuggestions)
-                        <div class="grid gap-3 xl:grid-cols-2">
-                            @if ($suggestions['titles']->isNotEmpty())
-                                <section class="sb-search-panel sb-search-panel--titles rounded-[1.35rem] p-4">
+                        <div class="grid gap-3 xl:grid-cols-3">
+                            @foreach ($visibleSections as $section)
+                                <section class="sb-search-panel {{ $section['panelClass'] }} rounded-[1.35rem] p-4">
                                     <div class="mb-3 flex items-start justify-between gap-3">
                                         <div>
                                             <div class="sb-search-group-title inline-flex items-center gap-2">
-                                                <x-ui.icon name="film" class="size-4 text-[#d6b574]" />
-                                                <span>Titles</span>
+                                                <x-ui.icon
+                                                    :name="$section['icon']"
+                                                    class="size-4 {{ $section['key'] === 'titles' ? 'text-[#d6b574]' : ($section['key'] === 'people' ? 'text-[#a8bfd7]' : 'text-[#cdb790]') }}"
+                                                />
+                                                <span>{{ $section['label'] }}</span>
                                             </div>
-                                            <div class="sb-search-group-copy">Poster-led matches with year and type.</div>
+                                            <div class="sb-search-group-copy">{{ $section['copy'] }}</div>
                                         </div>
-                                        <span class="sb-search-chip sb-search-chip--accent">
-                                            {{ $suggestions['titles']->count() }} shown
+                                        <span class="sb-search-chip {{ $section['chipClass'] }}">
+                                            {{ $section['items']->count() }} shown
                                         </span>
                                     </div>
 
                                     <div class="space-y-2">
-                                        @foreach ($suggestions['titles'] as $titleSuggestion)
-                                            <a
-                                                href="{{ route('public.titles.show', $titleSuggestion) }}"
-                                                x-on:click="storeRecent(@js($trimmedQuery))"
-                                                class="sb-search-item sb-search-item--title flex items-center gap-3 border border-white/6 bg-white/[0.025] p-2.5 hover:bg-white/[0.055]"
-                                            >
-                                                <div class="sb-search-item-media sb-search-item-media--title h-20 w-14 shrink-0 overflow-hidden rounded-[1rem]">
-                                                    @if ($titleSuggestion->preferredPoster())
-                                                        <img
-                                                            src="{{ $titleSuggestion->preferredPoster()->url }}"
-                                                            alt="{{ $titleSuggestion->preferredPoster()->alt_text ?: $titleSuggestion->name }}"
-                                                            class="h-full w-full object-cover"
-                                                            loading="lazy"
-                                                        >
-                                                    @else
-                                                        <div class="flex h-full w-full items-center justify-center bg-white/[0.03] text-[#8f877a]">
-                                                            <x-ui.icon name="film" class="size-5" />
-                                                        </div>
-                                                    @endif
-                                                </div>
-
-                                                <div class="min-w-0 flex-1 space-y-1">
-                                                    <div class="truncate text-sm font-semibold tracking-[-0.01em] text-[#f4eee5]">
-                                                        {{ $titleSuggestion->name }}
-                                                    </div>
-                                                    <div class="sb-search-meta">
-                                                        <span class="sb-search-chip sb-search-chip--accent sb-search-chip--tight">
-                                                            {{ $titleSuggestion->typeLabel() }}
-                                                        </span>
-                                                        @if ($titleSuggestion->release_year)
-                                                            <span class="sb-search-chip sb-search-chip--tight">
-                                                                {{ $titleSuggestion->release_year }}
-                                                            </span>
+                                        @foreach ($section['items'] as $suggestion)
+                                            @if ($section['key'] === 'titles')
+                                                <a
+                                                    href="{{ route('public.titles.show', $suggestion) }}"
+                                                    x-on:click="storeRecent(@js($trimmedQuery))"
+                                                    class="sb-search-item sb-search-item--title flex items-center gap-3 border border-white/6 bg-white/[0.025] p-2.5 hover:bg-white/[0.055]"
+                                                >
+                                                    <div class="sb-search-item-media sb-search-item-media--title h-20 w-14 shrink-0 overflow-hidden rounded-[1rem]">
+                                                        @if ($suggestion->preferredPoster())
+                                                            <img
+                                                                src="{{ $suggestion->preferredPoster()->url }}"
+                                                                alt="{{ $suggestion->preferredPoster()->alt_text ?: $suggestion->name }}"
+                                                                class="h-full w-full object-cover"
+                                                                loading="lazy"
+                                                            >
+                                                        @else
+                                                            <div class="flex h-full w-full items-center justify-center bg-white/[0.03] text-[#8f877a]">
+                                                                <x-ui.icon name="film" class="size-5" />
+                                                            </div>
                                                         @endif
                                                     </div>
-                                                </div>
 
-                                                <x-ui.icon name="arrow-right" class="size-4 shrink-0 text-[#9e9384]" />
-                                            </a>
-                                        @endforeach
-                                    </div>
-                                </section>
-                            @endif
-
-                            @if ($suggestions['people']->isNotEmpty())
-                                <section class="sb-search-panel sb-search-panel--people rounded-[1.35rem] p-4">
-                                    <div class="mb-3 flex items-start justify-between gap-3">
-                                        <div>
-                                            <div class="sb-search-group-title inline-flex items-center gap-2">
-                                                <x-ui.icon name="user" class="size-4 text-[#a8bfd7]" />
-                                                <span>People</span>
-                                            </div>
-                                            <div class="sb-search-group-copy">Portrait-first profiles with profession cues.</div>
-                                        </div>
-                                        <span class="sb-search-chip sb-search-chip--people">
-                                            {{ $suggestions['people']->count() }} shown
-                                        </span>
-                                    </div>
-
-                                    <div class="space-y-2">
-                                        @foreach ($suggestions['people'] as $personSuggestion)
-                                            <a
-                                                href="{{ route('public.people.show', $personSuggestion) }}"
-                                                x-on:click="storeRecent(@js($trimmedQuery))"
-                                                class="sb-search-item sb-search-item--person flex items-center gap-3 border border-white/6 bg-white/[0.025] p-2.5 hover:bg-white/[0.055]"
-                                            >
-                                                <div class="sb-search-item-media sb-search-item-media--person h-16 w-16 shrink-0 overflow-hidden rounded-[1rem]">
-                                                    @if ($personSuggestion->preferredHeadshot())
-                                                        <img
-                                                            src="{{ $personSuggestion->preferredHeadshot()->url }}"
-                                                            alt="{{ $personSuggestion->preferredHeadshot()->alt_text ?: $personSuggestion->name }}"
-                                                            class="h-full w-full object-cover"
-                                                            loading="lazy"
-                                                        >
-                                                    @else
-                                                        <div class="flex h-full w-full items-center justify-center bg-white/[0.03] text-[#8f877a]">
-                                                            <x-ui.icon name="user" class="size-5" />
+                                                    <div class="min-w-0 flex-1 space-y-1">
+                                                        <div class="truncate text-sm font-semibold tracking-[-0.01em] text-[#f4eee5]">
+                                                            {{ $suggestion->name }}
                                                         </div>
-                                                    @endif
-                                                </div>
-
-                                                <div class="min-w-0 flex-1 space-y-1">
-                                                    <div class="truncate text-sm font-semibold tracking-[-0.01em] text-[#f4eee5]">
-                                                        {{ $personSuggestion->name }}
-                                                    </div>
-                                                    <div class="sb-search-meta">
-                                                        <span class="sb-search-chip sb-search-chip--people sb-search-chip--tight">
-                                                            {{ $personSuggestion->primaryProfessionLabel() }}
-                                                        </span>
-                                                        @if ($personSuggestion->secondaryProfessionLabel() !== '')
-                                                            <span class="sb-search-meta-copy truncate">
-                                                                {{ $personSuggestion->secondaryProfessionLabel() }}
+                                                        <div class="sb-search-meta">
+                                                            <span class="sb-search-chip sb-search-chip--accent sb-search-chip--tight">
+                                                                {{ $suggestion->typeLabel() }}
                                                             </span>
+                                                            @if ($suggestion->release_year)
+                                                                <span class="sb-search-chip sb-search-chip--tight">
+                                                                    {{ $suggestion->release_year }}
+                                                                </span>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+
+                                                    <x-ui.icon name="arrow-right" class="size-4 shrink-0 text-[#9e9384]" />
+                                                </a>
+                                            @elseif ($section['key'] === 'people')
+                                                <a
+                                                    href="{{ route('public.people.show', $suggestion) }}"
+                                                    x-on:click="storeRecent(@js($trimmedQuery))"
+                                                    class="sb-search-item sb-search-item--person flex items-center gap-3 border border-white/6 bg-white/[0.025] p-2.5 hover:bg-white/[0.055]"
+                                                >
+                                                    <div class="sb-search-item-media sb-search-item-media--person h-16 w-16 shrink-0 overflow-hidden rounded-[1rem]">
+                                                        @if ($suggestion->preferredHeadshot())
+                                                            <img
+                                                                src="{{ $suggestion->preferredHeadshot()->url }}"
+                                                                alt="{{ $suggestion->preferredHeadshot()->alt_text ?: $suggestion->name }}"
+                                                                class="h-full w-full object-cover"
+                                                                loading="lazy"
+                                                            >
+                                                        @else
+                                                            <div class="flex h-full w-full items-center justify-center bg-white/[0.03] text-[#8f877a]">
+                                                                <x-ui.icon name="user" class="size-5" />
+                                                            </div>
                                                         @endif
                                                     </div>
-                                                    <div data-slot="global-search-person-suggestion-metrics" class="sb-search-meta">
-                                                        @if ($personSuggestion->popularityRankBadgeLabel())
+
+                                                    <div class="min-w-0 flex-1 space-y-1">
+                                                        <div class="truncate text-sm font-semibold tracking-[-0.01em] text-[#f4eee5]">
+                                                            {{ $suggestion->name }}
+                                                        </div>
+                                                        <div class="sb-search-meta">
                                                             <span class="sb-search-chip sb-search-chip--people sb-search-chip--tight">
-                                                                {{ $personSuggestion->popularityRankBadgeLabel() }}
+                                                                {{ $suggestion->primaryProfessionLabel() }}
                                                             </span>
-                                                        @endif
-                                                        <span class="sb-search-chip sb-search-chip--tight">
-                                                            {{ $personSuggestion->creditsBadgeLabel() }}
-                                                        </span>
+                                                            @if ($suggestion->secondaryProfessionLabel() !== '')
+                                                                <span class="sb-search-meta-copy truncate">
+                                                                    {{ $suggestion->secondaryProfessionLabel() }}
+                                                                </span>
+                                                            @endif
+                                                        </div>
+                                                        <div data-slot="global-search-person-suggestion-metrics" class="sb-search-meta">
+                                                            @if ($suggestion->popularityRankBadgeLabel())
+                                                                <span class="sb-search-chip sb-search-chip--people sb-search-chip--tight">
+                                                                    {{ $suggestion->popularityRankBadgeLabel() }}
+                                                                </span>
+                                                            @endif
+                                                            <span class="sb-search-chip sb-search-chip--tight">
+                                                                {{ $suggestion->creditsBadgeLabel() }}
+                                                            </span>
+                                                        </div>
                                                     </div>
-                                                </div>
 
-                                                <x-ui.icon name="arrow-right" class="size-4 shrink-0 text-[#9e9384]" />
-                                            </a>
+                                                    <x-ui.icon name="arrow-right" class="size-4 shrink-0 text-[#9e9384]" />
+                                                </a>
+                                            @else
+                                                <a
+                                                    href="{{ route('public.interest-categories.show', $suggestion) }}"
+                                                    x-on:click="storeRecent(@js($trimmedQuery))"
+                                                    class="sb-search-item sb-search-item--person flex items-center gap-3 border border-white/6 bg-white/[0.025] p-2.5 hover:bg-white/[0.055]"
+                                                >
+                                                    <div class="sb-search-item-media sb-search-item-media--person flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-[1rem] bg-white/[0.03] text-[#cdb790]">
+                                                        <x-ui.icon name="squares-2x2" class="size-5" />
+                                                    </div>
+
+                                                    <div class="min-w-0 flex-1 space-y-1">
+                                                        <div class="truncate text-sm font-semibold tracking-[-0.01em] text-[#f4eee5]">
+                                                            {{ $suggestion->name }}
+                                                        </div>
+                                                        <div data-slot="global-search-theme-suggestion-metrics" class="sb-search-meta">
+                                                            <span class="sb-search-chip sb-search-chip--tight">
+                                                                {{ $suggestion->interestCountBadgeLabel() }}
+                                                            </span>
+                                                            @if ($suggestion->titleLinkedInterestCount() > 0)
+                                                                <span class="sb-search-chip sb-search-chip--people sb-search-chip--tight">
+                                                                    {{ $suggestion->titleLinkedInterestCountBadgeLabel() }}
+                                                                </span>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+
+                                                    <x-ui.icon name="arrow-right" class="size-4 shrink-0 text-[#9e9384]" />
+                                                </a>
+                                            @endif
                                         @endforeach
                                     </div>
                                 </section>
-                            @endif
+                            @endforeach
                         </div>
                     @else
                         <div class="sb-search-panel rounded-[1.35rem] border border-dashed border-white/10 bg-white/[0.02] p-6 text-center">
                             <div class="space-y-2">
                                 <div class="sb-search-group-title">No quick matches</div>
                                 <div class="sb-search-group-copy mx-auto max-w-md">
-                                    Try a broader title, actor, or creator keyword. The full search page will still let you widen the query and filter further.
+                                    Try a broader title, actor, creator, or theme keyword. The full search page will still let you widen the query and filter further.
                                 </div>
                             </div>
                         </div>

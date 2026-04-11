@@ -14,10 +14,34 @@ use App\Models\CertificateRating;
 use App\Models\Company;
 use App\Models\CompanyCreditAttribute;
 use App\Models\CompanyCreditCategory;
+use App\Models\Country;
 use App\Models\Credit;
+use App\Models\Currency;
 use App\Models\Episode;
+use App\Models\Genre;
+use App\Models\Interest;
+use App\Models\InterestCategory;
+use App\Models\InterestPrimaryImage;
+use App\Models\InterestSimilarInterest;
 use App\Models\MovieAka;
 use App\Models\MovieAkaAttribute;
+use App\Models\MovieAwardNominationNominee;
+use App\Models\MovieAwardNominationSummary;
+use App\Models\MovieAwardNominationTitle;
+use App\Models\MovieBoxOffice;
+use App\Models\MovieCertificate;
+use App\Models\MovieCertificateAttribute;
+use App\Models\MovieCertificateSummary;
+use App\Models\MovieCompanyCredit;
+use App\Models\MovieCompanyCreditAttribute;
+use App\Models\MovieCompanyCreditCountry;
+use App\Models\MovieCompanyCreditSummary;
+use App\Models\MovieDirector;
+use App\Models\MovieEpisode;
+use App\Models\MovieEpisodeSummary;
+use App\Models\MovieGenre;
+use App\Models\MovieImageSummary;
+use App\Models\Person;
 use App\Models\Season;
 use App\Models\Title;
 use App\Models\TitleStatistic;
@@ -35,15 +59,53 @@ class LoadTitleDetailsAction
      *     galleryAssets: Collection<int, mixed>,
      *     castPreview: Collection<int, Credit>,
      *     crewGroups: Collection<int, array{role: string, credits: Collection<int, Credit>}>,
+     *     movieAkaRows: Collection<int, MovieAka>,
+     *     movieAkaAttributeRows: Collection<int, MovieAkaAttribute>,
      *     akaAttributeRows: Collection<int, AkaAttribute>,
      *     akaTypeRows: Collection<int, AkaType>,
      *     awardCategoryRows: Collection<int, AwardCategory>,
      *     awardEventRows: Collection<int, AwardEvent>,
+     *     movieAwardNominationRows: Collection<int, AwardNomination>,
+     *     movieAwardNominationNomineeRows: Collection<int, MovieAwardNominationNominee>,
+     *     movieAwardNominationTitleRows: Collection<int, MovieAwardNominationTitle>,
+     *     movieAwardNominationSummaryRows: Collection<int, MovieAwardNominationSummary>,
+     *     movieCertificateRows: Collection<int, MovieCertificate>,
+     *     movieCertificateSummaryRows: Collection<int, MovieCertificateSummary>,
+     *     movieCertificateAttributeRows: Collection<int, MovieCertificateAttribute>,
+     *     movieCompanyCreditRows: Collection<int, MovieCompanyCredit>,
+     *     movieCompanyCreditAttributeRows: Collection<int, MovieCompanyCreditAttribute>,
+     *     movieCompanyCreditCountryRows: Collection<int, MovieCompanyCreditCountry>,
+     *     movieCompanyCreditSummaryRows: Collection<int, MovieCompanyCreditSummary>,
+     *     movieDirectorRows: Collection<int, MovieDirector>,
+     *     movieEpisodeRows: Collection<int, MovieEpisode>,
+     *     movieEpisodeSummaryRows: Collection<int, MovieEpisodeSummary>,
+     *     movieGenreRows: Collection<int, MovieGenre>,
+     *     movieImageSummaryRows: Collection<int, MovieImageSummary>,
      *     certificateAttributeRows: Collection<int, CertificateAttribute>,
      *     certificateRatingRows: Collection<int, CertificateRating>,
+     *     certificateAttributeEntries: Collection<int, array{
+     *         attribute: CertificateAttribute,
+     *         usageCount: int,
+     *         countries: Collection<int, array{code: string, label: string}>,
+     *         ratings: Collection<int, CertificateRating>
+     *     }>,
+     *     certificateRatingEntries: Collection<int, array{
+     *         rating: CertificateRating,
+     *         usageCount: int,
+     *         countries: Collection<int, array{code: string, label: string}>,
+     *         attributes: Collection<int, CertificateAttribute>
+     *     }>,
      *     companyRows: Collection<int, Company>,
      *     companyCreditAttributeRows: Collection<int, CompanyCreditAttribute>,
      *     companyCreditCategoryRows: Collection<int, CompanyCreditCategory>,
+     *     movieBoxOfficeRows: Collection<int, MovieBoxOffice>,
+     *     currencyRows: Collection<int, Currency>,
+     *     countryRows: Collection<int, Country>,
+     *     genreRows: Collection<int, Genre>,
+     *     interestRows: Collection<int, Interest>,
+     *     interestCategoryRows: Collection<int, InterestCategory>,
+     *     interestPrimaryImageRows: Collection<int, InterestPrimaryImage>,
+     *     interestSimilarInterestRows: Collection<int, InterestSimilarInterest>,
      *     detailItems: Collection<int, array{label: string, value: string}>,
      *     certificateItems: Collection<int, array{rating: string, country: string|null}>,
      *     awardHighlights: Collection<int, AwardNomination>,
@@ -67,105 +129,10 @@ class LoadTitleDetailsAction
      */
     public function handle(Title $title): array
     {
-        $title->load([
-            'genres:id,name',
-            'statistic:movie_id,aggregate_rating,vote_count',
-            'titleImages:id,movie_id,position,url,width,height,type',
-            'titleVideos:imdb_id,movie_id,video_type_id,name,description,width,height,runtime_seconds,position',
-            'primaryImageRecord:movie_id,url,width,height,type',
-            'plotRecord:movie_id,plot',
-            'boxOfficeRecord:movie_id,domestic_gross_amount,worldwide_gross_amount,opening_weekend_gross_amount,production_budget_amount',
-            'countries:code,name',
-            'languages:code,name',
-            'interests:imdb_id,name,description,is_subgenre',
-            'movieAkas' => fn ($query) => $query
-                ->select(['id', 'movie_id', 'text', 'country_code', 'language_code', 'position'])
-                ->with([
-                    'movieAkaAttributes' => fn ($movieAkaAttributeQuery) => $movieAkaAttributeQuery
-                        ->select(['movie_aka_id', 'aka_attribute_id', 'position'])
-                        ->with([
-                            'akaAttribute:id,name',
-                        ])
-                        ->orderBy('position'),
-                ])
-                ->orderBy('position'),
-            'titleAkas' => fn ($query) => $query
-                ->select(['id', 'titleid', 'ordering', 'title', 'region', 'language', 'types', 'attributes', 'isoriginaltitle'])
-                ->with([
-                    'titleAkaTypes' => fn ($titleAkaTypeQuery) => $titleAkaTypeQuery
-                        ->select(['title_aka_id', 'aka_type_id', 'position'])
-                        ->with([
-                            'akaType:id,name',
-                        ])
-                        ->orderBy('position'),
-                ])
-                ->orderBy('ordering'),
-            'certificateRecords:id,movie_id,certificate_rating_id,country_code,position',
-            'certificateRecords.certificateRating:id,name',
-            'certificateRecords.movieCertificateAttributes:movie_certificate_id,certificate_attribute_id,position',
-            'certificateRecords.movieCertificateAttributes.certificateAttribute:id,name',
-            'movieCompanyCredits' => fn ($query) => $query
-                ->select(['id', 'movie_id', 'company_imdb_id', 'company_credit_category_id', 'position'])
-                ->with([
-                    'company:imdb_id,name',
-                    'companyCreditCategory:id,name',
-                    'movieCompanyCreditAttributes' => fn ($movieCompanyCreditAttributeQuery) => $movieCompanyCreditAttributeQuery
-                        ->select(['movie_company_credit_id', 'company_credit_attribute_id', 'position'])
-                        ->with([
-                            'companyCreditAttribute:id,name',
-                        ])
-                        ->orderBy('position'),
-                ])
-                ->orderBy('position'),
-            'parentsGuideSections:id,movie_id,parents_guide_category_id,position',
-            'credits' => fn ($query) => $query
-                ->select(['name_basic_id', 'movie_id', 'category', 'episode_count', 'position'])
-                ->with([
-                    'person' => fn ($personQuery) => $personQuery
-                        ->select([
-                            'id',
-                            'nconst',
-                            'imdb_id',
-                            'primaryname',
-                            'displayName',
-                            'alternativeNames',
-                            'primaryProfessions',
-                            'biography',
-                            'birthLocation',
-                            'deathLocation',
-                            'primaryImage_url',
-                            'primaryImage_width',
-                            'primaryImage_height',
-                        ])
-                        ->with([
-                            'personImages:name_basic_id,position,url,width,height,type',
-                            'professionTerms:id,name',
-                        ]),
-                ])
-                ->orderBy('position')
-                ->limit(24),
-            'awardNominations' => fn ($query) => $query
-                ->select(['id', 'movie_id', 'event_imdb_id', 'award_category_id', 'award_year', 'text', 'is_winner', 'winner_rank', 'position'])
-                ->with([
-                    'awardEvent:imdb_id,name',
-                    'awardCategory:id,name',
-                    'people' => fn ($peopleQuery) => $peopleQuery->select([
-                        'name_basics.id',
-                        'name_basics.nconst',
-                        'name_basics.imdb_id',
-                        'name_basics.primaryname',
-                        'name_basics.displayName',
-                        'name_basics.primaryImage_url',
-                        'name_basics.primaryImage_width',
-                        'name_basics.primaryImage_height',
-                    ]),
-                ])
-                ->orderByDesc('is_winner')
-                ->orderByDesc('award_year')
-                ->orderBy('position')
-                ->limit(8),
-            'seasons:movie_id,season,episode_count',
-        ]);
+        $title->loadMissing(Title::catalogDetailRelations());
+        $this->loadCreditPreview($title);
+        $this->loadAwardHighlights($title);
+        $this->hydrateMovieCompanyCreditRelations($title);
         $title->loadCount('credits');
 
         $poster = $title->preferredPoster();
@@ -189,8 +156,9 @@ class LoadTitleDetailsAction
             ])
             ->take(6)
             ->values();
-        $akaAttributeRows = $title->movieAkas
-            ->flatMap(fn (MovieAka $movieAka): Collection => $movieAka->movieAkaAttributes)
+        $movieAkaRows = $title->resolvedMovieAkas();
+        $movieAkaAttributeRows = $title->resolvedMovieAkaAttributes();
+        $akaAttributeRows = $movieAkaAttributeRows
             ->map(fn (MovieAkaAttribute $movieAkaAttribute): ?AkaAttribute => $movieAkaAttribute->akaAttribute)
             ->filter(fn (mixed $akaAttribute): bool => $akaAttribute instanceof AkaAttribute && filled($akaAttribute->name))
             ->unique('id')
@@ -198,15 +166,72 @@ class LoadTitleDetailsAction
         $akaTypeRows = $title->resolvedAkaTypes();
         $awardCategoryRows = $title->resolvedAwardCategories();
         $awardEventRows = $title->resolvedAwardEvents();
+        $movieAwardNominationRows = $title->resolvedMovieAwardNominations();
+        $movieAwardNominationNomineeRows = $title->resolvedMovieAwardNominationNominees();
+        $movieAwardNominationTitleRows = $title->resolvedMovieAwardNominationTitles();
+        $movieAwardNominationSummaryRows = $title->resolvedMovieAwardNominationSummaries();
+        $movieCertificateRows = $title->resolvedMovieCertificates();
+        $movieCertificateSummaryRows = $title->resolvedMovieCertificateSummaries();
+        $movieCertificateAttributeRows = $title->resolvedMovieCertificateAttributes();
+        $movieCompanyCreditRows = $title->resolvedMovieCompanyCredits();
+        $movieCompanyCreditAttributeRows = $title->resolvedMovieCompanyCreditAttributes();
+        $movieCompanyCreditCountryRows = $title->resolvedMovieCompanyCreditCountries();
+        $movieCompanyCreditSummaryRows = $title->resolvedMovieCompanyCreditSummaries();
+        $movieDirectorRows = $title->resolvedMovieDirectors();
+        $movieEpisodeRows = $title->resolvedMovieEpisodes();
+        $movieEpisodeSummaryRows = $title->resolvedMovieEpisodeSummaries();
+        $movieGenreRows = $title->resolvedMovieGenres();
+        $movieImageSummaryRows = $title->resolvedMovieImageSummaries();
+
+        if ($movieCompanyCreditSummaryRows->isEmpty()) {
+            $title->load([
+                'companyCreditSummary:movie_id,total_count,next_page_token',
+            ]);
+
+            $movieCompanyCreditSummaryRows = $title->resolvedMovieCompanyCreditSummaries();
+        }
+
+        if ($movieEpisodeSummaryRows->isEmpty()) {
+            $title->load([
+                'episodeSummary:movie_id,total_count,next_page_token',
+            ]);
+
+            $movieEpisodeSummaryRows = $title->resolvedMovieEpisodeSummaries();
+        }
+
+        if ($movieImageSummaryRows->isEmpty()) {
+            $title->load([
+                'imageSummary:movie_id,total_count,next_page_token',
+            ]);
+
+            $movieImageSummaryRows = $title->resolvedMovieImageSummaries();
+        }
+
         $certificateAttributeRows = $title->resolvedCertificateAttributes();
         $certificateRatingRows = $title->resolvedCertificateRatings();
+        $certificateAttributeEntries = $this->buildCertificateAttributeEntries(
+            $certificateAttributeRows,
+            $movieCertificateAttributeRows,
+        );
+        $certificateRatingEntries = $this->buildCertificateRatingEntries(
+            $certificateRatingRows,
+            $movieCertificateRows,
+        );
         $companyRows = $title->resolvedCompanies();
         $companyCreditAttributeRows = $title->resolvedCompanyCreditAttributes();
         $companyCreditCategoryRows = $title->resolvedCompanyCreditCategories();
-        $countries = $title->countries
+        $movieBoxOfficeRows = $title->resolvedMovieBoxOfficeRows();
+        $currencyRows = $title->resolvedCurrencies();
+        $countryRows = $title->resolvedCountries();
+        $genreRows = $title->resolvedGenres();
+        $interestRows = $title->resolvedInterests();
+        $interestCategoryRows = $title->resolvedInterestCategories();
+        $interestPrimaryImageRows = $title->resolvedInterestPrimaryImages();
+        $interestSimilarInterestRows = $title->resolvedInterestSimilarInterests();
+        $countries = $countryRows
             ->map(fn ($country): array => [
                 'code' => strtoupper((string) $country->code),
-                'label' => filled($country->name) ? (string) $country->name : strtoupper((string) $country->code),
+                'label' => $country->resolvedLabel(),
             ])
             ->filter(fn (array $country): bool => $country['code'] !== '')
             ->unique('code')
@@ -222,17 +247,25 @@ class LoadTitleDetailsAction
         $interestHighlights = $title->interests
             ->filter(fn ($interest): bool => filled($interest->name))
             ->take(8)
-            ->map(fn ($interest): array => [
-                'name' => (string) $interest->name,
-                'href' => route('public.search', ['q' => (string) $interest->name]),
-                'isSubgenre' => (bool) $interest->is_subgenre,
-            ])
+            ->map(function ($interest): array {
+                $interestCategory = $interest->interestCategoryInterests
+                    ->map(fn ($interestCategoryInterest) => $interestCategoryInterest->interestCategory)
+                    ->first();
+
+                return [
+                    'name' => (string) $interest->name,
+                    'href' => $interestCategory
+                        ? route('public.interest-categories.show', $interestCategory)
+                        : route('public.search', ['q' => (string) $interest->name]),
+                    'isSubgenre' => (bool) $interest->is_subgenre,
+                ];
+            })
             ->values();
-        $certificateItems = $title->certificateRecords
+        $certificateItems = $movieCertificateRows
             ->map(fn ($certificate): ?array => $certificate->certificateRating?->name
                 ? [
                     'rating' => $certificate->certificateRating->name,
-                    'country' => $certificate->country_code,
+                    'country' => $certificate->resolvedCountryLabel(),
                 ]
                 : null)
             ->filter()
@@ -240,7 +273,7 @@ class LoadTitleDetailsAction
         $detailItems = collect([
             ['label' => 'Original title', 'value' => $title->original_name !== $title->name ? (string) $title->original_name : null],
             ['label' => 'Release year', 'value' => $title->release_year ? (string) $title->release_year : null],
-            ['label' => 'Runtime', 'value' => $title->runtime_minutes ? $title->runtime_minutes.' min' : null],
+            ['label' => 'Runtime', 'value' => $title->runtimeMinutesLabel()],
             ['label' => 'Country of origin', 'value' => $countries->pluck('label')->implode(', ') ?: null],
             ['label' => 'Primary language', 'value' => $languages->pluck('label')->implode(', ') ?: null],
             ['label' => 'Certification', 'value' => $certificateItems->first()['rating'] ?? null],
@@ -307,18 +340,7 @@ class LoadTitleDetailsAction
 
         if ($genreIds !== []) {
             $relatedTitles = Title::query()
-                ->select([
-                    'movies.id',
-                    'movies.tconst',
-                    'movies.imdb_id',
-                    'movies.primarytitle',
-                    'movies.originaltitle',
-                    'movies.titletype',
-                    'movies.isadult',
-                    'movies.startyear',
-                    'movies.endyear',
-                    'movies.runtimeminutes',
-                ])
+                ->selectCatalogCardColumns()
                 ->addSelect([
                     'popularity_rank' => TitleStatistic::query()
                         ->select('vote_count')
@@ -328,12 +350,7 @@ class LoadTitleDetailsAction
                 ->publishedCatalog()
                 ->whereKeyNot($title->getKey())
                 ->whereHas('genres', fn ($genreQuery) => $genreQuery->whereIn('genres.id', $genreIds))
-                ->with([
-                    'genres:id,name',
-                    'statistic:movie_id,aggregate_rating,vote_count',
-                    'titleImages:id,movie_id,position,url,width,height,type',
-                    'primaryImageRecord:movie_id,url,width,height,type',
-                ])
+                ->withCatalogCardRelations()
                 ->orderByDesc('popularity_rank')
                 ->limit(6)
                 ->get();
@@ -408,15 +425,43 @@ class LoadTitleDetailsAction
             'galleryAssets' => $galleryAssets,
             'castPreview' => $castPreview,
             'crewGroups' => $crewGroups,
+            'movieAkaRows' => $movieAkaRows,
+            'movieAkaAttributeRows' => $movieAkaAttributeRows,
             'akaAttributeRows' => $akaAttributeRows,
             'akaTypeRows' => $akaTypeRows,
             'awardCategoryRows' => $awardCategoryRows,
             'awardEventRows' => $awardEventRows,
+            'movieAwardNominationRows' => $movieAwardNominationRows,
+            'movieAwardNominationNomineeRows' => $movieAwardNominationNomineeRows,
+            'movieAwardNominationTitleRows' => $movieAwardNominationTitleRows,
+            'movieAwardNominationSummaryRows' => $movieAwardNominationSummaryRows,
+            'movieCertificateRows' => $movieCertificateRows,
+            'movieCertificateSummaryRows' => $movieCertificateSummaryRows,
+            'movieCertificateAttributeRows' => $movieCertificateAttributeRows,
+            'movieCompanyCreditRows' => $movieCompanyCreditRows,
+            'movieCompanyCreditAttributeRows' => $movieCompanyCreditAttributeRows,
+            'movieCompanyCreditCountryRows' => $movieCompanyCreditCountryRows,
+            'movieCompanyCreditSummaryRows' => $movieCompanyCreditSummaryRows,
+            'movieDirectorRows' => $movieDirectorRows,
+            'movieEpisodeRows' => $movieEpisodeRows,
+            'movieEpisodeSummaryRows' => $movieEpisodeSummaryRows,
+            'movieGenreRows' => $movieGenreRows,
+            'movieImageSummaryRows' => $movieImageSummaryRows,
             'certificateAttributeRows' => $certificateAttributeRows,
             'certificateRatingRows' => $certificateRatingRows,
+            'certificateAttributeEntries' => $certificateAttributeEntries,
+            'certificateRatingEntries' => $certificateRatingEntries,
             'companyRows' => $companyRows,
             'companyCreditAttributeRows' => $companyCreditAttributeRows,
             'companyCreditCategoryRows' => $companyCreditCategoryRows,
+            'movieBoxOfficeRows' => $movieBoxOfficeRows,
+            'currencyRows' => $currencyRows,
+            'countryRows' => $countryRows,
+            'genreRows' => $genreRows,
+            'interestRows' => $interestRows,
+            'interestCategoryRows' => $interestCategoryRows,
+            'interestPrimaryImageRows' => $interestPrimaryImageRows,
+            'interestSimilarInterestRows' => $interestSimilarInterestRows,
             'detailItems' => $detailItems,
             'certificateItems' => $certificateItems,
             'awardHighlights' => $title->awardNominations->values(),
@@ -451,6 +496,214 @@ class LoadTitleDetailsAction
         ];
     }
 
+    private function hydrateMovieCompanyCreditRelations(Title $title): void
+    {
+        if (! $title->relationLoaded('movieCompanyCredits')) {
+            return;
+        }
+
+        $title->movieCompanyCredits->loadMissing([
+            'company:imdb_id,name',
+            'companyCreditCategory:id,name',
+            'movieCompanyCreditAttributes' => fn (Builder $query) => $query
+                ->select(['movie_company_credit_id', 'company_credit_attribute_id', 'position'])
+                ->with([
+                    'companyCreditAttribute:id,name',
+                    'movieCompanyCredit:id,movie_id,company_imdb_id,company_credit_category_id,start_year,end_year',
+                    'movieCompanyCredit.company:imdb_id,name',
+                    'movieCompanyCredit.companyCreditCategory:id,name',
+                ])
+                ->orderBy('position'),
+            'movieCompanyCreditCountries' => fn (Builder $query) => $query
+                ->select(['movie_company_credit_id', 'country_code', 'position'])
+                ->with([
+                    'movieCompanyCredit:id,movie_id,company_imdb_id,company_credit_category_id,start_year,end_year',
+                    'movieCompanyCredit.company:imdb_id,name',
+                    'movieCompanyCredit.companyCreditCategory:id,name',
+                ])
+                ->orderBy('position'),
+        ]);
+    }
+
+    /**
+     * @param  Collection<int, CertificateAttribute>  $certificateAttributeRows
+     * @param  Collection<int, MovieCertificateAttribute>  $movieCertificateAttributeRows
+     * @return Collection<int, array{
+     *     attribute: CertificateAttribute,
+     *     usageCount: int,
+     *     countries: Collection<int, array{code: string, label: string}>,
+     *     ratings: Collection<int, CertificateRating>
+     * }>
+     */
+    private function buildCertificateAttributeEntries(Collection $certificateAttributeRows, Collection $movieCertificateAttributeRows): Collection
+    {
+        return $certificateAttributeRows
+            ->map(function (CertificateAttribute $certificateAttribute) use ($movieCertificateAttributeRows): array {
+                $matchingRows = $movieCertificateAttributeRows
+                    ->filter(fn (MovieCertificateAttribute $movieCertificateAttribute): bool => $movieCertificateAttribute->certificate_attribute_id === $certificateAttribute->getKey())
+                    ->values();
+
+                $countries = $matchingRows
+                    ->map(function (MovieCertificateAttribute $movieCertificateAttribute): ?array {
+                        $movieCertificate = $movieCertificateAttribute->movieCertificate;
+
+                        if (! $movieCertificate instanceof MovieCertificate || ! filled($movieCertificate->country_code)) {
+                            return null;
+                        }
+
+                        return [
+                            'code' => strtoupper((string) $movieCertificate->country_code),
+                            'label' => $movieCertificate->resolvedCountryLabel() ?? strtoupper((string) $movieCertificate->country_code),
+                        ];
+                    })
+                    ->filter()
+                    ->unique('code')
+                    ->values();
+
+                $ratings = $matchingRows
+                    ->map(function (MovieCertificateAttribute $movieCertificateAttribute): ?CertificateRating {
+                        $movieCertificate = $movieCertificateAttribute->movieCertificate;
+
+                        if (! $movieCertificate instanceof MovieCertificate || ! $movieCertificate->relationLoaded('certificateRating')) {
+                            return null;
+                        }
+
+                        return $movieCertificate->certificateRating;
+                    })
+                    ->filter(fn (mixed $certificateRating): bool => $certificateRating instanceof CertificateRating && filled($certificateRating->name))
+                    ->unique('id')
+                    ->values();
+
+                return [
+                    'attribute' => $certificateAttribute,
+                    'usageCount' => $matchingRows->count(),
+                    'countries' => $countries,
+                    'ratings' => $ratings,
+                ];
+            })
+            ->values();
+    }
+
+    /**
+     * @param  Collection<int, CertificateRating>  $certificateRatingRows
+     * @param  Collection<int, MovieCertificate>  $movieCertificateRows
+     * @return Collection<int, array{
+     *     rating: CertificateRating,
+     *     usageCount: int,
+     *     countries: Collection<int, array{code: string, label: string}>,
+     *     attributes: Collection<int, CertificateAttribute>
+     * }>
+     */
+    private function buildCertificateRatingEntries(Collection $certificateRatingRows, Collection $movieCertificateRows): Collection
+    {
+        return $certificateRatingRows
+            ->map(function (CertificateRating $certificateRating) use ($movieCertificateRows): array {
+                $matchingRows = $movieCertificateRows
+                    ->filter(fn (MovieCertificate $movieCertificate): bool => $movieCertificate->certificate_rating_id === $certificateRating->getKey())
+                    ->values();
+
+                $countries = $matchingRows
+                    ->map(function (MovieCertificate $movieCertificate): ?array {
+                        if (! filled($movieCertificate->country_code)) {
+                            return null;
+                        }
+
+                        return [
+                            'code' => strtoupper((string) $movieCertificate->country_code),
+                            'label' => $movieCertificate->resolvedCountryLabel() ?? strtoupper((string) $movieCertificate->country_code),
+                        ];
+                    })
+                    ->filter()
+                    ->unique('code')
+                    ->values();
+
+                $attributes = $matchingRows
+                    ->flatMap(function (MovieCertificate $movieCertificate): Collection {
+                        if (! $movieCertificate->relationLoaded('movieCertificateAttributes')) {
+                            return collect();
+                        }
+
+                        return $movieCertificate->movieCertificateAttributes;
+                    })
+                    ->map(function (MovieCertificateAttribute $movieCertificateAttribute): ?CertificateAttribute {
+                        if (! $movieCertificateAttribute->relationLoaded('certificateAttribute')) {
+                            return null;
+                        }
+
+                        return $movieCertificateAttribute->certificateAttribute;
+                    })
+                    ->filter(fn (mixed $certificateAttribute): bool => $certificateAttribute instanceof CertificateAttribute && filled($certificateAttribute->name))
+                    ->unique('id')
+                    ->values();
+
+                return [
+                    'rating' => $certificateRating,
+                    'usageCount' => $matchingRows->count(),
+                    'countries' => $countries,
+                    'attributes' => $attributes,
+                ];
+            })
+            ->values();
+    }
+
+    private function loadCreditPreview(Title $title): void
+    {
+        $title->setRelation('credits', $title->credits()
+            ->select(['id', 'name_basic_id', 'movie_id', 'category', 'episode_count', 'position'])
+            ->with([
+                'nameCreditCharacters:name_credit_id,position,character_name',
+                'person' => fn ($personQuery) => $personQuery
+                    ->select(Person::directoryColumns())
+                    ->with(Person::directoryRelations()),
+            ])
+            ->orderBy('position')
+            ->limit(24)
+            ->get());
+    }
+
+    private function loadAwardHighlights(Title $title): void
+    {
+        $title->setRelation('awardNominations', $title->awardNominations()
+            ->select(['id', 'movie_id', 'event_imdb_id', 'award_category_id', 'award_year', 'text', 'is_winner', 'winner_rank', 'position'])
+            ->with([
+                'awardEvent:imdb_id,name',
+                'awardCategory:id,name',
+                'movieAwardNominationNominees' => fn ($nomineeQuery) => $nomineeQuery
+                    ->select(['movie_award_nomination_id', 'name_basic_id', 'position'])
+                    ->with([
+                        'person' => fn ($personQuery) => $personQuery->select([
+                            'name_basics.id',
+                            'name_basics.nconst',
+                            'name_basics.imdb_id',
+                            'name_basics.primaryname',
+                            'name_basics.displayName',
+                            'name_basics.primaryImage_url',
+                            'name_basics.primaryImage_width',
+                            'name_basics.primaryImage_height',
+                        ]),
+                        'awardNomination:id,event_imdb_id,award_category_id,award_year',
+                        'awardNomination.awardEvent:imdb_id,name',
+                        'awardNomination.awardCategory:id,name',
+                    ])
+                    ->orderBy('position'),
+                'movieAwardNominationTitles' => fn ($nominationTitleQuery) => $nominationTitleQuery
+                    ->select(['movie_award_nomination_id', 'nominated_movie_id', 'position'])
+                    ->with([
+                        'title:id,primarytitle,originaltitle,tconst',
+                        'movieAwardNomination:id,movie_id,event_imdb_id,award_category_id,award_year',
+                        'movieAwardNomination.event:imdb_id,name',
+                        'movieAwardNomination.awardCategory:id,name',
+                    ])
+                    ->orderBy('position'),
+                'people' => fn ($peopleQuery) => $peopleQuery->select(Person::directoryColumns()),
+            ])
+            ->orderByDesc('is_winner')
+            ->orderByDesc('award_year')
+            ->orderBy('position')
+            ->limit(8)
+            ->get());
+    }
+
     private function episodeGuideQuery(Title $series, ?int $seasonNumber = null): Builder
     {
         $query = Episode::query()
@@ -469,24 +722,8 @@ class LoadTitleDetailsAction
                 ->whereNotNull('movies.primarytitle'))
             ->with([
                 'title' => fn (Builder $titleQuery) => $titleQuery
-                    ->select([
-                        'movies.id',
-                        'movies.tconst',
-                        'movies.imdb_id',
-                        'movies.primarytitle',
-                        'movies.originaltitle',
-                        'movies.titletype',
-                        'movies.isadult',
-                        'movies.startyear',
-                        'movies.endyear',
-                        'movies.runtimeminutes',
-                    ])
-                    ->with([
-                        'statistic:movie_id,aggregate_rating,vote_count',
-                        'titleImages:id,movie_id,position,url,width,height,type',
-                        'primaryImageRecord:movie_id,url,width,height,type',
-                        'plotRecord:movie_id,plot',
-                    ]),
+                    ->selectCatalogCardColumns()
+                    ->withCatalogHeroRelations(),
             ]);
 
         if (is_int($seasonNumber)) {

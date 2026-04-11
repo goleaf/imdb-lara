@@ -23,6 +23,7 @@ class TitleTriviaAndGoofsExperienceTest extends TestCase
             ->assertSeeHtml('data-slot="title-trivia-tabs"')
             ->assertSeeHtml('data-slot="title-trivia-cards"')
             ->assertSeeHtml('data-slot="title-goof-cards"')
+            ->assertSeeHtml('text-[#f4eee5] decoration-white/20 hover:text-white')
             ->assertSee('Archive Notes');
     }
 

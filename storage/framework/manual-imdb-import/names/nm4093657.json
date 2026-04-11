@@ -1,0 +1,1887 @@
+{
+    "schemaVersion": 1,
+    "imdbId": "nm4093657",
+    "downloadedAt": "2026-04-11T03:17:47+00:00",
+    "sourceUrl": "https://api.imdbapi.dev/names/nm4093657",
+    "details": {
+        "id": "nm4093657",
+        "displayName": "Orion Lee",
+        "primaryImage": {
+            "url": "https://m.media-amazon.com/images/M/MV5BNTg3NTg4ZjItYmFjMi00ZGQxLWFiMjctOWE4ZTFmYTRlYWE3XkEyXkFqcGc@._V1_.jpg",
+            "width": 960,
+            "height": 1200
+        },
+        "primaryProfessions": [
+            "actor",
+            "producer"
+        ],
+        "biography": "A transformative actor working across theatre, film and television Orion is a versatile performer able to create characters and inhabit them with verisimilitude. Lauded for his performance as King Lu in First Cow and loved for his performance as the Dad Jin in Turning Red. Besides his screen credits on IMDB he has worked at prestigious theatres like the National Theatre of Scotland, Abbey Theatre (National Theatre of Ireland), Royal Court, American Repertory Theatre and the West End. He was directed by Trevor Nunn as Mosca, a co-lead part in Volpone by Ben Jonson at the Royal Shakespeare Company.\n\nOrion Lee worked in the finance industry as a fund manager before retraining as an actor at the London Academy of Music and Dramatic Art (LAMDA)."
+    },
+    "images": {
+        "images": [
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BMjE4OTQ3OTM4Nl5BMl5BanBnXkFtZTgwMTIxODE1MTE@._V1_.jpg",
+                "width": 427,
+                "height": 603,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BNzFjOGQwYmUtZmU2OS00NDE4LTk4OGEtMDBmM2VjNjZkYWJkXkEyXkFqcGc@._V1_.jpg",
+                "width": 2768,
+                "height": 1848,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BMTcwODU0MzU4OF5BMl5BanBnXkFtZTgwNjMwMDI0ODE@._V1_.jpg",
+                "width": 720,
+                "height": 900,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BODA0MzA5YzQtYzgwMy00ZWNhLWFkZjctNTYyYTE0MzMxZTIyXkEyXkFqcGc@._V1_.jpg",
+                "width": 960,
+                "height": 1200,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BNzZhYjMzZTItNDI2NS00MWIyLWI0OGQtMTc2ZTEyZmJkMGEyXkEyXkFqcGc@._V1_.jpg",
+                "width": 1125,
+                "height": 1377,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BOWMwODgwZTItNTc3OC00NjU0LThkMGMtNjc4MTg3YmQ4NWFlXkEyXkFqcGc@._V1_.jpg",
+                "width": 960,
+                "height": 1200,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BMzI1NDUzNzg2OF5BMl5BanBnXkFtZTgwNDU1ODE1MTE@._V1_.jpg",
+                "width": 1136,
+                "height": 640,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BMmZjNjQzMzgtMTljNi00ZTliLWFmOTctOTZiMWNkNWIwMDEwXkEyXkFqcGc@._V1_.jpg",
+                "width": 1920,
+                "height": 1080,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BOTQ5YTIzOGMtYWMxZi00OWJjLTkzZjItNjkwYTkyNmU5OTY3XkEyXkFqcGc@._V1_.jpg",
+                "width": 1920,
+                "height": 1080,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BODkwNTgzYmQtZTFlMC00MjZkLWE0MTQtZWFkZmJmOWViNzQ2XkEyXkFqcGc@._V1_.jpg",
+                "width": 1920,
+                "height": 2880,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BMTAwMjM0OTA5NDReQTJeQWpwZ15BbWU4MDI0MzgxNTEx._V1_.jpg",
+                "width": 1136,
+                "height": 640,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BMTcyMDQxMjc3Nl5BMl5BanBnXkFtZTgwNDI1MDk5MjE@._V1_.jpg",
+                "width": 2048,
+                "height": 1181,
+                "type": "event"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BNzM1Mzc4NTczOV5BMl5BanBnXkFtZTgwNDM4ODIwMzE@._V1_.jpg",
+                "width": 900,
+                "height": 583,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BY2U5YzBjNzMtOTQ4OS00Y2I1LThkZTAtYjI0N2MyMWFhNmJlXkEyXkFqcGc@._V1_.jpg",
+                "width": 1920,
+                "height": 1280,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BMTQxMjM4OTM3Nl5BMl5BanBnXkFtZTgwMjgyODE1MTE@._V1_.jpg",
+                "width": 1136,
+                "height": 640,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BMTQzMTQyMTE0MV5BMl5BanBnXkFtZTgwNzQ1ODE1MTE@._V1_.jpg",
+                "width": 1136,
+                "height": 640,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BNTg3NTg4ZjItYmFjMi00ZGQxLWFiMjctOWE4ZTFmYTRlYWE3XkEyXkFqcGc@._V1_.jpg",
+                "width": 960,
+                "height": 1200,
+                "type": "publicity"
+            }
+        ],
+        "totalCount": 17
+    },
+    "filmography": {
+        "credits": [
+            {
+                "title": {
+                    "id": "tt1074638",
+                    "type": "movie",
+                    "primaryTitle": "Skyfall",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNjAzMWNkODUtM2FlMi00NzgyLWJhMGUtMWEyNDYyZGFiN2RlXkEyXkFqcGc@._V1_.jpg",
+                        "width": 691,
+                        "height": 1024
+                    },
+                    "startYear": 2012,
+                    "genres": [
+                        "Action",
+                        "Adventure",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.8,
+                        "voteCount": 771166
+                    },
+                    "metacritic": {
+                        "score": 81,
+                        "reviewCount": 49
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        },
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        },
+                        {
+                            "code": "TR",
+                            "name": "Turkey"
+                        },
+                        {
+                            "code": "CN",
+                            "name": "China"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Shanghai Barman"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt2527336",
+                    "type": "movie",
+                    "primaryTitle": "Star Wars: Episode VIII - The Last Jedi",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMjQ1MzcxNjg4N15BMl5BanBnXkFtZTgwNzgwMjY4MzI@._V1_.jpg",
+                        "width": 800,
+                        "height": 1185
+                    },
+                    "startYear": 2017,
+                    "genres": [
+                        "Action",
+                        "Adventure",
+                        "Fantasy",
+                        "Sci-Fi"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.8,
+                        "voteCount": 716595
+                    },
+                    "metacritic": {
+                        "score": 84,
+                        "reviewCount": 56
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Canady's First Order Monitor"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt2713180",
+                    "type": "movie",
+                    "primaryTitle": "Fury",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMjA4MDU0NTUyN15BMl5BanBnXkFtZTgwMzQxMzY4MjE@._V1_.jpg",
+                        "width": 1382,
+                        "height": 2048
+                    },
+                    "startYear": 2014,
+                    "genres": [
+                        "Action",
+                        "Drama",
+                        "War"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.6,
+                        "voteCount": 606465
+                    },
+                    "metacritic": {
+                        "score": 64,
+                        "reviewCount": 47
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        },
+                        {
+                            "code": "CN",
+                            "name": "China"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Tired GI #1"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt0974015",
+                    "type": "movie",
+                    "primaryTitle": "Justice League",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMjM5YmQxM2YtZjI2Yy00YjhhLTg5N2MtMTEyMzdlZDU3OTVhXkEyXkFqcGc@._V1_.jpg",
+                        "width": 4050,
+                        "height": 6000
+                    },
+                    "startYear": 2017,
+                    "genres": [
+                        "Action",
+                        "Adventure",
+                        "Fantasy",
+                        "Sci-Fi"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6,
+                        "voteCount": 503925
+                    },
+                    "metacritic": {
+                        "score": 45,
+                        "reviewCount": 52
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        },
+                        {
+                            "code": "CA",
+                            "name": "Canada"
+                        },
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Star Labs Scientist"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt12361974",
+                    "type": "movie",
+                    "primaryTitle": "Zack Snyder's Justice League",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNDA0MzM5YTctZTU2My00NGQ5LWE2NTEtNDM0MjZmMDBkOTZkXkEyXkFqcGc@._V1_.jpg",
+                        "width": 2025,
+                        "height": 3000
+                    },
+                    "startYear": 2021,
+                    "genres": [
+                        "Action",
+                        "Adventure",
+                        "Fantasy",
+                        "Sci-Fi"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.9,
+                        "voteCount": 471826
+                    },
+                    "metacritic": {
+                        "score": 54,
+                        "reviewCount": 46
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Star Labs Scientist"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt12042730",
+                    "type": "movie",
+                    "primaryTitle": "Project Hail Mary",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNTkwNzJiYTctNzI3NC00NjE1LTlhYjktY2Q5MTdmMWFmNzcxXkEyXkFqcGc@._V1_.jpg",
+                        "width": 2765,
+                        "height": 4096
+                    },
+                    "startYear": 2026,
+                    "genres": [
+                        "Adventure",
+                        "Comedy",
+                        "Sci-Fi"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.4,
+                        "voteCount": 178625
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Dr. Li"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt8097030",
+                    "type": "movie",
+                    "primaryTitle": "Turning Red",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BODY2NjExYmUtZTQ4NS00NzM2LWE2NWYtZWY2NGIyOTBmNzI3XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1350,
+                        "height": 2000
+                    },
+                    "startYear": 2022,
+                    "genres": [
+                        "Animation",
+                        "Adventure",
+                        "Comedy",
+                        "Drama",
+                        "Family",
+                        "Fantasy",
+                        "Music",
+                        "Romance"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.9,
+                        "voteCount": 173015
+                    },
+                    "metacritic": {
+                        "score": 83,
+                        "reviewCount": 53
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        },
+                        {
+                            "code": "CA",
+                            "name": "Canada"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Jin"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt5743796",
+                    "type": "tvSeries",
+                    "primaryTitle": "Warrior",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNTE5MjE3NTUtNTQxMC00ZjIwLWE2ZjctNmQ2NDc3ZmY2YTE0XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1296,
+                        "height": 1920
+                    },
+                    "startYear": 2019,
+                    "endYear": 2023,
+                    "genres": [
+                        "Action",
+                        "Crime",
+                        "Drama",
+                        "History"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.4,
+                        "voteCount": 53042
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Po"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt3149038",
+                    "type": "movie",
+                    "primaryTitle": "A Brilliant Young Mind",
+                    "originalTitle": "X+Y",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNTIzNmNjZjYtMWE2Zi00NjA3LWFiYjQtNmE4NjIxNmFlZWQ0XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1175,
+                        "height": 1763
+                    },
+                    "startYear": 2014,
+                    "genres": [
+                        "Drama",
+                        "Romance"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.1,
+                        "voteCount": 31246
+                    },
+                    "metacritic": {
+                        "score": 65,
+                        "reviewCount": 19
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        },
+                        {
+                            "code": "AU",
+                            "name": "Australia"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Deng Laoshi"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt9231040",
+                    "type": "movie",
+                    "primaryTitle": "First Cow",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMjNiZTA3MDYtYzRiZi00OTdiLWI5NjItMTllZDQxMWM5NTQyXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1922,
+                        "height": 2883
+                    },
+                    "startYear": 2019,
+                    "genres": [
+                        "Drama",
+                        "Western"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.1,
+                        "voteCount": 24419
+                    },
+                    "metacritic": {
+                        "score": 90,
+                        "reviewCount": 44
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "King-Lu"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt2568204",
+                    "type": "tvSeries",
+                    "primaryTitle": "Tyrant",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNzY4NTg3MzEzMV5BMl5BanBnXkFtZTgwODU5ODgxOTE@._V1_.jpg",
+                        "width": 1000,
+                        "height": 1500
+                    },
+                    "startYear": 2014,
+                    "endYear": 2016,
+                    "genres": [
+                        "Action",
+                        "Drama",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.7,
+                        "voteCount": 24146
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Ambassador Zhang"
+                ],
+                "episodeCount": 4
+            },
+            {
+                "title": {
+                    "id": "tt6433880",
+                    "type": "movie",
+                    "primaryTitle": "Anna and the Apocalypse",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTU4NTM4NDQyNV5BMl5BanBnXkFtZTgwMjY0NTI0NjM@._V1_.jpg",
+                        "width": 1382,
+                        "height": 2048
+                    },
+                    "startYear": 2017,
+                    "genres": [
+                        "Comedy",
+                        "Horror",
+                        "Musical"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.1,
+                        "voteCount": 17545
+                    },
+                    "metacritic": {
+                        "score": 63,
+                        "reviewCount": 27
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "producer"
+            },
+            {
+                "title": {
+                    "id": "tt0115355",
+                    "type": "tvSeries",
+                    "primaryTitle": "Silent Witness",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNDFlOTgxNmYtNGRiNy00NzIxLTg0YTItOGUzZmZmNGJkMjYwXkEyXkFqcGc@._V1_.jpg",
+                        "width": 2160,
+                        "height": 2880
+                    },
+                    "startYear": 1996,
+                    "genres": [
+                        "Crime",
+                        "Drama",
+                        "Mystery"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.9,
+                        "voteCount": 15008
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Dr. Oliver Matthews"
+                ],
+                "episodeCount": 2
+            },
+            {
+                "title": {
+                    "id": "tt1652216",
+                    "type": "tvSeries",
+                    "primaryTitle": "DCI Banks",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMzg5NTgxMzgtYzViNC00NWY2LWJhY2ItYTViZmY5Y2VmN2Y1XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1127,
+                        "height": 1600
+                    },
+                    "startYear": 2010,
+                    "endYear": 2016,
+                    "genres": [
+                        "Crime",
+                        "Drama",
+                        "Mystery"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.7,
+                        "voteCount": 10209
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Chang Li"
+                ],
+                "episodeCount": 2
+            },
+            {
+                "title": {
+                    "id": "tt0088512",
+                    "type": "tvSeries",
+                    "primaryTitle": "EastEnders",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYjVjMTU3YTUtZmYzYy00NzQzLWFjYzYtNjljYzRmOTZmZTdmXkEyXkFqcGc@._V1_.jpg",
+                        "width": 960,
+                        "height": 1440
+                    },
+                    "startYear": 1985,
+                    "genres": [
+                        "Crime",
+                        "Drama",
+                        "Romance"
+                    ],
+                    "rating": {
+                        "aggregateRating": 4.8,
+                        "voteCount": 10013
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Obstetrician"
+                ],
+                "episodeCount": 2
+            },
+            {
+                "title": {
+                    "id": "tt3525168",
+                    "type": "movie",
+                    "primaryTitle": "Dead in a Week (or Your Money Back)",
+                    "originalTitle": "Dead in a Week (or Your Money Back)",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNDkxMjQzMzY3OF5BMl5BanBnXkFtZTgwOTk5OTE3NTM@._V1_.jpg",
+                        "width": 864,
+                        "height": 1280
+                    },
+                    "startYear": 2018,
+                    "genres": [
+                        "Comedy",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.3,
+                        "voteCount": 7572
+                    },
+                    "metacritic": {
+                        "score": 38,
+                        "reviewCount": 5
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "producer"
+            },
+            {
+                "title": {
+                    "id": "tt3525168",
+                    "type": "movie",
+                    "primaryTitle": "Dead in a Week (or Your Money Back)",
+                    "originalTitle": "Dead in a Week (or Your Money Back)",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNDkxMjQzMzY3OF5BMl5BanBnXkFtZTgwOTk5OTE3NTM@._V1_.jpg",
+                        "width": 864,
+                        "height": 1280
+                    },
+                    "startYear": 2018,
+                    "genres": [
+                        "Comedy",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.3,
+                        "voteCount": 7572
+                    },
+                    "metacritic": {
+                        "score": 38,
+                        "reviewCount": 5
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Lawrence"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt7161312",
+                    "type": "tvSeries",
+                    "primaryTitle": "Informer",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BY2UzZGYyNTMtMTBhNi00NzFkLTgzZTAtYmMzNGMyY2YxY2E4XkEyXkFqcGc@._V1_.jpg",
+                        "width": 8100,
+                        "height": 12000
+                    },
+                    "startYear": 2018,
+                    "endYear": 2018,
+                    "genres": [
+                        "Crime",
+                        "Drama",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.8,
+                        "voteCount": 7063
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Jin Weijun"
+                ],
+                "episodeCount": 3
+            },
+            {
+                "title": {
+                    "id": "tt3847626",
+                    "type": "tvMiniSeries",
+                    "primaryTitle": "Code of a Killer",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYjEwZjA2MjEtMjNiYi00MTg0LThiN2EtNTY1YmI0ZjE1ZWFkXkEyXkFqcGc@._V1_.jpg",
+                        "width": 709,
+                        "height": 1000
+                    },
+                    "startYear": 2015,
+                    "endYear": 2015,
+                    "genres": [
+                        "Biography",
+                        "Crime",
+                        "Drama",
+                        "History"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.6,
+                        "voteCount": 4626
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Jack Wu"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt7531138",
+                    "type": "movie",
+                    "primaryTitle": "Only You",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNzZjMzEwZGUtMTlhNi00OGQ0LTk3ZjgtNDIyYzU0ODBjNzAwXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1300,
+                        "height": 1920
+                    },
+                    "startYear": 2018,
+                    "genres": [
+                        "Drama",
+                        "Romance"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.7,
+                        "voteCount": 4105
+                    },
+                    "metacritic": {
+                        "score": 78,
+                        "reviewCount": 7
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        },
+                        {
+                            "code": "SE",
+                            "name": "Sweden"
+                        }
+                    ]
+                },
+                "category": "producer"
+            },
+            {
+                "title": {
+                    "id": "tt3717804",
+                    "type": "movie",
+                    "primaryTitle": "England Is Mine",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNGYxMzg4MTQtZWZhNy00ZTUyLWFmZjMtNTdkYTZlNjRmMTM4XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1944,
+                        "height": 2880
+                    },
+                    "startYear": 2017,
+                    "genres": [
+                        "Biography",
+                        "Drama",
+                        "Music"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.8,
+                        "voteCount": 4072
+                    },
+                    "metacritic": {
+                        "score": 45,
+                        "reviewCount": 19
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "producer"
+            },
+            {
+                "title": {
+                    "id": "tt7551216",
+                    "type": "tvSeries",
+                    "primaryTitle": "White Dragon",
+                    "originalTitle": "Strangers",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOGNlMDZhMDctZGIxNi00NWI0LWE5NjItNjI5MGNjNzM5ZDU2XkEyXkFqcGc@._V1_.jpg",
+                        "width": 759,
+                        "height": 1073
+                    },
+                    "startYear": 2018,
+                    "endYear": 2018,
+                    "genres": [
+                        "Crime",
+                        "Drama",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.5,
+                        "voteCount": 2957
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Allen Ma"
+                ],
+                "episodeCount": 2
+            },
+            {
+                "title": {
+                    "id": "tt13751472",
+                    "type": "tvSeries",
+                    "primaryTitle": "Bump",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNWVkMmZjYTctYTM3MS00MmI2LWE3MTEtZGVjZThjMTljNmFhXkEyXkFqcGc@._V1_.jpg",
+                        "width": 960,
+                        "height": 1440
+                    },
+                    "startYear": 2021,
+                    "endYear": 2024,
+                    "genres": [
+                        "Comedy",
+                        "Drama",
+                        "Romance"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.6,
+                        "voteCount": 2891
+                    },
+                    "originCountries": [
+                        {
+                            "code": "AU",
+                            "name": "Australia"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Karl"
+                ],
+                "episodeCount": 2
+            },
+            {
+                "title": {
+                    "id": "tt2297604",
+                    "type": "tvMiniSeries",
+                    "primaryTitle": "Run",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTQ3MzEwMTk0NV5BMl5BanBnXkFtZTgwMjUxOTIyMDE@._V1_.jpg",
+                        "width": 1382,
+                        "height": 2048
+                    },
+                    "startYear": 2013,
+                    "endYear": 2013,
+                    "genres": [
+                        "Crime",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.4,
+                        "voteCount": 2083
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Andy"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt1957938",
+                    "type": "movie",
+                    "primaryTitle": "Narcopolis",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMjI3NzAzNTIwMl5BMl5BanBnXkFtZTgwNDU4OTMyNzE@._V1_.jpg",
+                        "width": 1620,
+                        "height": 2400
+                    },
+                    "startYear": 2015,
+                    "genres": [
+                        "Mystery",
+                        "Sci-Fi",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 4.4,
+                        "voteCount": 1949
+                    },
+                    "metacritic": {
+                        "score": 30,
+                        "reviewCount": 5
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Mr. Chang"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt2964118",
+                    "type": "tvMiniSeries",
+                    "primaryTitle": "Dates",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BODY0ZmZmNDMtNjZlMC00YTUxLWEwOGUtM2Y1NTA2MDUzZjQyXkEyXkFqcGc@._V1_.jpg",
+                        "width": 851,
+                        "height": 1200
+                    },
+                    "startYear": 2013,
+                    "endYear": 2013,
+                    "genres": [
+                        "Drama",
+                        "Romance"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.5,
+                        "voteCount": 1937
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Tony"
+                ],
+                "episodeCount": 2
+            },
+            {
+                "title": {
+                    "id": "tt5885106",
+                    "type": "movie",
+                    "primaryTitle": "I Am Vengeance",
+                    "originalTitle": "Vengeance",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNTUyNzJjMmYtYzFhMC00NjBmLWEyZmMtOTZlNDE1ZjMyMjYyXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1514,
+                        "height": 2145
+                    },
+                    "startYear": 2018,
+                    "genres": [
+                        "Action"
+                    ],
+                    "rating": {
+                        "aggregateRating": 4.4,
+                        "voteCount": 1702
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Burke"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt6354784",
+                    "type": "movie",
+                    "primaryTitle": "The Hungry",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNTFhYmFkYjQtMTk5NC00MzY1LWE3ODItMzcwMTAzYzcwNjNiXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1125,
+                        "height": 1500
+                    },
+                    "startYear": 2017,
+                    "genres": [
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7,
+                        "voteCount": 1437
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        },
+                        {
+                            "code": "IN",
+                            "name": "India"
+                        }
+                    ]
+                },
+                "category": "producer"
+            },
+            {
+                "title": {
+                    "id": "tt3502470",
+                    "type": "tvSeries",
+                    "primaryTitle": "Critical",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNTE3NjE5NDMxN15BMl5BanBnXkFtZTgwNTg4Mjk5NDE@._V1_.jpg",
+                        "width": 1059,
+                        "height": 1500
+                    },
+                    "startYear": 2015,
+                    "endYear": 2015,
+                    "genres": [
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.4,
+                        "voteCount": 1186
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Brian Zhao"
+                ],
+                "episodeCount": 6
+            },
+            {
+                "title": {
+                    "id": "tt26741906",
+                    "type": "tvMiniSeries",
+                    "primaryTitle": "Rematch",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNzRiMmI0NTEtNGU3Mi00ZWY1LTkyYTUtZGIwM2Q4YzE5YWYxXkEyXkFqcGc@._V1_.jpg",
+                        "width": 826,
+                        "height": 1098
+                    },
+                    "startYear": 2024,
+                    "endYear": 2025,
+                    "genres": [
+                        "Drama",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.4,
+                        "voteCount": 1185
+                    },
+                    "originCountries": [
+                        {
+                            "code": "FR",
+                            "name": "France"
+                        },
+                        {
+                            "code": "HU",
+                            "name": "Hungary"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "P.C."
+                ],
+                "episodeCount": 6
+            },
+            {
+                "title": {
+                    "id": "tt13109732",
+                    "type": "movie",
+                    "primaryTitle": "Rosemead",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYWY3MDA1NjktYzhhNS00MzFiLTk3YTAtNTU5MDA5MGQ0ZWIyXkEyXkFqcGc@._V1_.jpg",
+                        "width": 8100,
+                        "height": 12000
+                    },
+                    "startYear": 2025,
+                    "genres": [
+                        "Crime",
+                        "Drama",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.5,
+                        "voteCount": 840
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Charles"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt2171704",
+                    "type": "videoGame",
+                    "primaryTitle": "007 Legends",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZGQzYjRjZTktZGU5OS00MGJjLWFjMzUtYmY4Yzc3ZjNmOTk0XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1200,
+                        "height": 1800
+                    },
+                    "startYear": 2012,
+                    "genres": [
+                        "Action",
+                        "Adventure",
+                        "Crime",
+                        "Sci-Fi",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.8,
+                        "voteCount": 643
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Mr. Ling",
+                    "Moonraker Scientist"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt3637136",
+                    "type": "short",
+                    "primaryTitle": "The Expert",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNjU1N2Q2MGItNDQ1OS00ZDExLTkzOTUtNmE3OTcyZTM5N2ZhXkEyXkFqcGc@._V1_.jpg",
+                        "width": 440,
+                        "height": 600
+                    },
+                    "startYear": 2014,
+                    "genres": [
+                        "Short",
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.7,
+                        "voteCount": 607
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Anderson"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt7948996",
+                    "type": "tvSeries",
+                    "primaryTitle": "Chimerica",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYzUxOGYyYTktMzBiYi00YzY2LWEwYzYtNzU0Y2Y0ZTcwY2E5XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1688,
+                        "height": 2362
+                    },
+                    "startYear": 2019,
+                    "endYear": 2019,
+                    "genres": [
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.6,
+                        "voteCount": 588
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Tang Wen Lei"
+                ],
+                "episodeCount": 3
+            },
+            {
+                "title": {
+                    "id": "tt6438398",
+                    "type": "movie",
+                    "primaryTitle": "Catacombe",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNDNjZmZmZGYtZmM0ZS00ZDQzLWEyNDYtNGYyYWIzZmJhYjhmXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1131,
+                        "height": 1600
+                    },
+                    "startYear": 2018,
+                    "genres": [
+                        "Drama",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.5,
+                        "voteCount": 509
+                    },
+                    "originCountries": [
+                        {
+                            "code": "BE",
+                            "name": "Belgium"
+                        },
+                        {
+                            "code": "NL",
+                            "name": "Netherlands"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Charlie Yuen"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt7382842",
+                    "type": "movie",
+                    "primaryTitle": "Followers",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMDI4MGQ0MGUtZTgyMC00ZWU0LThhNzEtYjhjNzY3MGNjMGFmXkEyXkFqcGc@._V1_.jpg",
+                        "width": 600,
+                        "height": 900
+                    },
+                    "startYear": 2021,
+                    "genres": [
+                        "Comedy",
+                        "Horror"
+                    ],
+                    "rating": {
+                        "aggregateRating": 3.4,
+                        "voteCount": 371
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Edward Lee"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt16267384",
+                    "type": "tvMiniSeries",
+                    "primaryTitle": "Significant Others",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNDg2ZmNiZjQtNzRhNy00NzVjLThlZmQtMzM3MDFkYmExOGE4XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1162,
+                        "height": 1742
+                    },
+                    "startYear": 2022,
+                    "endYear": 2022,
+                    "genres": [
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.5,
+                        "voteCount": 350
+                    },
+                    "originCountries": [
+                        {
+                            "code": "AU",
+                            "name": "Australia"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Father Shirley"
+                ],
+                "episodeCount": 2
+            },
+            {
+                "title": {
+                    "id": "tt2634438",
+                    "type": "movie",
+                    "primaryTitle": "Panic",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMjExMjAwNzk1Nl5BMl5BanBnXkFtZTgwMzE5OTYyMDI@._V1_.jpg",
+                        "width": 1530,
+                        "height": 2161
+                    },
+                    "startYear": 2014,
+                    "genres": [
+                        "Drama",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.1,
+                        "voteCount": 121
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Yi"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt3135282",
+                    "type": "movie",
+                    "primaryTitle": "M.L.E.",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNDIyNTA2NDQ2OF5BMl5BanBnXkFtZTgwMzE5MTMyNjE@._V1_.jpg",
+                        "width": 812,
+                        "height": 1221
+                    },
+                    "startYear": 2015,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.4,
+                        "voteCount": 116
+                    },
+                    "originCountries": [
+                        {
+                            "code": "CA",
+                            "name": "Canada"
+                        },
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Sebastian"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt4686238",
+                    "type": "movie",
+                    "primaryTitle": "Zero",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNmRiMWM4OTAtNzNmYy00MzhhLThmMDAtODk1MTVjMDcxNzgyXkEyXkFqcGc@._V1_.jpg",
+                        "width": 2384,
+                        "height": 3370
+                    },
+                    "startYear": 2022,
+                    "genres": [
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 4.4,
+                        "voteCount": 91
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "producer"
+            },
+            {
+                "title": {
+                    "id": "tt2993342",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Erica & Callum",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNWQ0ODc2MDAtYWE5NS00YWJjLTlmZWMtNDJkZWMxYTI3YWQwXkEyXkFqcGc@._V1_.jpg",
+                        "width": 500,
+                        "height": 375
+                    },
+                    "startYear": 2013,
+                    "genres": [
+                        "Drama",
+                        "Romance"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.2,
+                        "voteCount": 86
+                    }
+                },
+                "category": "actor",
+                "characters": [
+                    "Tony"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt3395490",
+                    "type": "tvSeries",
+                    "primaryTitle": "SAG-AFTRA Foundation Conversations",
+                    "originalTitle": "SAG-AFTRA Foundation Conversations",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNzBhZDJkZDMtNzNhNi00MmI4LTlkZjQtY2ViMTJjMmEzYzJhXkEyXkFqcGc@._V1_.jpg",
+                        "width": 800,
+                        "height": 1200
+                    },
+                    "startYear": 1979,
+                    "genres": [
+                        "Talk-Show"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.7,
+                        "voteCount": 78
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "self",
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt3395490",
+                    "type": "tvSeries",
+                    "primaryTitle": "SAG-AFTRA Foundation Conversations",
+                    "originalTitle": "SAG-AFTRA Foundation Conversations",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNzBhZDJkZDMtNzNhNi00MmI4LTlkZjQtY2ViMTJjMmEzYzJhXkEyXkFqcGc@._V1_.jpg",
+                        "width": 800,
+                        "height": 1200
+                    },
+                    "startYear": 1979,
+                    "genres": [
+                        "Talk-Show"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.7,
+                        "voteCount": 78
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor"
+            },
+            {
+                "title": {
+                    "id": "tt7640460",
+                    "type": "short",
+                    "primaryTitle": "Pommel",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOTFiOWM4NGEtMDVkOC00MWVhLThjNzEtOTI4OTQ0MTA2ZTBlXkEyXkFqcGc@._V1_.jpg",
+                        "width": 2480,
+                        "height": 3508
+                    },
+                    "startYear": 2018,
+                    "genres": [
+                        "Short",
+                        "Drama",
+                        "Sport"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.3,
+                        "voteCount": 47
+                    },
+                    "originCountries": [
+                        {
+                            "code": "HR",
+                            "name": "Croatia"
+                        },
+                        {
+                            "code": "SG",
+                            "name": "Singapore"
+                        },
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Dad"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt6426032",
+                    "type": "videoGame",
+                    "primaryTitle": "Battlefleet Gothic: Armada",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMDRiZjcxOGUtODYxNy00OGI2LTg5Y2YtZGExMGRkOGY4NTRkXkEyXkFqcGc@._V1_.jpg",
+                        "width": 761,
+                        "height": 1083
+                    },
+                    "startYear": 2016,
+                    "genres": [
+                        "Action",
+                        "Adventure",
+                        "Fantasy",
+                        "Sci-Fi",
+                        "War"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6,
+                        "voteCount": 32
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Tau Air Caste",
+                    "Tau Water Caste"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt3136586",
+                    "type": "short",
+                    "primaryTitle": "Happy Birthday Cindy Wei",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYzJhNDM0MjMtNDViMy00NjI1LWE1NjktNmI3N2EyYjYwZmFjXkEyXkFqcGc@._V1_.jpg",
+                        "width": 798,
+                        "height": 531
+                    },
+                    "startYear": 2013,
+                    "genres": [
+                        "Short",
+                        "Biography",
+                        "Comedy",
+                        "Drama",
+                        "Romance"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.7,
+                        "voteCount": 21
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Michael"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt20764022",
+                    "type": "videoGame",
+                    "primaryTitle": "The Pirate Queen",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMmJjNjIzMTEtOTJjNS00YTkxLWFlMWQtOTUwYmVhZDM2ZjZkXkEyXkFqcGc@._V1_.jpg",
+                        "width": 4169,
+                        "height": 6118
+                    },
+                    "startYear": 2023,
+                    "genres": [
+                        "Adventure"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.3,
+                        "voteCount": 21
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Cheung Po Tsai"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt9908904",
+                    "type": "short",
+                    "primaryTitle": "Automat",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZWU5NTAxODgtYTVlMC00YTExLWE4ZWItZjVlZTFmMzdmYjNhXkEyXkFqcGc@._V1_.jpg",
+                        "width": 5235,
+                        "height": 7290
+                    },
+                    "startYear": 2019,
+                    "genres": [
+                        "Short",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.9,
+                        "voteCount": 14
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "thanks"
+            },
+            {
+                "title": {
+                    "id": "tt2704266",
+                    "type": "short",
+                    "primaryTitle": "Formalities",
+                    "startYear": 2012,
+                    "genres": [
+                        "Short",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5,
+                        "voteCount": 14
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor"
+            },
+            {
+                "title": {
+                    "id": "tt16227048",
+                    "type": "tvSeries",
+                    "primaryTitle": "Backstage Features",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOWY4OWM1YWYtMzI3ZS00NTcxLWIyZmItZDJlNGFlMTlhZTg1XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1200,
+                        "height": 1400
+                    },
+                    "startYear": 2021,
+                    "genres": [
+                        "Talk-Show"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.4,
+                        "voteCount": 11
+                    },
+                    "originCountries": [
+                        {
+                            "code": "CA",
+                            "name": "Canada"
+                        }
+                    ]
+                },
+                "category": "self",
+                "characters": [
+                    "Self"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt36872855",
+                    "type": "short",
+                    "primaryTitle": "Mango Seed",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMDg5OWRjZWUtZjhkNS00NDY2LThmM2QtNWU4ZmIzYzgwNzdiXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1414,
+                        "height": 2000
+                    },
+                    "startYear": 2025,
+                    "genres": [
+                        "Short",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.7,
+                        "voteCount": 6
+                    },
+                    "originCountries": [
+                        {
+                            "code": "AU",
+                            "name": "Australia"
+                        }
+                    ]
+                },
+                "category": "producer"
+            }
+        ],
+        "totalCount": 64
+    },
+    "relationships": {
+        "relationships": []
+    },
+    "trivia": {
+        "triviaEntries": []
+    },
+    "artifacts": {
+        "details": {
+            "path": "details.json",
+            "url": "https://api.imdbapi.dev/names/nm4093657",
+            "has_payload": true
+        },
+        "images": {
+            "path": "images.json",
+            "url": "https://api.imdbapi.dev/names/nm4093657/images",
+            "has_payload": true
+        },
+        "filmography": {
+            "path": "filmography.json",
+            "url": "https://api.imdbapi.dev/names/nm4093657/filmography",
+            "has_payload": true
+        },
+        "relationships": {
+            "path": "relationships.json",
+            "url": "https://api.imdbapi.dev/names/nm4093657/relationships",
+            "has_payload": true
+        },
+        "trivia": {
+            "path": "trivia.json",
+            "url": "https://api.imdbapi.dev/names/nm4093657/trivia",
+            "has_payload": true
+        }
+    }
+}

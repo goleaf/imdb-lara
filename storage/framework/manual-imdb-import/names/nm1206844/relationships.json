@@ -1,0 +1,28 @@
+{
+    "relationships": [
+        {
+            "name": {
+                "id": "nm1049335",
+                "displayName": "Caroline Williams",
+                "alternativeNames": [
+                    "Caroline Goddard",
+                    "Caroline Hope Williams"
+                ],
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BYTI3ZTQ2NjItMzk5OC00OTU0LWFjZjYtNWI4ZDExZGMwMDA3XkEyXkFqcGc@._V1_.jpg",
+                    "width": 2115,
+                    "height": 2565
+                },
+                "primaryProfessions": [
+                    "director",
+                    "producer",
+                    "writer"
+                ]
+            },
+            "relationType": "spouse",
+            "attributes": [
+                "3 children"
+            ]
+        }
+    ]
+}

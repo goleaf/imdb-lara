@@ -1,0 +1,233 @@
+{
+    "schemaVersion": 1,
+    "imdbId": "nm16165407",
+    "downloadedAt": "2026-04-11T03:20:51+00:00",
+    "sourceUrl": "https://api.imdbapi.dev/names/nm16165407",
+    "details": {
+        "id": "nm16165407",
+        "displayName": "Isla McRae",
+        "primaryImage": {
+            "url": "https://m.media-amazon.com/images/M/MV5BZDRlOTlhMGItNGJjNy00MDllLWExZTUtOWVlZDhkMTBjOGY4XkEyXkFqcGc@._V1_.jpg",
+            "width": 1899,
+            "height": 2374
+        },
+        "primaryProfessions": [
+            "actress"
+        ],
+        "biography": "Isla McRae is known for The Fantastic Four: First Steps (2025), Project Hail Mary (2026) and The Christmas Quest (2024)."
+    },
+    "images": {
+        "images": [
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BNzZmMmRiYTYtZWZkMS00NTk2LWEyZDAtZTg3ZjYzMzlhNzJjXkEyXkFqcGc@._V1_.jpg",
+                "width": 3124,
+                "height": 3905,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BY2MyNDA0NWMtNDMzMi00YmQxLTkxMDAtNjcwYzNhNGI2ZGViXkEyXkFqcGc@._V1_.jpg",
+                "width": 3168,
+                "height": 4752,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BZmI5MzBmMTYtZGEwYi00NmM0LTg3ODMtYWMyOGRkN2IxMGViXkEyXkFqcGc@._V1_.jpg",
+                "width": 3168,
+                "height": 4752,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BNjYzYjlmYWUtNzY5Mi00NjM0LThiZGMtMWMwYjcxNGFmZGJkXkEyXkFqcGc@._V1_.jpg",
+                "width": 3168,
+                "height": 4752,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BMDFiZmQ4MjItNWQ5Zi00YzM3LWIzNDgtOTJkZTgzZmQ0ZmMzXkEyXkFqcGc@._V1_.jpg",
+                "width": 3168,
+                "height": 4752,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BNmJhNzgyMzQtOWZkMC00NGY3LTg5ZGEtY2ZmNzc1OTIzZDdlXkEyXkFqcGc@._V1_.jpg",
+                "width": 1066,
+                "height": 1600,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BZDRlOTlhMGItNGJjNy00MDllLWExZTUtOWVlZDhkMTBjOGY4XkEyXkFqcGc@._V1_.jpg",
+                "width": 1899,
+                "height": 2374,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BZjY3NGZkMzktZjc1Zi00ZmRmLWE5M2UtZDYzNDY2YTg1YzU2XkEyXkFqcGc@._V1_.jpg",
+                "width": 3648,
+                "height": 5472,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BZWJlYTg4YWQtZWUwMi00NDZmLTgyMzItOWFmOGIyOGU3NmVkXkEyXkFqcGc@._V1_.jpg",
+                "width": 3648,
+                "height": 5472,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BYzgzY2RiZmYtZDY4OC00NDQ2LTk4OGUtY2U2Zjg3NzU5NzFhXkEyXkFqcGc@._V1_.jpg",
+                "width": 3648,
+                "height": 5472,
+                "type": "publicity"
+            }
+        ],
+        "totalCount": 10
+    },
+    "filmography": {
+        "credits": [
+            {
+                "title": {
+                    "id": "tt10676052",
+                    "type": "movie",
+                    "primaryTitle": "The Fantastic Four: First Steps",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOGM5MzA3MDAtYmEwMi00ZDNiLTg4MDgtMTZjOTc0ZGMyNTIwXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1086,
+                        "height": 1609
+                    },
+                    "startYear": 2025,
+                    "genres": [
+                        "Action",
+                        "Adventure",
+                        "Sci-Fi"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.8,
+                        "voteCount": 257429
+                    },
+                    "metacritic": {
+                        "score": 65,
+                        "reviewCount": 54
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        },
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        },
+                        {
+                            "code": "CA",
+                            "name": "Canada"
+                        },
+                        {
+                            "code": "NZ",
+                            "name": "New Zealand"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Yancy Street Kid"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt12042730",
+                    "type": "movie",
+                    "primaryTitle": "Project Hail Mary",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNTkwNzJiYTctNzI3NC00NjE1LTlhYjktY2Q5MTdmMWFmNzcxXkEyXkFqcGc@._V1_.jpg",
+                        "width": 2765,
+                        "height": 4096
+                    },
+                    "startYear": 2026,
+                    "genres": [
+                        "Adventure",
+                        "Comedy",
+                        "Sci-Fi"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.4,
+                        "voteCount": 178625
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Phillips"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt32140747",
+                    "type": "tvMovie",
+                    "primaryTitle": "The Christmas Quest",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOTI0ZDUyMDctNTZiMi00N2RmLWFjMjQtZDFiMjhiMzM3OWQ3XkEyXkFqcGc@._V1_.jpg",
+                        "width": 642,
+                        "height": 958
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Adventure",
+                        "Romance"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.4,
+                        "voteCount": 1867
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Young Stephanie"
+                ]
+            }
+        ],
+        "totalCount": 3
+    },
+    "relationships": {
+        "relationships": []
+    },
+    "trivia": {
+        "triviaEntries": []
+    },
+    "artifacts": {
+        "details": {
+            "path": "details.json",
+            "url": "https://api.imdbapi.dev/names/nm16165407",
+            "has_payload": true
+        },
+        "images": {
+            "path": "images.json",
+            "url": "https://api.imdbapi.dev/names/nm16165407/images",
+            "has_payload": true
+        },
+        "filmography": {
+            "path": "filmography.json",
+            "url": "https://api.imdbapi.dev/names/nm16165407/filmography",
+            "has_payload": true
+        },
+        "relationships": {
+            "path": "relationships.json",
+            "url": "https://api.imdbapi.dev/names/nm16165407/relationships",
+            "has_payload": true
+        },
+        "trivia": {
+            "path": "trivia.json",
+            "url": "https://api.imdbapi.dev/names/nm16165407/trivia",
+            "has_payload": true
+        }
+    }
+}

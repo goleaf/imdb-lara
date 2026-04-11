@@ -14,6 +14,7 @@ class BuildPublicTitleIndexQueryAction
      *     search?: string,
      *     searchMode?: string|null,
      *     genre?: string|null,
+     *     theme?: string|null,
      *     minimumRating?: int|float|string|null,
      *     ratingMin?: int|float|string|null,
      *     ratingMax?: int|float|string|null,
@@ -39,6 +40,7 @@ class BuildPublicTitleIndexQueryAction
         $search = trim((string) ($filters['search'] ?? ''));
         $searchMode = filled($filters['searchMode'] ?? null) ? (string) $filters['searchMode'] : null;
         $genre = filled($filters['genre'] ?? null) ? (string) $filters['genre'] : null;
+        $theme = filled($filters['theme'] ?? null) ? (string) $filters['theme'] : null;
         $minimumRating = filled($filters['minimumRating'] ?? $filters['ratingMin'] ?? null)
             ? (float) ($filters['minimumRating'] ?? $filters['ratingMin'])
             : null;
@@ -69,18 +71,7 @@ class BuildPublicTitleIndexQueryAction
         $includePresentationRelations = (bool) ($filters['includePresentationRelations'] ?? true);
 
         $query = Title::query()
-            ->select([
-                'movies.id',
-                'movies.tconst',
-                'movies.imdb_id',
-                'movies.primarytitle',
-                'movies.originaltitle',
-                'movies.titletype',
-                'movies.isadult',
-                'movies.startyear',
-                'movies.endyear',
-                'movies.runtimeminutes',
-            ])
+            ->selectCatalogCardColumns()
             ->addSelect([
                 'popularity_rank' => TitleStatistic::query()
                     ->select('vote_count')
@@ -90,17 +81,7 @@ class BuildPublicTitleIndexQueryAction
             ->published();
 
         if ($includePresentationRelations) {
-            $query->with([
-                'genres:id,name',
-                'statistic:movie_id,aggregate_rating,vote_count',
-                'titleImages' => fn ($imageQuery) => $imageQuery
-                    ->select(['id', 'movie_id', 'position', 'url', 'width', 'height', 'type'])
-                    ->whereIn('type', ['poster', 'backdrop', 'still_frame', 'gallery'])
-                    ->limit(6),
-                'primaryImageRecord:movie_id,url,width,height,type',
-                'countries:code,name',
-                'languages:code,name',
-            ]);
+            $query->withCatalogListRelations();
         }
 
         if ($excludeEpisodes) {
@@ -114,7 +95,11 @@ class BuildPublicTitleIndexQueryAction
         }
 
         if ($genreId = $this->resolveGenreId($genre)) {
-            $query->whereHas('genres', fn (Builder $genreQuery) => $genreQuery->where('genres.id', $genreId));
+            $query->inGenre($genreId);
+        }
+
+        if ($interestCategoryId = $this->resolveInterestCategoryId($theme)) {
+            $query->forInterestCategory($interestCategoryId);
         }
 
         if ($minimumRating !== null || $maximumRating !== null || $votesMin !== null) {
@@ -145,37 +130,18 @@ class BuildPublicTitleIndexQueryAction
             $query->where('startyear', $year);
         }
 
-        if ($yearFrom !== null) {
-            $query->where('startyear', '>=', $yearFrom);
-        }
-
-        if ($yearTo !== null) {
-            $query->where('startyear', '<=', $yearTo);
-        }
+        $query->releasedBetweenYears($yearFrom, $yearTo);
 
         if ($language !== null) {
-            $query->whereHas(
-                'languages',
-                fn (Builder $languageQuery) => $languageQuery->where('languages.code', $language),
-            );
+            $query->spokenInLanguage($language);
         }
 
         if ($country !== null) {
-            $query->whereHas(
-                'countries',
-                fn (Builder $countryQuery) => $countryQuery->where('countries.code', $country),
-            );
+            $query->producedInCountry($country);
         }
 
         if ($runtime !== null) {
-            match ($runtime) {
-                'under-30' => $query->whereNotNull('runtimeminutes')->where('runtimeminutes', '<', 30),
-                '30-60' => $query->whereBetween('runtimeminutes', [30, 60]),
-                '60-90' => $query->whereBetween('runtimeminutes', [60, 90]),
-                '90-120' => $query->whereBetween('runtimeminutes', [90, 120]),
-                '120-plus' => $query->where('runtimeminutes', '>=', 120),
-                default => $query,
-            };
+            $query->withinRuntimeBucket($runtime);
         }
 
         if ($awards !== null) {
@@ -238,5 +204,18 @@ class BuildPublicTitleIndexQueryAction
         }
 
         return ctype_digit($genre) ? (int) $genre : null;
+    }
+
+    private function resolveInterestCategoryId(?string $theme): ?int
+    {
+        if (! filled($theme)) {
+            return null;
+        }
+
+        if (preg_match('/-ic(?P<id>\d+)$/', $theme, $matches) === 1) {
+            return (int) $matches['id'];
+        }
+
+        return ctype_digit($theme) ? (int) $theme : null;
     }
 }

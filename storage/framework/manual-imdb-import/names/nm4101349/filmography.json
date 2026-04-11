@@ -1,0 +1,809 @@
+{
+    "credits": [
+        {
+            "title": {
+                "id": "tt1646971",
+                "type": "movie",
+                "primaryTitle": "How to Train Your Dragon 2",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BMzMwMTAwODczN15BMl5BanBnXkFtZTgwMDk2NDA4MTE@._V1_.jpg",
+                    "width": 1382,
+                    "height": 2048
+                },
+                "startYear": 2014,
+                "genres": [
+                    "Animation",
+                    "Action",
+                    "Adventure",
+                    "Comedy",
+                    "Family",
+                    "Fantasy"
+                ],
+                "rating": {
+                    "aggregateRating": 7.8,
+                    "voteCount": 400587
+                },
+                "metacritic": {
+                    "score": 77,
+                    "reviewCount": 48
+                },
+                "originCountries": [
+                    {
+                        "code": "US",
+                        "name": "United States"
+                    },
+                    {
+                        "code": "IN",
+                        "name": "India"
+                    }
+                ]
+            },
+            "category": "miscellaneous"
+        },
+        {
+            "title": {
+                "id": "tt4729430",
+                "type": "movie",
+                "primaryTitle": "Klaus",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BZDA4ODhlMzctNGRmYi00NmViLTkxZGYtZjRkNGQ5YzYwYWVlXkEyXkFqcGc@._V1_.jpg",
+                    "width": 1500,
+                    "height": 2222
+                },
+                "startYear": 2019,
+                "genres": [
+                    "Animation",
+                    "Adventure",
+                    "Comedy",
+                    "Family",
+                    "Fantasy"
+                ],
+                "rating": {
+                    "aggregateRating": 8.2,
+                    "voteCount": 235574
+                },
+                "metacritic": {
+                    "score": 65,
+                    "reviewCount": 13
+                },
+                "originCountries": [
+                    {
+                        "code": "ES",
+                        "name": "Spain"
+                    },
+                    {
+                        "code": "GB",
+                        "name": "United Kingdom"
+                    },
+                    {
+                        "code": "US",
+                        "name": "United States"
+                    },
+                    {
+                        "code": "AT",
+                        "name": "Austria"
+                    },
+                    {
+                        "code": "CA",
+                        "name": "Canada"
+                    },
+                    {
+                        "code": "FR",
+                        "name": "France"
+                    }
+                ]
+            },
+            "category": "thanks"
+        },
+        {
+            "title": {
+                "id": "tt2267968",
+                "type": "movie",
+                "primaryTitle": "Kung Fu Panda 3",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BMTUyNzgxNjg2M15BMl5BanBnXkFtZTgwMTY1NDI1NjE@._V1_.jpg",
+                    "width": 660,
+                    "height": 978
+                },
+                "startYear": 2016,
+                "genres": [
+                    "Animation",
+                    "Action",
+                    "Adventure",
+                    "Comedy",
+                    "Family",
+                    "Fantasy"
+                ],
+                "rating": {
+                    "aggregateRating": 7.1,
+                    "voteCount": 217144
+                },
+                "metacritic": {
+                    "score": 66,
+                    "reviewCount": 34
+                },
+                "originCountries": [
+                    {
+                        "code": "US",
+                        "name": "United States"
+                    },
+                    {
+                        "code": "CN",
+                        "name": "China"
+                    }
+                ]
+            },
+            "category": "miscellaneous"
+        },
+        {
+            "title": {
+                "id": "tt12042730",
+                "type": "movie",
+                "primaryTitle": "Project Hail Mary",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BNTkwNzJiYTctNzI3NC00NjE1LTlhYjktY2Q5MTdmMWFmNzcxXkEyXkFqcGc@._V1_.jpg",
+                    "width": 2765,
+                    "height": 4096
+                },
+                "startYear": 2026,
+                "genres": [
+                    "Adventure",
+                    "Comedy",
+                    "Sci-Fi"
+                ],
+                "rating": {
+                    "aggregateRating": 8.4,
+                    "voteCount": 178625
+                },
+                "originCountries": [
+                    {
+                        "code": "US",
+                        "name": "United States"
+                    }
+                ]
+            },
+            "category": "actor",
+            "characters": [
+                "Rejected Rocky Voice"
+            ]
+        },
+        {
+            "title": {
+                "id": "tt3874544",
+                "type": "movie",
+                "primaryTitle": "The Boss Baby",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BMTg5MzUxNzgxNV5BMl5BanBnXkFtZTgwMTM2NzQ3MjI@._V1_.jpg",
+                    "width": 1382,
+                    "height": 2017
+                },
+                "startYear": 2017,
+                "genres": [
+                    "Animation",
+                    "Adventure",
+                    "Comedy",
+                    "Family",
+                    "Fantasy"
+                ],
+                "rating": {
+                    "aggregateRating": 6.3,
+                    "voteCount": 157490
+                },
+                "metacritic": {
+                    "score": 50,
+                    "reviewCount": 32
+                },
+                "originCountries": [
+                    {
+                        "code": "US",
+                        "name": "United States"
+                    }
+                ]
+            },
+            "category": "miscellaneous"
+        },
+        {
+            "title": {
+                "id": "tt2224026",
+                "type": "movie",
+                "primaryTitle": "Home",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BMjExOTQ4MDMyMV5BMl5BanBnXkFtZTgwMTE3NDM2MzE@._V1_.jpg",
+                    "width": 1382,
+                    "height": 2048
+                },
+                "startYear": 2015,
+                "genres": [
+                    "Animation",
+                    "Adventure",
+                    "Comedy",
+                    "Family",
+                    "Fantasy",
+                    "Musical",
+                    "Sci-Fi"
+                ],
+                "rating": {
+                    "aggregateRating": 6.5,
+                    "voteCount": 120941
+                },
+                "metacritic": {
+                    "score": 55,
+                    "reviewCount": 31
+                },
+                "originCountries": [
+                    {
+                        "code": "US",
+                        "name": "United States"
+                    },
+                    {
+                        "code": "IN",
+                        "name": "India"
+                    }
+                ]
+            },
+            "category": "miscellaneous"
+        },
+        {
+            "title": {
+                "id": "tt1911658",
+                "type": "movie",
+                "primaryTitle": "Penguins of Madagascar",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BMTEyMDg4MDU4MjdeQTJeQWpwZ15BbWU4MDQyOTc3MjIx._V1_.jpg",
+                    "width": 1382,
+                    "height": 2048
+                },
+                "startYear": 2014,
+                "genres": [
+                    "Animation",
+                    "Action",
+                    "Adventure",
+                    "Comedy",
+                    "Crime",
+                    "Family",
+                    "Sci-Fi"
+                ],
+                "rating": {
+                    "aggregateRating": 6.6,
+                    "voteCount": 115144
+                },
+                "metacritic": {
+                    "score": 53,
+                    "reviewCount": 31
+                },
+                "originCountries": [
+                    {
+                        "code": "US",
+                        "name": "United States"
+                    },
+                    {
+                        "code": "GB",
+                        "name": "United Kingdom"
+                    }
+                ]
+            },
+            "category": "producer"
+        },
+        {
+            "title": {
+                "id": "tt1679335",
+                "type": "movie",
+                "primaryTitle": "Trolls",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BMTkxNDc3OTcxMV5BMl5BanBnXkFtZTgwODk2NjAzOTE@._V1_.jpg",
+                    "width": 1379,
+                    "height": 2048
+                },
+                "startYear": 2016,
+                "genres": [
+                    "Animation",
+                    "Adventure",
+                    "Comedy",
+                    "Family",
+                    "Fantasy",
+                    "Music"
+                ],
+                "rating": {
+                    "aggregateRating": 6.4,
+                    "voteCount": 100326
+                },
+                "metacritic": {
+                    "score": 55,
+                    "reviewCount": 32
+                },
+                "originCountries": [
+                    {
+                        "code": "US",
+                        "name": "United States"
+                    },
+                    {
+                        "code": "IN",
+                        "name": "India"
+                    },
+                    {
+                        "code": "GB",
+                        "name": "United Kingdom"
+                    },
+                    {
+                        "code": "DE",
+                        "name": "Germany"
+                    }
+                ]
+            },
+            "category": "miscellaneous"
+        },
+        {
+            "title": {
+                "id": "tt2140553",
+                "type": "videoGame",
+                "primaryTitle": "The Last of Us",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BMTE2MmQ3OTctZmExNi00ZTYxLTgzMGYtOTdlYjFjNzIxNWMxXkEyXkFqcGc@._V1_.jpg",
+                    "width": 1200,
+                    "height": 1800
+                },
+                "startYear": 2013,
+                "genres": [
+                    "Action",
+                    "Adventure",
+                    "Drama",
+                    "Horror",
+                    "Sci-Fi"
+                ],
+                "rating": {
+                    "aggregateRating": 9.7,
+                    "voteCount": 90123
+                },
+                "originCountries": [
+                    {
+                        "code": "US",
+                        "name": "United States"
+                    }
+                ]
+            },
+            "category": "miscellaneous"
+        },
+        {
+            "title": {
+                "id": "tt0864835",
+                "type": "movie",
+                "primaryTitle": "Mr. Peabody & Sherman",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BZWMyODZlZTktNWE0Ny00YzUzLWFkOTQtZjFjYjA5ZWMyZmU0XkEyXkFqcGc@._V1_.jpg",
+                    "width": 2000,
+                    "height": 3000
+                },
+                "startYear": 2014,
+                "genres": [
+                    "Animation",
+                    "Adventure",
+                    "Comedy",
+                    "Family",
+                    "Fantasy",
+                    "History",
+                    "Sci-Fi"
+                ],
+                "rating": {
+                    "aggregateRating": 6.8,
+                    "voteCount": 83991
+                },
+                "metacritic": {
+                    "score": 59,
+                    "reviewCount": 34
+                },
+                "originCountries": [
+                    {
+                        "code": "US",
+                        "name": "United States"
+                    },
+                    {
+                        "code": "IN",
+                        "name": "India"
+                    }
+                ]
+            },
+            "category": "miscellaneous"
+        },
+        {
+            "title": {
+                "id": "tt1800763",
+                "type": "videoGame",
+                "primaryTitle": "Uncharted 3: Drake's Deception",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BNzVkZTVlMDItYjI5Yy00NjQ5LWI4OWMtMjllYmIxMTUxZDVhXkEyXkFqcGc@._V1_.jpg",
+                    "width": 1200,
+                    "height": 1800
+                },
+                "startYear": 2011,
+                "genres": [
+                    "Action",
+                    "Adventure",
+                    "Thriller"
+                ],
+                "rating": {
+                    "aggregateRating": 9,
+                    "voteCount": 27659
+                },
+                "originCountries": [
+                    {
+                        "code": "US",
+                        "name": "United States"
+                    }
+                ]
+            },
+            "category": "miscellaneous"
+        },
+        {
+            "title": {
+                "id": "tt13622982",
+                "type": "tvSeries",
+                "primaryTitle": "Star Wars: Visions",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BNjc4OGI4MTQtOGE4ZC00YjU3LTk0NGEtYTBjMDUxYjZhN2ZjXkEyXkFqcGc@._V1_.jpg",
+                    "width": 1120,
+                    "height": 1600
+                },
+                "startYear": 2021,
+                "genres": [
+                    "Animation",
+                    "Action",
+                    "Adventure",
+                    "Drama",
+                    "Fantasy",
+                    "Sci-Fi"
+                ],
+                "rating": {
+                    "aggregateRating": 7,
+                    "voteCount": 27280
+                },
+                "originCountries": [
+                    {
+                        "code": "JP",
+                        "name": "Japan"
+                    },
+                    {
+                        "code": "US",
+                        "name": "United States"
+                    },
+                    {
+                        "code": "KR",
+                        "name": "Republic of Korea"
+                    },
+                    {
+                        "code": "CL",
+                        "name": "Chile"
+                    },
+                    {
+                        "code": "GB",
+                        "name": "United Kingdom"
+                    },
+                    {
+                        "code": "IE",
+                        "name": "Ireland"
+                    },
+                    {
+                        "code": "IN",
+                        "name": "India"
+                    },
+                    {
+                        "code": "ZA",
+                        "name": "South Africa"
+                    }
+                ]
+            },
+            "category": "producer",
+            "episodeCount": 1
+        },
+        {
+            "title": {
+                "id": "tt8637498",
+                "type": "movie",
+                "primaryTitle": "The Monkey King",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BNWI3Y2IxMmYtYjY2Yi00Mzc3LWEzYWItODEwYmJmMTZjOTA2XkEyXkFqcGc@._V1_.jpg",
+                    "width": 510,
+                    "height": 755
+                },
+                "startYear": 2023,
+                "genres": [
+                    "Animation",
+                    "Action",
+                    "Adventure",
+                    "Comedy",
+                    "Family",
+                    "Fantasy"
+                ],
+                "rating": {
+                    "aggregateRating": 5.8,
+                    "voteCount": 7884
+                },
+                "metacritic": {
+                    "score": 59,
+                    "reviewCount": 10
+                },
+                "originCountries": [
+                    {
+                        "code": "CN",
+                        "name": "China"
+                    },
+                    {
+                        "code": "HK",
+                        "name": "Hong Kong (Special Administrative Region of China)"
+                    },
+                    {
+                        "code": "US",
+                        "name": "United States"
+                    }
+                ]
+            },
+            "category": "thanks"
+        },
+        {
+            "title": {
+                "id": "tt8787772",
+                "type": "tvMiniSeries",
+                "primaryTitle": "Maya and the Three",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BNGQyMjE0OGMtNWE0OC00MzY0LTk0ZmEtODA5ZDYxYzc3MjkzXkEyXkFqcGc@._V1_.jpg",
+                    "width": 1012,
+                    "height": 1500
+                },
+                "startYear": 2021,
+                "endYear": 2021,
+                "genres": [
+                    "Animation",
+                    "Action",
+                    "Adventure",
+                    "Comedy",
+                    "Drama",
+                    "Family",
+                    "Fantasy"
+                ],
+                "rating": {
+                    "aggregateRating": 8,
+                    "voteCount": 5722
+                },
+                "originCountries": [
+                    {
+                        "code": "MX",
+                        "name": "Mexico"
+                    },
+                    {
+                        "code": "US",
+                        "name": "United States"
+                    }
+                ]
+            },
+            "category": "thanks",
+            "episodeCount": 9
+        },
+        {
+            "title": {
+                "id": "tt9288748",
+                "type": "movie",
+                "primaryTitle": "My Father's Dragon",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BYzAxMGZiNzgtOTZmNS00M2Y4LWJjNGUtZDNmYTJhM2YyYTk2XkEyXkFqcGc@._V1_.jpg",
+                    "width": 800,
+                    "height": 1185
+                },
+                "startYear": 2022,
+                "genres": [
+                    "Animation",
+                    "Adventure",
+                    "Comedy",
+                    "Drama",
+                    "Family",
+                    "Fantasy"
+                ],
+                "rating": {
+                    "aggregateRating": 6.5,
+                    "voteCount": 4162
+                },
+                "metacritic": {
+                    "score": 74,
+                    "reviewCount": 21
+                },
+                "originCountries": [
+                    {
+                        "code": "IE",
+                        "name": "Ireland"
+                    },
+                    {
+                        "code": "US",
+                        "name": "United States"
+                    }
+                ]
+            },
+            "category": "thanks"
+        },
+        {
+            "title": {
+                "id": "tt5513770",
+                "type": "short",
+                "primaryTitle": "Kung Fu Panda: Secrets of the Scroll",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BOTNjOWUxOTMtMjdjZi00NDYwLWJmZGQtZmI0MDA5ODk2MDY1XkEyXkFqcGc@._V1_.jpg",
+                    "width": 592,
+                    "height": 841
+                },
+                "startYear": 2016,
+                "genres": [
+                    "Animation",
+                    "Short",
+                    "Action",
+                    "Adventure",
+                    "Comedy",
+                    "Family"
+                ],
+                "rating": {
+                    "aggregateRating": 6.9,
+                    "voteCount": 3403
+                },
+                "originCountries": [
+                    {
+                        "code": "US",
+                        "name": "United States"
+                    },
+                    {
+                        "code": "IN",
+                        "name": "India"
+                    },
+                    {
+                        "code": "CA",
+                        "name": "Canada"
+                    }
+                ]
+            },
+            "category": "miscellaneous"
+        },
+        {
+            "title": {
+                "id": "tt9288860",
+                "type": "tvSeries",
+                "primaryTitle": "Trash Truck",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BM2U3ZTM3ZDYtMGQyMi00ZTkxLTg1NDQtMGUxZmZjNTUyODUwXkEyXkFqcGc@._V1_.jpg",
+                    "width": 426,
+                    "height": 597
+                },
+                "startYear": 2020,
+                "endYear": 2021,
+                "genres": [
+                    "Animation",
+                    "Family"
+                ],
+                "rating": {
+                    "aggregateRating": 8.6,
+                    "voteCount": 1085
+                }
+            },
+            "category": "thanks",
+            "episodeCount": 28
+        },
+        {
+            "title": {
+                "id": "tt2221781",
+                "type": "videoGame",
+                "primaryTitle": "Resident Evil: Operation Raccoon City",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BZGM1ZGQwMTEtZTFhZC00M2YxLWIzZmUtMTUwNjFlMGE4M2U3XkEyXkFqcGc@._V1_.jpg",
+                    "width": 1200,
+                    "height": 1800
+                },
+                "startYear": 2012,
+                "genres": [
+                    "Action",
+                    "Horror",
+                    "Sci-Fi",
+                    "Thriller"
+                ],
+                "rating": {
+                    "aggregateRating": 5.1,
+                    "voteCount": 954
+                },
+                "originCountries": [
+                    {
+                        "code": "JP",
+                        "name": "Japan"
+                    },
+                    {
+                        "code": "US",
+                        "name": "United States"
+                    }
+                ]
+            },
+            "category": "miscellaneous"
+        },
+        {
+            "title": {
+                "id": "tt1716744",
+                "type": "videoGame",
+                "primaryTitle": "Guild Wars 2",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BNTFkNWRmNzAtMzc4Ni00ZjE2LWIzNGQtZmIxZWVlOWQ3NzJiXkEyXkFqcGc@._V1_.jpg",
+                    "width": 1200,
+                    "height": 1800
+                },
+                "startYear": 2012,
+                "genres": [
+                    "Action",
+                    "Adventure",
+                    "Fantasy"
+                ],
+                "rating": {
+                    "aggregateRating": 8.2,
+                    "voteCount": 733
+                },
+                "originCountries": [
+                    {
+                        "code": "US",
+                        "name": "United States"
+                    }
+                ]
+            },
+            "category": "miscellaneous"
+        },
+        {
+            "title": {
+                "id": "tt1560146",
+                "type": "videoGame",
+                "primaryTitle": "Epic Mickey",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BMzI1MDNjODYtNTVhZi00N2Y0LTllM2QtZjIxZmQzZTU4N2I1XkEyXkFqcGc@._V1_.jpg",
+                    "width": 1000,
+                    "height": 1409
+                },
+                "startYear": 2010,
+                "genres": [
+                    "Action",
+                    "Adventure",
+                    "Comedy",
+                    "Drama",
+                    "Family",
+                    "Fantasy",
+                    "Sci-Fi"
+                ],
+                "rating": {
+                    "aggregateRating": 7.8,
+                    "voteCount": 508
+                },
+                "originCountries": [
+                    {
+                        "code": "US",
+                        "name": "United States"
+                    }
+                ]
+            },
+            "category": "miscellaneous"
+        },
+        {
+            "title": {
+                "id": "tt14779306",
+                "type": "movie",
+                "primaryTitle": "Mission: Joy - Finding Happiness in Troubled Times",
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BZDAwNzJjOGItOWVmNi00NDVlLWI1ZmEtYzkzNWRmNzQ0ZDM2XkEyXkFqcGc@._V1_.jpg",
+                    "width": 1728,
+                    "height": 2560
+                },
+                "startYear": 2021,
+                "genres": [
+                    "Documentary"
+                ],
+                "rating": {
+                    "aggregateRating": 8,
+                    "voteCount": 488
+                },
+                "originCountries": [
+                    {
+                        "code": "US",
+                        "name": "United States"
+                    }
+                ]
+            },
+            "category": "producer"
+        }
+    ],
+    "totalCount": 21
+}

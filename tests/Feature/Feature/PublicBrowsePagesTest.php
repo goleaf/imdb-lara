@@ -29,9 +29,7 @@ class PublicBrowsePagesTest extends TestCase
 
         $this->get(route('public.discover'))
             ->assertOk()
-            ->assertSee('Advanced Title Discovery')
             ->assertSeeHtml('data-slot="discover-filters-island"')
-            ->assertSeeHtml('data-slot="discover-hero"')
             ->assertSeeHtml('data-slot="discover-advanced-filters"')
             ->assertSeeHtml('data-slot="discover-results-shell"');
 
@@ -45,10 +43,25 @@ class PublicBrowsePagesTest extends TestCase
             ->assertSee('Trailers')
             ->assertSee('Trailer archive');
 
+        $this->get(route('public.trending'))
+            ->assertOk()
+            ->assertSee('Trending Now')
+            ->assertSeeHtml('data-slot="title-browser-island"')
+            ->assertDontSeeHtml('title-browser-skeleton-1')
+            ->assertDontSeeHtml('aria-label="Pagination Navigation"');
+
         $this->get(route('public.titles.index'))
             ->assertOk()
             ->assertSee('Browse Titles')
+            ->assertSee('Theme lanes')
+            ->assertSeeHtml('data-slot="catalog-browse-theme-spotlight"')
             ->assertSeeHtml('data-slot="title-browser-island"');
+
+        $this->get(route('public.titles.index', ['theme' => $interestCategory->slug]))
+            ->assertOk()
+            ->assertSee('Theme lane')
+            ->assertSee($interestCategory->name)
+            ->assertSee('Clear theme lane');
 
         $this->get(route('public.genres.show', $genre))
             ->assertOk()

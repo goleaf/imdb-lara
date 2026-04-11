@@ -1,0 +1,150 @@
+{
+    "parentsGuide": [
+        {
+            "category": "FRIGHTENING_INTENSE_SCENES",
+            "severityBreakdowns": [
+                {
+                    "severityLevel": "none",
+                    "voteCount": 3
+                },
+                {
+                    "severityLevel": "mild",
+                    "voteCount": 94
+                },
+                {
+                    "severityLevel": "moderate",
+                    "voteCount": 111
+                },
+                {
+                    "severityLevel": "severe",
+                    "voteCount": 17
+                }
+            ]
+        },
+        {
+            "category": "SEXUAL_CONTENT",
+            "severityBreakdowns": [
+                {
+                    "severityLevel": "none",
+                    "voteCount": 274
+                },
+                {
+                    "severityLevel": "mild",
+                    "voteCount": 18
+                },
+                {
+                    "severityLevel": "moderate",
+                    "voteCount": 5
+                },
+                {
+                    "severityLevel": "severe",
+                    "voteCount": 6
+                }
+            ],
+            "reviews": [
+                {
+                    "text": "A very brief reference to people \"hooking up.\""
+                },
+                {
+                    "text": "There is a picture of a couple kissing shown through memory card although you can barely see it the scene stays for 2 seconds."
+                }
+            ]
+        },
+        {
+            "category": "VIOLENCE",
+            "severityBreakdowns": [
+                {
+                    "severityLevel": "none",
+                    "voteCount": 32
+                },
+                {
+                    "severityLevel": "mild",
+                    "voteCount": 199
+                },
+                {
+                    "severityLevel": "moderate",
+                    "voteCount": 6
+                },
+                {
+                    "severityLevel": "severe",
+                    "voteCount": 4
+                }
+            ],
+            "reviews": [
+                {
+                    "text": "After a hole is torn in the side of Mary, Grace hits his head on the navigation dashboard. He is shown unconscious with a bloody nose. Dark blood is then shown smeared dripping onto the dashboard. After, he has some cuts and bruises on his face. Probably the most violent part.",
+                    "isSpoiler": true
+                },
+                {
+                    "text": "A man throws up several times, but manages to grab an orange cone to throw up into."
+                },
+                {
+                    "text": "A ventilator tube is pulled from a man's throat, and he coughs up liquid several times."
+                },
+                {
+                    "text": "An alien creature is burned by air, with thick black smoke gushing out of his back.",
+                    "isSpoiler": true
+                },
+                {
+                    "text": "A man's arm is burned by being touched by an alien, but you don't see the incident due to dramatically flashing light in the scene. You do hear the skin sizzling and see the healed burn later."
+                },
+                {
+                    "text": "A man is chased through a field, then tackled to the ground and drugged."
+                }
+            ]
+        },
+        {
+            "category": "PROFANITY",
+            "severityBreakdowns": [
+                {
+                    "severityLevel": "none",
+                    "voteCount": 176
+                },
+                {
+                    "severityLevel": "mild",
+                    "voteCount": 57
+                },
+                {
+                    "severityLevel": "moderate",
+                    "voteCount": 5
+                },
+                {
+                    "severityLevel": "severe",
+                    "voteCount": 6
+                }
+            ],
+            "reviews": [
+                {
+                    "text": "There is some blasphemy."
+                }
+            ]
+        },
+        {
+            "category": "ALCOHOL_DRUGS",
+            "severityBreakdowns": [
+                {
+                    "severityLevel": "none",
+                    "voteCount": 27
+                },
+                {
+                    "severityLevel": "mild",
+                    "voteCount": 191
+                },
+                {
+                    "severityLevel": "moderate",
+                    "voteCount": 3
+                },
+                {
+                    "severityLevel": "severe",
+                    "voteCount": 5
+                }
+            ],
+            "reviews": [
+                {
+                    "text": "Grace is forced to be on the mission by being drugged.",
+                    "isSpoiler": true
+                }
+            ]
+        }
+    ]
+}

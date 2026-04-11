@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Feature\Search;
 
+use App\Actions\Search\BuildSearchTitleResultsQueryAction;
 use App\Livewire\Search\SearchResults;
 use App\Models\NameBasicMeterRanking;
 use App\Models\Person;
@@ -21,14 +22,23 @@ class SearchExperienceTest extends TestCase
     public function test_search_page_highlights_top_matches_with_titles_and_people_lanes(): void
     {
         $title = $this->sampleTitle();
+        $interestCategory = $this->sampleInterestCategory();
 
         $this->get(route('public.search', ['q' => $this->searchTermFor($title)]))
             ->assertOk()
+            ->assertSee('Search The Global Catalog')
+            ->assertSee('Browse by Theme')
             ->assertSee('Search Results')
             ->assertSee('Top Match')
             ->assertSee('Best title match')
             ->assertDontSee('No matches yet.')
             ->assertSee($title->name);
+
+        $this->get(route('public.search', ['q' => $interestCategory->name]))
+            ->assertOk()
+            ->assertSee('Theme matches')
+            ->assertSee($interestCategory->name)
+            ->assertSee(route('public.interest-categories.show', $interestCategory), false);
     }
 
     public function test_search_supports_live_genre_and_year_filters_against_remote_titles(): void
@@ -62,6 +72,28 @@ class SearchExperienceTest extends TestCase
         ]))
             ->assertOk()
             ->assertSee('No matches yet.');
+    }
+
+    public function test_search_page_supports_theme_filters_against_remote_titles(): void
+    {
+        $interestCategory = $this->sampleInterestCategory();
+        $themeResultTitle = app(BuildSearchTitleResultsQueryAction::class)
+            ->handle([
+                'search' => '',
+                'theme' => $interestCategory->slug,
+                'sort' => 'popular',
+            ])
+            ->limit(12)
+            ->first();
+
+        if (! $themeResultTitle instanceof Title) {
+            $this->markTestSkipped('The remote catalog does not currently expose a visible title for the sampled interest category.');
+        }
+
+        $this->get(route('public.search', ['theme' => $interestCategory->slug]))
+            ->assertOk()
+            ->assertSee('Refine title matches')
+            ->assertSee($themeResultTitle->name);
     }
 
     public function test_search_page_reuses_ranked_person_cards_for_people_matches(): void

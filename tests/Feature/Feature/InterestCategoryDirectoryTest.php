@@ -46,6 +46,8 @@ class InterestCategoryDirectoryTest extends TestCase
             ->assertSee('Category overview')
             ->assertSee('Related interests')
             ->assertSee('Linked titles')
-            ->assertSeeHtml('data-slot="interest-category-detail-hero"');
+            ->assertSee(route('public.titles.index', ['theme' => $category->slug]), false)
+            ->assertSeeHtml('data-slot="interest-category-detail-hero"')
+            ->assertSeeHtml('data-slot="interest-category-summary-panels"');
     }
 }

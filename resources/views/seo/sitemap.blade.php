@@ -1,4 +1,4 @@
-@php echo '<?xml version="1.0" encoding="UTF-8"?>'; @endphp
+<?php echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     @foreach ($staticRoutes as $staticRoute)
         <url>
@@ -9,6 +9,12 @@
     @foreach ($genres as $genre)
         <url>
             <loc>{{ route('public.genres.show', $genre) }}</loc>
+        </url>
+    @endforeach
+
+    @foreach ($interestCategories as $interestCategory)
+        <url>
+            <loc>{{ route('public.interest-categories.show', $interestCategory) }}</loc>
         </url>
     @endforeach
 

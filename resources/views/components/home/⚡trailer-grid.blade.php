@@ -67,9 +67,9 @@ new class extends Component
                 </x-ui.text>
             </div>
 
-            <x-ui.link :href="route('public.trailers.latest')" variant="ghost">
+            <x-ui.link.light :href="route('public.trailers.latest')">
                 See all trailers
-            </x-ui.link>
+            </x-ui.link.light>
         </div>
 
         @if ($errorMessage)
@@ -148,13 +148,13 @@ new class extends Component
                                 </div>
 
                                 <div class="flex flex-wrap gap-3">
-                                    <x-ui.button as="a" :href="route('public.titles.show', $title)" variant="outline" icon="film">
+                                    <x-ui.button.light-action :href="route('public.titles.show', $title)" icon="film">
                                         View title
-                                    </x-ui.button>
+                                    </x-ui.button.light-action>
                                     @if (filled($title->preferredVideo()?->url))
-                                        <x-ui.link :href="$title->preferredVideo()->url" open-in-new-tab variant="ghost">
+                                        <x-ui.button.light-action :href="$title->preferredVideo()->url" open-in-new-tab icon="play">
                                             Open trailer
-                                        </x-ui.link>
+                                        </x-ui.button.light-action>
                                     @endif
                                 </div>
                             </div>

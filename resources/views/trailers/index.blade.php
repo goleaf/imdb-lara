@@ -78,13 +78,13 @@
                             </div>
 
                             <div class="flex flex-wrap gap-3">
-                                <x-ui.button as="a" :href="route('public.titles.show', $title)" variant="outline" icon="film">
+                                <x-ui.button.light-action :href="route('public.titles.show', $title)" icon="film">
                                     View title
-                                </x-ui.button>
+                                </x-ui.button.light-action>
                                 @if (filled($title->preferredVideo()?->url))
-                                    <x-ui.link :href="$title->preferredVideo()->url" open-in-new-tab variant="ghost" iconAfter="arrow-top-right-on-square">
+                                    <x-ui.button.light-action :href="$title->preferredVideo()->url" open-in-new-tab icon="play">
                                         Open trailer
-                                    </x-ui.link>
+                                    </x-ui.button.light-action>
                                 @endif
                             </div>
                         </div>

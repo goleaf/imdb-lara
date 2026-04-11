@@ -1,0 +1,23 @@
+{
+    "triviaEntries": [
+        {
+            "id": "nt0265915",
+            "text": "Acted with the Oregon Shakespeare Festival 1990-2008.",
+            "interestCount": 14,
+            "voteCount": 15
+        },
+        {
+            "id": "nt0764736",
+            "text": "He reads the Blackstone Audio books for NY Times bestseller Jonathan Maberry's Joe Ledger series.",
+            "interestCount": 23,
+            "voteCount": 23
+        },
+        {
+            "id": "nt2066378",
+            "text": "Narrated the Andy Weir novel \"Project Hail Mary\".",
+            "interestCount": 34,
+            "voteCount": 34
+        }
+    ],
+    "totalCount": 3
+}

@@ -13,13 +13,6 @@ class CatalogOnlyImportPipelineGuardTest extends TestCase
 {
     use UsesCatalogOnlyApplication;
 
-    public function test_legacy_frontier_import_command_is_disabled_in_catalog_only_mode(): void
-    {
-        $this->artisan('imdb:import-titles-frontier')
-            ->expectsOutputToContain(EnsureLegacyImportPipelineIsEnabledAction::disabledMessage())
-            ->assertExitCode(1);
-    }
-
     public function test_title_import_action_throws_when_legacy_pipeline_is_disabled(): void
     {
         $this->expectException(RuntimeException::class);

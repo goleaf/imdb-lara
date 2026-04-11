@@ -1,0 +1,3312 @@
+{
+    "schemaVersion": 1,
+    "imdbId": "nm4364362",
+    "downloadedAt": "2026-04-11T03:21:46+00:00",
+    "sourceUrl": "https://api.imdbapi.dev/names/nm4364362",
+    "details": {
+        "id": "nm4364362",
+        "displayName": "Rodrig Andrisan",
+        "primaryProfessions": [
+            "actor",
+            "director",
+            "writer"
+        ],
+        "biography": "Rodrig Andrisan was born on October 7, 1958, in Bucharest, Romania. Debut as Actor in 2010, in London, United Kingdom. He is also a writer and journalist, having over 1,000 articles published in various newspapers and magazines and 2 books published : \"Giants of Rock Music\" (1991) and \"The Unnamed Puppy\"(1996). Between 1991 and 2007, thousands of movies translated from English, French, Italian, German, Spanish, into Romanian, live at the Romanian Film Archive and various film festivals (Dakino, European Film Festival) and, with script, at several TV networks. Rodrig Andrisan has many films under his belt (Feature Films, Shorts, Music Videos, Commercials), in which he appeared as an Actor, portraying very different characters, thanks to his natural look \"all ethnicities\".",
+        "heightCm": 178,
+        "birthDate": {
+            "year": 1958,
+            "month": 10,
+            "day": 7
+        },
+        "birthLocation": "Bucharest, Romania"
+    },
+    "images": {
+        "images": []
+    },
+    "filmography": {
+        "credits": [
+            {
+                "title": {
+                    "id": "tt1877830",
+                    "type": "movie",
+                    "primaryTitle": "The Batman",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMmU5NGJlMzAtMGNmOC00YjJjLTgyMzUtNjAyYmE4Njg5YWMyXkEyXkFqcGc@._V1_.jpg",
+                        "width": 2764,
+                        "height": 4096
+                    },
+                    "startYear": 2022,
+                    "genres": [
+                        "Action",
+                        "Crime",
+                        "Drama",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.8,
+                        "voteCount": 922740
+                    },
+                    "metacritic": {
+                        "score": 72,
+                        "reviewCount": 68
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Funeral VIP"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt2382320",
+                    "type": "movie",
+                    "primaryTitle": "No Time to Die",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZGZiOGZhZDQtZmRkNy00ZmUzLTliMGEtZGU0NjExOGMxZDVkXkEyXkFqcGc@._V1_.jpg",
+                        "width": 2765,
+                        "height": 4096
+                    },
+                    "startYear": 2021,
+                    "genres": [
+                        "Action",
+                        "Adventure",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.3,
+                        "voteCount": 485931
+                    },
+                    "metacritic": {
+                        "score": 68,
+                        "reviewCount": 67
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        },
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Spectre Member"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt3402236",
+                    "type": "movie",
+                    "primaryTitle": "Murder on the Orient Express",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNTlkYjBlZTctZjg2YS00NDMzLTlkMTMtNWExMGYyOTliMmEzXkEyXkFqcGc@._V1_.jpg",
+                        "width": 2025,
+                        "height": 3000
+                    },
+                    "startYear": 2017,
+                    "genres": [
+                        "Comedy",
+                        "Crime",
+                        "Drama",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.5,
+                        "voteCount": 320496
+                    },
+                    "metacritic": {
+                        "score": 52,
+                        "reviewCount": 46
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        },
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        },
+                        {
+                            "code": "MT",
+                            "name": "Malta"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Istanbul Bazaar Merchant"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt6139732",
+                    "type": "movie",
+                    "primaryTitle": "Aladdin",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMjQ2ODIyMjY4MF5BMl5BanBnXkFtZTgwNzY4ODI2NzM@._V1_.jpg",
+                        "width": 1382,
+                        "height": 2048
+                    },
+                    "startYear": 2019,
+                    "genres": [
+                        "Adventure",
+                        "Comedy",
+                        "Family",
+                        "Fantasy",
+                        "Musical",
+                        "Romance"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.9,
+                        "voteCount": 313956
+                    },
+                    "metacritic": {
+                        "score": 53,
+                        "reviewCount": 50
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        },
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        },
+                        {
+                            "code": "SG",
+                            "name": "Singapore"
+                        },
+                        {
+                            "code": "CA",
+                            "name": "Canada"
+                        },
+                        {
+                            "code": "CZ",
+                            "name": "Czechia"
+                        },
+                        {
+                            "code": "RS",
+                            "name": "Serbia"
+                        },
+                        {
+                            "code": "CN",
+                            "name": "China"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Agrabah Citizen"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt7126948",
+                    "type": "movie",
+                    "primaryTitle": "Wonder Woman 1984",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYTdkYjI0M2ItMmUxZi00YjU1LTgwM2ItODgxNDY0ODZhZDQzXkEyXkFqcGc@._V1_.jpg",
+                        "width": 2764,
+                        "height": 4096
+                    },
+                    "startYear": 2020,
+                    "genres": [
+                        "Action",
+                        "Adventure",
+                        "Fantasy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.3,
+                        "voteCount": 310381
+                    },
+                    "metacritic": {
+                        "score": 60,
+                        "reviewCount": 58
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Red Square Civilian"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt7097896",
+                    "type": "movie",
+                    "primaryTitle": "Venom: Let There Be Carnage",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZGIxMTU1MjItM2FmMi00YmFiLTgwNDMtMTczYmVjYTBhNGZhXkEyXkFqcGc@._V1_.jpg",
+                        "width": 691,
+                        "height": 1024
+                    },
+                    "startYear": 2021,
+                    "genres": [
+                        "Action",
+                        "Adventure",
+                        "Crime",
+                        "Fantasy",
+                        "Horror",
+                        "Sci-Fi",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.9,
+                        "voteCount": 302738
+                    },
+                    "metacritic": {
+                        "score": 49,
+                        "reviewCount": 48
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        },
+                        {
+                            "code": "CA",
+                            "name": "Canada"
+                        },
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "San Quentin Prisoner"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt5057054",
+                    "type": "tvSeries",
+                    "primaryTitle": "Tom Clancy's Jack Ryan",
+                    "originalTitle": "Jack Ryan",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNGYxNzgzNTQtY2U0OC00NzU2LTgxZmYtNmZkMmVlMjgyMzM3XkEyXkFqcGc@._V1_.jpg",
+                        "width": 2024,
+                        "height": 3000
+                    },
+                    "startYear": 2018,
+                    "endYear": 2023,
+                    "genres": [
+                        "Action",
+                        "Crime",
+                        "Drama",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8,
+                        "voteCount": 191878
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Commuter London Liverpool Street"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt12042730",
+                    "type": "movie",
+                    "primaryTitle": "Project Hail Mary",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNTkwNzJiYTctNzI3NC00NjE1LTlhYjktY2Q5MTdmMWFmNzcxXkEyXkFqcGc@._V1_.jpg",
+                        "width": 2765,
+                        "height": 4096
+                    },
+                    "startYear": 2026,
+                    "genres": [
+                        "Adventure",
+                        "Comedy",
+                        "Sci-Fi"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.4,
+                        "voteCount": 178625
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Member Of The Russian Disaster Crew"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt5108870",
+                    "type": "movie",
+                    "primaryTitle": "Morbius",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BY2UzYzFiZWUtOGU5ZC00YTIxLWFlNGUtMGU1YmI4OWUzN2FmXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1350,
+                        "height": 2000
+                    },
+                    "startYear": 2022,
+                    "genres": [
+                        "Action",
+                        "Adventure",
+                        "Horror",
+                        "Sci-Fi",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.1,
+                        "voteCount": 171128
+                    },
+                    "metacritic": {
+                        "score": 35,
+                        "reviewCount": 55
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Man in Central Park",
+                    "Old Man Running"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt4686844",
+                    "type": "movie",
+                    "primaryTitle": "The Death of Stalin",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTcxMDc1NjcyNl5BMl5BanBnXkFtZTgwNDU0NDYxMzI@._V1_.jpg",
+                        "width": 1000,
+                        "height": 1481
+                    },
+                    "startYear": 2017,
+                    "genres": [
+                        "Comedy",
+                        "Drama",
+                        "History"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.3,
+                        "voteCount": 126160
+                    },
+                    "metacritic": {
+                        "score": 88,
+                        "reviewCount": 43
+                    },
+                    "originCountries": [
+                        {
+                            "code": "FR",
+                            "name": "France"
+                        },
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        },
+                        {
+                            "code": "BE",
+                            "name": "Belgium"
+                        },
+                        {
+                            "code": "CA",
+                            "name": "Canada"
+                        },
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Soviet Mourner"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt6911608",
+                    "type": "movie",
+                    "primaryTitle": "Mamma Mia! Here We Go Again",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMjEwMTM3OTI1NV5BMl5BanBnXkFtZTgwNDk5NTY0NTM@._V1_.jpg",
+                        "width": 1293,
+                        "height": 2048
+                    },
+                    "startYear": 2018,
+                    "genres": [
+                        "Comedy",
+                        "Musical",
+                        "Romance"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.6,
+                        "voteCount": 120163
+                    },
+                    "metacritic": {
+                        "score": 60,
+                        "reviewCount": 46
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        },
+                        {
+                            "code": "CN",
+                            "name": "China"
+                        },
+                        {
+                            "code": "HR",
+                            "name": "Croatia"
+                        },
+                        {
+                            "code": "JP",
+                            "name": "Japan"
+                        },
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Taverna Customer"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt8623904",
+                    "type": "movie",
+                    "primaryTitle": "Last Christmas",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BY2NlNTMwYzgtZjI2Ny00ZWExLWE2NDUtNzFlYTQyMmY1NjkwXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1012,
+                        "height": 1500
+                    },
+                    "startYear": 2019,
+                    "genres": [
+                        "Comedy",
+                        "Drama",
+                        "Fantasy",
+                        "Romance"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.5,
+                        "voteCount": 106070
+                    },
+                    "metacritic": {
+                        "score": 50,
+                        "reviewCount": 40
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        },
+                        {
+                            "code": "CN",
+                            "name": "China"
+                        },
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Christmas Shopper"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt1961175",
+                    "type": "movie",
+                    "primaryTitle": "American Assassin",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMjM0MjY4MTk5NV5BMl5BanBnXkFtZTgwNDE2NTQyMzI@._V1_.jpg",
+                        "width": 1293,
+                        "height": 2048
+                    },
+                    "startYear": 2017,
+                    "genres": [
+                        "Action",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.2,
+                        "voteCount": 100340
+                    },
+                    "metacritic": {
+                        "score": 45,
+                        "reviewCount": 30
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        },
+                        {
+                            "code": "HK",
+                            "name": "Hong Kong (Special Administrative Region of China)"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Client Warsaw Antiques Market"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt5431890",
+                    "type": "movie",
+                    "primaryTitle": "Official Secrets",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNGM2NzcwZjItOTE4Mi00Yzc5LWI3ZmItYTdkZWQ0NDYxN2YzXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1635,
+                        "height": 2415
+                    },
+                    "startYear": 2019,
+                    "genres": [
+                        "Biography",
+                        "Crime",
+                        "Drama",
+                        "History",
+                        "Thriller",
+                        "War"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.3,
+                        "voteCount": 60496
+                    },
+                    "metacritic": {
+                        "score": 63,
+                        "reviewCount": 28
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        },
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        },
+                        {
+                            "code": "CN",
+                            "name": "China"
+                        },
+                        {
+                            "code": "CA",
+                            "name": "Canada"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Dead Body 4"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt1686821",
+                    "type": "movie",
+                    "primaryTitle": "Vampire Academy",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BODNkYTk5Y2UtMzYwNi00MWI2LWEwZTUtYjg2NzZjMWQzZmE3XkEyXkFqcGc@._V1_.jpg",
+                        "width": 2025,
+                        "height": 3000
+                    },
+                    "startYear": 2014,
+                    "genres": [
+                        "Action",
+                        "Comedy",
+                        "Drama",
+                        "Fantasy",
+                        "Horror",
+                        "Mystery",
+                        "Romance",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.4,
+                        "voteCount": 58543
+                    },
+                    "metacritic": {
+                        "score": 31,
+                        "reviewCount": 15
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        },
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        },
+                        {
+                            "code": "IN",
+                            "name": "India"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Romanian Vampire Expert"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt7661390",
+                    "type": "tvSeries",
+                    "primaryTitle": "Gangs of London",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMGVjYjA1MmEtZDU0OS00ZGRmLWFkNDMtOThlOGM0M2ExYWVlXkEyXkFqcGc@._V1_.jpg",
+                        "width": 2400,
+                        "height": 3600
+                    },
+                    "startYear": 2020,
+                    "genres": [
+                        "Action",
+                        "Crime",
+                        "Drama",
+                        "Thriller",
+                        "War"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8,
+                        "voteCount": 53002
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        },
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Albanian Tough Guy"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt1562871",
+                    "type": "movie",
+                    "primaryTitle": "Ra.One",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMzcyMjMxOTg4MF5BMl5BanBnXkFtZTcwNzEwMDE5Ng@@._V1_.jpg",
+                        "width": 7200,
+                        "height": 10800
+                    },
+                    "startYear": 2011,
+                    "genres": [
+                        "Action",
+                        "Sci-Fi",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5,
+                        "voteCount": 51738
+                    },
+                    "metacritic": {
+                        "score": 60,
+                        "reviewCount": 8
+                    },
+                    "originCountries": [
+                        {
+                            "code": "IN",
+                            "name": "India"
+                        },
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Passer-By",
+                    "Guy at Cafe Table",
+                    "Scared Man in the Bus"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt1830379",
+                    "type": "tvSeries",
+                    "primaryTitle": "Top Boy",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNzIxNjNkYjctMzkyYy00ZGE0LTgzMTQtZDczZWY5NWEwNDdjXkEyXkFqcGc@._V1_.jpg",
+                        "width": 426,
+                        "height": 597
+                    },
+                    "startYear": 2011,
+                    "endYear": 2023,
+                    "genres": [
+                        "Crime",
+                        "Drama",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.4,
+                        "voteCount": 48331
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Council Estate Resident"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt8356942",
+                    "type": "movie",
+                    "primaryTitle": "The 355",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNzhkNmZlODUtYWM4YS00NzRlLWEwOTgtM2U5ZDA0ZDJjNDI3XkEyXkFqcGc@._V1_.jpg",
+                        "width": 3158,
+                        "height": 5000
+                    },
+                    "startYear": 2022,
+                    "genres": [
+                        "Action",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.6,
+                        "voteCount": 43480
+                    },
+                    "metacritic": {
+                        "score": 40,
+                        "reviewCount": 40
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        },
+                        {
+                            "code": "CN",
+                            "name": "China"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Morocco Market Customer"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt7518786",
+                    "type": "movie",
+                    "primaryTitle": "'83",
+                    "originalTitle": "83",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYmNlNGY2NWEtODBiYi00YWIxLTkyNmItNTUwMmRjOTY4NzNkXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1638,
+                        "height": 2048
+                    },
+                    "startYear": 2021,
+                    "genres": [
+                        "Drama",
+                        "History",
+                        "Sport"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.5,
+                        "voteCount": 42877
+                    },
+                    "originCountries": [
+                        {
+                            "code": "IN",
+                            "name": "India"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "India Cricket Supporter"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt6141246",
+                    "type": "movie",
+                    "primaryTitle": "The Aeronauts",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMDNkNmRjZGMtOGY0NS00ZmI5LWIzOWMtODI3NGZjZTZkYTBkXkEyXkFqcGc@._V1_.jpg",
+                        "width": 8100,
+                        "height": 12000
+                    },
+                    "startYear": 2019,
+                    "genres": [
+                        "Action",
+                        "Adventure",
+                        "Drama",
+                        "Romance"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.6,
+                        "voteCount": 40008
+                    },
+                    "metacritic": {
+                        "score": 60,
+                        "reviewCount": 37
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        },
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Oxford Scientist"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt8425532",
+                    "type": "tvSeries",
+                    "primaryTitle": "Pennyworth",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYjJkNjk5ZjgtOGY1NS00NmQ2LWE2ZDYtNGZmOWZlNTM0YWRmXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1382,
+                        "height": 2048
+                    },
+                    "startYear": 2019,
+                    "endYear": 2022,
+                    "genres": [
+                        "Action",
+                        "Crime",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.8,
+                        "voteCount": 19815
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Passerby"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt0280653",
+                    "type": "movie",
+                    "primaryTitle": "Amen.",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNzQzYmE4NTktMjA0Ny00YWMwLWE2MzMtMjVkYjE5YmU5ZTg0XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1080,
+                        "height": 1522
+                    },
+                    "startYear": 2002,
+                    "genres": [
+                        "Biography",
+                        "Crime",
+                        "Drama",
+                        "War"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.2,
+                        "voteCount": 15747
+                    },
+                    "metacritic": {
+                        "score": 57,
+                        "reviewCount": 19
+                    },
+                    "originCountries": [
+                        {
+                            "code": "FR",
+                            "name": "France"
+                        },
+                        {
+                            "code": "DE",
+                            "name": "Germany"
+                        },
+                        {
+                            "code": "RO",
+                            "name": "Romania"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Black Cardinal and Jew Prisoner"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt5254610",
+                    "type": "movie",
+                    "primaryTitle": "Final Score",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNmMyMTIyZTItMmNhNy00NWUwLWIwMzgtNTdkYjAyYTkzYjRmXkEyXkFqcGc@._V1_.jpg",
+                        "width": 4322,
+                        "height": 6400
+                    },
+                    "startYear": 2018,
+                    "genres": [
+                        "Action",
+                        "Adventure",
+                        "Drama",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.8,
+                        "voteCount": 15322
+                    },
+                    "metacritic": {
+                        "score": 53,
+                        "reviewCount": 9
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        },
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Dynamo FC Supporter"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt8647400",
+                    "type": "movie",
+                    "primaryTitle": "De De Pyaar De",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNmU4ZDNmOGQtNzUxMC00MmJkLWE5MDYtZTA4NTNiOTk3OTAwXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1417,
+                        "height": 2048
+                    },
+                    "startYear": 2019,
+                    "genres": [
+                        "Comedy",
+                        "Drama",
+                        "Romance"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.5,
+                        "voteCount": 11064
+                    },
+                    "originCountries": [
+                        {
+                            "code": "IN",
+                            "name": "India"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Vaddi Sharaban Party Guest"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt10228230",
+                    "type": "tvMiniSeries",
+                    "primaryTitle": "Quiz",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZDQxNzkwYWMtNzYyNi00MTc5LTgzMGMtZjYxMTdjNjQyYWViXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1000,
+                        "height": 1500
+                    },
+                    "startYear": 2020,
+                    "endYear": 2020,
+                    "genres": [
+                        "Crime",
+                        "Drama",
+                        "History"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.3,
+                        "voteCount": 8885
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Audience Member"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt10062652",
+                    "type": "tvSeries",
+                    "primaryTitle": "Cobra",
+                    "originalTitle": "COBRA",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMjU2MThiOTUtODYyZC00OGUyLWE0ODAtZjEzM2VmYzRiZmI2XkEyXkFqcGc@._V1_.jpg",
+                        "width": 879,
+                        "height": 1308
+                    },
+                    "startYear": 2020,
+                    "endYear": 2023,
+                    "genres": [
+                        "Drama",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.6,
+                        "voteCount": 5101
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Passerby"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt8049666",
+                    "type": "tvMiniSeries",
+                    "primaryTitle": "MotherFatherSon",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNmRhODFmZTMtNTg4Yi00ZWNhLWE4NGQtYjdkZGFiMTA1ODE5XkEyXkFqcGc@._V1_.jpg",
+                        "width": 600,
+                        "height": 900
+                    },
+                    "startYear": 2019,
+                    "endYear": 2019,
+                    "genres": [
+                        "Drama",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.8,
+                        "voteCount": 4524
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Community Member"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt7343740",
+                    "type": "movie",
+                    "primaryTitle": "Days of the Bagnold Summer",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNzdiM2M3NWMtYTZjNC00MGE0LWE2ODEtMGQwOWY0Y2U0YzQ5XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1962,
+                        "height": 2898
+                    },
+                    "startYear": 2019,
+                    "genres": [
+                        "Comedy",
+                        "Drama",
+                        "Music"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.6,
+                        "voteCount": 2983
+                    },
+                    "metacritic": {
+                        "score": 57,
+                        "reviewCount": 11
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Man Crazy about Fudge"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt7820846",
+                    "type": "movie",
+                    "primaryTitle": "Love Will Take Over",
+                    "originalTitle": "Loveyatri",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOTJkZTM2YjYtYzNlMy00OGI1LTlkZGEtZGY3M2FmYzMzNjc1XkEyXkFqcGc@._V1_.jpg",
+                        "width": 829,
+                        "height": 1200
+                    },
+                    "startYear": 2018,
+                    "genres": [
+                        "Comedy",
+                        "Drama",
+                        "Music",
+                        "Romance"
+                    ],
+                    "rating": {
+                        "aggregateRating": 3.5,
+                        "voteCount": 2721
+                    },
+                    "originCountries": [
+                        {
+                            "code": "IN",
+                            "name": "India"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Laundry Services Professional"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt1966385",
+                    "type": "movie",
+                    "primaryTitle": "City of Tiny Lights",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMDY3NWNkN2ItNjAzOS00NjI1LWJmNTctNTAyNjM4MmFhMjA3XkEyXkFqcGc@._V1_.jpg",
+                        "width": 600,
+                        "height": 889
+                    },
+                    "startYear": 2016,
+                    "genres": [
+                        "Crime",
+                        "Drama",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.6,
+                        "voteCount": 2563
+                    },
+                    "metacritic": {
+                        "score": 55,
+                        "reviewCount": 12
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        },
+                        {
+                            "code": "BE",
+                            "name": "Belgium"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Older Muslim"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt5687270",
+                    "type": "movie",
+                    "primaryTitle": "The Corrupted",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BM2QxMTc4OTEtMGY3Mi00MDMwLTlhYWItYzM4Yzc1ODNjZWM1XkEyXkFqcGc@._V1_.jpg",
+                        "width": 2025,
+                        "height": 3000
+                    },
+                    "startYear": 2019,
+                    "genres": [
+                        "Crime",
+                        "Drama",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.7,
+                        "voteCount": 2008
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Bell Man"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt8000970",
+                    "type": "tvMiniSeries",
+                    "primaryTitle": "Trigonometry",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZjhhZjJiZmUtYzQyZC00ODAzLTg3NjgtOTljYWI0YmExMjA1XkEyXkFqcGc@._V1_.jpg",
+                        "width": 668,
+                        "height": 989
+                    },
+                    "startYear": 2020,
+                    "endYear": 2020,
+                    "genres": [
+                        "Comedy",
+                        "Drama",
+                        "Romance"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.3,
+                        "voteCount": 1563
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Man in Black with Black Wings"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt8622232",
+                    "type": "movie",
+                    "primaryTitle": "Time to Dance",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZDIwNzk0ZTMtNzM2MS00MWU4LWExYTEtZTAxYmQ0YmI5ZjI3XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1080,
+                        "height": 1528
+                    },
+                    "startYear": 2021,
+                    "genres": [
+                        "Musical",
+                        "Romance"
+                    ],
+                    "rating": {
+                        "aggregateRating": 2.5,
+                        "voteCount": 1060
+                    },
+                    "originCountries": [
+                        {
+                            "code": "IN",
+                            "name": "India"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Ballroom Audience Member"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt3468046",
+                    "type": "tvSeries",
+                    "primaryTitle": "Autopsy: The Last Hours of",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYmRjYTE3MTUtNjYzYi00MWRhLWE5NTAtMzM2Y2E2NTQwOTEzXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1007,
+                        "height": 1465
+                    },
+                    "startYear": 2014,
+                    "genres": [
+                        "Documentary",
+                        "Biography"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.7,
+                        "voteCount": 951
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Mexican Doctor"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt3381610",
+                    "type": "movie",
+                    "primaryTitle": "Breakdown",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTU5NzAwMjc1Ml5BMl5BanBnXkFtZTgwNDE2ODg0NzE@._V1_.jpg",
+                        "width": 810,
+                        "height": 1200
+                    },
+                    "startYear": 2016,
+                    "genres": [
+                        "Action",
+                        "Crime",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5,
+                        "voteCount": 920
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Josef"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt8063866",
+                    "type": "tvSeries",
+                    "primaryTitle": "The Reluctant Landlord",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMjE2NzY3MzczNl5BMl5BanBnXkFtZTgwNDYyNTQ2NjM@._V1_.jpg",
+                        "width": 1327,
+                        "height": 2048
+                    },
+                    "startYear": 2018,
+                    "endYear": 2019,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.5,
+                        "voteCount": 888
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Gentleman in the pub"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt2106749",
+                    "type": "movie",
+                    "primaryTitle": "The Warning",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNTMwOTIyMTAyM15BMl5BanBnXkFtZTcwNDQ4MjIyNw@@._V1_.jpg",
+                        "width": 1811,
+                        "height": 2561
+                    },
+                    "startYear": 2012,
+                    "genres": [
+                        "Fantasy",
+                        "Horror",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 2.9,
+                        "voteCount": 473
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        },
+                        {
+                            "code": "PL",
+                            "name": "Poland"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Doctor Reegan"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt2354437",
+                    "type": "movie",
+                    "primaryTitle": "The Ice Cream Wars",
+                    "originalTitle": "The Hooligan Wars",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNjUxMTMyMzAzNV5BMl5BanBnXkFtZTcwNTE0NDk3Nw@@._V1_.jpg",
+                        "width": 1382,
+                        "height": 2047
+                    },
+                    "startYear": 2014,
+                    "genres": [
+                        "Crime"
+                    ],
+                    "rating": {
+                        "aggregateRating": 3.6,
+                        "voteCount": 396
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Pervert"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt0127142",
+                    "type": "movie",
+                    "primaryTitle": "Portile albastre ale orasului",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZTA5ZmU1MzUtYTM3YS00NzA4LThiMzEtMDc5MTE0YzNjZjc1XkEyXkFqcGc@._V1_.jpg",
+                        "width": 500,
+                        "height": 718
+                    },
+                    "startYear": 1974,
+                    "genres": [
+                        "Drama",
+                        "War"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.3,
+                        "voteCount": 185
+                    },
+                    "originCountries": [
+                        {
+                            "code": "RO",
+                            "name": "Romania"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Student at the aviation school"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt2004211",
+                    "type": "movie",
+                    "primaryTitle": "Dear Enemy",
+                    "originalTitle": "Qin Mi Di Ren",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMzc5NzJjYzEtNTg0YS00ZTI3LWI0OWQtMTExMTU2M2E1OGIxXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1120,
+                        "height": 1600
+                    },
+                    "startYear": 2011,
+                    "genres": [
+                        "Comedy",
+                        "Romance"
+                    ],
+                    "rating": {
+                        "aggregateRating": 4.5,
+                        "voteCount": 182
+                    },
+                    "originCountries": [
+                        {
+                            "code": "CN",
+                            "name": "China"
+                        },
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Australian Lithium Mine Worker"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt7983304",
+                    "type": "tvMiniSeries",
+                    "primaryTitle": "Dreaming Whilst Black",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BY2NmM2UzNzQtZjFlOS00YTM0LWFhNzYtNjVmNTA5ZjA4N2U2XkEyXkFqcGc@._V1_.jpg",
+                        "width": 900,
+                        "height": 450
+                    },
+                    "startYear": 2018,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.1,
+                        "voteCount": 114
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Bossman"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt4874072",
+                    "type": "movie",
+                    "primaryTitle": "Essex Spacebin",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNzY0MTEwZGMtYzAyNy00Zjc1LWI0NGUtYjYwZDAwMWE3OWY4XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1944,
+                        "height": 2880
+                    },
+                    "startYear": 2016,
+                    "genres": [
+                        "Comedy",
+                        "Sci-Fi"
+                    ],
+                    "rating": {
+                        "aggregateRating": 4.9,
+                        "voteCount": 107
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Rod"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt3576732",
+                    "type": "short",
+                    "primaryTitle": "Incomplete",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMzYxNDA2MzgwMF5BMl5BanBnXkFtZTgwMjExMDczMTE@._V1_.jpg",
+                        "width": 1600,
+                        "height": 2303
+                    },
+                    "startYear": 2014,
+                    "genres": [
+                        "Short",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.8,
+                        "voteCount": 76
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "writer"
+            },
+            {
+                "title": {
+                    "id": "tt3576732",
+                    "type": "short",
+                    "primaryTitle": "Incomplete",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMzYxNDA2MzgwMF5BMl5BanBnXkFtZTgwMjExMDczMTE@._V1_.jpg",
+                        "width": 1600,
+                        "height": 2303
+                    },
+                    "startYear": 2014,
+                    "genres": [
+                        "Short",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.8,
+                        "voteCount": 76
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "director"
+            },
+            {
+                "title": {
+                    "id": "tt3576732",
+                    "type": "short",
+                    "primaryTitle": "Incomplete",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMzYxNDA2MzgwMF5BMl5BanBnXkFtZTgwMjExMDczMTE@._V1_.jpg",
+                        "width": 1600,
+                        "height": 2303
+                    },
+                    "startYear": 2014,
+                    "genres": [
+                        "Short",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.8,
+                        "voteCount": 76
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Garrett"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt0130210",
+                    "type": "movie",
+                    "primaryTitle": "Ratacire",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMGZjYzYwZTEtMjU2Ni00ZDc1LWEyMDAtZGY0NDc3MWE2NGYxXkEyXkFqcGc@._V1_.jpg",
+                        "width": 600,
+                        "height": 843
+                    },
+                    "startYear": 1978,
+                    "genres": [
+                        "Comedy",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.9,
+                        "voteCount": 67
+                    },
+                    "originCountries": [
+                        {
+                            "code": "RO",
+                            "name": "Romania"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Guy at the table and Passer-by"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt1727291",
+                    "type": "short",
+                    "primaryTitle": "Hollow",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTgzMDM5OTc1NV5BMl5BanBnXkFtZTgwNTQ5MTIzMDE@._V1_.jpg",
+                        "width": 930,
+                        "height": 1236
+                    },
+                    "startYear": 2010,
+                    "genres": [
+                        "Short",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.9,
+                        "voteCount": 57
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Office colleague of Marcus"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt5317608",
+                    "type": "movie",
+                    "primaryTitle": "The Red Mosquito",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNTcyMmUwYzUtMGZmYS00ZTQwLWE0YjEtYTQ0MDUyODYwNzJjXkEyXkFqcGc@._V1_.jpg",
+                        "width": 3240,
+                        "height": 1696
+                    },
+                    "startYear": 2019,
+                    "genres": [
+                        "Action",
+                        "Adventure",
+                        "Comedy",
+                        "Romance"
+                    ],
+                    "rating": {
+                        "aggregateRating": 4.4,
+                        "voteCount": 55
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "The Beggar"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt4200882",
+                    "type": "musicVideo",
+                    "primaryTitle": "Take That: The Flood",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZjM3ZGVhYzYtYzdiOS00M2RiLWFkNDQtZmFjMzA5OWQ4ZWE1XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1280,
+                        "height": 720
+                    },
+                    "startYear": 2010,
+                    "genres": [
+                        "Music",
+                        "Sport"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.8,
+                        "voteCount": 38
+                    }
+                },
+                "category": "actor",
+                "characters": [
+                    "Cheering Guy In The Boat"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt10959932",
+                    "type": "short",
+                    "primaryTitle": "EE 5G. Stream Even When It's Busy",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZWU3OWMyNGQtOWM5ZC00M2YyLTg0MTctMzRhNDI3ZWE2OGQxXkEyXkFqcGc@._V1_.jpg",
+                        "width": 769,
+                        "height": 1064
+                    },
+                    "startYear": 2019,
+                    "genres": [
+                        "Short",
+                        "Comedy",
+                        "Sci-Fi"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.2,
+                        "voteCount": 34
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Man in the market"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt11295422",
+                    "type": "movie",
+                    "primaryTitle": "The Music Island",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTdlYWVlM2UtODNiMS00MjQ3LThkYWEtYzYxZGZiYzI3MWQ3XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1429,
+                        "height": 2000
+                    },
+                    "startYear": 2021,
+                    "genres": [
+                        "Drama",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.6,
+                        "voteCount": 30
+                    },
+                    "originCountries": [
+                        {
+                            "code": "RO",
+                            "name": "Romania"
+                        }
+                    ]
+                },
+                "category": "writer"
+            },
+            {
+                "title": {
+                    "id": "tt11295422",
+                    "type": "movie",
+                    "primaryTitle": "The Music Island",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTdlYWVlM2UtODNiMS00MjQ3LThkYWEtYzYxZGZiYzI3MWQ3XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1429,
+                        "height": 2000
+                    },
+                    "startYear": 2021,
+                    "genres": [
+                        "Drama",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.6,
+                        "voteCount": 30
+                    },
+                    "originCountries": [
+                        {
+                            "code": "RO",
+                            "name": "Romania"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Vangelis"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt28440933",
+                    "type": "movie",
+                    "primaryTitle": "Cochon and the Small Reset",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BODExMDExZTQtN2NkYS00NzU1LWJjN2UtZTM3NzY4YjZkNGJhXkEyXkFqcGc@._V1_.jpg",
+                        "width": 636,
+                        "height": 900
+                    },
+                    "startYear": 2023,
+                    "genres": [
+                        "Action",
+                        "Adventure",
+                        "Comedy",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.4,
+                        "voteCount": 25
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "costume_department"
+            },
+            {
+                "title": {
+                    "id": "tt28440933",
+                    "type": "movie",
+                    "primaryTitle": "Cochon and the Small Reset",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BODExMDExZTQtN2NkYS00NzU1LWJjN2UtZTM3NzY4YjZkNGJhXkEyXkFqcGc@._V1_.jpg",
+                        "width": 636,
+                        "height": 900
+                    },
+                    "startYear": 2023,
+                    "genres": [
+                        "Action",
+                        "Adventure",
+                        "Comedy",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.4,
+                        "voteCount": 25
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "producer"
+            },
+            {
+                "title": {
+                    "id": "tt28440933",
+                    "type": "movie",
+                    "primaryTitle": "Cochon and the Small Reset",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BODExMDExZTQtN2NkYS00NzU1LWJjN2UtZTM3NzY4YjZkNGJhXkEyXkFqcGc@._V1_.jpg",
+                        "width": 636,
+                        "height": 900
+                    },
+                    "startYear": 2023,
+                    "genres": [
+                        "Action",
+                        "Adventure",
+                        "Comedy",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.4,
+                        "voteCount": 25
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "casting_director"
+            },
+            {
+                "title": {
+                    "id": "tt28440933",
+                    "type": "movie",
+                    "primaryTitle": "Cochon and the Small Reset",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BODExMDExZTQtN2NkYS00NzU1LWJjN2UtZTM3NzY4YjZkNGJhXkEyXkFqcGc@._V1_.jpg",
+                        "width": 636,
+                        "height": 900
+                    },
+                    "startYear": 2023,
+                    "genres": [
+                        "Action",
+                        "Adventure",
+                        "Comedy",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.4,
+                        "voteCount": 25
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "writer"
+            },
+            {
+                "title": {
+                    "id": "tt28440933",
+                    "type": "movie",
+                    "primaryTitle": "Cochon and the Small Reset",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BODExMDExZTQtN2NkYS00NzU1LWJjN2UtZTM3NzY4YjZkNGJhXkEyXkFqcGc@._V1_.jpg",
+                        "width": 636,
+                        "height": 900
+                    },
+                    "startYear": 2023,
+                    "genres": [
+                        "Action",
+                        "Adventure",
+                        "Comedy",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.4,
+                        "voteCount": 25
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "make_up_department"
+            },
+            {
+                "title": {
+                    "id": "tt28440933",
+                    "type": "movie",
+                    "primaryTitle": "Cochon and the Small Reset",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BODExMDExZTQtN2NkYS00NzU1LWJjN2UtZTM3NzY4YjZkNGJhXkEyXkFqcGc@._V1_.jpg",
+                        "width": 636,
+                        "height": 900
+                    },
+                    "startYear": 2023,
+                    "genres": [
+                        "Action",
+                        "Adventure",
+                        "Comedy",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.4,
+                        "voteCount": 25
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "director"
+            },
+            {
+                "title": {
+                    "id": "tt28440933",
+                    "type": "movie",
+                    "primaryTitle": "Cochon and the Small Reset",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BODExMDExZTQtN2NkYS00NzU1LWJjN2UtZTM3NzY4YjZkNGJhXkEyXkFqcGc@._V1_.jpg",
+                        "width": 636,
+                        "height": 900
+                    },
+                    "startYear": 2023,
+                    "genres": [
+                        "Action",
+                        "Adventure",
+                        "Comedy",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.4,
+                        "voteCount": 25
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Very Very Secret Agent Cochon"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt33062463",
+                    "type": "short",
+                    "primaryTitle": "A Deadly Threesome",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTg4Y2JkYjYtZDcxNC00OTJmLTkzOWEtMDQ3ZWRlOTcwNjkzXkEyXkFqcGc@._V1_.jpg",
+                        "width": 695,
+                        "height": 900
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Short",
+                        "Action",
+                        "Comedy",
+                        "Crime",
+                        "Drama",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7,
+                        "voteCount": 15
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "editor"
+            },
+            {
+                "title": {
+                    "id": "tt33062463",
+                    "type": "short",
+                    "primaryTitle": "A Deadly Threesome",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTg4Y2JkYjYtZDcxNC00OTJmLTkzOWEtMDQ3ZWRlOTcwNjkzXkEyXkFqcGc@._V1_.jpg",
+                        "width": 695,
+                        "height": 900
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Short",
+                        "Action",
+                        "Comedy",
+                        "Crime",
+                        "Drama",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7,
+                        "voteCount": 15
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "producer"
+            },
+            {
+                "title": {
+                    "id": "tt33062463",
+                    "type": "short",
+                    "primaryTitle": "A Deadly Threesome",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTg4Y2JkYjYtZDcxNC00OTJmLTkzOWEtMDQ3ZWRlOTcwNjkzXkEyXkFqcGc@._V1_.jpg",
+                        "width": 695,
+                        "height": 900
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Short",
+                        "Action",
+                        "Comedy",
+                        "Crime",
+                        "Drama",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7,
+                        "voteCount": 15
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "director"
+            },
+            {
+                "title": {
+                    "id": "tt33062463",
+                    "type": "short",
+                    "primaryTitle": "A Deadly Threesome",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTg4Y2JkYjYtZDcxNC00OTJmLTkzOWEtMDQ3ZWRlOTcwNjkzXkEyXkFqcGc@._V1_.jpg",
+                        "width": 695,
+                        "height": 900
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Short",
+                        "Action",
+                        "Comedy",
+                        "Crime",
+                        "Drama",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7,
+                        "voteCount": 15
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "costume_department"
+            },
+            {
+                "title": {
+                    "id": "tt33062463",
+                    "type": "short",
+                    "primaryTitle": "A Deadly Threesome",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTg4Y2JkYjYtZDcxNC00OTJmLTkzOWEtMDQ3ZWRlOTcwNjkzXkEyXkFqcGc@._V1_.jpg",
+                        "width": 695,
+                        "height": 900
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Short",
+                        "Action",
+                        "Comedy",
+                        "Crime",
+                        "Drama",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7,
+                        "voteCount": 15
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "casting_director"
+            },
+            {
+                "title": {
+                    "id": "tt33062463",
+                    "type": "short",
+                    "primaryTitle": "A Deadly Threesome",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTg4Y2JkYjYtZDcxNC00OTJmLTkzOWEtMDQ3ZWRlOTcwNjkzXkEyXkFqcGc@._V1_.jpg",
+                        "width": 695,
+                        "height": 900
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Short",
+                        "Action",
+                        "Comedy",
+                        "Crime",
+                        "Drama",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7,
+                        "voteCount": 15
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "writer"
+            },
+            {
+                "title": {
+                    "id": "tt33062463",
+                    "type": "short",
+                    "primaryTitle": "A Deadly Threesome",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTg4Y2JkYjYtZDcxNC00OTJmLTkzOWEtMDQ3ZWRlOTcwNjkzXkEyXkFqcGc@._V1_.jpg",
+                        "width": 695,
+                        "height": 900
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Short",
+                        "Action",
+                        "Comedy",
+                        "Crime",
+                        "Drama",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7,
+                        "voteCount": 15
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "cinematographer"
+            },
+            {
+                "title": {
+                    "id": "tt33062463",
+                    "type": "short",
+                    "primaryTitle": "A Deadly Threesome",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTg4Y2JkYjYtZDcxNC00OTJmLTkzOWEtMDQ3ZWRlOTcwNjkzXkEyXkFqcGc@._V1_.jpg",
+                        "width": 695,
+                        "height": 900
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Short",
+                        "Action",
+                        "Comedy",
+                        "Crime",
+                        "Drama",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7,
+                        "voteCount": 15
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "location_management"
+            },
+            {
+                "title": {
+                    "id": "tt33062463",
+                    "type": "short",
+                    "primaryTitle": "A Deadly Threesome",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTg4Y2JkYjYtZDcxNC00OTJmLTkzOWEtMDQ3ZWRlOTcwNjkzXkEyXkFqcGc@._V1_.jpg",
+                        "width": 695,
+                        "height": 900
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Short",
+                        "Action",
+                        "Comedy",
+                        "Crime",
+                        "Drama",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7,
+                        "voteCount": 15
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Dick Garlic Crotch, MP and The DOP at the End"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt2253980",
+                    "type": "short",
+                    "primaryTitle": "Clowning Around",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMjEzMjQyNTI1NV5BMl5BanBnXkFtZTcwNjM1NjQxOA@@._V1_.jpg",
+                        "width": 9000,
+                        "height": 12000
+                    },
+                    "startYear": 2013,
+                    "genres": [
+                        "Short",
+                        "Action",
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.2,
+                        "voteCount": 15
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Clowns UK Rep."
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt2104916",
+                    "type": "short",
+                    "primaryTitle": "Hot & Bothered",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNmVhOTJhYzItZTAzMC00ZTM5LWJjNjMtNWUxNTMwYjAyYzljXkEyXkFqcGc@._V1_.jpg",
+                        "width": 759,
+                        "height": 1106
+                    },
+                    "startYear": 2014,
+                    "genres": [
+                        "Short",
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.2,
+                        "voteCount": 15
+                    }
+                },
+                "category": "actor",
+                "characters": [
+                    "Bus Stop Man"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt8391418",
+                    "type": "short",
+                    "primaryTitle": "Strange Cities Are Familiar",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMzU4OTgzMDMtNDgxOS00YjNkLTg0Y2MtYmZjZTY1NWJiMDgxXkEyXkFqcGc@._V1_.jpg",
+                        "width": 2048,
+                        "height": 857
+                    },
+                    "startYear": 2019,
+                    "genres": [
+                        "Short",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.5,
+                        "voteCount": 13
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Social Club Member"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt5448466",
+                    "type": "tvSeries",
+                    "primaryTitle": "Sam Delaney's News Thing",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZTI4MTBiZmUtMWIyYi00OWE0LThmZGItYzBhYjBiNzUzYWM1XkEyXkFqcGc@._V1_.jpg",
+                        "width": 4928,
+                        "height": 3280
+                    },
+                    "startYear": 2015,
+                    "endYear": 2018,
+                    "genres": [
+                        "Comedy",
+                        "News",
+                        "Talk-Show"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.6,
+                        "voteCount": 13
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Russian General Yuri"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt8441266",
+                    "type": "short",
+                    "primaryTitle": "Connected Money: HSBC Commercial",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYmRmYjM0ZGMtZmI2ZS00ODU0LWE4MGMtMWEwZGVmMzE0MTU0XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1000,
+                        "height": 816
+                    },
+                    "startYear": 2018,
+                    "genres": [
+                        "Short",
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7,
+                        "voteCount": 11
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Shop Keeper"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt4698106",
+                    "type": "musicVideo",
+                    "primaryTitle": "Walking on Cars: Catch Me If You Can",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNWM3NGMxYTQtYTkwNy00NjhjLTllODEtNjY0MDFiYmQxY2UwXkEyXkFqcGc@._V1_.jpg",
+                        "width": 636,
+                        "height": 900
+                    },
+                    "startYear": 2015,
+                    "genres": [
+                        "Drama",
+                        "Music",
+                        "Romance"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.4,
+                        "voteCount": 10
+                    }
+                },
+                "category": "actor",
+                "characters": [
+                    "Paparazzo & Boom Man"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt30852453",
+                    "type": "short",
+                    "primaryTitle": "The Creature from Epping Forest",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZGM4NzdkNDMtNzI1MS00NDM4LWEzMDItYzJkNjA3Yjc3ZGYyXkEyXkFqcGc@._V1_.jpg",
+                        "width": 600,
+                        "height": 900
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Short",
+                        "Adventure",
+                        "Comedy",
+                        "Horror",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.8,
+                        "voteCount": 9
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "editor"
+            },
+            {
+                "title": {
+                    "id": "tt30852453",
+                    "type": "short",
+                    "primaryTitle": "The Creature from Epping Forest",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZGM4NzdkNDMtNzI1MS00NDM4LWEzMDItYzJkNjA3Yjc3ZGYyXkEyXkFqcGc@._V1_.jpg",
+                        "width": 600,
+                        "height": 900
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Short",
+                        "Adventure",
+                        "Comedy",
+                        "Horror",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.8,
+                        "voteCount": 9
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "director"
+            },
+            {
+                "title": {
+                    "id": "tt30852453",
+                    "type": "short",
+                    "primaryTitle": "The Creature from Epping Forest",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZGM4NzdkNDMtNzI1MS00NDM4LWEzMDItYzJkNjA3Yjc3ZGYyXkEyXkFqcGc@._V1_.jpg",
+                        "width": 600,
+                        "height": 900
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Short",
+                        "Adventure",
+                        "Comedy",
+                        "Horror",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.8,
+                        "voteCount": 9
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "writer"
+            },
+            {
+                "title": {
+                    "id": "tt30852453",
+                    "type": "short",
+                    "primaryTitle": "The Creature from Epping Forest",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZGM4NzdkNDMtNzI1MS00NDM4LWEzMDItYzJkNjA3Yjc3ZGYyXkEyXkFqcGc@._V1_.jpg",
+                        "width": 600,
+                        "height": 900
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Short",
+                        "Adventure",
+                        "Comedy",
+                        "Horror",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.8,
+                        "voteCount": 9
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Yeti"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt30852453",
+                    "type": "short",
+                    "primaryTitle": "The Creature from Epping Forest",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZGM4NzdkNDMtNzI1MS00NDM4LWEzMDItYzJkNjA3Yjc3ZGYyXkEyXkFqcGc@._V1_.jpg",
+                        "width": 600,
+                        "height": 900
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Short",
+                        "Adventure",
+                        "Comedy",
+                        "Horror",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.8,
+                        "voteCount": 9
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "producer"
+            },
+            {
+                "title": {
+                    "id": "tt2663192",
+                    "type": "short",
+                    "primaryTitle": "Misery",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNjU5Njc0OTA3MF5BMl5BanBnXkFtZTcwMDYwMDgwOQ@@._V1_.jpg",
+                        "width": 639,
+                        "height": 958
+                    },
+                    "startYear": 2013,
+                    "genres": [
+                        "Short",
+                        "Drama",
+                        "Fantasy",
+                        "Mystery"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.1,
+                        "voteCount": 9
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Anthony"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt11424068",
+                    "type": "short",
+                    "primaryTitle": "Scrooge spots a Christmas deal - Specsavers",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMzliZDZiYzItMzNjYy00YzNkLTk0YzgtNjYxY2NiMzE2OTlhXkEyXkFqcGc@._V1_.jpg",
+                        "width": 2488,
+                        "height": 4096
+                    },
+                    "startYear": 2019,
+                    "genres": [
+                        "Short",
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.6,
+                        "voteCount": 9
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Victorian Man"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt2332871",
+                    "type": "short",
+                    "primaryTitle": "Toyboy",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BODk0MjNkZDUtZjZkZS00ZWJjLThiYTMtOGM0OTkwMzNhMzVjXkEyXkFqcGc@._V1_.jpg",
+                        "width": 366,
+                        "height": 522
+                    },
+                    "startYear": 2012,
+                    "genres": [
+                        "Short",
+                        "Romance"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.3,
+                        "voteCount": 7
+                    }
+                },
+                "category": "actor",
+                "characters": [
+                    "Moroccan Man"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt2002785",
+                    "type": "short",
+                    "primaryTitle": "Scissors",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BN2ViNGRhNjAtNDQxOS00MDI4LWIwN2MtZTdhNjhhY2E2MDA4XkEyXkFqcGc@._V1_.jpg",
+                        "width": 640,
+                        "height": 800
+                    },
+                    "startYear": 2011,
+                    "genres": [
+                        "Short",
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.2,
+                        "voteCount": 7
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Azeem"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt32400938",
+                    "type": "short",
+                    "primaryTitle": "The Big Grumble",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOGI0NDYwOTYtZWY2NC00ZTMyLWJkMDQtNmQwYzk2YzA1YzdjXkEyXkFqcGc@._V1_.jpg",
+                        "width": 636,
+                        "height": 900
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Short",
+                        "Action",
+                        "Comedy",
+                        "Crime",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.4,
+                        "voteCount": 6
+                    }
+                },
+                "category": "actor",
+                "characters": [
+                    "The Hitman"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt32400938",
+                    "type": "short",
+                    "primaryTitle": "The Big Grumble",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOGI0NDYwOTYtZWY2NC00ZTMyLWJkMDQtNmQwYzk2YzA1YzdjXkEyXkFqcGc@._V1_.jpg",
+                        "width": 636,
+                        "height": 900
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Short",
+                        "Action",
+                        "Comedy",
+                        "Crime",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.4,
+                        "voteCount": 6
+                    }
+                },
+                "category": "casting_director"
+            },
+            {
+                "title": {
+                    "id": "tt32400938",
+                    "type": "short",
+                    "primaryTitle": "The Big Grumble",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOGI0NDYwOTYtZWY2NC00ZTMyLWJkMDQtNmQwYzk2YzA1YzdjXkEyXkFqcGc@._V1_.jpg",
+                        "width": 636,
+                        "height": 900
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Short",
+                        "Action",
+                        "Comedy",
+                        "Crime",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.4,
+                        "voteCount": 6
+                    }
+                },
+                "category": "writer"
+            },
+            {
+                "title": {
+                    "id": "tt32400938",
+                    "type": "short",
+                    "primaryTitle": "The Big Grumble",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOGI0NDYwOTYtZWY2NC00ZTMyLWJkMDQtNmQwYzk2YzA1YzdjXkEyXkFqcGc@._V1_.jpg",
+                        "width": 636,
+                        "height": 900
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Short",
+                        "Action",
+                        "Comedy",
+                        "Crime",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.4,
+                        "voteCount": 6
+                    }
+                },
+                "category": "director"
+            },
+            {
+                "title": {
+                    "id": "tt32400938",
+                    "type": "short",
+                    "primaryTitle": "The Big Grumble",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOGI0NDYwOTYtZWY2NC00ZTMyLWJkMDQtNmQwYzk2YzA1YzdjXkEyXkFqcGc@._V1_.jpg",
+                        "width": 636,
+                        "height": 900
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Short",
+                        "Action",
+                        "Comedy",
+                        "Crime",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.4,
+                        "voteCount": 6
+                    }
+                },
+                "category": "producer"
+            },
+            {
+                "title": {
+                    "id": "tt32400938",
+                    "type": "short",
+                    "primaryTitle": "The Big Grumble",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOGI0NDYwOTYtZWY2NC00ZTMyLWJkMDQtNmQwYzk2YzA1YzdjXkEyXkFqcGc@._V1_.jpg",
+                        "width": 636,
+                        "height": 900
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Short",
+                        "Action",
+                        "Comedy",
+                        "Crime",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.4,
+                        "voteCount": 6
+                    }
+                },
+                "category": "editor"
+            },
+            {
+                "title": {
+                    "id": "tt1996341",
+                    "type": "short",
+                    "primaryTitle": "North + Sense",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYTYxZWM3YTctODE4MS00MTI2LTliNTctNmJlMTY0ZTNhM2U4XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1280,
+                        "height": 775
+                    },
+                    "startYear": 2012,
+                    "genres": [
+                        "Short",
+                        "Comedy",
+                        "Crime"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6,
+                        "voteCount": 6
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Cafe Chef"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt31988136",
+                    "type": "short",
+                    "primaryTitle": "Alone in Fear",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNzMzNmRhZWUtZTMzYy00MTdkLTgwY2ItMmI5OWRkYzAyODUyXkEyXkFqcGc@._V1_.jpg",
+                        "width": 719,
+                        "height": 899
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Short",
+                        "Action",
+                        "Fantasy",
+                        "Horror",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7,
+                        "voteCount": 5
+                    }
+                },
+                "category": "director"
+            },
+            {
+                "title": {
+                    "id": "tt31988136",
+                    "type": "short",
+                    "primaryTitle": "Alone in Fear",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNzMzNmRhZWUtZTMzYy00MTdkLTgwY2ItMmI5OWRkYzAyODUyXkEyXkFqcGc@._V1_.jpg",
+                        "width": 719,
+                        "height": 899
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Short",
+                        "Action",
+                        "Fantasy",
+                        "Horror",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7,
+                        "voteCount": 5
+                    }
+                },
+                "category": "producer"
+            },
+            {
+                "title": {
+                    "id": "tt31988136",
+                    "type": "short",
+                    "primaryTitle": "Alone in Fear",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNzMzNmRhZWUtZTMzYy00MTdkLTgwY2ItMmI5OWRkYzAyODUyXkEyXkFqcGc@._V1_.jpg",
+                        "width": 719,
+                        "height": 899
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Short",
+                        "Action",
+                        "Fantasy",
+                        "Horror",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7,
+                        "voteCount": 5
+                    }
+                },
+                "category": "editor"
+            },
+            {
+                "title": {
+                    "id": "tt31988136",
+                    "type": "short",
+                    "primaryTitle": "Alone in Fear",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNzMzNmRhZWUtZTMzYy00MTdkLTgwY2ItMmI5OWRkYzAyODUyXkEyXkFqcGc@._V1_.jpg",
+                        "width": 719,
+                        "height": 899
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Short",
+                        "Action",
+                        "Fantasy",
+                        "Horror",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7,
+                        "voteCount": 5
+                    }
+                },
+                "category": "actor",
+                "characters": [
+                    "Scary Man With Knife"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt31988136",
+                    "type": "short",
+                    "primaryTitle": "Alone in Fear",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNzMzNmRhZWUtZTMzYy00MTdkLTgwY2ItMmI5OWRkYzAyODUyXkEyXkFqcGc@._V1_.jpg",
+                        "width": 719,
+                        "height": 899
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Short",
+                        "Action",
+                        "Fantasy",
+                        "Horror",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7,
+                        "voteCount": 5
+                    }
+                },
+                "category": "writer"
+            }
+        ],
+        "totalCount": 960
+    },
+    "relationships": {
+        "relationships": []
+    },
+    "trivia": {
+        "triviaEntries": [
+            {
+                "id": "nt1282769",
+                "text": "Fluent in four languages: English, Italian, French and Romanian. Semi-fluent in other three: German, Spanish and Russian."
+            }
+        ],
+        "totalCount": 1
+    },
+    "artifacts": {
+        "details": {
+            "path": "details.json",
+            "url": "https://api.imdbapi.dev/names/nm4364362",
+            "has_payload": true
+        },
+        "images": {
+            "path": "images.json",
+            "url": "https://api.imdbapi.dev/names/nm4364362/images",
+            "has_payload": true
+        },
+        "filmography": {
+            "path": "filmography.json",
+            "url": "https://api.imdbapi.dev/names/nm4364362/filmography",
+            "has_payload": true
+        },
+        "relationships": {
+            "path": "relationships.json",
+            "url": "https://api.imdbapi.dev/names/nm4364362/relationships",
+            "has_payload": true
+        },
+        "trivia": {
+            "path": "trivia.json",
+            "url": "https://api.imdbapi.dev/names/nm4364362/trivia",
+            "has_payload": true
+        }
+    }
+}

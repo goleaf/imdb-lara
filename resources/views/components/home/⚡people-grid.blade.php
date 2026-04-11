@@ -92,9 +92,9 @@ new class extends Component
                 </x-ui.text>
             </div>
 
-            <x-ui.link :href="route('public.people.index')" variant="ghost">
+            <x-ui.link.light :href="route('public.people.index')">
                 See all people
-            </x-ui.link>
+            </x-ui.link.light>
         </div>
 
         @if ($errorMessage)
@@ -270,9 +270,9 @@ new class extends Component
                                     </div>
 
                                     <div class="mt-auto">
-                                        <x-ui.link :href="route('public.people.show', $person)" variant="ghost">
+                                        <x-ui.link.light :href="route('public.people.show', $person)">
                                             Open profile
-                                        </x-ui.link>
+                                        </x-ui.link.light>
                                     </div>
                                 </div>
                             </div>

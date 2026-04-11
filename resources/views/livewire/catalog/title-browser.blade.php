@@ -1,55 +1,32 @@
 <div>
 @island(name: 'title-browser-page')
-    @php
-        $view = $this->viewData;
-    @endphp
-
 <div class="space-y-4" data-slot="title-browser-island">
-    <div wire:loading.delay class="{{ $view['isChartMode'] ? 'space-y-3' : 'grid gap-4 md:grid-cols-2 xl:grid-cols-3' }}">
-        @foreach (range(1, 6) as $index)
-            @if ($view['isChartMode'])
-                <x-ui.card class="sb-chart-card !max-w-none overflow-hidden rounded-[1.45rem] p-3.5" wire:key="title-browser-skeleton-{{ $index }}">
-                    <div class="grid gap-4 sm:grid-cols-[4.8rem_5.8rem_minmax(0,1fr)] xl:grid-cols-[5.4rem_6.4rem_minmax(0,1fr)_auto]">
-                        <div class="space-y-2">
-                            <x-ui.skeleton.text class="w-10" />
-                            <x-ui.skeleton.text class="w-14" />
-                            <x-ui.skeleton.text class="w-16" />
-                        </div>
-                        <x-ui.skeleton class="aspect-[2/3] w-full rounded-[1rem]" />
-                        <div class="space-y-3">
-                            <x-ui.skeleton.text class="w-1/3" />
-                            <x-ui.skeleton.text class="w-3/4" />
-                            <x-ui.skeleton.text class="w-2/3" />
-                        </div>
-                    </div>
-                </x-ui.card>
-            @else
-                <x-ui.card class="sb-poster-card !max-w-none h-full overflow-hidden rounded-[1.4rem]" wire:key="title-browser-skeleton-{{ $index }}">
-                    <div class="space-y-4">
-                        <x-ui.skeleton class="aspect-[2/3] w-full rounded-box" />
-                        <x-ui.skeleton.text class="w-1/3" />
-                        <x-ui.skeleton.text class="w-3/4" />
-                        <x-ui.skeleton.text class="w-5/6" />
-                    </div>
-                </x-ui.card>
-            @endif
-        @endforeach
-    </div>
+    @if ($this->viewData['isCatalogUnavailable'])
+        <x-ui.card class="sb-results-shell !max-w-none rounded-[1.6rem] p-4 sm:p-5" data-slot="title-browser-status">
+            <div class="space-y-2">
+                <div class="sb-page-kicker">{{ $this->viewData['isUsingStaleCache'] ? 'Cached catalog snapshot' : 'Catalog unavailable' }}</div>
+                <x-ui.heading level="h2" size="md">{{ $this->viewData['statusHeading'] }}</x-ui.heading>
+                <x-ui.text class="text-sm text-neutral-600 dark:text-neutral-300">
+                    {{ $this->viewData['statusText'] }}
+                </x-ui.text>
+            </div>
+        </x-ui.card>
+    @endif
 
-    <div wire:loading.remove class="sb-results-shell space-y-4 rounded-[1.6rem] p-4 sm:p-5">
-        @if ($view['isChartMode'])
+    <div class="sb-results-shell space-y-4 rounded-[1.6rem] p-4 sm:p-5">
+        @if ($this->viewData['isChartMode'])
             <div class="sb-chart-context-shell" data-slot="chart-context-shell">
                 <div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(18rem,0.92fr)] xl:items-start">
                     <div class="space-y-3">
                         <div class="sb-chart-context-kicker">
-                            {{ $view['selectedCountryCode'] !== '' ? 'Local vs Global' : 'Global Context' }}
+                            {{ $this->viewData['selectedCountryCode'] !== '' ? 'Local vs Global' : 'Global Context' }}
                         </div>
 
-                        @if ($view['selectedCountryCode'] !== '')
+                        @if ($this->viewData['selectedCountryCode'] !== '')
                             <div class="flex flex-wrap items-center gap-3">
-                                <x-ui.flag type="country" :code="$view['selectedCountryCode']" class="size-5" />
+                                <x-ui.flag type="country" :code="$this->viewData['selectedCountryCode']" class="size-5" />
                                 <x-ui.heading level="h3" size="md" class="sb-chart-context-title">
-                                    {{ $view['selectedCountryLabel'] }} local chart
+                                    {{ $this->viewData['selectedCountryLabel'] }} local chart
                                 </x-ui.heading>
                                 <span class="sb-chart-context-pill">Compared with global</span>
                             </div>
@@ -68,21 +45,21 @@
                         @endif
                     </div>
 
-                    @if ($view['chartCountryOptions'] !== [])
+                    @if ($this->viewData['chartCountryOptions'] !== [])
                         <div class="space-y-3">
                             <div class="sb-chart-context-kicker">Country Lenses</div>
                             <div class="flex flex-wrap gap-2">
                                 <a
                                     href="{{ request()->fullUrlWithoutQuery(['country']) }}"
-                                    class="sb-chart-country-chip {{ $view['selectedCountryCode'] === '' ? 'sb-chart-country-chip--active' : '' }}"
+                                    class="sb-chart-country-chip {{ $this->viewData['selectedCountryCode'] === '' ? 'sb-chart-country-chip--active' : '' }}"
                                 >
                                     <span>Global</span>
                                 </a>
 
-                                @foreach ($view['chartCountryOptions'] as $chartCountry)
+                                @foreach ($this->viewData['chartCountryOptions'] as $chartCountry)
                                     <a
                                         href="{{ request()->fullUrlWithQuery(['country' => $chartCountry['code']]) }}"
-                                        class="sb-chart-country-chip {{ $view['selectedCountryCode'] === $chartCountry['code'] ? 'sb-chart-country-chip--active' : '' }}"
+                                        class="sb-chart-country-chip {{ $this->viewData['selectedCountryCode'] === $chartCountry['code'] ? 'sb-chart-country-chip--active' : '' }}"
                                     >
                                         <x-ui.flag type="country" :code="$chartCountry['code']" class="size-4" />
                                         <span>{{ $chartCountry['label'] }}</span>
@@ -96,40 +73,44 @@
             </div>
         @endif
 
-        <div class="{{ $view['isChartMode'] ? 'space-y-3' : 'grid gap-4 md:grid-cols-2 xl:grid-cols-3' }}">
-            @forelse ($view['titles'] as $title)
-                @if ($view['isChartMode'])
+        <div class="{{ $this->viewData['isChartMode'] ? 'space-y-3' : 'grid gap-4 md:grid-cols-2 xl:grid-cols-3' }}">
+            @forelse ($this->viewData['titles'] as $title)
+                @if ($this->viewData['isChartMode'])
                     <div wire:key="title-browser-{{ $title->id }}">
                         <x-catalog.chart-title-card
                             :title="$title"
-                            :comparison-label="$view['chartRows'][$title->id]['comparisonLabel']"
-                            :rank="$view['chartRows'][$title->id]['rank']"
-                            :movement-amount="$view['chartRows'][$title->id]['movementAmount']"
-                            :movement-direction="$view['chartRows'][$title->id]['movementDirection']"
-                            :movement-note="$view['chartRows'][$title->id]['movementNote']"
+                            :comparison-label="$this->viewData['chartRows'][$title->id]['comparisonLabel']"
+                            :rank="$this->viewData['chartRows'][$title->id]['rank']"
+                            :movement-amount="$this->viewData['chartRows'][$title->id]['movementAmount']"
+                            :movement-direction="$this->viewData['chartRows'][$title->id]['movementDirection']"
+                            :movement-note="$this->viewData['chartRows'][$title->id]['movementNote']"
                         />
                     </div>
                 @else
                     <div wire:key="title-browser-{{ $title->id }}">
-                        <x-catalog.title-card :title="$title" :show-summary="$view['showSummary']" />
+                        <x-catalog.title-card :title="$title" :show-summary="$this->viewData['showSummary']" />
                     </div>
                 @endif
             @empty
-                <div class="{{ $view['isChartMode'] ? '' : 'md:col-span-2 xl:col-span-3' }}">
+                <div class="{{ $this->viewData['isChartMode'] ? '' : 'md:col-span-2 xl:col-span-3' }}">
                     <x-ui.empty class="rounded-box border border-dashed border-black/10 bg-white dark:border-white/10 dark:bg-neutral-900">
                         <x-ui.empty.media>
                             <x-ui.icon name="film" class="size-8 text-neutral-400 dark:text-neutral-500" />
                         </x-ui.empty.media>
-                        <x-ui.heading level="h3">{{ $view['emptyHeading'] }}</x-ui.heading>
+                        <x-ui.heading level="h3">
+                            {{ $this->viewData['isCatalogUnavailable'] ? $this->viewData['statusHeading'] : $this->viewData['emptyHeading'] }}
+                        </x-ui.heading>
                         <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
-                            @if ($view['isChartMode'] && $view['selectedCountryCode'] !== '')
-                                No chart titles are currently available for {{ $view['selectedCountryLabel'] }}.
+                            @if ($this->viewData['isCatalogUnavailable'])
+                                {{ $this->viewData['statusText'] }}
+                            @elseif ($this->viewData['isChartMode'] && $this->viewData['selectedCountryCode'] !== '')
+                                No chart titles are currently available for {{ $this->viewData['selectedCountryLabel'] }}.
                             @else
-                                {{ $view['emptyText'] }}
+                                {{ $this->viewData['emptyText'] }}
                             @endif
                         </x-ui.text>
 
-                        @if ($view['isChartMode'] && $view['selectedCountryCode'] !== '')
+                        @if ($this->viewData['isChartMode'] && $this->viewData['selectedCountryCode'] !== '')
                             <div class="mt-4">
                                 <x-ui.button as="a" :href="request()->fullUrlWithoutQuery(['country'])" variant="outline" icon="globe-alt">
                                     Return to global chart
@@ -141,9 +122,11 @@
             @endforelse
         </div>
 
-        <div>
-            {{ $view['titles']->links() }}
-        </div>
+        @if ($this->viewData['hasPagination'])
+            <div>
+                {{ $this->viewData['titles']->links() }}
+            </div>
+        @endif
     </div>
 </div>
 @endisland

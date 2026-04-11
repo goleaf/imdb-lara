@@ -31,9 +31,9 @@ class GetPeopleDirectorySnapshotAction
                 $topProfessions = Profession::query()
                     ->select(['professions.id', 'professions.name'])
                     ->whereNotNull('professions.name')
-                    ->whereHas('nameBasics', fn ($query) => $query->whereNotNull('name_basics.primaryname'))
+                    ->whereHas('persons', fn ($query) => $query->whereNotNull('name_basics.primaryname'))
                     ->withCount([
-                        'nameBasics as published_people_count' => fn ($query) => $query->whereNotNull('name_basics.primaryname'),
+                        'persons as published_people_count' => fn ($query) => $query->whereNotNull('name_basics.primaryname'),
                     ])
                     ->orderByDesc('published_people_count')
                     ->orderBy('professions.name')
@@ -57,7 +57,7 @@ class GetPeopleDirectorySnapshotAction
                     'professionCount' => Profession::query()
                         ->select(['professions.id'])
                         ->whereNotNull('professions.name')
-                        ->whereHas('nameBasics', fn ($query) => $query->whereNotNull('name_basics.primaryname'))
+                        ->whereHas('persons', fn ($query) => $query->whereNotNull('name_basics.primaryname'))
                         ->count(),
                     'topProfessions' => $topProfessions,
                 ];

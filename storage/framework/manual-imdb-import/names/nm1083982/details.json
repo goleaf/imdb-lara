@@ -1,0 +1,22 @@
+{
+    "id": "nm1083982",
+    "displayName": "Andy Weir",
+    "primaryImage": {
+        "url": "https://m.media-amazon.com/images/M/MV5BZGZhOGVjZTItNzQ4Yy00MGVkLWIyZmYtYWMxZjc1ZjM3N2JmXkEyXkFqcGc@._V1_.jpg",
+        "width": 1194,
+        "height": 1792
+    },
+    "primaryProfessions": [
+        "miscellaneous",
+        "producer",
+        "writer"
+    ],
+    "biography": "Andy Weir was born on 16 June 1972 in Davis, California, USA. He is a writer and producer, known for The Martian (2015), Artemis and Project Hail Mary (2026).",
+    "birthName": "Andy Taylor Weir",
+    "birthDate": {
+        "year": 1972,
+        "month": 6,
+        "day": 16
+    },
+    "birthLocation": "Davis, California, USA"
+}

@@ -187,9 +187,9 @@ new class extends Component
             </div>
 
             @if (filled($linkHref))
-                <x-ui.link :href="$linkHref" variant="ghost">
+                <x-ui.link.light :href="$linkHref">
                     {{ $linkLabel }}
-                </x-ui.link>
+                </x-ui.link.light>
             @endif
         </div>
 

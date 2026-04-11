@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\MediaKind;
 use App\Enums\TitleType as CatalogTitleType;
+use App\Models\Concerns\FormatsRuntimeLabels;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model;
@@ -15,6 +16,8 @@ use Illuminate\Support\Str;
 
 class Title extends Model
 {
+    use FormatsRuntimeLabels;
+
     protected $connection = 'imdb_mysql';
 
     protected $table = 'movies';
@@ -49,6 +52,205 @@ class Title extends Model
             'runtimeminutes' => 'integer',
             'title_type_id' => 'integer',
             'runtimeSeconds' => 'integer',
+        ];
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function catalogCardColumns(): array
+    {
+        return [
+            'movies.id',
+            'movies.tconst',
+            'movies.imdb_id',
+            'movies.primarytitle',
+            'movies.originaltitle',
+            'movies.titletype',
+            'movies.isadult',
+            'movies.startyear',
+            'movies.endyear',
+            'movies.runtimeminutes',
+            'movies.title_type_id',
+            'movies.runtimeSeconds',
+        ];
+    }
+
+    /**
+     * @return array<int|string, mixed>
+     */
+    public static function catalogHeroRelations(): array
+    {
+        return [
+            'statistic:movie_id,aggregate_rating,vote_count',
+            'titleImages:id,movie_id,position,url,width,height,type',
+            'primaryImageRecord:movie_id,url,width,height,type',
+            'plotRecord:movie_id,plot',
+        ];
+    }
+
+    /**
+     * @return array<int|string, mixed>
+     */
+    public static function catalogCardRelations(): array
+    {
+        return [
+            ...self::catalogHeroRelations(),
+            'genres:id,name',
+            'countries:code,name',
+            'languages:code,name',
+        ];
+    }
+
+    /**
+     * @return array<int|string, mixed>
+     */
+    public static function catalogListRelations(): array
+    {
+        return [
+            ...self::catalogHeroRelations(),
+            'genres:id,name',
+        ];
+    }
+
+    /**
+     * @return array<int|string, mixed>
+     */
+    public static function catalogMediaRelations(): array
+    {
+        return [
+            ...self::catalogHeroRelations(),
+            'titleVideos:imdb_id,movie_id,video_type_id,name,description,width,height,runtime_seconds,position',
+            'titleVideos.videoType:id,name',
+        ];
+    }
+
+    /**
+     * @return array<int|string, mixed>
+     */
+    public static function catalogBoxOfficeRelations(): array
+    {
+        return [
+            'titleImages:id,movie_id,position,url,width,height,type',
+            'primaryImageRecord:movie_id,url,width,height,type',
+            'boxOfficeRecord' => fn ($query) => $query->select([
+                'movie_id',
+                'domestic_gross_amount',
+                'domestic_gross_currency_code',
+                'worldwide_gross_amount',
+                'worldwide_gross_currency_code',
+                'opening_weekend_gross_amount',
+                'opening_weekend_gross_currency_code',
+                'opening_weekend_end_year',
+                'opening_weekend_end_month',
+                'opening_weekend_end_day',
+                'production_budget_amount',
+                'production_budget_currency_code',
+            ]),
+        ];
+    }
+
+    /**
+     * @return array<int|string, mixed>
+     */
+    public static function catalogDetailRelations(): array
+    {
+        return [
+            ...self::catalogMediaRelations(),
+            'boxOfficeRecord' => fn ($query) => $query
+                ->select([
+                    'movie_id',
+                    'domestic_gross_amount',
+                    'domestic_gross_currency_code',
+                    'worldwide_gross_amount',
+                    'worldwide_gross_currency_code',
+                    'opening_weekend_gross_amount',
+                    'opening_weekend_gross_currency_code',
+                    'production_budget_amount',
+                    'production_budget_currency_code',
+                ])
+                ->with([
+                    'productionBudget:code',
+                    'domesticGross:code',
+                    'openingWeekendGross:code',
+                    'worldwideGross:code',
+                ]),
+            'genres:id,name',
+            'movieGenres:movie_id,genre_id,position',
+            'countries:code,name',
+            'languages:code,name',
+            'interests:imdb_id,name,description,is_subgenre',
+            'interests.interestCategoryInterests:interest_category_id,interest_imdb_id,position',
+            'interests.interestCategoryInterests.interestCategory:id,name',
+            'interests.interestPrimaryImages:interest_imdb_id,url,width,height,type',
+            'interests.interestSimilarInterests:interest_imdb_id,similar_interest_imdb_id,position',
+            'interests.interestSimilarInterests.similar:imdb_id,name,description,is_subgenre',
+            'movieAkas' => fn ($query) => $query
+                ->select(['id', 'movie_id', 'text', 'country_code', 'language_code', 'position'])
+                ->with([
+                    'language:code,name',
+                    'movieAkaAttributes' => fn ($movieAkaAttributeQuery) => $movieAkaAttributeQuery
+                        ->select(['movie_aka_id', 'aka_attribute_id', 'position'])
+                        ->with([
+                            'akaAttribute:id,name',
+                        ])
+                        ->orderBy('position'),
+                ])
+                ->orderBy('position'),
+            'imageSummary:movie_id,total_count,next_page_token',
+            'certificateRecords:id,movie_id,certificate_rating_id,country_code,position',
+            'certificateRecords.certificateRating:id,name',
+            'certificateRecords.movieCertificateAttributes' => fn ($movieCertificateAttributeQuery) => $movieCertificateAttributeQuery
+                ->select(['movie_certificate_id', 'certificate_attribute_id', 'position'])
+                ->with([
+                    'certificateAttribute:id,name',
+                    'movieCertificate:id,movie_id,certificate_rating_id',
+                    'movieCertificate.certificateRating:id,name',
+                ])
+                ->orderBy('position'),
+            'certificateSummary:movie_id,total_count',
+            'movieEpisodes:episode_movie_id,movie_id,season,episode_number,release_year,release_month,release_day',
+            'episodeSummary:movie_id,total_count,next_page_token',
+            'companyCreditSummary:movie_id,total_count,next_page_token',
+            'movieDirectors' => fn ($movieDirectorQuery) => $movieDirectorQuery
+                ->select(['movie_id', 'name_basic_id', 'position'])
+                ->with([
+                    'nameBasic:id,primaryname,displayName',
+                ])
+                ->orderBy('position'),
+            'movieCompanyCredits' => fn ($query) => $query
+                ->select(['id', 'movie_id', 'company_imdb_id', 'company_credit_category_id', 'start_year', 'end_year', 'position'])
+                ->with([
+                    'company:imdb_id,name',
+                    'companyCreditCategory:id,name',
+                    'movieCompanyCreditAttributes' => fn ($movieCompanyCreditAttributeQuery) => $movieCompanyCreditAttributeQuery
+                        ->select(['movie_company_credit_id', 'company_credit_attribute_id', 'position'])
+                        ->with([
+                            'companyCreditAttribute:id,name',
+                            'movieCompanyCredit:id,movie_id,company_imdb_id,company_credit_category_id,start_year,end_year',
+                            'movieCompanyCredit.company:imdb_id,name',
+                            'movieCompanyCredit.companyCreditCategory:id,name',
+                        ])
+                        ->orderBy('position'),
+                    'movieCompanyCreditCountries' => fn ($movieCompanyCreditCountryQuery) => $movieCompanyCreditCountryQuery
+                        ->select(['movie_company_credit_id', 'country_code', 'position'])
+                        ->with([
+                            'movieCompanyCredit:id,movie_id,company_imdb_id,company_credit_category_id,start_year,end_year',
+                            'movieCompanyCredit.company:imdb_id,name',
+                            'movieCompanyCredit.companyCreditCategory:id,name',
+                        ])
+                        ->orderBy('position'),
+                ])
+                ->orderBy('position'),
+            'movieGenres' => fn ($movieGenreQuery) => $movieGenreQuery
+                ->select(['movie_id', 'genre_id', 'position'])
+                ->with([
+                    'genre:id,name',
+                ])
+                ->orderBy('position'),
+            'parentsGuideSections:id,movie_id,parents_guide_category_id,position',
+            'awardNominationSummary:movie_id,nomination_count,win_count,next_page_token',
+            'seasons:movie_id,season,episode_count',
         ];
     }
 
@@ -170,10 +372,135 @@ class Title extends Model
             ->orderBy('primarytitle');
     }
 
+    public function scopeSelectCatalogCardColumns(Builder $query): Builder
+    {
+        return $query->select(self::catalogCardColumns());
+    }
+
+    public function scopeWithCatalogCardRelations(Builder $query): Builder
+    {
+        return $query->with(self::catalogCardRelations());
+    }
+
+    public function scopeWithCatalogListRelations(Builder $query): Builder
+    {
+        return $query->with(self::catalogListRelations());
+    }
+
+    public function scopeWithCatalogHeroRelations(Builder $query): Builder
+    {
+        return $query->with(self::catalogHeroRelations());
+    }
+
+    public function scopeWithCatalogMediaRelations(Builder $query): Builder
+    {
+        return $query->with(self::catalogMediaRelations());
+    }
+
+    public function scopeWithCatalogBoxOfficeRelations(Builder $query): Builder
+    {
+        return $query->with(self::catalogBoxOfficeRelations());
+    }
+
+    public function scopeWithCatalogDetailRelations(Builder $query): Builder
+    {
+        return $query->with(self::catalogDetailRelations());
+    }
+
+    public function scopeInGenre(Builder $query, string|int|Genre $genre): Builder
+    {
+        $genreId = match (true) {
+            $genre instanceof Genre => (int) $genre->getKey(),
+            is_int($genre) => $genre,
+            preg_match('/-g(?P<id>\d+)$/', $genre, $matches) === 1 => (int) $matches['id'],
+            ctype_digit($genre) => (int) $genre,
+            default => null,
+        };
+
+        if ($genreId === null) {
+            return $query;
+        }
+
+        return $query->whereHas('genres', fn (Builder $genreQuery) => $genreQuery->where('genres.id', $genreId));
+    }
+
+    public function scopeReleasedBetweenYears(Builder $query, ?int $yearFrom = null, ?int $yearTo = null): Builder
+    {
+        if ($yearFrom !== null) {
+            $query->where('startyear', '>=', $yearFrom);
+        }
+
+        if ($yearTo !== null) {
+            $query->where('startyear', '<=', $yearTo);
+        }
+
+        return $query;
+    }
+
+    public function scopeProducedInCountry(Builder $query, string $countryCode): Builder
+    {
+        return $query->whereHas(
+            'countries',
+            fn (Builder $countryQuery) => $countryQuery->where('countries.code', strtoupper($countryCode)),
+        );
+    }
+
+    public function scopeSpokenInLanguage(Builder $query, string $languageCode): Builder
+    {
+        return $query->whereHas(
+            'languages',
+            fn (Builder $languageQuery) => $languageQuery->where('languages.code', strtoupper($languageCode)),
+        );
+    }
+
+    public function scopeWithinRuntimeBucket(Builder $query, string $runtime): Builder
+    {
+        return match ($runtime) {
+            'under-30' => $query->whereNotNull('runtimeminutes')->where('runtimeminutes', '<', 30),
+            '30-60' => $query->whereBetween('runtimeminutes', [30, 60]),
+            '60-90' => $query->whereBetween('runtimeminutes', [60, 90]),
+            '90-120' => $query->whereBetween('runtimeminutes', [90, 120]),
+            '120-plus' => $query->where('runtimeminutes', '>=', 120),
+            default => $query,
+        };
+    }
+
+    public function scopeForInterestCategory(Builder $query, InterestCategory|int $interestCategory): Builder
+    {
+        $interestCategoryId = $interestCategory instanceof InterestCategory
+            ? (int) $interestCategory->getKey()
+            : (int) $interestCategory;
+
+        return $query->whereHas(
+            'interests.interestCategories',
+            fn (Builder $categoryQuery) => $categoryQuery->where('interest_categories.id', $interestCategoryId),
+        );
+    }
+
+    public function scopeWithMatchedInterestCount(Builder $query, InterestCategory|int $interestCategory): Builder
+    {
+        $interestCategoryId = $interestCategory instanceof InterestCategory
+            ? (int) $interestCategory->getKey()
+            : (int) $interestCategory;
+
+        return $query->withCount([
+            'interests as matched_interest_count' => fn (Builder $interestQuery) => $interestQuery
+                ->whereHas(
+                    'interestCategories',
+                    fn (Builder $categoryQuery) => $categoryQuery->where('interest_categories.id', $interestCategoryId),
+                ),
+        ]);
+    }
+
     public function genres(): BelongsToMany
     {
         return $this->belongsToMany(Genre::class, 'movie_genres', 'movie_id', 'genre_id', 'id', 'id')
             ->orderBy('movie_genres.position');
+    }
+
+    public function movieGenres(): HasMany
+    {
+        return $this->hasMany(MovieGenre::class, 'movie_id', 'id')->orderBy('position');
     }
 
     public function countries(): BelongsToMany
@@ -207,16 +534,16 @@ class Title extends Model
         return $this->hasMany(MovieAka::class, 'movie_id', 'id')->orderBy('position');
     }
 
-    public function titleAkas(): HasMany
-    {
-        return $this->hasMany(TitleAka::class, 'titleid', 'tconst')->orderBy('ordering');
-    }
-
     public function awardNominations(): HasMany
     {
         return $this->hasMany(AwardNomination::class, 'movie_id', 'id')
             ->orderByDesc('award_year')
             ->orderBy('position');
+    }
+
+    public function awardNominationSummary(): HasOne
+    {
+        return $this->hasOne(MovieAwardNominationSummary::class, 'movie_id', 'id');
     }
 
     public function seasons(): HasMany
@@ -239,6 +566,11 @@ class Title extends Model
     public function titleImages(): HasMany
     {
         return $this->hasMany(TitleImage::class, 'movie_id', 'id')->orderBy('position');
+    }
+
+    public function imageSummary(): HasOne
+    {
+        return $this->hasOne(MovieImageSummary::class, 'movie_id', 'id');
     }
 
     public function titleVideos(): HasMany
@@ -281,9 +613,36 @@ class Title extends Model
         return $this->hasMany(MovieCertificate::class, 'movie_id', 'id')->orderBy('position');
     }
 
+    public function certificateSummary(): HasOne
+    {
+        return $this->hasOne(MovieCertificateSummary::class, 'movie_id', 'id');
+    }
+
+    public function episodeSummary(): HasOne
+    {
+        return $this->hasOne(MovieEpisodeSummary::class, 'movie_id', 'id');
+    }
+
+    public function companyCreditSummary(): HasOne
+    {
+        return $this->hasOne(MovieCompanyCreditSummary::class, 'movie_id', 'id');
+    }
+
     public function movieCompanyCredits(): HasMany
     {
         return $this->hasMany(MovieCompanyCredit::class, 'movie_id', 'id')->orderBy('position');
+    }
+
+    public function movieDirectors(): HasMany
+    {
+        return $this->hasMany(MovieDirector::class, 'movie_id', 'id')->orderBy('position');
+    }
+
+    public function movieEpisodes(): HasMany
+    {
+        return $this->hasMany(MovieEpisode::class, 'movie_id', 'id')
+            ->orderBy('season')
+            ->orderBy('episode_number');
     }
 
     public function parentsGuideSections(): HasMany
@@ -362,22 +721,147 @@ class Title extends Model
         return $genres;
     }
 
+    /**
+     * @return SupportCollection<int, Genre>
+     */
+    public function resolvedGenres(): SupportCollection
+    {
+        if (! $this->relationLoaded('genres')) {
+            return collect();
+        }
+
+        return $this->genres
+            ->filter(fn (mixed $genre): bool => $genre instanceof Genre && filled($genre->name))
+            ->unique('id')
+            ->values();
+    }
+
+    /**
+     * @return SupportCollection<int, Interest>
+     */
+    public function resolvedInterests(): SupportCollection
+    {
+        if (! $this->relationLoaded('interests')) {
+            return collect();
+        }
+
+        return $this->interests
+            ->filter(fn (mixed $interest): bool => $interest instanceof Interest && filled($interest->imdb_id))
+            ->unique('imdb_id')
+            ->values();
+    }
+
+    /**
+     * @return SupportCollection<int, InterestCategory>
+     */
+    public function resolvedInterestCategories(): SupportCollection
+    {
+        if (! $this->relationLoaded('interests')) {
+            return collect();
+        }
+
+        return $this->interests
+            ->flatMap(function (Interest $interest): SupportCollection {
+                if (! $interest->relationLoaded('interestCategoryInterests')) {
+                    return collect();
+                }
+
+                return $interest->interestCategoryInterests;
+            })
+            ->map(function (InterestCategoryInterest $interestCategoryInterest): ?InterestCategory {
+                if (! $interestCategoryInterest->relationLoaded('interestCategory')) {
+                    return null;
+                }
+
+                return $interestCategoryInterest->interestCategory;
+            })
+            ->filter(fn (mixed $interestCategory): bool => $interestCategory instanceof InterestCategory && filled($interestCategory->name))
+            ->unique('id')
+            ->values();
+    }
+
+    /**
+     * @return SupportCollection<int, InterestCategoryInterest>
+     */
+    public function resolvedInterestCategoryInterests(): SupportCollection
+    {
+        if (! $this->relationLoaded('interests')) {
+            return collect();
+        }
+
+        return $this->interests
+            ->flatMap(function (Interest $interest): SupportCollection {
+                if (! $interest->relationLoaded('interestCategoryInterests')) {
+                    return collect();
+                }
+
+                return $interest->interestCategoryInterests;
+            })
+            ->filter(fn (mixed $interestCategoryInterest): bool => $interestCategoryInterest instanceof InterestCategoryInterest)
+            ->unique(fn (InterestCategoryInterest $interestCategoryInterest): string => $interestCategoryInterest->interest_category_id.'|'.$interestCategoryInterest->interest_imdb_id)
+            ->values();
+    }
+
+    /**
+     * @return SupportCollection<int, InterestPrimaryImage>
+     */
+    public function resolvedInterestPrimaryImages(): SupportCollection
+    {
+        if (! $this->relationLoaded('interests')) {
+            return collect();
+        }
+
+        return $this->interests
+            ->flatMap(function (Interest $interest): SupportCollection {
+                if (! $interest->relationLoaded('interestPrimaryImages')) {
+                    return collect();
+                }
+
+                return $interest->interestPrimaryImages;
+            })
+            ->filter(fn (mixed $interestPrimaryImage): bool => $interestPrimaryImage instanceof InterestPrimaryImage && filled($interestPrimaryImage->url))
+            ->unique(fn (InterestPrimaryImage $interestPrimaryImage): string => $interestPrimaryImage->interest_imdb_id.'|'.$interestPrimaryImage->url)
+            ->values();
+    }
+
+    /**
+     * @return SupportCollection<int, InterestSimilarInterest>
+     */
+    public function resolvedInterestSimilarInterests(): SupportCollection
+    {
+        if (! $this->relationLoaded('interests')) {
+            return collect();
+        }
+
+        return $this->interests
+            ->flatMap(function (Interest $interest): SupportCollection {
+                if (! $interest->relationLoaded('interestSimilarInterests')) {
+                    return collect();
+                }
+
+                return $interest->interestSimilarInterests;
+            })
+            ->filter(fn (mixed $interestSimilarInterest): bool => $interestSimilarInterest instanceof InterestSimilarInterest)
+            ->unique(fn (InterestSimilarInterest $interestSimilarInterest): string => $interestSimilarInterest->interest_imdb_id.'|'.$interestSimilarInterest->similar_interest_imdb_id)
+            ->values();
+    }
+
     public function displayAverageRating(): ?float
     {
-        if (! $this->relationLoaded('statistic') || ! $this->statistic?->average_rating) {
+        if (! $this->relationLoaded('statistic')) {
             return null;
         }
 
-        return (float) $this->statistic->average_rating;
+        return $this->statistic?->average_rating;
     }
 
     public function displayRatingCount(): int
     {
-        if (! $this->relationLoaded('statistic') || ! $this->statistic) {
+        if (! $this->relationLoaded('statistic')) {
             return 0;
         }
 
-        return (int) $this->statistic->rating_count;
+        return $this->statistic?->rating_count ?? 0;
     }
 
     public function displayReviewCount(): int
@@ -398,6 +882,11 @@ class Title extends Model
             ->toString();
     }
 
+    public function originCountryLabel(): ?string
+    {
+        return Country::labelForCode($this->originCountryCode());
+    }
+
     public function preferredVideo(): ?CatalogMediaAsset
     {
         if (! $this->relationLoaded('titleVideos')) {
@@ -414,7 +903,13 @@ class Title extends Model
 
     public function summaryText(): ?string
     {
-        $summary = $this->tagline ?: $this->synopsis ?: $this->plot_outline;
+        $summary = $this->getAttributeFromArray('tagline')
+            ?: $this->getAttributeFromArray('synopsis')
+            ?: $this->getAttributeFromArray('plot_outline');
+
+        if (! filled($summary) && $this->relationLoaded('plotRecord')) {
+            $summary = $this->plotRecord?->plot;
+        }
 
         return filled($summary) ? (string) $summary : null;
     }
@@ -460,6 +955,189 @@ class Title extends Model
             })
             ->filter(fn (mixed $awardEvent): bool => $awardEvent instanceof AwardEvent && filled($awardEvent->name))
             ->unique('imdb_id')
+            ->values();
+    }
+
+    /**
+     * @return SupportCollection<int, AwardNomination>
+     */
+    public function resolvedMovieAwardNominations(): SupportCollection
+    {
+        if (! $this->relationLoaded('awardNominations')) {
+            return collect();
+        }
+
+        return $this->awardNominations
+            ->filter(fn (mixed $awardNomination): bool => $awardNomination instanceof AwardNomination && filled($awardNomination->id))
+            ->unique('id')
+            ->values();
+    }
+
+    /**
+     * @return SupportCollection<int, MovieAwardNominationNominee>
+     */
+    public function resolvedMovieAwardNominationNominees(): SupportCollection
+    {
+        if (! $this->relationLoaded('awardNominations')) {
+            return collect();
+        }
+
+        return $this->awardNominations
+            ->flatMap(function (AwardNomination $awardNomination): SupportCollection {
+                if (! $awardNomination->relationLoaded('movieAwardNominationNominees')) {
+                    return collect();
+                }
+
+                return $awardNomination->movieAwardNominationNominees;
+            })
+            ->filter(fn (mixed $nominee): bool => $nominee instanceof MovieAwardNominationNominee)
+            ->unique(fn (MovieAwardNominationNominee $nominee): string => $nominee->movie_award_nomination_id.'|'.$nominee->name_basic_id)
+            ->values();
+    }
+
+    /**
+     * @return SupportCollection<int, MovieAwardNominationTitle>
+     */
+    public function resolvedMovieAwardNominationTitles(): SupportCollection
+    {
+        if (! $this->relationLoaded('awardNominations')) {
+            return collect();
+        }
+
+        return $this->awardNominations
+            ->flatMap(function (AwardNomination $awardNomination): SupportCollection {
+                if (! $awardNomination->relationLoaded('movieAwardNominationTitles')) {
+                    return collect();
+                }
+
+                return $awardNomination->movieAwardNominationTitles;
+            })
+            ->filter(fn (mixed $title): bool => $title instanceof MovieAwardNominationTitle)
+            ->unique(fn (MovieAwardNominationTitle $title): string => $title->movie_award_nomination_id.'|'.$title->nominated_movie_id)
+            ->values();
+    }
+
+    /**
+     * @return SupportCollection<int, MovieAwardNominationSummary>
+     */
+    public function resolvedMovieAwardNominationSummaries(): SupportCollection
+    {
+        if (! $this->relationLoaded('awardNominationSummary') || ! $this->awardNominationSummary instanceof MovieAwardNominationSummary) {
+            return collect();
+        }
+
+        return collect([$this->awardNominationSummary])
+            ->filter(fn (mixed $summary): bool => $summary instanceof MovieAwardNominationSummary && filled($summary->movie_id))
+            ->values();
+    }
+
+    /**
+     * @return SupportCollection<int, MovieCertificate>
+     */
+    public function resolvedMovieCertificates(): SupportCollection
+    {
+        if (! $this->relationLoaded('certificateRecords')) {
+            return collect();
+        }
+
+        return $this->certificateRecords
+            ->filter(
+                fn (mixed $certificate): bool => $certificate instanceof MovieCertificate
+                    && (filled($certificate->certificate_rating_id) || filled($certificate->country_code) || filled($certificate->id)),
+            )
+            ->unique(function (MovieCertificate $certificate): string {
+                $countryCode = strtoupper((string) $certificate->country_code);
+
+                return ($certificate->certificate_rating_id ?? 'missing-rating').'|'.$countryCode;
+            })
+            ->sortBy(function (MovieCertificate $certificate): string {
+                $rating = $certificate->relationLoaded('certificateRating') && filled($certificate->certificateRating?->name)
+                    ? (string) $certificate->certificateRating?->name
+                    : (string) ($certificate->certificate_rating_id ?? '');
+                $country = $certificate->resolvedCountryLabel() ?? strtoupper((string) $certificate->country_code);
+                $position = str_pad((string) ($certificate->position ?? 9999), 6, '0', STR_PAD_LEFT);
+                $identifier = str_pad((string) ($certificate->id ?? 999999), 6, '0', STR_PAD_LEFT);
+
+                return mb_strtolower($rating.'|'.$country.'|'.$position.'|'.$identifier);
+            })
+            ->values();
+    }
+
+    /**
+     * @return SupportCollection<int, MovieCertificateSummary>
+     */
+    public function resolvedMovieCertificateSummaries(): SupportCollection
+    {
+        if (! $this->relationLoaded('certificateSummary') || ! $this->certificateSummary instanceof MovieCertificateSummary) {
+            return collect();
+        }
+
+        return collect([$this->certificateSummary])
+            ->filter(fn (mixed $summary): bool => $summary instanceof MovieCertificateSummary && filled($summary->movie_id))
+            ->values();
+    }
+
+    /**
+     * @return SupportCollection<int, MovieEpisodeSummary>
+     */
+    public function resolvedMovieEpisodeSummaries(): SupportCollection
+    {
+        if (! $this->relationLoaded('episodeSummary') || ! $this->episodeSummary instanceof MovieEpisodeSummary) {
+            return collect();
+        }
+
+        return collect([$this->episodeSummary])
+            ->filter(fn (mixed $summary): bool => $summary instanceof MovieEpisodeSummary && filled($summary->movie_id))
+            ->values();
+    }
+
+    /**
+     * @return SupportCollection<int, MovieImageSummary>
+     */
+    public function resolvedMovieImageSummaries(): SupportCollection
+    {
+        if (! $this->relationLoaded('imageSummary') || ! $this->imageSummary instanceof MovieImageSummary) {
+            return collect();
+        }
+
+        return collect([$this->imageSummary])
+            ->filter(fn (mixed $summary): bool => $summary instanceof MovieImageSummary && filled($summary->movie_id))
+            ->values();
+    }
+
+    /**
+     * @return SupportCollection<int, MovieCompanyCreditSummary>
+     */
+    public function resolvedMovieCompanyCreditSummaries(): SupportCollection
+    {
+        if (! $this->relationLoaded('companyCreditSummary') || ! $this->companyCreditSummary instanceof MovieCompanyCreditSummary) {
+            return collect();
+        }
+
+        return collect([$this->companyCreditSummary])
+            ->filter(fn (mixed $summary): bool => $summary instanceof MovieCompanyCreditSummary && filled($summary->movie_id))
+            ->values();
+    }
+
+    /**
+     * @return SupportCollection<int, MovieCertificateAttribute>
+     */
+    public function resolvedMovieCertificateAttributes(): SupportCollection
+    {
+        if (! $this->relationLoaded('certificateRecords')) {
+            return collect();
+        }
+
+        return $this->certificateRecords
+            ->flatMap(function (MovieCertificate $certificate): SupportCollection {
+                if (! $certificate->relationLoaded('movieCertificateAttributes')) {
+                    return collect();
+                }
+
+                return $certificate->movieCertificateAttributes;
+            })
+            ->filter(fn (mixed $movieCertificateAttribute): bool => $movieCertificateAttribute instanceof MovieCertificateAttribute)
+            ->unique(fn (MovieCertificateAttribute $movieCertificateAttribute): string => $movieCertificateAttribute->movie_certificate_id.'|'.$movieCertificateAttribute->certificate_attribute_id)
             ->values();
     }
 
@@ -515,6 +1193,66 @@ class Title extends Model
     }
 
     /**
+     * @return SupportCollection<int, MovieCompanyCredit>
+     */
+    public function resolvedMovieCompanyCredits(): SupportCollection
+    {
+        if (! $this->relationLoaded('movieCompanyCredits')) {
+            return collect();
+        }
+
+        return $this->movieCompanyCredits
+            ->filter(fn (mixed $movieCompanyCredit): bool => $movieCompanyCredit instanceof MovieCompanyCredit && filled($movieCompanyCredit->id))
+            ->unique('id')
+            ->values();
+    }
+
+    /**
+     * @return SupportCollection<int, MovieDirector>
+     */
+    public function resolvedMovieDirectors(): SupportCollection
+    {
+        if (! $this->relationLoaded('movieDirectors')) {
+            return collect();
+        }
+
+        return $this->movieDirectors
+            ->filter(fn (mixed $movieDirector): bool => $movieDirector instanceof MovieDirector)
+            ->unique(fn (MovieDirector $movieDirector): string => $movieDirector->movie_id.'|'.$movieDirector->name_basic_id)
+            ->values();
+    }
+
+    /**
+     * @return SupportCollection<int, MovieEpisode>
+     */
+    public function resolvedMovieEpisodes(): SupportCollection
+    {
+        if (! $this->relationLoaded('movieEpisodes')) {
+            return collect();
+        }
+
+        return $this->movieEpisodes
+            ->filter(fn (mixed $movieEpisode): bool => $movieEpisode instanceof MovieEpisode && filled($movieEpisode->episode_movie_id))
+            ->unique('episode_movie_id')
+            ->values();
+    }
+
+    /**
+     * @return SupportCollection<int, MovieGenre>
+     */
+    public function resolvedMovieGenres(): SupportCollection
+    {
+        if (! $this->relationLoaded('movieGenres')) {
+            return collect();
+        }
+
+        return $this->movieGenres
+            ->filter(fn (mixed $movieGenre): bool => $movieGenre instanceof MovieGenre && filled($movieGenre->movie_id) && filled($movieGenre->genre_id))
+            ->unique(fn (MovieGenre $movieGenre): string => $movieGenre->movie_id.'|'.$movieGenre->genre_id)
+            ->values();
+    }
+
+    /**
      * @return SupportCollection<int, Company>
      */
     public function resolvedCompanies(): SupportCollection
@@ -533,6 +1271,50 @@ class Title extends Model
             })
             ->filter(fn (mixed $company): bool => $company instanceof Company && filled($company->name))
             ->unique('imdb_id')
+            ->values();
+    }
+
+    /**
+     * @return SupportCollection<int, MovieCompanyCreditAttribute>
+     */
+    public function resolvedMovieCompanyCreditAttributes(): SupportCollection
+    {
+        if (! $this->relationLoaded('movieCompanyCredits')) {
+            return collect();
+        }
+
+        return $this->movieCompanyCredits
+            ->flatMap(function (MovieCompanyCredit $movieCompanyCredit): SupportCollection {
+                if (! $movieCompanyCredit->relationLoaded('movieCompanyCreditAttributes')) {
+                    return collect();
+                }
+
+                return $movieCompanyCredit->movieCompanyCreditAttributes;
+            })
+            ->filter(fn (mixed $movieCompanyCreditAttribute): bool => $movieCompanyCreditAttribute instanceof MovieCompanyCreditAttribute)
+            ->unique(fn (MovieCompanyCreditAttribute $movieCompanyCreditAttribute): string => $movieCompanyCreditAttribute->movie_company_credit_id.'|'.$movieCompanyCreditAttribute->company_credit_attribute_id)
+            ->values();
+    }
+
+    /**
+     * @return SupportCollection<int, MovieCompanyCreditCountry>
+     */
+    public function resolvedMovieCompanyCreditCountries(): SupportCollection
+    {
+        if (! $this->relationLoaded('movieCompanyCredits')) {
+            return collect();
+        }
+
+        return $this->movieCompanyCredits
+            ->flatMap(function (MovieCompanyCredit $movieCompanyCredit): SupportCollection {
+                if (! $movieCompanyCredit->relationLoaded('movieCompanyCreditCountries')) {
+                    return collect();
+                }
+
+                return $movieCompanyCredit->movieCompanyCreditCountries;
+            })
+            ->filter(fn (mixed $movieCompanyCreditCountry): bool => $movieCompanyCreditCountry instanceof MovieCompanyCreditCountry)
+            ->unique(fn (MovieCompanyCreditCountry $movieCompanyCreditCountry): string => $movieCompanyCreditCountry->movie_company_credit_id.'|'.$movieCompanyCreditCountry->country_code)
             ->values();
     }
 
@@ -588,32 +1370,104 @@ class Title extends Model
     }
 
     /**
+     * @return SupportCollection<int, Country>
+     */
+    public function resolvedCountries(): SupportCollection
+    {
+        if (! $this->relationLoaded('countries')) {
+            return collect();
+        }
+
+        return $this->countries
+            ->filter(fn (mixed $country): bool => $country instanceof Country && filled($country->code))
+            ->unique('code')
+            ->values();
+    }
+
+    /**
+     * @return SupportCollection<int, MovieBoxOffice>
+     */
+    public function resolvedMovieBoxOfficeRows(): SupportCollection
+    {
+        if (! $this->relationLoaded('boxOfficeRecord') || ! $this->boxOfficeRecord instanceof MovieBoxOffice) {
+            return collect();
+        }
+
+        return collect([$this->boxOfficeRecord])
+            ->filter(fn (mixed $boxOfficeRecord): bool => $boxOfficeRecord instanceof MovieBoxOffice && filled($boxOfficeRecord->movie_id))
+            ->values();
+    }
+
+    /**
+     * @return SupportCollection<int, Currency>
+     */
+    public function resolvedCurrencies(): SupportCollection
+    {
+        if (! $this->relationLoaded('boxOfficeRecord') || ! $this->boxOfficeRecord instanceof MovieBoxOffice) {
+            return collect();
+        }
+
+        return collect([
+            'productionBudget',
+            'domesticGross',
+            'openingWeekendGross',
+            'worldwideGross',
+        ])
+            ->map(function (string $relation): ?Currency {
+                if (! $this->boxOfficeRecord->relationLoaded($relation)) {
+                    return null;
+                }
+
+                return $this->boxOfficeRecord->getRelation($relation);
+            })
+            ->filter(fn (mixed $currency): bool => $currency instanceof Currency && filled($currency->code))
+            ->unique('code')
+            ->values();
+    }
+
+    /**
+     * @return SupportCollection<int, MovieAka>
+     */
+    public function resolvedMovieAkas(): SupportCollection
+    {
+        if (! $this->relationLoaded('movieAkas')) {
+            return collect();
+        }
+
+        return $this->movieAkas
+            ->filter(fn (mixed $movieAka): bool => $movieAka instanceof MovieAka && filled($movieAka->id))
+            ->unique('id')
+            ->values();
+    }
+
+    /**
+     * @return SupportCollection<int, MovieAkaAttribute>
+     */
+    public function resolvedMovieAkaAttributes(): SupportCollection
+    {
+        if (! $this->relationLoaded('movieAkas')) {
+            return collect();
+        }
+
+        return $this->movieAkas
+            ->flatMap(function (MovieAka $movieAka): SupportCollection {
+                if (! $movieAka->relationLoaded('movieAkaAttributes')) {
+                    return collect();
+                }
+
+                return $movieAka->movieAkaAttributes;
+            })
+            ->filter(fn (mixed $movieAkaAttribute): bool => $movieAkaAttribute instanceof MovieAkaAttribute)
+            ->unique(fn (MovieAkaAttribute $movieAkaAttribute): string => $movieAkaAttribute->movie_aka_id.'|'.$movieAkaAttribute->aka_attribute_id)
+            ->values();
+    }
+
+    /**
      * @return SupportCollection<int, AkaType>
      */
     public function resolvedAkaTypes(): SupportCollection
     {
-        if (! $this->relationLoaded('titleAkas')) {
-            return collect();
-        }
-
-        return $this->titleAkas
-            ->flatMap(function (TitleAka $titleAka): SupportCollection {
-                if (! $titleAka->relationLoaded('titleAkaTypes')) {
-                    return collect();
-                }
-
-                return $titleAka->titleAkaTypes;
-            })
-            ->map(function (TitleAkaType $titleAkaType): ?AkaType {
-                if (! $titleAkaType->relationLoaded('akaType')) {
-                    return null;
-                }
-
-                return $titleAkaType->akaType;
-            })
-            ->filter(fn (mixed $akaType): bool => $akaType instanceof AkaType && filled($akaType->name))
-            ->unique('id')
-            ->values();
+        return collect();
     }
 
     /**
@@ -686,6 +1540,11 @@ class Title extends Model
         $runtimeSeconds = $this->getAttributeFromArray('runtimeSeconds');
 
         return $runtimeSeconds ? (int) $runtimeSeconds : null;
+    }
+
+    public function runtimeMinutesLabel(): ?string
+    {
+        return self::formatMinutesLabel($this->runtime_minutes);
     }
 
     public function getReleaseDateAttribute(): mixed
@@ -794,25 +1653,25 @@ class Title extends Model
     public static function remoteTypesForCatalogType(CatalogTitleType $type): array
     {
         return match ($type) {
-            CatalogTitleType::Movie => ['movie', 'tvMovie', 'video'],
-            CatalogTitleType::Series => ['tvSeries'],
-            CatalogTitleType::MiniSeries => ['tvMiniSeries'],
+            CatalogTitleType::Movie => ['movie', 'tvMovie', 'tvmovie', 'video'],
+            CatalogTitleType::Series => ['tvSeries', 'tvseries', 'tvPilot', 'tvpilot', 'tvShortSeries', 'tvshortseries'],
+            CatalogTitleType::MiniSeries => ['tvMiniSeries', 'tvminiseries'],
             CatalogTitleType::Documentary => ['documentary'],
-            CatalogTitleType::Special => ['tvSpecial', 'special'],
+            CatalogTitleType::Special => ['tvSpecial', 'tvspecial', 'special'],
             CatalogTitleType::Short => ['short'],
-            CatalogTitleType::Episode => ['tvEpisode'],
+            CatalogTitleType::Episode => ['tvEpisode', 'tvepisode'],
         };
     }
 
     private static function catalogTypeFromRemote(?string $remoteType): CatalogTitleType
     {
-        return match ($remoteType) {
-            'tvSeries' => CatalogTitleType::Series,
-            'tvMiniSeries' => CatalogTitleType::MiniSeries,
-            'tvEpisode' => CatalogTitleType::Episode,
+        return match (Str::lower((string) $remoteType)) {
+            'tvseries', 'tvpilot', 'tvshortseries' => CatalogTitleType::Series,
+            'tvminiseries' => CatalogTitleType::MiniSeries,
+            'tvepisode' => CatalogTitleType::Episode,
             'short' => CatalogTitleType::Short,
             'documentary' => CatalogTitleType::Documentary,
-            'tvSpecial', 'special' => CatalogTitleType::Special,
+            'tvspecial', 'special' => CatalogTitleType::Special,
             default => CatalogTitleType::Movie,
         };
     }

@@ -40,65 +40,9 @@ class LoadPersonDetailsAction
      */
     public function handle(Person $person): array
     {
-        $person->load([
-            'personImages:name_basic_id,position,url,width,height,type',
-            'alternativeNameRecords:name_basic_id,alternative_name,position',
-            'professionTerms:id,name',
-            'meterRanking:name_basic_id,current_rank,change_direction,difference',
-            'credits' => fn ($query) => $query
-                ->select(['name_basic_id', 'movie_id', 'category', 'episode_count', 'position'])
-                ->with([
-                    'title' => fn ($titleQuery) => $titleQuery
-                        ->select([
-                            'movies.id',
-                            'movies.tconst',
-                            'movies.imdb_id',
-                            'movies.primarytitle',
-                            'movies.originaltitle',
-                            'movies.titletype',
-                            'movies.isadult',
-                            'movies.startyear',
-                            'movies.endyear',
-                            'movies.runtimeminutes',
-                        ])
-                        ->addSelect([
-                            'popularity_rank' => TitleStatistic::query()
-                                ->select('vote_count')
-                                ->whereColumn('movie_ratings.movie_id', 'movies.id')
-                                ->limit(1),
-                        ])
-                        ->publishedCatalog()
-                        ->with([
-                            'genres:id,name',
-                            'statistic:movie_id,aggregate_rating,vote_count',
-                            'titleImages:id,movie_id,position,url,width,height,type',
-                            'primaryImageRecord:movie_id,url,width,height,type',
-                        ]),
-                ])
-                ->orderBy('position')
-                ->limit(40),
-            'awardNominations' => fn ($query) => $query
-                ->select(['movie_award_nominations.id', 'movie_award_nominations.movie_id', 'movie_award_nominations.event_imdb_id', 'movie_award_nominations.award_category_id', 'movie_award_nominations.award_year', 'movie_award_nominations.text', 'movie_award_nominations.is_winner', 'movie_award_nominations.winner_rank', 'movie_award_nominations.position'])
-                ->with([
-                    'awardEvent:imdb_id,name',
-                    'awardCategory:id,name',
-                    'title' => fn ($titleQuery) => $titleQuery->select([
-                        'movies.id',
-                        'movies.tconst',
-                        'movies.imdb_id',
-                        'movies.primarytitle',
-                        'movies.originaltitle',
-                        'movies.titletype',
-                        'movies.isadult',
-                        'movies.startyear',
-                        'movies.endyear',
-                        'movies.runtimeminutes',
-                    ]),
-                ])
-                ->orderByDesc('is_winner')
-                ->orderByDesc('award_year')
-                ->limit(8),
-        ]);
+        $person->loadMissing(Person::detailRelations());
+        $this->loadPreviewCredits($person);
+        $this->loadAwardHighlights($person);
 
         $headshot = $person->preferredHeadshot();
         $photoGallery = $person->groupedMediaAssetsByKind()
@@ -123,16 +67,23 @@ class LoadPersonDetailsAction
             ->filter(fn ($title): bool => $title instanceof Title)
             ->unique('id')
             ->values();
-        $knownForTitles = $creditedTitles
-            ->sortByDesc(fn (Title $title): string => sprintf(
-                '%01d-%05.2f-%09d-%05d',
-                $person->credits->where('movie_id', $title->id)->contains(fn (Credit $credit) => $credit->is_principal) ? 1 : 0,
-                (float) ($title->statistic?->average_rating ?? 0),
-                (int) ($title->statistic?->rating_count ?? 0),
-                (int) ($title->release_year ?? 0),
-            ))
-            ->take(6)
+        $knownForTitles = $person->knownForTitles
+            ->filter(fn ($title): bool => $title instanceof Title)
+            ->unique('id')
             ->values();
+
+        if ($knownForTitles->isEmpty()) {
+            $knownForTitles = $creditedTitles
+                ->sortByDesc(fn (Title $title): string => sprintf(
+                    '%01d-%05.2f-%09d-%05d',
+                    $person->credits->where('movie_id', $title->id)->contains(fn (Credit $credit) => $credit->is_principal) ? 1 : 0,
+                    (float) ($title->statistic?->average_rating ?? 0),
+                    (int) ($title->statistic?->rating_count ?? 0),
+                    (int) ($title->release_year ?? 0),
+                ))
+                ->take(6)
+                ->values();
+        }
         $knownForTitleIds = $knownForTitles
             ->pluck('id')
             ->filter(fn (mixed $value): bool => is_numeric($value))
@@ -160,52 +111,17 @@ class LoadPersonDetailsAction
 
         if ($collaborationTitleIds !== []) {
             $frequentCollaborators = Credit::query()
-                ->select(['name_basic_id', 'movie_id', 'category', 'episode_count', 'position'])
+                ->select(['name_credits.id', 'name_credits.name_basic_id', 'name_credits.movie_id', 'name_credits.category', 'name_credits.episode_count', 'name_credits.position'])
                 ->whereIn('movie_id', $collaborationTitleIds)
                 ->where('name_basic_id', '!=', $person->getKey())
+                ->ordered()
+                ->withPersonPreview()
                 ->with([
-                    'person' => fn ($personQuery) => $personQuery
-                        ->select([
-                            'id',
-                            'nconst',
-                            'imdb_id',
-                            'primaryname',
-                            'displayName',
-                            'alternativeNames',
-                            'primaryProfessions',
-                            'biography',
-                            'birthLocation',
-                            'deathLocation',
-                            'primaryImage_url',
-                            'primaryImage_width',
-                            'primaryImage_height',
-                        ])
-                        ->with([
-                            'personImages:name_basic_id,position,url,width,height,type',
-                            'professionTerms:id,name',
-                        ]),
                     'title' => fn ($titleQuery) => $titleQuery
-                        ->select([
-                            'movies.id',
-                            'movies.tconst',
-                            'movies.imdb_id',
-                            'movies.primarytitle',
-                            'movies.originaltitle',
-                            'movies.titletype',
-                            'movies.isadult',
-                            'movies.startyear',
-                            'movies.endyear',
-                            'movies.runtimeminutes',
-                        ])
+                        ->selectCatalogCardColumns()
                         ->publishedCatalog()
-                        ->with([
-                            'genres:id,name',
-                            'statistic:movie_id,aggregate_rating,vote_count',
-                            'titleImages:id,movie_id,position,url,width,height,type',
-                            'primaryImageRecord:movie_id,url,width,height,type',
-                        ]),
+                        ->withCatalogCardRelations(),
                 ])
-                ->orderBy('position')
                 ->get()
                 ->filter(fn (Credit $credit): bool => $credit->person instanceof Person && $credit->title instanceof Title)
                 ->groupBy(fn (Credit $credit): string => (string) $credit->person_id)
@@ -336,5 +252,44 @@ class LoadPersonDetailsAction
                 ],
             ),
         ];
+    }
+
+    private function loadPreviewCredits(Person $person): void
+    {
+        $person->setRelation('credits', $person->credits()
+            ->select(['id', 'name_basic_id', 'movie_id', 'category', 'episode_count', 'position'])
+            ->with([
+                'nameCreditCharacters:name_credit_id,position,character_name',
+                'title' => fn ($titleQuery) => $titleQuery
+                    ->selectCatalogCardColumns()
+                    ->addSelect([
+                        'popularity_rank' => TitleStatistic::query()
+                            ->select('vote_count')
+                            ->whereColumn('movie_ratings.movie_id', 'movies.id')
+                            ->limit(1),
+                    ])
+                    ->publishedCatalog()
+                    ->withCatalogCardRelations(),
+            ])
+            ->orderBy('position')
+            ->limit(40)
+            ->get());
+    }
+
+    private function loadAwardHighlights(Person $person): void
+    {
+        $person->setRelation('awardNominations', $person->awardNominations()
+            ->select(['movie_award_nominations.id', 'movie_award_nominations.movie_id', 'movie_award_nominations.event_imdb_id', 'movie_award_nominations.award_category_id', 'movie_award_nominations.award_year', 'movie_award_nominations.text', 'movie_award_nominations.is_winner', 'movie_award_nominations.winner_rank', 'movie_award_nominations.position'])
+            ->with([
+                'awardEvent:imdb_id,name',
+                'awardCategory:id,name',
+                'title' => fn ($titleQuery) => $titleQuery
+                    ->selectCatalogCardColumns()
+                    ->withCatalogCardRelations(),
+            ])
+            ->orderByDesc('is_winner')
+            ->orderByDesc('award_year')
+            ->limit(8)
+            ->get());
     }
 }

@@ -70,6 +70,55 @@ class Person extends Model
         ];
     }
 
+    /**
+     * @return list<string>
+     */
+    public static function directoryColumns(): array
+    {
+        return [
+            'name_basics.id',
+            'name_basics.nconst',
+            'name_basics.imdb_id',
+            'name_basics.primaryname',
+            'name_basics.displayName',
+            'name_basics.alternativeNames',
+            'name_basics.primaryProfessions',
+            'name_basics.biography',
+            'name_basics.birthLocation',
+            'name_basics.deathLocation',
+            'name_basics.primaryImage_url',
+            'name_basics.primaryImage_width',
+            'name_basics.primaryImage_height',
+        ];
+    }
+
+    /**
+     * @return array<int|string, mixed>
+     */
+    public static function directoryRelations(): array
+    {
+        return [
+            'personImages:name_basic_id,position,url,width,height,type',
+            'professionTerms:id,name',
+            'meterRanking:name_basic_id,current_rank,change_direction,difference',
+        ];
+    }
+
+    /**
+     * @return array<int|string, mixed>
+     */
+    public static function detailRelations(): array
+    {
+        return [
+            ...self::directoryRelations(),
+            'alternativeNameRecords:name_basic_id,alternative_name,position',
+            'knownForTitles' => fn ($query) => $query
+                ->selectCatalogCardColumns()
+                ->publishedCatalog()
+                ->withCatalogCardRelations(),
+        ];
+    }
+
     public function getRouteKeyName(): string
     {
         return 'slug';
@@ -123,14 +172,66 @@ class Person extends Model
         });
     }
 
+    public function scopeSelectDirectoryColumns(Builder $query): Builder
+    {
+        return $query->select(self::directoryColumns());
+    }
+
+    public function scopeWithDirectoryRelations(Builder $query): Builder
+    {
+        return $query->with(self::directoryRelations());
+    }
+
+    public function scopeWithDirectoryMetrics(Builder $query): Builder
+    {
+        return $query
+            ->withCount(['credits', 'awardNominations'])
+            ->withExists('meterRanking');
+    }
+
+    public function scopeWithDetailRelations(Builder $query): Builder
+    {
+        return $query->with(self::detailRelations());
+    }
+
+    public function scopeInProfession(Builder $query, string $profession): Builder
+    {
+        return $query->whereHas(
+            'professionTerms',
+            fn (Builder $builder) => $builder->where('professions.name', $profession),
+        );
+    }
+
     public function credits(): HasMany
     {
         return $this->hasMany(Credit::class, 'name_basic_id', 'id')->orderBy('position');
     }
 
+    public function relationships(): HasMany
+    {
+        return $this->hasMany(NameRelationship::class, 'name_basic_id', 'id')->orderBy('position');
+    }
+
+    public function relationshipsAbout(): HasMany
+    {
+        return $this->hasMany(NameRelationship::class, 'related_name_basic_id', 'id')->orderBy('position');
+    }
+
     public function professions(): HasMany
     {
         return $this->hasMany(PersonProfession::class, 'name_basic_id', 'id')->orderBy('position');
+    }
+
+    public function knownForTitleLinks(): HasMany
+    {
+        return $this->hasMany(NameBasicKnownForTitle::class, 'name_basic_id', 'id')->orderBy('position');
+    }
+
+    public function knownForTitles(): BelongsToMany
+    {
+        return $this->belongsToMany(Title::class, 'name_basic_known_for_titles', 'name_basic_id', 'title_basic_id', 'id', 'id')
+            ->withPivot('position')
+            ->orderByPivot('position');
     }
 
     public function professionTerms(): BelongsToMany
@@ -295,7 +396,7 @@ class Person extends Model
 
     public function summaryText(): ?string
     {
-        $summary = $this->short_biography ?: $this->biography;
+        $summary = $this->getAttributeFromArray('short_biography') ?: $this->biography;
 
         return filled($summary) ? (string) $summary : null;
     }

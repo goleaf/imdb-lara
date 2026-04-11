@@ -23,17 +23,15 @@ class LoadSeasonDetailsAction
      *     backdrop: mixed,
      *     airedRangeLabel: string|null,
      *     episodeCount: int,
-     *     currentSeasonRuntimeAverage: float|int|null,
+     *     currentSeasonRuntimeAverageLabel: string|null,
      *     seo: PageSeoData
      * }
      */
     public function handle(Title $series, Season $season): array
     {
-        $series->load([
+        $series->loadMissing([
             'seasons:movie_id,season,episode_count',
-            'titleImages:id,movie_id,position,url,width,height,type',
-            'primaryImageRecord:movie_id,url,width,height,type',
-            'statistic:movie_id,aggregate_rating,vote_count',
+            ...Title::catalogHeroRelations(),
         ]);
 
         $season->load([
@@ -41,24 +39,8 @@ class LoadSeasonDetailsAction
                 ->select(['episode_movie_id', 'movie_id', 'season', 'episode_number', 'release_year', 'release_month', 'release_day'])
                 ->with([
                     'title' => fn ($titleQuery) => $titleQuery
-                        ->select([
-                            'movies.id',
-                            'movies.tconst',
-                            'movies.imdb_id',
-                            'movies.primarytitle',
-                            'movies.originaltitle',
-                            'movies.titletype',
-                            'movies.isadult',
-                            'movies.startyear',
-                            'movies.endyear',
-                            'movies.runtimeminutes',
-                        ])
-                        ->with([
-                            'statistic:movie_id,aggregate_rating,vote_count',
-                            'titleImages:id,movie_id,position,url,width,height,type',
-                            'primaryImageRecord:movie_id,url,width,height,type',
-                            'plotRecord:movie_id,plot',
-                        ]),
+                        ->selectCatalogCardColumns()
+                        ->withCatalogHeroRelations(),
                 ])
                 ->orderBy('episode_number'),
         ]);
@@ -108,7 +90,11 @@ class LoadSeasonDetailsAction
             'backdrop' => $backdrop,
             'airedRangeLabel' => $airedRangeLabel,
             'episodeCount' => $episodeRows->count(),
-            'currentSeasonRuntimeAverage' => $episodeRows->avg(fn (Episode $episodeMeta) => $episodeMeta->title?->runtime_minutes),
+            'currentSeasonRuntimeAverageLabel' => Title::formatMinutesLabel(
+                ($currentSeasonRuntimeAverage = $episodeRows->avg(fn (Episode $episodeMeta) => $episodeMeta->title?->runtime_minutes)) !== null
+                    ? (int) round($currentSeasonRuntimeAverage)
+                    : null,
+            ),
             'seo' => new PageSeoData(
                 title: $season->meta_title ?: ($season->name.' · '.$series->name),
                 description: $season->meta_description ?: ($season->summary ?: 'Browse episode records for '.$season->name.' of '.$series->name.'.'),

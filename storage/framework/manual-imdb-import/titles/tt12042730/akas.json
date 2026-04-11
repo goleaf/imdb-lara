@@ -1,0 +1,434 @@
+{
+    "akas": [
+        {
+            "text": "Proyecto Fin del mundo",
+            "country": {
+                "code": "AR",
+                "name": "Argentina"
+            }
+        },
+        {
+            "text": "Der Astronaut - Project Hail Mary",
+            "country": {
+                "code": "AT",
+                "name": "Austria"
+            }
+        },
+        {
+            "text": "Project Hail Mary",
+            "country": {
+                "code": "AU",
+                "name": "Australia"
+            }
+        },
+        {
+            "text": "Devoradores de Estrelas",
+            "country": {
+                "code": "BR",
+                "name": "Brazil"
+            }
+        },
+        {
+            "text": "Project Hail Mary",
+            "country": {
+                "code": "CA",
+                "name": "Canada"
+            },
+            "language": {
+                "code": "eng",
+                "name": "English"
+            }
+        },
+        {
+            "text": "Projet dernière chance",
+            "country": {
+                "code": "CA",
+                "name": "Canada"
+            },
+            "language": {
+                "code": "fra",
+                "name": "French"
+            }
+        },
+        {
+            "text": "Der Astronaut - Project Hail Mary",
+            "country": {
+                "code": "CH",
+                "name": "Switzerland"
+            },
+            "language": {
+                "code": "deu",
+                "name": "German"
+            }
+        },
+        {
+            "text": "Projet Dernière Chance",
+            "country": {
+                "code": "CH",
+                "name": "Switzerland"
+            },
+            "language": {
+                "code": "fra",
+                "name": "French"
+            }
+        },
+        {
+            "text": "Proyecto Fin del mundo",
+            "country": {
+                "code": "CL",
+                "name": "Chile"
+            }
+        },
+        {
+            "text": "拯救计划",
+            "country": {
+                "code": "CN",
+                "name": "China"
+            },
+            "language": {
+                "code": "cmn",
+                "name": "Mandarin Chinese"
+            }
+        },
+        {
+            "text": "Proyecto Fin del Mundo",
+            "country": {
+                "code": "CO",
+                "name": "Colombia"
+            }
+        },
+        {
+            "text": "Αποστολή «Χαίρε Μαρία»",
+            "country": {
+                "code": "CY",
+                "name": "Cyprus"
+            }
+        },
+        {
+            "text": "Spasitel",
+            "country": {
+                "code": "CZ",
+                "name": "Czechia"
+            }
+        },
+        {
+            "text": "Der Astronaut - Project Hail Mary",
+            "country": {
+                "code": "DE",
+                "name": "Germany"
+            }
+        },
+        {
+            "text": "Project Hail Mary",
+            "country": {
+                "code": "DK",
+                "name": "Denmark"
+            }
+        },
+        {
+            "text": "Proyecto Fin del mundo",
+            "country": {
+                "code": "EC",
+                "name": "Ecuador"
+            }
+        },
+        {
+            "text": "Ave Maria",
+            "country": {
+                "code": "EE",
+                "name": "Estonia"
+            }
+        },
+        {
+            "text": "Proyecto Salvación",
+            "country": {
+                "code": "ES",
+                "name": "Spain"
+            }
+        },
+        {
+            "text": "Operaatio Ave Maria",
+            "country": {
+                "code": "FI",
+                "name": "Finland"
+            }
+        },
+        {
+            "text": "Projet Dernière Chance",
+            "country": {
+                "code": "FR",
+                "name": "France"
+            }
+        },
+        {
+            "text": "Project Hail Mary",
+            "country": {
+                "code": "GB",
+                "name": "United Kingdom"
+            }
+        },
+        {
+            "text": "Αποστολή «Χαίρε Μαρία»",
+            "country": {
+                "code": "GR",
+                "name": "Greece"
+            }
+        },
+        {
+            "text": "末日聖母號",
+            "country": {
+                "code": "HK",
+                "name": "Hong Kong (Special Administrative Region of China)"
+            },
+            "language": {
+                "code": "yue",
+                "name": "Yue Chinese"
+            }
+        },
+        {
+            "text": "Projekt spasitelj",
+            "country": {
+                "code": "HR",
+                "name": "Croatia"
+            },
+            "attributes": [
+                "new title"
+            ]
+        },
+        {
+            "text": "A Hail Mary-küldetés",
+            "country": {
+                "code": "HU",
+                "name": "Hungary"
+            }
+        },
+        {
+            "text": "Project Hail Mary",
+            "country": {
+                "code": "IE",
+                "name": "Ireland"
+            },
+            "language": {
+                "code": "eng",
+                "name": "English"
+            }
+        },
+        {
+            "text": "Project Hail Mary",
+            "country": {
+                "code": "IN",
+                "name": "India"
+            },
+            "language": {
+                "code": "eng",
+                "name": "English"
+            }
+        },
+        {
+            "text": "L'Ultima Missione: Project Hail Mary",
+            "country": {
+                "code": "IT",
+                "name": "Italy"
+            }
+        },
+        {
+            "text": "プロジェクト・ヘイル・メアリー",
+            "country": {
+                "code": "JP",
+                "name": "Japan"
+            },
+            "language": {
+                "code": "jpn",
+                "name": "Japanese"
+            }
+        },
+        {
+            "text": "Проект «Конец света»",
+            "country": {
+                "code": "KZ",
+                "name": "Kazakhstan"
+            },
+            "language": {
+                "code": "rus",
+                "name": "Russian"
+            }
+        },
+        {
+            "text": "Projektas Sveika, Marija",
+            "country": {
+                "code": "LT",
+                "name": "Lithuania"
+            }
+        },
+        {
+            "text": "Projekts Ave Maria",
+            "country": {
+                "code": "LV",
+                "name": "Latvia"
+            }
+        },
+        {
+            "text": "Проектот Очајнички обид",
+            "country": {
+                "code": "MK",
+                "name": "North Macedonia (Republic of North Macedonia)"
+            }
+        },
+        {
+            "text": "Proyecto Fin del mundo",
+            "country": {
+                "code": "MX",
+                "name": "Mexico"
+            }
+        },
+        {
+            "text": "Project Hail Mary",
+            "country": {
+                "code": "NZ",
+                "name": "New Zealand"
+            },
+            "language": {
+                "code": "eng",
+                "name": "English"
+            }
+        },
+        {
+            "text": "Proyecto Fin del mundo",
+            "country": {
+                "code": "PE",
+                "name": "Peru"
+            }
+        },
+        {
+            "text": "Projekt Hail Mary",
+            "country": {
+                "code": "PL",
+                "name": "Poland"
+            }
+        },
+        {
+            "text": "Projeto Hail Mary",
+            "country": {
+                "code": "PT",
+                "name": "Portugal"
+            }
+        },
+        {
+            "text": "Proiectul Hail Mary",
+            "country": {
+                "code": "RO",
+                "name": "Romania"
+            }
+        },
+        {
+            "text": "Пројекат Очајнички покушај",
+            "country": {
+                "code": "RS",
+                "name": "Serbia"
+            }
+        },
+        {
+            "text": "Проект «Конец света»",
+            "country": {
+                "code": "RU",
+                "name": "Russian Federation"
+            }
+        },
+        {
+            "text": "Project Hail Mary",
+            "country": {
+                "code": "SE",
+                "name": "Sweden"
+            }
+        },
+        {
+            "text": "Projekt Zadnje upanje",
+            "country": {
+                "code": "SI",
+                "name": "Slovenia"
+            }
+        },
+        {
+            "text": "Posledná šanca",
+            "country": {
+                "code": "SK",
+                "name": "Slovakia"
+            }
+        },
+        {
+            "text": "Kurtuluş Projesi",
+            "country": {
+                "code": "TR",
+                "name": "Turkey"
+            },
+            "language": {
+                "code": "tur",
+                "name": "Turkish"
+            }
+        },
+        {
+            "text": "極限返航",
+            "country": {
+                "code": "TW",
+                "name": "Taiwan (Province of China)"
+            }
+        },
+        {
+            "text": "Проєкт Аве Марія",
+            "country": {
+                "code": "UA",
+                "name": "Ukraine"
+            }
+        },
+        {
+            "text": "Project Hail Mary",
+            "country": {
+                "code": "US",
+                "name": "United States"
+            }
+        },
+        {
+            "text": "Proyecto Fin del mundo",
+            "country": {
+                "code": "US",
+                "name": "United States"
+            },
+            "language": {
+                "code": "spa",
+                "name": "Spanish"
+            }
+        },
+        {
+            "text": "Proyecto Fin del mundo",
+            "country": {
+                "code": "UY",
+                "name": "Uruguay"
+            }
+        },
+        {
+            "text": "Proyecto Fin del mundo",
+            "country": {
+                "code": "VE",
+                "name": "Venezuela"
+            }
+        },
+        {
+            "text": "Thoát Khỏi Tận Thế",
+            "country": {
+                "code": "VN",
+                "name": "Vietnam"
+            }
+        },
+        {
+            "text": "Project Hail Mary",
+            "country": {
+                "code": "ZA",
+                "name": "South Africa"
+            },
+            "language": {
+                "code": "eng",
+                "name": "English"
+            }
+        }
+    ]
+}

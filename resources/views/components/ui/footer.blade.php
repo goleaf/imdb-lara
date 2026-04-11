@@ -1,120 +1,47 @@
 @php
     $currentYear = now()->year;
-
-    $exploreLinks = [
-        ['label' => 'Home', 'href' => route('public.home'), 'icon' => 'home'],
-        ['label' => 'Discovery', 'href' => route('public.discover'), 'icon' => 'sparkles'],
-        ['label' => 'Browse Titles', 'href' => route('public.titles.index'), 'icon' => 'film'],
-        ['label' => 'People', 'href' => route('public.people.index'), 'icon' => 'users'],
-        ['label' => 'Search', 'href' => route('public.search'), 'icon' => 'magnifying-glass'],
-    ];
-
-    if (\Illuminate\Support\Facades\Route::has('public.movies.index')) {
-        array_splice($exploreLinks, 3, 0, [[
-            'label' => 'Movies',
-            'href' => route('public.movies.index'),
-            'icon' => 'film',
-        ]]);
-    }
-
-    if (\Illuminate\Support\Facades\Route::has('public.series.index')) {
-        array_splice($exploreLinks, 4, 0, [[
-            'label' => 'TV Shows',
-            'href' => route('public.series.index'),
-            'icon' => 'tv',
-        ]]);
-    }
-
-    $signalLinks = [];
-
-    if (\Illuminate\Support\Facades\Route::has('public.trending')) {
-        $signalLinks[] = ['label' => 'Trending', 'href' => route('public.trending'), 'icon' => 'fire'];
-    }
-
-    if (\Illuminate\Support\Facades\Route::has('public.trailers.latest')) {
-        $signalLinks[] = ['label' => 'Trailers', 'href' => route('public.trailers.latest'), 'icon' => 'play'];
-    }
-
-    if (\Illuminate\Support\Facades\Route::has('public.awards.index')) {
-        $signalLinks[] = ['label' => 'Awards', 'href' => route('public.awards.index'), 'icon' => 'trophy'];
-    }
-
-    $signalLinks[] = ['label' => 'Browse by Genre', 'href' => route('public.discover'), 'icon' => 'tag'];
-    $signalLinks[] = ['label' => 'Browse by Year', 'href' => route('public.titles.index'), 'icon' => 'calendar-days'];
-    $catalogLinks = collect([
-        \Illuminate\Support\Facades\Route::has('public.rankings.movies')
-            ? ['label' => 'Top Movies', 'href' => route('public.rankings.movies'), 'icon' => 'star']
-            : null,
-        \Illuminate\Support\Facades\Route::has('public.rankings.series')
-            ? ['label' => 'Top Series', 'href' => route('public.rankings.series'), 'icon' => 'tv']
-            : null,
-        \Illuminate\Support\Facades\Route::has('public.search')
-            ? ['label' => 'Advanced Search', 'href' => route('public.search'), 'icon' => 'magnifying-glass']
-            : null,
-        ['label' => 'Discover First', 'href' => route('public.discover'), 'icon' => 'sparkles'],
-    ])->filter()->values()->all();
-
-    $footerSections = [
-        ['heading' => 'Explore', 'links' => $exploreLinks],
-        ['heading' => 'Live Routes', 'links' => $signalLinks],
-        ['heading' => 'Catalog Paths', 'links' => $catalogLinks],
-    ];
+    $footerData = $footerData ?? [];
 @endphp
 
 <footer {{ $attributes->class('mt-10 w-full border-t border-white/8 bg-[radial-gradient(circle_at_top_right,rgba(251,191,36,0.12),transparent_20%),radial-gradient(circle_at_bottom_left,rgba(14,165,233,0.12),transparent_24%),linear-gradient(180deg,rgba(18,18,18,0.98),rgba(6,6,6,1))]') }} data-slot="site-footer">
     <div class="mx-auto w-full max-w-7xl px-4 py-8 md:px-6 md:py-10">
-        <div class="grid gap-8 xl:grid-cols-[minmax(0,1.2fr)_repeat(3,minmax(0,0.75fr))]">
-            <div class="space-y-4">
-                <x-ui.brand
-                    :href="route('public.home')"
-                    name="Screenbase"
-                    class="justify-start text-left"
-                />
+        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            @foreach ($footerData['sections'] as $section)
+                <section class="rounded-[1.45rem] border border-white/10 bg-white/[0.03] p-5">
+                    <div class="space-y-4">
+                        <div class="space-y-2">
+                            <div class="inline-flex items-center gap-2 text-[0.62rem] font-semibold uppercase tracking-[0.22em] text-[#b7aa96]">
+                                <x-ui.icon name="chevron-right" class="size-4 text-[#d6b574]" />
+                                <span>{{ $section['heading'] }}</span>
+                            </div>
 
-                <x-ui.text class="max-w-md text-sm leading-7 text-neutral-300">
-                    Discover titles, people, genres, and release years from one public catalog built directly on the imported IMDb schema.
-                </x-ui.text>
+                            <x-ui.text class="text-sm leading-6 text-[#bfb3a4]">
+                                {{ $section['description'] }}
+                            </x-ui.text>
+                        </div>
 
-                <div class="flex flex-wrap gap-2">
-                    <x-ui.badge variant="outline" color="neutral" icon="sparkles">Discovery</x-ui.badge>
-                    <x-ui.badge variant="outline" color="neutral" icon="film">Titles</x-ui.badge>
-                    <x-ui.badge variant="outline" color="neutral" icon="users">People</x-ui.badge>
-                </div>
-            </div>
-
-            @foreach ($footerSections as $section)
-                <div class="space-y-3">
-                    <div class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-neutral-400">
-                        <x-ui.icon name="chevron-right" class="size-4" />
-                        <span>{{ $section['heading'] }}</span>
+                        <div class="grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
+                            @foreach ($section['links'] as $link)
+                                <x-ui.link
+                                    :href="$link['href']"
+                                    variant="soft"
+                                    :primary="false"
+                                    :icon="$link['icon']"
+                                    class="rounded-full border border-white/8 bg-white/[0.02] px-3 py-2 text-sm !text-[#f1ebdf] transition hover:!text-white hover:border-white/16 hover:bg-white/[0.05] no-underline"
+                                >
+                                    {{ $link['label'] }}
+                                </x-ui.link>
+                            @endforeach
+                        </div>
                     </div>
-
-                    <div class="grid gap-2">
-                        @foreach ($section['links'] as $link)
-                            <x-ui.link
-                                :href="$link['href']"
-                                variant="soft"
-                                :primary="false"
-                                :icon="$link['icon']"
-                                class="text-sm"
-                            >
-                                {{ $link['label'] }}
-                            </x-ui.link>
-                        @endforeach
-                    </div>
-                </div>
+                </section>
             @endforeach
         </div>
 
-        <div class="mt-6 flex flex-col gap-3 border-t border-white/8 pt-4 text-sm text-neutral-400 md:flex-row md:items-center md:justify-between">
-            <x-ui.text class="text-sm text-neutral-400">
-                © {{ $currentYear }} Screenbase. Built for title discovery, trailer browsing, awards, and IMDb-style catalog exploration.
+        <div class="mt-5 border-t border-white/8 pt-4 text-sm text-neutral-400">
+            <x-ui.text class="w-full text-sm leading-6 text-[#b2a796]">
+                © {{ $currentYear }} Screenbase. {{ $footerData['legalCopy'] }}
             </x-ui.text>
-
-            <div class="flex flex-wrap gap-3">
-                <x-ui.badge variant="outline" color="neutral" icon="code-bracket">Laravel 12</x-ui.badge>
-                <x-ui.badge variant="outline" color="neutral" icon="bolt">Livewire 4</x-ui.badge>
-            </div>
         </div>
     </div>
 </footer>

@@ -43,4 +43,11 @@ class MovieCompanyCreditCountry extends ImdbModel
     {
         return $this->belongsTo(MovieCompanyCredit::class, 'movie_company_credit_id', 'id');
     }
+
+    public function resolvedCountryLabel(): ?string
+    {
+        $fallbackName = $this->relationLoaded('country') ? $this->country?->name : null;
+
+        return Country::labelForCode($this->country_code, $fallbackName);
+    }
 }

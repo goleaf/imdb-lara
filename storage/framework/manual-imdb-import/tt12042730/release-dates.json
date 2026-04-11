@@ -1,0 +1,1158 @@
+{
+    "releaseDates": [
+        {
+            "country": {
+                "code": "GB",
+                "name": "United Kingdom"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 9
+            },
+            "attributes": [
+                "limited"
+            ]
+        },
+        {
+            "country": {
+                "code": "BE",
+                "name": "Belgium"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 18
+            }
+        },
+        {
+            "country": {
+                "code": "CH",
+                "name": "Switzerland"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 18
+            }
+        },
+        {
+            "country": {
+                "code": "FR",
+                "name": "France"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 18
+            }
+        },
+        {
+            "country": {
+                "code": "GP",
+                "name": "Guadeloupe"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 18
+            }
+        },
+        {
+            "country": {
+                "code": "KR",
+                "name": "Republic of Korea"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 18
+            }
+        },
+        {
+            "country": {
+                "code": "LA",
+                "name": "Lao People's Democratic Republic"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 18
+            }
+        },
+        {
+            "country": {
+                "code": "LU",
+                "name": "Luxembourg"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 18
+            }
+        },
+        {
+            "country": {
+                "code": "MA",
+                "name": "Morocco"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 18
+            }
+        },
+        {
+            "country": {
+                "code": "PH",
+                "name": "Philippines"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 18
+            }
+        },
+        {
+            "country": {
+                "code": "TN",
+                "name": "Tunisia"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 18
+            }
+        },
+        {
+            "country": {
+                "code": "TW",
+                "name": "Taiwan (Province of China)"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 18
+            }
+        },
+        {
+            "country": {
+                "code": "AE",
+                "name": "United Arab Emirates"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "AG",
+                "name": "Antigua and Barbuda"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "AL",
+                "name": "Albania"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "AM",
+                "name": "Armenia"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "AR",
+                "name": "Argentina"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "AU",
+                "name": "Australia"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "AW",
+                "name": "Aruba"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "BA",
+                "name": "Bosnia and Herzegovina"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "BH",
+                "name": "Bahrain"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "BO",
+                "name": "Bolivia"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "CL",
+                "name": "Chile"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "CO",
+                "name": "Colombia"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "CR",
+                "name": "Costa Rica"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "CW",
+                "name": "Curacao"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "CZ",
+                "name": "Czechia"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "DE",
+                "name": "Germany"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "DK",
+                "name": "Denmark"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "DO",
+                "name": "Dominican Republic"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "EC",
+                "name": "Ecuador"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "EG",
+                "name": "Egypt"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "FO",
+                "name": "Faroe Islands"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "GE",
+                "name": "Georgia"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "GR",
+                "name": "Greece"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "GT",
+                "name": "Guatemala"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "GY",
+                "name": "Guyana"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "HK",
+                "name": "Hong Kong (Special Administrative Region of China)"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "HN",
+                "name": "Honduras"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "HR",
+                "name": "Croatia"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "HU",
+                "name": "Hungary"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "IL",
+                "name": "Israel"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "IQ",
+                "name": "Iraq"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "IS",
+                "name": "Iceland"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "IT",
+                "name": "Italy"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "KG",
+                "name": "Kyrgyzstan"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "KH",
+                "name": "Cambodia"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "KN",
+                "name": "Saint Kitts and Nevis"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "KW",
+                "name": "Kuwait"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "KZ",
+                "name": "Kazakhstan"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "LB",
+                "name": "Lebanon"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "LC",
+                "name": "Saint Lucia"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "ME",
+                "name": "Montenegro"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "MX",
+                "name": "Mexico"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "NI",
+                "name": "Nicaragua"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "NL",
+                "name": "Netherlands"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "NZ",
+                "name": "New Zealand"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "OM",
+                "name": "Oman"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "PA",
+                "name": "Panama"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "PE",
+                "name": "Peru"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "PR",
+                "name": "Puerto Rico"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "PT",
+                "name": "Portugal"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "PY",
+                "name": "Paraguay"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "QA",
+                "name": "Qatar"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "RS",
+                "name": "Serbia"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "SA",
+                "name": "Saudi Arabia"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "SG",
+                "name": "Singapore"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "SI",
+                "name": "Slovenia"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "SK",
+                "name": "Slovakia"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "TH",
+                "name": "Thailand"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "TT",
+                "name": "Trinidad and Tobago"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "UA",
+                "name": "Ukraine"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "UY",
+                "name": "Uruguay"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "UZ",
+                "name": "Uzbekistan"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "VE",
+                "name": "Venezuela"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 19
+            }
+        },
+        {
+            "country": {
+                "code": "AT",
+                "name": "Austria"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 20
+            }
+        },
+        {
+            "country": {
+                "code": "BR",
+                "name": "Brazil"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 20
+            }
+        },
+        {
+            "country": {
+                "code": "CA",
+                "name": "Canada"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 20
+            }
+        },
+        {
+            "country": {
+                "code": "CN",
+                "name": "China"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 20
+            }
+        },
+        {
+            "country": {
+                "code": "EE",
+                "name": "Estonia"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 20
+            }
+        },
+        {
+            "country": {
+                "code": "FI",
+                "name": "Finland"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 20
+            }
+        },
+        {
+            "country": {
+                "code": "GB",
+                "name": "United Kingdom"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 20
+            }
+        },
+        {
+            "country": {
+                "code": "GU",
+                "name": "Guam"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 20
+            }
+        },
+        {
+            "country": {
+                "code": "IE",
+                "name": "Ireland"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 20
+            }
+        },
+        {
+            "country": {
+                "code": "IN",
+                "name": "India"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 20
+            }
+        },
+        {
+            "country": {
+                "code": "JP",
+                "name": "Japan"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 20
+            }
+        },
+        {
+            "country": {
+                "code": "LT",
+                "name": "Lithuania"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 20
+            }
+        },
+        {
+            "country": {
+                "code": "LV",
+                "name": "Latvia"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 20
+            }
+        },
+        {
+            "country": {
+                "code": "MN",
+                "name": "Mongolia"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 20
+            }
+        },
+        {
+            "country": {
+                "code": "NO",
+                "name": "Norway"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 20
+            }
+        },
+        {
+            "country": {
+                "code": "PL",
+                "name": "Poland"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 20
+            }
+        },
+        {
+            "country": {
+                "code": "RO",
+                "name": "Romania"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 20
+            }
+        },
+        {
+            "country": {
+                "code": "SE",
+                "name": "Sweden"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 20
+            }
+        },
+        {
+            "country": {
+                "code": "SN",
+                "name": "Senegal"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 20
+            }
+        },
+        {
+            "country": {
+                "code": "TR",
+                "name": "Turkey"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 20
+            }
+        },
+        {
+            "country": {
+                "code": "US",
+                "name": "United States"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 20
+            }
+        },
+        {
+            "country": {
+                "code": "VN",
+                "name": "Vietnam"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 20
+            }
+        },
+        {
+            "country": {
+                "code": "ZA",
+                "name": "South Africa"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 20
+            }
+        },
+        {
+            "country": {
+                "code": "BY",
+                "name": "Belarus"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 26
+            }
+        },
+        {
+            "country": {
+                "code": "MY",
+                "name": "Malaysia"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 26
+            }
+        },
+        {
+            "country": {
+                "code": "AD",
+                "name": "Andorra"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 27
+            }
+        },
+        {
+            "country": {
+                "code": "ES",
+                "name": "Spain"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 27
+            }
+        },
+        {
+            "country": {
+                "code": "MT",
+                "name": "Malta"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 3,
+                "day": 27
+            }
+        },
+        {
+            "country": {
+                "code": "ID",
+                "name": "Indonesia"
+            },
+            "releaseDate": {
+                "year": 2026,
+                "month": 4,
+                "day": 8
+            }
+        }
+    ]
+}

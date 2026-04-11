@@ -1,0 +1,47 @@
+{
+    "images": [
+        {
+            "url": "https://m.media-amazon.com/images/M/MV5BM2YwNTNlMGMtNmQwYS00OWExLWEwOGYtNTA5ZDQ2ZDA5ODlhXkEyXkFqcGc@._V1_.jpg",
+            "width": 4000,
+            "height": 6000,
+            "type": "publicity"
+        },
+        {
+            "url": "https://m.media-amazon.com/images/M/MV5BZTc3Njc1ZTctMzYyMS00OWQ4LWI5YjUtNTlmNzE5YmU4MzQ2XkEyXkFqcGc@._V1_.jpg",
+            "width": 2123,
+            "height": 1060,
+            "type": "publicity"
+        },
+        {
+            "url": "https://m.media-amazon.com/images/M/MV5BMTA2ZDExZWItZDc0ZC00YTUyLThjOTQtM2JhZGJjYjE5YTA0XkEyXkFqcGc@._V1_.jpg",
+            "width": 8640,
+            "height": 5760,
+            "type": "still_frame"
+        },
+        {
+            "url": "https://m.media-amazon.com/images/M/MV5BNjI1OTIwZjgtZWI4OS00M2FmLWE1YzktZDdjODA2NmQ1YjZkXkEyXkFqcGc@._V1_.jpg",
+            "width": 4153,
+            "height": 5338,
+            "type": "publicity"
+        },
+        {
+            "url": "https://m.media-amazon.com/images/M/MV5BNDQzZmE1OWYtN2EwYS00OTUxLWI4NmYtZTE4Y2VjNTNkNmY3XkEyXkFqcGc@._V1_.jpg",
+            "width": 4000,
+            "height": 6000,
+            "type": "publicity"
+        },
+        {
+            "url": "https://m.media-amazon.com/images/M/MV5BODdhOGUzMzItNGI2Mi00Y2M3LTgwYzgtYTZjNjA2Zjc3NGEyXkEyXkFqcGc@._V1_CR182,18,1950,2925_.jpg",
+            "width": 1950,
+            "height": 2925,
+            "type": "publicity"
+        },
+        {
+            "url": "https://m.media-amazon.com/images/M/MV5BM2MwZWRjMWUtODExNy00Mjg2LTgxODMtYWJkMjkyYzRhZDVlXkEyXkFqcGc@._V1_.jpg",
+            "width": 4000,
+            "height": 6000,
+            "type": "publicity"
+        }
+    ],
+    "totalCount": 7
+}

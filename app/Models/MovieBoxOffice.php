@@ -59,6 +59,11 @@ class MovieBoxOffice extends ImdbModel
         return $this->belongsTo(Movie::class, 'movie_id', 'id');
     }
 
+    public function title(): BelongsTo
+    {
+        return $this->belongsTo(Title::class, 'movie_id', 'id');
+    }
+
     public function openingWeekendGross(): BelongsTo
     {
         return $this->belongsTo(Currency::class, 'opening_weekend_gross_currency_code', 'code');

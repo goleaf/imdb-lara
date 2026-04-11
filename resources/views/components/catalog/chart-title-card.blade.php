@@ -7,8 +7,26 @@
     'movementNote' => 'vs popularity',
 ])
 
+@php
+    $titleUrl = route('public.titles.show', $title);
+    $poster = $title->preferredPoster();
+    $summaryText = $title->summaryText();
+    $genres = $title->resolvedGenres();
+    $releaseYear = $title->release_year;
+    $runtimeLabel = $title->runtimeMinutesLabel();
+    $originalTitle = filled($title->original_name) && $title->original_name !== $title->name
+        ? $title->original_name
+        : null;
+    $voteLabel = $title->displayRatingCount() > 0 ? number_format($title->displayRatingCount()).' votes' : null;
+    $comparisonToken = filled($comparisonLabel) && $comparisonLabel !== $voteLabel
+        ? (string) $comparisonLabel
+        : null;
+    $originCountryCode = $title->originCountryCode();
+    $originCountryLabel = $title->originCountryLabel();
+@endphp
+
 <x-ui.card class="sb-chart-card !max-w-none overflow-hidden rounded-[1.45rem] p-3.5" data-slot="chart-title-card">
-    <div class="grid gap-4 sm:grid-cols-[4.8rem_5.8rem_minmax(0,1fr)] xl:grid-cols-[5.4rem_6.4rem_minmax(0,1fr)_auto] xl:items-start">
+    <div class="grid gap-4 sm:grid-cols-[4.8rem_5.8rem_minmax(0,1fr)] xl:grid-cols-[5.2rem_6.6rem_minmax(0,1fr)] xl:items-start">
         <div class="sb-chart-rank-block">
             <div class="sb-chart-rank-number" data-slot="chart-rank-number">
                 {{ str_pad((string) $rank, 2, '0', STR_PAD_LEFT) }}
@@ -18,17 +36,19 @@
                 <x-ui.icon :name="match ($movementDirection) { 'up' => 'arrow-trending-up', 'down' => 'arrow-trending-down', default => 'minus' }" class="size-3.5" />
                 <span>{{ match ($movementDirection) { 'up' => 'Up '.$movementAmount, 'down' => 'Down '.$movementAmount, default => 'Steady' } }}</span>
             </div>
-            <div class="sb-chart-movement-note">{{ $movementNote }}</div>
+            @if (filled($movementNote))
+                <div class="sb-chart-movement-note">{{ $movementNote }}</div>
+            @endif
         </div>
 
         <a
-            href="{{ route('public.titles.show', $title) }}"
+            href="{{ $titleUrl }}"
             class="group sb-chart-poster overflow-hidden rounded-[1rem]"
         >
-            @if ($title->preferredPoster())
+            @if ($poster)
                 <img
-                    src="{{ $title->preferredPoster()->url }}"
-                    alt="{{ $title->preferredPoster()->alt_text ?: $title->name }}"
+                    src="{{ $poster->url }}"
+                    alt="{{ $poster->accessibleAltText($title->name) }}"
                     class="aspect-[2/3] w-full object-cover transition duration-500 group-hover:scale-[1.03]"
                     loading="lazy"
                 >
@@ -39,69 +59,115 @@
             @endif
         </a>
 
-        <div class="min-w-0 space-y-3">
-            <div class="space-y-2">
-                <div class="sb-chart-meta">
-                    <span class="sb-chart-meta-token">
-                        <x-ui.icon :name="$title->typeIcon()" class="size-3" />
-                        {{ $title->typeLabel() }}
-                    </span>
-
-                    @if ($title->release_year)
+        <div class="min-w-0 space-y-4">
+            <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                <div class="min-w-0 flex-1 space-y-3">
+                    <div class="sb-chart-meta">
                         <span class="sb-chart-meta-token">
-                            <x-ui.icon name="calendar-days" class="size-3" />
-                            {{ $title->release_year }}
+                            <x-ui.icon :name="$title->typeIcon()" class="size-3" />
+                            {{ $title->typeLabel() }}
                         </span>
+
+                        @if ($releaseYear)
+                            <a href="{{ route('public.years.show', ['year' => $releaseYear]) }}" class="sb-chart-meta-token sb-chart-meta-token--interactive">
+                                <x-ui.icon name="calendar-days" class="size-3" />
+                                {{ $releaseYear }}
+                            </a>
+                        @endif
+
+                        @if (filled($runtimeLabel))
+                            <span class="sb-chart-meta-token">
+                                <x-ui.icon name="clock" class="size-3" />
+                                {{ $runtimeLabel }}
+                            </span>
+                        @endif
+
+                        @if (filled($originCountryCode) && filled($originCountryLabel))
+                            <span class="sb-chart-meta-token">
+                                <x-ui.flag type="country" :code="$originCountryCode" class="size-3.5" />
+                                {{ $originCountryLabel }}
+                            </span>
+                        @endif
+                    </div>
+
+                    <div class="space-y-2">
+                        <x-ui.heading level="h3" size="md" class="sb-chart-title">
+                            <a href="{{ $titleUrl }}" class="hover:opacity-80">
+                                {{ $title->name }}
+                            </a>
+                        </x-ui.heading>
+
+                        @if (filled($originalTitle))
+                            <div class="sb-chart-original-title">Original title: {{ $originalTitle }}</div>
+                        @endif
+
+                        @if (filled($summaryText))
+                            <x-ui.text class="sb-chart-summary">
+                                {{ str($summaryText)->limit(210) }}
+                            </x-ui.text>
+                        @endif
+                    </div>
+                </div>
+
+                <div class="sb-chart-metric-grid">
+                    @if ($title->displayAverageRating())
+                        <div class="sb-chart-metric sb-chart-metric--accent">
+                            <div class="sb-chart-metric-label">Rating</div>
+                            <div class="sb-chart-metric-value">
+                                <x-ui.icon name="star" class="size-3.5" />
+                                {{ number_format($title->displayAverageRating(), 1) }}
+                            </div>
+                        </div>
+                    @endif
+
+                    @if (filled($voteLabel))
+                        <div class="sb-chart-metric">
+                            <div class="sb-chart-metric-label">Audience</div>
+                            <div class="sb-chart-metric-value">{{ $voteLabel }}</div>
+                        </div>
+                    @endif
+
+                    @if (filled($comparisonToken))
+                        <div class="sb-chart-metric">
+                            <div class="sb-chart-metric-label">Signal</div>
+                            <div class="sb-chart-metric-value">
+                                <x-ui.icon name="sparkles" class="size-3.5" />
+                                {{ $comparisonToken }}
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            @if ($genres->isNotEmpty())
+                <div class="sb-chart-genre-links">
+                    @foreach ($genres as $genre)
+                        <a href="{{ route('public.genres.show', $genre) }}" class="sb-chart-genre-link">
+                            {{ $genre->name }}
+                        </a>
+                    @endforeach
+                </div>
+            @endif
+
+            <div class="sb-chart-footer">
+                <div class="flex flex-wrap items-center gap-2.5">
+                    @if (filled($movementNote))
+                        <span class="sb-chart-footer-note">{{ $movementNote }}</span>
+                    @endif
+
+                    @if ($comparisonToken)
+                        <span class="sb-chart-footer-separator">•</span>
+                    @endif
+
+                    @if (filled($comparisonToken))
+                        <span class="sb-chart-footer-note">{{ $comparisonToken }}</span>
                     @endif
                 </div>
 
-                <x-ui.heading level="h3" size="md" class="sb-chart-title">
-                    <a href="{{ route('public.titles.show', $title) }}" class="hover:opacity-80">
-                        {{ $title->name }}
-                    </a>
-                </x-ui.heading>
+                <x-ui.button.light-action :href="$titleUrl" icon="film">
+                    View title
+                </x-ui.button.light-action>
             </div>
-
-            <div class="sb-chart-stat-row">
-                @if ($title->displayAverageRating())
-                    <span class="sb-chart-stat sb-chart-stat--accent">
-                        <x-ui.icon name="star" class="size-3.5" />
-                        {{ number_format($title->displayAverageRating(), 1) }}
-                    </span>
-                @endif
-
-                @if ($title->displayRatingCount())
-                    <span class="sb-chart-stat">{{ number_format($title->displayRatingCount()) }} votes</span>
-                @endif
-
-                @if (filled($comparisonLabel))
-                    <span class="sb-chart-stat">
-                        <x-ui.icon name="globe-alt" class="size-3.5" />
-                        {{ $comparisonLabel }}
-                    </span>
-                @endif
-            </div>
-
-            <div class="sb-chart-secondary-meta">
-                @if ($title->previewGenres(2)->isNotEmpty())
-                    <span>{{ $title->previewGenres(2)->pluck('name')->join(' · ') }}</span>
-                @endif
-                @if ($title->runtime_minutes)
-                    <span>{{ $title->runtime_minutes }} min</span>
-                @endif
-                @if ($title->originCountryCode())
-                    <span class="inline-flex items-center gap-2">
-                        <x-ui.flag type="country" :code="$title->originCountryCode()" class="size-4" />
-                        <span>{{ $title->originCountryCode() }}</span>
-                    </span>
-                @endif
-            </div>
-        </div>
-
-        <div class="hidden xl:flex xl:justify-end">
-            <x-ui.link :href="route('public.titles.show', $title)" variant="ghost" iconAfter="arrow-right">
-                View
-            </x-ui.link>
         </div>
     </div>
 </x-ui.card>

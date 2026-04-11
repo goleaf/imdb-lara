@@ -1,10 +1,18 @@
 <div>
 @island(name: 'people-browser-page')
-    @php
-        $view = $this->viewData;
-    @endphp
-
 <div class="space-y-4" data-slot="people-browser-island">
+    @if ($this->viewData['isCatalogUnavailable'])
+        <x-ui.card class="sb-results-shell !max-w-none rounded-[1.6rem] p-4 sm:p-5" data-slot="people-browser-status">
+            <div class="space-y-2">
+                <div class="sb-page-kicker">Catalog unavailable</div>
+                <x-ui.heading level="h2" size="md">{{ $this->viewData['statusHeading'] }}</x-ui.heading>
+                <x-ui.text class="text-sm text-neutral-600 dark:text-neutral-300">
+                    {{ $this->viewData['statusText'] }}
+                </x-ui.text>
+            </div>
+        </x-ui.card>
+    @endif
+
     <x-ui.card class="sb-filter-shell !max-w-none rounded-[1.6rem] p-5">
         <div class="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.7fr)_minmax(0,0.7fr)]">
             <x-ui.field>
@@ -27,7 +35,7 @@
                     placeholder="All professions"
                     clearable
                 >
-                    @foreach ($view['professions'] as $professionOption)
+                    @foreach ($this->viewData['professions'] as $professionOption)
                         <x-ui.combobox.option
                             wire:key="people-profession-{{ str($professionOption)->slug()->value() }}"
                             value="{{ $professionOption }}"
@@ -47,7 +55,7 @@
                     size="sm"
                     placeholder="Sort people"
                 >
-                    @foreach ($view['sortOptions'] as $sortOption)
+                    @foreach ($this->viewData['sortOptions'] as $sortOption)
                         <x-ui.combobox.option
                             wire:key="people-sort-{{ $sortOption['value'] }}"
                             value="{{ $sortOption['value'] }}"
@@ -76,17 +84,19 @@
 
     <div wire:loading.remove class="sb-results-shell space-y-4 rounded-[1.6rem] p-4 sm:p-5">
         <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            @forelse ($view['people'] as $person)
-                <x-catalog.person-card :person="$person" />
+            @forelse ($this->viewData['people'] as $person)
+                <div wire:key="people-browser-{{ $person->id }}">
+                    <x-catalog.person-card :person="$person" />
+                </div>
             @empty
                 <div class="sm:col-span-2 xl:col-span-3">
                     <x-ui.empty class="rounded-box border border-dashed border-black/10 bg-white dark:border-white/10 dark:bg-neutral-900">
                         <x-ui.empty.media>
                             <x-ui.icon name="users" class="size-8 text-neutral-400 dark:text-neutral-500" />
                         </x-ui.empty.media>
-                        <x-ui.heading level="h3">No people match the current filters.</x-ui.heading>
+                        <x-ui.heading level="h3">{{ $this->viewData['emptyHeading'] }}</x-ui.heading>
                         <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
-                            Adjust the keyword or profession filter to widen the directory.
+                            {{ $this->viewData['emptyText'] }}
                         </x-ui.text>
                     </x-ui.empty>
                 </div>
@@ -94,7 +104,7 @@
         </div>
 
         <div>
-            {{ $view['people']->links() }}
+            {{ $this->viewData['people']->links() }}
         </div>
     </div>
 </div>

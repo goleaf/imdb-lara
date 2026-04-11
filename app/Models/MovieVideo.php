@@ -47,6 +47,11 @@ class MovieVideo extends ImdbModel
         return $this->belongsTo(Movie::class, 'movie_id', 'id');
     }
 
+    public function title(): BelongsTo
+    {
+        return $this->belongsTo(Title::class, 'movie_id', 'id');
+    }
+
     public function videoType(): BelongsTo
     {
         return $this->belongsTo(VideoType::class, 'video_type_id', 'id');

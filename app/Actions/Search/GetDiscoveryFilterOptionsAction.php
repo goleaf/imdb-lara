@@ -3,7 +3,7 @@
 namespace App\Actions\Search;
 
 use App\Enums\TitleType;
-use App\Models\Genre;
+use App\Models\InterestCategory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
 
@@ -17,6 +17,7 @@ class GetDiscoveryFilterOptionsAction
      * @return array{
      *     countries: list<array{value: string, label: string}>,
      *     genres: Collection<int, Genre>,
+     *     interestCategories: Collection<int, InterestCategory>,
      *     languages: list<array{value: string, label: string}>,
      *     titleTypes: list<TitleType>,
      *     minimumRatings: list<int>,
@@ -37,7 +38,8 @@ class GetDiscoveryFilterOptionsAction
 
                 return [
                     'countries' => $searchFilterOptions['countries'],
-                    'genres' => Genre::query()->select(['id', 'name'])->orderBy('name')->get(),
+                    'genres' => $searchFilterOptions['genres'],
+                    'interestCategories' => $searchFilterOptions['interestCategories'],
                     'languages' => $searchFilterOptions['languages'],
                     'titleTypes' => TitleType::cases(),
                     'minimumRatings' => range(10, 1),

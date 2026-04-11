@@ -8,17 +8,22 @@ use Illuminate\Database\Eloquent\Builder;
 class BuildPublicInterestCategoryIndexQueryAction
 {
     /**
-     * @param  array{search?: string, sort?: string}  $filters
+     * @param  array{search?: string, showImages?: bool, sort?: string}  $filters
      */
     public function handle(array $filters = []): Builder
     {
         $search = trim((string) ($filters['search'] ?? ''));
+        $showImages = (bool) ($filters['showImages'] ?? false);
         $sort = (string) ($filters['sort'] ?? 'popular');
 
         $query = InterestCategory::query()
-            ->select(['interest_categories.id', 'interest_categories.name'])
+            ->selectDirectoryColumns()
             ->withDirectoryMetrics()
             ->matchingSearch($search);
+
+        if ($showImages) {
+            $query->withDirectoryPreviewImage();
+        }
 
         return match ($sort) {
             'name' => $query->orderBy('interest_categories.name'),

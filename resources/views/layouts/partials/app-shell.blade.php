@@ -79,6 +79,10 @@
                             @endisset
                         </div>
                     </main>
+
+                    @if ($shell['showFooter'])
+                        <x-ui.footer />
+                    @endif
                 </div>
             </div>
         @else
@@ -104,7 +108,7 @@
                                     </span>
                                 </a>
 
-                                @unless (request()->routeIs('admin.*') || request()->routeIs('public.search'))
+                                @unless (request()->routeIs('admin.*'))
                                     <div class="hidden min-w-0 max-w-[54rem] flex-1 xl:block">
                                         <div class="sb-shell-search-stage">
                                             <div class="sb-shell-search-label">Search The Global Catalog</div>
@@ -114,67 +118,73 @@
                                 @endunless
                             </div>
 
-                            <x-ui.navbar class="sb-shell-topnav w-full flex-wrap gap-2 border-t border-white/8 px-0 pt-3" aria-label="Global navigation">
+                            @php($hasShellUtilities = $shell['shouldRenderAdminShortcut'] || $shell['shouldRenderWatchlistShortcut'] || $shell['shouldRenderSignOutShortcut'] || $shell['shouldRenderGuestAuthShortcuts'])
+
+                            <div class="sb-shell-topnav" aria-label="Global navigation">
                                 @if (filled(trim((string) $shell['renderedNavbar'])))
                                     {!! $shell['renderedNavbar'] !!}
                                 @elseif (request()->routeIs('public.*'))
                                     @include('layouts.partials.public-navbar')
                                 @endif
 
-                                @if ($shell['shouldRenderAdminShortcut'])
-                                    <x-ui.navbar.item
-                                        :href="route('admin.dashboard')"
-                                        label="Admin"
-                                        icon="shield-check"
-                                        class="sb-shell-topnav-item"
-                                        :active="request()->routeIs('admin.*')"
-                                    />
-                                @endif
+                                @if ($hasShellUtilities)
+                                    <div class="sb-shell-topnav-utility">
+                                        @if ($shell['shouldRenderAdminShortcut'])
+                                            <x-ui.button.light-outline
+                                                :href="route('admin.dashboard')"
+                                                size="sm"
+                                                icon="shield-check"
+                                            >
+                                                Admin
+                                            </x-ui.button.light-outline>
+                                        @endif
 
-                                @if ($shell['shouldRenderWatchlistShortcut'])
-                                    <x-ui.navbar.item
-                                        :href="route('account.watchlist')"
-                                        label="Watchlist"
-                                        icon="bookmark"
-                                        class="sb-shell-topnav-item"
-                                        :active="request()->routeIs('account.*')"
-                                    />
-                                @endif
+                                        @if ($shell['shouldRenderWatchlistShortcut'])
+                                            <x-ui.button.light-outline
+                                                :href="route('account.watchlist')"
+                                                size="sm"
+                                                icon="bookmark"
+                                            >
+                                                Watchlist
+                                            </x-ui.button.light-outline>
+                                        @endif
 
-                                @if ($shell['shouldRenderSignOutShortcut'])
-                                    <form method="POST" action="{{ route('logout') }}">
-                                        @csrf
-                                        <x-ui.button
-                                            type="submit"
-                                            variant="ghost"
-                                            size="sm"
-                                            icon="arrow-right-start-on-rectangle"
-                                        >
-                                            Sign out
-                                        </x-ui.button>
-                                    </form>
-                                @endif
+                                        @if ($shell['shouldRenderSignOutShortcut'])
+                                            <form method="POST" action="{{ route('logout') }}" class="sb-shell-topnav-utility-form">
+                                                @csrf
+                                                <x-ui.button
+                                                    type="submit"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    icon="arrow-right-start-on-rectangle"
+                                                    class="sb-shell-topnav-utility-button"
+                                                >
+                                                    Sign out
+                                                </x-ui.button>
+                                            </form>
+                                        @endif
 
-                                @if ($shell['shouldRenderGuestAuthShortcuts'])
-                                    <x-ui.button
-                                        as="a"
-                                        :href="route('login')"
-                                        variant="ghost"
-                                        size="sm"
-                                        icon="arrow-right-end-on-rectangle"
-                                    >
-                                        Sign in
-                                    </x-ui.button>
-                                    <x-ui.button
-                                        as="a"
-                                        :href="route('register')"
-                                        size="sm"
-                                        icon="user-plus"
-                                    >
-                                        Create account
-                                    </x-ui.button>
+                                        @if ($shell['shouldRenderGuestAuthShortcuts'])
+                                            <x-ui.button.light-outline
+                                                :href="route('login')"
+                                                size="sm"
+                                                icon="arrow-right-end-on-rectangle"
+                                            >
+                                                Sign in
+                                            </x-ui.button.light-outline>
+                                            <x-ui.button
+                                                as="a"
+                                                :href="route('register')"
+                                                size="sm"
+                                                icon="user-plus"
+                                                class="sb-shell-topnav-utility-button"
+                                            >
+                                                Create account
+                                            </x-ui.button>
+                                        @endif
+                                    </div>
                                 @endif
-                            </x-ui.navbar>
+                            </div>
                         </div>
                     </header>
 
@@ -196,7 +206,7 @@
                         </div>
                     </main>
 
-                    @if ($shell['showFooter'] && ! request()->routeIs('admin.*') && ! request()->routeIs('public.search'))
+                    @if ($shell['showFooter'])
                         <x-ui.footer />
                     @endif
                 </div>

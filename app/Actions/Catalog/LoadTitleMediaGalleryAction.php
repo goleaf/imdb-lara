@@ -7,10 +7,18 @@ use App\Enums\MediaKind;
 use App\Enums\TitleType;
 use App\Models\CatalogMediaAsset;
 use App\Models\Title;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
 
 class LoadTitleMediaGalleryAction
 {
+    private const IMAGES_PER_PAGE = 8;
+
+    public function __construct(
+        private readonly BuildCatalogMediaLightboxGroupAction $buildCatalogMediaLightboxGroup,
+    ) {}
+
     /**
      * @return array{
      *     title: Title,
@@ -21,6 +29,19 @@ class LoadTitleMediaGalleryAction
      *     posterAssets: Collection<int, CatalogMediaAsset>,
      *     stillAssets: Collection<int, CatalogMediaAsset>,
      *     backdropAssets: Collection<int, CatalogMediaAsset>,
+     *     posterAssetsPagination: LengthAwarePaginator<int, CatalogMediaAsset>,
+     *     stillAssetsPagination: LengthAwarePaginator<int, CatalogMediaAsset>,
+     *     backdropAssetsPagination: LengthAwarePaginator<int, CatalogMediaAsset>,
+     *     imageLightboxGroups: array<string, array{
+     *         label: string,
+     *         items: list<array{
+     *             id: string,
+     *             url: string,
+     *             altText: string,
+     *             caption: string,
+     *             meta: list<string>
+     *         }>
+     *     }>,
      *     trailerAssets: Collection<int, CatalogMediaAsset>,
      *     viewerStripAssets: Collection<int, CatalogMediaAsset>,
      *     leadTrailer: CatalogMediaAsset|null,
@@ -35,14 +56,7 @@ class LoadTitleMediaGalleryAction
      */
     public function handle(Title $title): array
     {
-        $title->load([
-            'statistic:movie_id,aggregate_rating,vote_count',
-            'titleImages:id,movie_id,position,url,width,height,type',
-            'titleVideos:imdb_id,movie_id,video_type_id,name,description,width,height,runtime_seconds,position',
-            'titleVideos.videoType:id,name',
-            'primaryImageRecord:movie_id,url,width,height,type',
-            'plotRecord:movie_id,plot',
-        ]);
+        $title->loadMissing(Title::catalogMediaRelations());
 
         $poster = $title->preferredPoster();
         $backdrop = $title->preferredBackdrop();
@@ -50,6 +64,9 @@ class LoadTitleMediaGalleryAction
         $posterAssets = $this->resolveGroupedAssets($groupedAssets, MediaKind::Poster);
         $stillAssets = $this->resolveGroupedAssets($groupedAssets, MediaKind::Still, MediaKind::Gallery);
         $backdropAssets = $this->resolveGroupedAssets($groupedAssets, MediaKind::Backdrop);
+        $posterAssetsPagination = $this->paginateAssets($posterAssets, 'posters_page', 'title-media-posters');
+        $stillAssetsPagination = $this->paginateAssets($stillAssets, 'stills_page', 'title-media-stills');
+        $backdropAssetsPagination = $this->paginateAssets($backdropAssets, 'backdrops_page', 'title-media-backdrops');
         $trailerAssets = $this->resolveGroupedAssets(
             $groupedAssets,
             MediaKind::Trailer,
@@ -91,6 +108,14 @@ class LoadTitleMediaGalleryAction
             'posterAssets' => $posterAssets,
             'stillAssets' => $stillAssets,
             'backdropAssets' => $backdropAssets,
+            'posterAssetsPagination' => $posterAssetsPagination,
+            'stillAssetsPagination' => $stillAssetsPagination,
+            'backdropAssetsPagination' => $backdropAssetsPagination,
+            'imageLightboxGroups' => [
+                'posters' => $this->buildCatalogMediaLightboxGroup->handle('Posters', $posterAssets),
+                'stills' => $this->buildCatalogMediaLightboxGroup->handle('Stills', $stillAssets),
+                'backdrops' => $this->buildCatalogMediaLightboxGroup->handle('Backdrops', $backdropAssets),
+            ],
             'trailerAssets' => $trailerAssets,
             'viewerStripAssets' => $viewerStripAssets,
             'leadTrailer' => $leadTrailer,
@@ -108,7 +133,7 @@ class LoadTitleMediaGalleryAction
                 canonical: route('public.titles.media', $title),
                 openGraphType: $openGraphType,
                 openGraphImage: ($backdrop ?? $poster)?->url,
-                openGraphImageAlt: ($backdrop ?? $poster)?->alt_text ?: $title->name,
+                openGraphImageAlt: ($backdrop ?? $poster)?->accessibleAltText($title->name) ?? $title->name,
                 breadcrumbs: [
                     ['label' => 'Home', 'href' => route('public.home')],
                     ['label' => 'Titles', 'href' => route('public.titles.index')],
@@ -133,5 +158,29 @@ class LoadTitleMediaGalleryAction
             ->filter(fn (mixed $asset): bool => $asset instanceof CatalogMediaAsset)
             ->unique('url')
             ->values();
+    }
+
+    /**
+     * @param  Collection<int, CatalogMediaAsset>  $assets
+     * @return LengthAwarePaginator<int, CatalogMediaAsset>
+     */
+    private function paginateAssets(Collection $assets, string $pageName, string $fragment): LengthAwarePaginator
+    {
+        $currentPage = Paginator::resolveCurrentPage($pageName);
+
+        $paginator = new LengthAwarePaginator(
+            $assets->forPage($currentPage, self::IMAGES_PER_PAGE)->values(),
+            $assets->count(),
+            self::IMAGES_PER_PAGE,
+            $currentPage,
+            [
+                'path' => Paginator::resolveCurrentPath(),
+                'pageName' => $pageName,
+            ],
+        );
+
+        return $paginator
+            ->withQueryString()
+            ->fragment($fragment);
     }
 }

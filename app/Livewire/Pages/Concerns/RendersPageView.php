@@ -69,7 +69,7 @@ trait RendersPageView
 
         return view('livewire.pages.page-content', [
             'content' => $sections['content'] ?? '',
-        ])->layout('components.layouts.livewire-page', [
+        ])->layout('layouts.app', [
             'shell' => app(ResolvePageShellViewDataAction::class)->forLivewireLayout($layoutData),
         ]);
     }

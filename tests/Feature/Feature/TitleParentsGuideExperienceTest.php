@@ -23,6 +23,7 @@ class TitleParentsGuideExperienceTest extends TestCase
             ->assertSeeHtml('data-slot="title-parent-advisories"')
             ->assertSeeHtml('data-slot="title-parent-certificates"')
             ->assertSeeHtml('data-slot="title-parent-spoilers"')
+            ->assertSeeHtml('text-[#f4eee5] decoration-white/20 hover:text-white')
             ->assertSee('Content Concerns')
             ->assertSee('Spoiler Notes');
     }

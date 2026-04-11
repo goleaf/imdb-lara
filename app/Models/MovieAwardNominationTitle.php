@@ -40,8 +40,18 @@ class MovieAwardNominationTitle extends ImdbModel
         return $this->belongsTo(Movie::class, 'nominated_movie_id', 'id');
     }
 
+    public function title(): BelongsTo
+    {
+        return $this->belongsTo(Title::class, 'nominated_movie_id', 'id');
+    }
+
     public function movieAwardNomination(): BelongsTo
     {
         return $this->belongsTo(MovieAwardNomination::class, 'movie_award_nomination_id', 'id');
+    }
+
+    public function awardNomination(): BelongsTo
+    {
+        return $this->belongsTo(AwardNomination::class, 'movie_award_nomination_id', 'id');
     }
 }

@@ -16,9 +16,12 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Sleep;
+use Illuminate\Testing\TestResponse;
 use ReflectionClass;
 use RuntimeException;
+use Tests\Concerns\InteractsWithRemoteCatalog;
 use Tests\Concerns\UsesCatalogOnlyApplication;
+use Throwable;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -31,6 +34,10 @@ abstract class TestCase extends BaseTestCase
             && ! $this->supportsCatalogOnlyApplicationTestContract()
         ) {
             $this->markTestSkipped('Legacy local-schema or write-side test is not applicable in the current catalog-only MySQL application mode.');
+        }
+
+        if ($this->supportsRemoteCatalogTestContract()) {
+            $this->ensureRemoteCatalogAvailable();
         }
 
         Sleep::fake();
@@ -60,6 +67,50 @@ abstract class TestCase extends BaseTestCase
             class_uses_recursive(static::class),
             true,
         );
+    }
+
+    protected function supportsRemoteCatalogTestContract(): bool
+    {
+        return in_array(
+            InteractsWithRemoteCatalog::class,
+            class_uses_recursive(static::class),
+            true,
+        );
+    }
+
+    protected function runTest(): mixed
+    {
+        try {
+            return parent::runTest();
+        } catch (Throwable $throwable) {
+            if (
+                $this->supportsRemoteCatalogTestContract()
+                && method_exists($this, 'shouldSkipBecauseRemoteCatalogIsUnavailable')
+                && $this->shouldSkipBecauseRemoteCatalogIsUnavailable($throwable)
+                && method_exists($this, 'markRemoteCatalogUnavailable')
+            ) {
+                $this->markRemoteCatalogUnavailable($throwable);
+            }
+
+            throw $throwable;
+        }
+    }
+
+    public function call($method, $uri, $parameters = [], $cookies = [], $files = [], $server = [], $content = null): TestResponse
+    {
+        $response = parent::call($method, $uri, $parameters, $cookies, $files, $server, $content);
+
+        if (
+            $this->supportsRemoteCatalogTestContract()
+            && $response->exception instanceof Throwable
+            && method_exists($this, 'shouldSkipBecauseRemoteCatalogIsUnavailable')
+            && $this->shouldSkipBecauseRemoteCatalogIsUnavailable($response->exception)
+            && method_exists($this, 'markRemoteCatalogUnavailable')
+        ) {
+            $this->markRemoteCatalogUnavailable($response->exception);
+        }
+
+        return $response;
     }
 
     /**

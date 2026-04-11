@@ -32,4 +32,9 @@ class Profession extends ImdbModel
     {
         return $this->belongsToMany(NameBasic::class, 'name_basic_professions', 'profession_id', 'name_basic_id', 'id', 'id');
     }
+
+    public function persons(): BelongsToMany
+    {
+        return $this->belongsToMany(Person::class, 'name_basic_professions', 'profession_id', 'name_basic_id', 'id', 'id');
+    }
 }

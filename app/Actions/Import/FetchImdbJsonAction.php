@@ -20,9 +20,9 @@ class FetchImdbJsonAction
 
     private const DEFAULT_HTTP_CACHE_TTL_SECONDS = 86400;
 
-    private const MAX_REQUEST_ATTEMPTS = 5;
+    private const DEFAULT_RETRY_ATTEMPTS = 5;
 
-    private const TOO_MANY_REQUESTS_DELAY_MILLISECONDS = 1000;
+    private const DEFAULT_RETRY_DELAY_MILLISECONDS = 1000;
 
     private static ?int $lastRequestFinishedAtMicroseconds = null;
 
@@ -44,46 +44,56 @@ class FetchImdbJsonAction
         }
 
         $response = null;
+        $lastException = null;
+        $maxAttempts = $this->requestRetryAttempts();
 
-        for ($attempt = 1; $attempt <= self::MAX_REQUEST_ATTEMPTS; $attempt++) {
+        for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
             $this->pauseBeforeRequest();
 
             try {
                 $response = $this->newRequest()->get($url, $query);
+                $lastException = null;
+            } catch (Throwable $exception) {
+                $response = null;
+                $lastException = $exception;
             } finally {
                 $this->markRequestAsFinished();
             }
 
-            if (! $this->shouldRetryTooManyRequests($response) || $attempt === self::MAX_REQUEST_ATTEMPTS) {
-                break;
+            if ($nullable && $response?->status() === 404) {
+                $this->rememberHttpPayload($cacheKey, null);
+
+                return null;
             }
 
-            Sleep::for(self::TOO_MANY_REQUESTS_DELAY_MILLISECONDS)
-                ->milliseconds()
-                ->then(static function (): void {});
+            if ($attempt < $maxAttempts && $this->shouldRetryRequest($response, $lastException)) {
+                $this->sleepBeforeRetry();
+
+                continue;
+            }
+
+            if ($lastException instanceof Throwable) {
+                throw $lastException;
+            }
+
+            if (! $response instanceof Response) {
+                throw new RuntimeException(sprintf('IMDb API returned no response for [%s].', $url));
+            }
+
+            $response->throw();
+
+            $payload = $response->json();
+
+            if (! is_array($payload)) {
+                throw new RuntimeException(sprintf('IMDb API returned a non-object payload for [%s].', $url));
+            }
+
+            $this->rememberHttpPayload($cacheKey, $payload);
+
+            return $payload;
         }
 
-        if ($response === null) {
-            throw new RuntimeException(sprintf('IMDb API returned no response for [%s].', $url));
-        }
-
-        if ($nullable && $response->status() === 404) {
-            $this->rememberHttpPayload($cacheKey, null);
-
-            return null;
-        }
-
-        $response->throw();
-
-        $payload = $response->json();
-
-        if (! is_array($payload)) {
-            throw new RuntimeException(sprintf('IMDb API returned a non-object payload for [%s].', $url));
-        }
-
-        $this->rememberHttpPayload($cacheKey, $payload);
-
-        return $payload;
+        throw new RuntimeException(sprintf('IMDb API returned no response for [%s].', $url));
     }
 
     /**
@@ -100,40 +110,50 @@ class FetchImdbJsonAction
         }
 
         $response = null;
+        $lastException = null;
+        $maxAttempts = $this->requestRetryAttempts();
 
-        for ($attempt = 1; $attempt <= self::MAX_REQUEST_ATTEMPTS; $attempt++) {
+        for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
             $this->pauseBeforeRequest();
 
             try {
                 $response = $this->newRequest()->post($url, $payload);
+                $lastException = null;
+            } catch (Throwable $exception) {
+                $response = null;
+                $lastException = $exception;
             } finally {
                 $this->markRequestAsFinished();
             }
 
-            if (! $this->shouldRetryTooManyRequests($response) || $attempt === self::MAX_REQUEST_ATTEMPTS) {
-                break;
+            if ($attempt < $maxAttempts && $this->shouldRetryRequest($response, $lastException)) {
+                $this->sleepBeforeRetry();
+
+                continue;
             }
 
-            Sleep::for(self::TOO_MANY_REQUESTS_DELAY_MILLISECONDS)
-                ->milliseconds()
-                ->then(static function (): void {});
+            if ($lastException instanceof Throwable) {
+                throw $lastException;
+            }
+
+            if (! $response instanceof Response) {
+                throw new RuntimeException(sprintf('IMDb API returned no response for [%s].', $url));
+            }
+
+            $response->throw();
+
+            $decodedPayload = $response->json();
+
+            if (! is_array($decodedPayload)) {
+                throw new RuntimeException(sprintf('IMDb API returned a non-object payload for [%s].', $url));
+            }
+
+            $this->rememberHttpPayload($cacheKey, $decodedPayload);
+
+            return $decodedPayload;
         }
 
-        if (! $response instanceof Response) {
-            throw new RuntimeException(sprintf('IMDb API returned no response for [%s].', $url));
-        }
-
-        $response->throw();
-
-        $decodedPayload = $response->json();
-
-        if (! is_array($decodedPayload)) {
-            throw new RuntimeException(sprintf('IMDb API returned a non-object payload for [%s].', $url));
-        }
-
-        $this->rememberHttpPayload($cacheKey, $decodedPayload);
-
-        return $decodedPayload;
+        throw new RuntimeException(sprintf('IMDb API returned no response for [%s].', $url));
     }
 
     /**
@@ -195,6 +215,8 @@ class FetchImdbJsonAction
                 $batchStarted = true;
             }
 
+            $roundResponses = [];
+
             try {
                 $roundResponses = Http::pool(function (Pool $pool) use ($pendingRequests): array {
                     return collect($pendingRequests)
@@ -210,11 +232,22 @@ class FetchImdbJsonAction
                         })
                         ->all();
                 }, concurrency: max(1, $concurrency));
+            } catch (Throwable $exception) {
+                foreach ($pendingRequests as $key => $request) {
+                    $attempts[$key]++;
+
+                    if ($attempts[$key] >= $this->requestRetryAttempts()) {
+                        throw $exception;
+                    }
+                }
+
+                $this->sleepBeforeRetry();
+
+                continue;
             } finally {
                 $this->markRequestAsFinished();
             }
 
-            $retryDelayMilliseconds = 0;
             $retryRequests = [];
 
             foreach ($pendingRequests as $key => $request) {
@@ -233,9 +266,11 @@ class FetchImdbJsonAction
                     continue;
                 }
 
-                if ($this->shouldRetryTooManyRequests($response) && $attempts[$key] < self::MAX_REQUEST_ATTEMPTS) {
+                if (
+                    $attempts[$key] < $this->requestRetryAttempts()
+                    && $this->shouldRetryRequest($response)
+                ) {
                     $retryRequests[$key] = $request;
-                    $retryDelayMilliseconds = max($retryDelayMilliseconds, self::TOO_MANY_REQUESTS_DELAY_MILLISECONDS);
 
                     continue;
                 }
@@ -269,9 +304,7 @@ class FetchImdbJsonAction
                 break;
             }
 
-            Sleep::for($retryDelayMilliseconds)
-                ->milliseconds()
-                ->then(static function (): void {});
+            $this->sleepBeforeRetry();
 
             $pendingRequests = $retryRequests;
         }
@@ -390,8 +423,7 @@ class FetchImdbJsonAction
     {
         return Http::acceptJson()
             ->connectTimeout(10)
-            ->timeout(30)
-            ->retry([200, 500, 1000], throw: false);
+            ->timeout(30);
     }
 
     private function shouldRetryTooManyRequests(Response $response): bool
@@ -404,6 +436,23 @@ class FetchImdbJsonAction
             Str::lower(trim($response->body())),
             'too many requests',
         );
+    }
+
+    private function shouldRetryRequest(?Response $response, ?Throwable $exception = null): bool
+    {
+        if ($exception instanceof Throwable) {
+            return true;
+        }
+
+        if (! $response instanceof Response) {
+            return false;
+        }
+
+        if ($this->shouldRetryTooManyRequests($response)) {
+            return true;
+        }
+
+        return $response->failed();
     }
 
     private function currentTimeMicroseconds(): int
@@ -429,6 +478,32 @@ class FetchImdbJsonAction
             (int) config(
                 'services.imdb.default_batch_concurrency',
                 self::DEFAULT_BATCH_CONCURRENCY,
+            ),
+        );
+    }
+
+    private function requestRetryAttempts(): int
+    {
+        return max(
+            1,
+            (int) config('services.imdb.retry_attempts', self::DEFAULT_RETRY_ATTEMPTS),
+        );
+    }
+
+    private function sleepBeforeRetry(): void
+    {
+        Sleep::for($this->requestRetryDelayMilliseconds())
+            ->milliseconds()
+            ->then(static function (): void {});
+    }
+
+    private function requestRetryDelayMilliseconds(): int
+    {
+        return max(
+            0,
+            (int) config(
+                'services.imdb.retry_delay_milliseconds',
+                self::DEFAULT_RETRY_DELAY_MILLISECONDS,
             ),
         );
     }

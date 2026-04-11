@@ -3,22 +3,81 @@
 @section('title', $title->meta_title ?: $title->name)
 @section('meta_description', $title->meta_description ?: ($title->plot_outline ?: 'Browse cast, awards, genres, ratings, and release details for '.$title->name.'.'))
 
-@php
-    $akaAttributeRows = $akaAttributeRows ?? collect();
-    $akaTypeRows = $akaTypeRows ?? collect();
-    $awardCategoryRows = $awardCategoryRows ?? collect();
-    $awardEventRows = $awardEventRows ?? collect();
-    $certificateAttributeRows = $certificateAttributeRows ?? collect();
-    $certificateRatingRows = $certificateRatingRows ?? collect();
-    $companyRows = $companyRows ?? collect();
-    $interestHighlights = $interestHighlights ?? collect();
-@endphp
-
 @section('breadcrumbs')
     <x-ui.breadcrumbs.item :href="route('public.home')">Home</x-ui.breadcrumbs.item>
     <x-ui.breadcrumbs.item :href="route('public.titles.index')">Titles</x-ui.breadcrumbs.item>
     <x-ui.breadcrumbs.item>{{ $title->name }}</x-ui.breadcrumbs.item>
 @endsection
+
+@php
+    foreach ([
+        'galleryAssets',
+        'castPreview',
+        'crewGroups',
+        'movieAkaRows',
+        'movieAkaAttributeRows',
+        'akaAttributeRows',
+        'akaTypeRows',
+        'awardCategoryRows',
+        'awardEventRows',
+        'movieAwardNominationRows',
+        'movieAwardNominationNomineeRows',
+        'movieAwardNominationTitleRows',
+        'movieAwardNominationSummaryRows',
+        'movieCertificateRows',
+        'movieCertificateSummaryRows',
+        'movieCertificateAttributeRows',
+        'movieCompanyCreditRows',
+        'movieCompanyCreditAttributeRows',
+        'movieCompanyCreditCountryRows',
+        'movieCompanyCreditSummaryRows',
+        'movieDirectorRows',
+        'movieEpisodeRows',
+        'movieEpisodeSummaryRows',
+        'movieGenreRows',
+        'movieImageSummaryRows',
+        'certificateAttributeRows',
+        'certificateRatingRows',
+        'companyRows',
+        'companyCreditAttributeRows',
+        'companyCreditCategoryRows',
+        'movieBoxOfficeRows',
+        'currencyRows',
+        'countryRows',
+        'genreRows',
+        'interestRows',
+        'interestCategoryRows',
+        'interestPrimaryImageRows',
+        'interestSimilarInterestRows',
+        'detailItems',
+        'certificateItems',
+        'awardHighlights',
+        'relatedTitles',
+        'seasonNavigation',
+        'seasons',
+        'latestSeasonEpisodes',
+        'topRatedEpisodes',
+        'countries',
+        'languages',
+        'interestHighlights',
+        'archiveLinks',
+        'heroStats',
+    ] as $collectionVariable) {
+        if (! isset($$collectionVariable) || ! ($$collectionVariable instanceof \Illuminate\Support\Collection)) {
+            $$collectionVariable = collect();
+        }
+    }
+
+    $poster ??= null;
+    $backdrop ??= null;
+    $primaryVideo ??= null;
+    $latestSeason ??= null;
+    $shareModalId ??= 'title-share-'.$title->id;
+    $shareUrl ??= route('public.titles.show', $title);
+    $isSeriesLike ??= false;
+    $ratingCount ??= 0;
+    $posterLightboxModalId = 'title-poster-lightbox-'.$title->id;
+@endphp
 
 @section('content')
     <section class="space-y-6">
@@ -35,20 +94,32 @@
                     <div class="absolute inset-0 bg-[linear-gradient(135deg,rgba(16,15,13,0.96),rgba(10,10,9,0.98))]"></div>
                 @endif
 
-                <div class="relative grid gap-6 p-6 xl:grid-cols-[15rem_minmax(0,1fr)]">
-                    <div class="overflow-hidden rounded-[1.3rem] border border-black/5 bg-neutral-100 shadow-sm dark:border-white/10 dark:bg-neutral-800">
-                        @if ($poster)
-                            <img
-                                src="{{ $poster->url }}"
-                                alt="{{ $poster->alt_text ?: $title->name }}"
-                                class="aspect-[2/3] w-full object-cover"
-                            >
-                        @else
-                            <div class="flex aspect-[2/3] items-center justify-center text-neutral-500 dark:text-neutral-400">
+                <div class="relative grid gap-6 p-6">
+                    @if ($poster)
+                        <button
+                            type="button"
+                            x-data
+                            x-on:click="$modal.open(@js($posterLightboxModalId))"
+                            class="group mx-auto block w-full max-w-[15rem] text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f4eee5] focus-visible:ring-offset-4 focus-visible:ring-offset-[#0b0a09]"
+                            data-slot="title-detail-poster-trigger"
+                        >
+                            <div class="overflow-hidden rounded-[1.3rem] border border-black/5 bg-neutral-100 shadow-sm dark:border-white/10 dark:bg-neutral-800">
+                                <div class="aspect-[2/3] w-full overflow-hidden">
+                                    <img
+                                        src="{{ $poster->url }}"
+                                        alt="{{ $poster->alt_text ?: $title->name }}"
+                                        class="block h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
+                                    >
+                                </div>
+                            </div>
+                        </button>
+                    @else
+                        <div class="mx-auto w-full max-w-[15rem] overflow-hidden rounded-[1.3rem] border border-black/5 bg-neutral-100 shadow-sm dark:border-white/10 dark:bg-neutral-800">
+                            <div class="flex aspect-[2/3] w-full items-center justify-center text-neutral-500 dark:text-neutral-400">
                                 <x-ui.icon name="film" class="size-14" />
                             </div>
-                        @endif
-                    </div>
+                        </div>
+                    @endif
 
                     <div class="space-y-6 p-5 sm:p-6">
                         <div class="space-y-4">
@@ -57,8 +128,8 @@
                                 @if ($title->release_year)
                                     <x-ui.badge variant="outline" color="slate" icon="calendar-days">{{ $title->release_year }}</x-ui.badge>
                                 @endif
-                                @if ($title->runtime_minutes)
-                                    <x-ui.badge variant="outline" color="neutral" icon="clock">{{ $title->runtime_minutes }} min</x-ui.badge>
+                                @if ($title->runtimeMinutesLabel())
+                                    <x-ui.badge variant="outline" color="neutral" icon="clock">{{ $title->runtimeMinutesLabel() }}</x-ui.badge>
                                 @endif
                                 @if ($title->age_rating)
                                     <x-ui.badge variant="outline" color="neutral" icon="shield-check">{{ $title->age_rating }}</x-ui.badge>
@@ -122,15 +193,50 @@
             </div>
         </x-ui.card>
 
-        <div class="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
+        @if ($poster)
+            @push('modals')
+                <x-ui.modal
+                    :id="$posterLightboxModalId"
+                    bare
+                    width="screen"
+                    backdrop="dark"
+                    animation="fade"
+                >
+                    <div
+                        class="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top_right,rgba(214,181,116,0.16),transparent_24%),linear-gradient(180deg,rgba(8,8,7,0.98),rgba(5,5,5,0.995))] p-4 sm:p-6"
+                        data-slot="title-detail-poster-lightbox"
+                    >
+                        <div class="relative inline-flex max-w-full items-start justify-center">
+                            <button
+                                type="button"
+                                class="sb-media-lightbox-close sb-media-lightbox-close--corner"
+                                x-on:click="$modal.close(@js($posterLightboxModalId))"
+                            >
+                                <x-ui.icon name="x-mark" class="size-5" />
+                                <span class="sr-only">Close poster lightbox</span>
+                            </button>
+
+                            <img
+                                src="{{ $poster->url }}"
+                                alt="{{ $poster->alt_text ?: $title->name }}"
+                                @class([
+                                    'sb-media-lightbox-image',
+                                    'sb-media-lightbox-image--portrait' => ($poster->height ?? 0) > ($poster->width ?? 0),
+                                    'sb-media-lightbox-image--landscape' => ($poster->height ?? 0) <= ($poster->width ?? 0),
+                                ])
+                            >
+                        </div>
+                    </div>
+                </x-ui.modal>
+            @endpush
+        @endif
+
+        <div class="grid gap-6">
             <div class="space-y-6">
                 <x-ui.card class="sb-detail-section !max-w-none">
                     <div class="space-y-4">
                         <div>
                             <x-ui.heading level="h2" size="lg">Overview</x-ui.heading>
-                            <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                Core release, origin, and catalog facts from the imported MySQL dataset.
-                            </x-ui.text>
                         </div>
 
                         @if ($detailItems->isNotEmpty())
@@ -193,6 +299,97 @@
                         @endif
                     </div>
                 </x-ui.card>
+
+                @if ($movieAkaRows->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-movie-akas" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Movie AKAs</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Raw rows imported from the <code>movie_akas</code> table and linked directly to this movie.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 font-medium">Title</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">Country</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">Language</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                            @foreach ($movieAkaRows as $movieAkaRow)
+                                                <tr>
+                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
+                                                        {{ $movieAkaRow->text }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        @if (filled($movieAkaRow->country_code))
+                                                            <div class="flex items-center gap-2">
+                                                                <x-ui.flag type="country" :code="$movieAkaRow->country_code" class="size-4" />
+                                                                <span>{{ $movieAkaRow->resolvedCountryLabel() ?? $movieAkaRow->country_code }}</span>
+                                                            </div>
+                                                        @else
+                                                            <span>&mdash;</span>
+                                                        @endif
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieAkaRow->resolvedLanguageLabel() ?? '—' }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                @if ($movieAkaAttributeRows->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-movie-aka-attributes" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Movie AKA attributes</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Raw rows imported from the <code>movie_aka_attributes</code> table and linked to this movie through its movie AKA records.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 font-medium">movie_aka_id</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">aka_attribute_id</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">position</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                            @foreach ($movieAkaAttributeRows as $movieAkaAttributeRow)
+                                                <tr>
+                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
+                                                        {{ $movieAkaAttributeRow->movie_aka_id }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieAkaAttributeRow->aka_attribute_id }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieAkaAttributeRow->position }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.card>
+                @endif
 
                 @if ($akaAttributeRows->isNotEmpty())
                     <x-ui.card data-slot="title-detail-aka-attributes" class="sb-detail-section !max-w-none">
@@ -276,7 +473,7 @@
                             <div>
                                 <x-ui.heading level="h2" size="lg">Award categories</x-ui.heading>
                                 <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                    Raw rows imported from the <code>award_categories</code> table and linked to this movie through its award nominations.
+                                    Award categories linked to this title through its nominations.
                                 </x-ui.text>
                             </div>
 
@@ -285,17 +482,13 @@
                                     <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
                                         <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
                                             <tr>
-                                                <th scope="col" class="px-4 py-3 font-medium">id</th>
-                                                <th scope="col" class="px-4 py-3 font-medium">name</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">Category</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
                                             @foreach ($awardCategoryRows as $awardCategoryRow)
                                                 <tr>
                                                     <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
-                                                        {{ $awardCategoryRow->id }}
-                                                    </td>
-                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
                                                         {{ $awardCategoryRow->name }}
                                                     </td>
                                                 </tr>
@@ -314,7 +507,7 @@
                             <div>
                                 <x-ui.heading level="h2" size="lg">Award events</x-ui.heading>
                                 <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                    Raw rows imported from the <code>award_events</code> table and linked to this movie through its award nominations.
+                                    Award events linked to this title through its nominations.
                                 </x-ui.text>
                             </div>
 
@@ -323,17 +516,13 @@
                                     <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
                                         <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
                                             <tr>
-                                                <th scope="col" class="px-4 py-3 font-medium">imdb_id</th>
-                                                <th scope="col" class="px-4 py-3 font-medium">name</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">Event</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
                                             @foreach ($awardEventRows as $awardEventRow)
                                                 <tr>
                                                     <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
-                                                        {{ $awardEventRow->imdb_id }}
-                                                    </td>
-                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
                                                         {{ $awardEventRow->name }}
                                                     </td>
                                                 </tr>
@@ -346,13 +535,13 @@
                     </x-ui.card>
                 @endif
 
-                @if ($certificateAttributeRows->isNotEmpty())
-                    <x-ui.card data-slot="title-detail-certificate-attributes" class="sb-detail-section !max-w-none">
+                @if ($movieAwardNominationRows->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-movie-award-nominations" class="sb-detail-section !max-w-none">
                         <div class="space-y-4">
                             <div>
-                                <x-ui.heading level="h2" size="lg">Certificate attributes</x-ui.heading>
+                                <x-ui.heading level="h2" size="lg">Movie award nominations</x-ui.heading>
                                 <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                    Raw rows imported from the <code>certificate_attributes</code> table and linked to this movie through its certificate records.
+                                    Award nominations attached directly to this title.
                                 </x-ui.text>
                             </div>
 
@@ -361,18 +550,38 @@
                                     <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
                                         <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
                                             <tr>
-                                                <th scope="col" class="px-4 py-3 font-medium">id</th>
-                                                <th scope="col" class="px-4 py-3 font-medium">name</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">Event</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">Category</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">Year</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">Note</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">Winner</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">Winner rank</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
-                                            @foreach ($certificateAttributeRows as $certificateAttributeRow)
+                                            @foreach ($movieAwardNominationRows as $movieAwardNominationRow)
                                                 <tr>
                                                     <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
-                                                        {{ $certificateAttributeRow->id }}
+                                                        {{ $movieAwardNominationRow->awardEvent?->name ?? '—' }}
                                                     </td>
                                                     <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
-                                                        {{ $certificateAttributeRow->name }}
+                                                        {{ $movieAwardNominationRow->awardCategory?->name ?? '—' }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieAwardNominationRow->award_year ?? '—' }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ filled($movieAwardNominationRow->text) ? $movieAwardNominationRow->text : '—' }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieAwardNominationRow->is_winner ? 'Yes' : 'No' }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        @if ($movieAwardNominationRow->winner_rank)
+                                                            <x-catalog.winner-rank-badge :rank="$movieAwardNominationRow->winner_rank" />
+                                                        @else
+                                                            —
+                                                        @endif
                                                     </td>
                                                 </tr>
                                             @endforeach
@@ -384,13 +593,13 @@
                     </x-ui.card>
                 @endif
 
-                @if ($certificateRatingRows->isNotEmpty())
-                    <x-ui.card data-slot="title-detail-certificate-ratings" class="sb-detail-section !max-w-none">
+                @if ($movieAwardNominationNomineeRows->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-movie-award-nomination-nominees" class="sb-detail-section !max-w-none">
                         <div class="space-y-4">
                             <div>
-                                <x-ui.heading level="h2" size="lg">Certificate ratings</x-ui.heading>
+                                <x-ui.heading level="h2" size="lg">Movie award nomination nominees</x-ui.heading>
                                 <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                    Raw rows imported from the <code>certificate_ratings</code> table and linked to this movie through its certificate records.
+                                    Nominees linked to this title's award nominations.
                                 </x-ui.text>
                             </div>
 
@@ -399,18 +608,496 @@
                                     <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
                                         <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
                                             <tr>
-                                                <th scope="col" class="px-4 py-3 font-medium">id</th>
-                                                <th scope="col" class="px-4 py-3 font-medium">name</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">Nomination</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">Nominee</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
-                                            @foreach ($certificateRatingRows as $certificateRatingRow)
+                                            @foreach ($movieAwardNominationNomineeRows as $movieAwardNominationNomineeRow)
+                                                @php
+                                                    $nomineePerson = $movieAwardNominationNomineeRow->person;
+                                                    $nomineeHeadshot = $nomineePerson?->preferredHeadshot();
+                                                    $nomineeHref = $nomineePerson ? route('public.people.show', $nomineePerson) : null;
+                                                    $nomineeName = $nomineePerson?->name;
+                                                @endphp
                                                 <tr>
                                                     <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
-                                                        {{ $certificateRatingRow->id }}
+                                                        @if ($movieAwardNominationNomineeRow->awardNomination)
+                                                            <a
+                                                                href="{{ route('public.awards.nominations.show', $movieAwardNominationNomineeRow->awardNomination) }}"
+                                                                class="block rounded-[1rem] transition hover:opacity-80"
+                                                            >
+                                                                <div class="font-medium text-neutral-900 dark:text-neutral-100">
+                                                                    {{ $movieAwardNominationNomineeRow->awardNomination->awardCategory?->name ?: 'Award nomination' }}
+                                                                </div>
+                                                                <div class="text-xs text-neutral-500 dark:text-neutral-400">
+                                                                    {{ $movieAwardNominationNomineeRow->awardNomination->awardEvent?->name ?: 'Event' }}
+                                                                    @if ($movieAwardNominationNomineeRow->awardNomination->award_year)
+                                                                        · {{ $movieAwardNominationNomineeRow->awardNomination->award_year }}
+                                                                    @endif
+                                                                </div>
+                                                            </a>
+                                                        @else
+                                                            <div class="font-medium text-neutral-900 dark:text-neutral-100">Award nomination</div>
+                                                        @endif
                                                     </td>
                                                     <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
-                                                        {{ $certificateRatingRow->name }}
+                                                        @if ($nomineePerson && $nomineeHref)
+                                                            <a
+                                                                href="{{ $nomineeHref }}"
+                                                                data-slot="title-detail-award-nominee-link"
+                                                                class="flex items-center gap-3 rounded-[1rem] transition hover:opacity-80"
+                                                            >
+                                                                <div
+                                                                    data-slot="title-detail-award-nominee-avatar"
+                                                                    class="flex h-12 w-10 shrink-0 items-center justify-center overflow-hidden rounded-[0.8rem] border border-black/5 bg-neutral-100 dark:border-white/10 dark:bg-white/[0.04]"
+                                                                >
+                                                                    @if ($nomineeHeadshot)
+                                                                        <img
+                                                                            src="{{ $nomineeHeadshot->url }}"
+                                                                            alt="{{ $nomineeHeadshot->alt_text ?: $nomineeName }}"
+                                                                            class="h-full w-full object-cover"
+                                                                            loading="lazy"
+                                                                        >
+                                                                    @else
+                                                                        <x-ui.icon name="user" class="size-4 text-neutral-400 dark:text-neutral-500" />
+                                                                    @endif
+                                                                </div>
+
+                                                                <span class="min-w-0 truncate font-medium text-neutral-900 dark:text-neutral-100">
+                                                                    {{ $nomineeName }}
+                                                                </span>
+                                                            </a>
+                                                        @else
+                                                            —
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                @if ($movieAwardNominationSummaryRows->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-movie-award-nomination-summaries" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Movie award nomination summaries</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Raw rows imported from the <code>movie_award_nomination_summaries</code> table and linked directly to this movie.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 font-medium">Nominations</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">Wins</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                            @foreach ($movieAwardNominationSummaryRows as $movieAwardNominationSummaryRow)
+                                                <tr>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieAwardNominationSummaryRow->nomination_count }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieAwardNominationSummaryRow->win_count }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                @if ($movieAwardNominationTitleRows->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-movie-award-nomination-titles" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Movie award nomination titles</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Nominated titles linked to this title's award nominations.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 font-medium">Nomination</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">Title</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                            @foreach ($movieAwardNominationTitleRows as $movieAwardNominationTitleRow)
+                                                <tr>
+                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
+                                                        {{ $movieAwardNominationTitleRow->movieAwardNomination?->awardCategory?->name ?? '—' }}
+                                                        @if (filled($movieAwardNominationTitleRow->movieAwardNomination?->event?->name) || filled($movieAwardNominationTitleRow->movieAwardNomination?->award_year))
+                                                            <div class="mt-1 text-xs font-normal text-neutral-500 dark:text-neutral-400">
+                                                                {{ $movieAwardNominationTitleRow->movieAwardNomination?->event?->name ?? 'Unknown event' }}
+                                                                @if (filled($movieAwardNominationTitleRow->movieAwardNomination?->award_year))
+                                                                    · {{ $movieAwardNominationTitleRow->movieAwardNomination?->award_year }}
+                                                                @endif
+                                                            </div>
+                                                        @endif
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieAwardNominationTitleRow->title?->name ?? $movieAwardNominationTitleRow->nominated_movie_id }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                @if ($movieCertificateRows->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-movie-certificates" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Movie certificates</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Certificate records linked directly to this title.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 font-medium">Rating</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">Country</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                            @foreach ($movieCertificateRows as $movieCertificateRow)
+                                                <tr>
+                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
+                                                        {{ $movieCertificateRow->certificateRating?->name ?? $movieCertificateRow->certificate_rating_id ?? '—' }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        @if (filled($movieCertificateRow->country_code))
+                                                            <div class="flex items-center gap-2">
+                                                                <x-ui.flag type="country" :code="$movieCertificateRow->country_code" class="size-4" />
+                                                                <span>{{ $movieCertificateRow->resolvedCountryLabel() ?? $movieCertificateRow->country_code }}</span>
+                                                            </div>
+                                                        @else
+                                                            —
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                @if ($movieCertificateAttributeRows->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-movie-certificate-attributes" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Movie certificate attributes</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Certificate attributes linked to this title's certificate records.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 font-medium">Rating</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">Attribute</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                            @foreach ($movieCertificateAttributeRows as $movieCertificateAttributeRow)
+                                                <tr>
+                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
+                                                        {{ $movieCertificateAttributeRow->movieCertificate?->certificateRating?->name ?? '—' }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieCertificateAttributeRow->certificateAttribute?->name ?? $movieCertificateAttributeRow->certificate_attribute_id }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                @if ($movieCertificateSummaryRows->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-movie-certificate-summaries" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Movie certificate summaries</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Raw rows imported from the <code>movie_certificate_summaries</code> table and linked directly to this movie.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 font-medium">movie_id</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">total_count</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                            @foreach ($movieCertificateSummaryRows as $movieCertificateSummaryRow)
+                                                <tr>
+                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
+                                                        {{ $movieCertificateSummaryRow->movie_id }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieCertificateSummaryRow->total_count }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                @if ($certificateAttributeEntries->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-certificate-attributes" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Certificate attributes</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Certificate attributes linked to this title through its certificate records.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 font-medium">Attribute</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">Ratings on this title</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">Countries on this title</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">Certificates on this title</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                            @foreach ($certificateAttributeEntries as $certificateAttributeEntry)
+                                                <tr>
+                                                    <td class="px-4 py-3 align-top">
+                                                        <a
+                                                            href="{{ route('public.certificate-attributes.show', $certificateAttributeEntry['attribute']) }}"
+                                                            class="font-medium text-neutral-900 transition hover:opacity-80 dark:text-neutral-100"
+                                                        >
+                                                            {{ $certificateAttributeEntry['attribute']->name }}
+                                                        </a>
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        <div class="flex flex-wrap gap-2">
+                                                            @forelse ($certificateAttributeEntry['ratings'] as $certificateRating)
+                                                                <a
+                                                                    href="{{ route('public.certificate-ratings.show', $certificateRating) }}"
+                                                                    class="inline-flex items-center rounded-full border border-black/8 px-2.5 py-1 text-xs font-medium text-neutral-700 transition hover:bg-white dark:border-white/10 dark:text-neutral-200 dark:hover:bg-white/[0.05]"
+                                                                >
+                                                                    {{ $certificateRating->name }}
+                                                                </a>
+                                                            @empty
+                                                                <span class="text-neutral-500 dark:text-neutral-400">—</span>
+                                                            @endforelse
+                                                        </div>
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        <div class="flex flex-wrap gap-2">
+                                                            @forelse ($certificateAttributeEntry['countries'] as $country)
+                                                                <span class="inline-flex items-center gap-2 rounded-full border border-black/8 px-2.5 py-1 text-xs font-medium dark:border-white/10">
+                                                                    <x-ui.flag type="country" :code="$country['code']" class="size-3.5" />
+                                                                    <span>{{ $country['label'] }}</span>
+                                                                </span>
+                                                            @empty
+                                                                <span class="text-neutral-500 dark:text-neutral-400">—</span>
+                                                            @endforelse
+                                                        </div>
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
+                                                        {{ number_format($certificateAttributeEntry['usageCount']) }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                @if ($certificateRatingEntries->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-certificate-ratings" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Certificate ratings</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Certificate ratings linked to this title through its certificate records.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 font-medium">Rating</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">Countries on this title</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">Attributes on this title</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">Certificates on this title</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                            @foreach ($certificateRatingEntries as $certificateRatingEntry)
+                                                <tr>
+                                                    <td class="px-4 py-3 align-top">
+                                                        <a
+                                                            href="{{ route('public.certificate-ratings.show', $certificateRatingEntry['rating']) }}"
+                                                            class="font-medium text-neutral-900 transition hover:opacity-80 dark:text-neutral-100"
+                                                        >
+                                                            {{ $certificateRatingEntry['rating']->name }}
+                                                        </a>
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        <div class="flex flex-wrap gap-2">
+                                                            @forelse ($certificateRatingEntry['countries'] as $country)
+                                                                <span class="inline-flex items-center gap-2 rounded-full border border-black/8 px-2.5 py-1 text-xs font-medium dark:border-white/10">
+                                                                    <x-ui.flag type="country" :code="$country['code']" class="size-3.5" />
+                                                                    <span>{{ $country['label'] }}</span>
+                                                                </span>
+                                                            @empty
+                                                                <span class="text-neutral-500 dark:text-neutral-400">—</span>
+                                                            @endforelse
+                                                        </div>
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        <div class="flex flex-wrap gap-2">
+                                                            @forelse ($certificateRatingEntry['attributes'] as $certificateAttribute)
+                                                                <a
+                                                                    href="{{ route('public.certificate-attributes.show', $certificateAttribute) }}"
+                                                                    class="inline-flex items-center rounded-full border border-black/8 px-2.5 py-1 text-xs font-medium text-neutral-700 transition hover:bg-white dark:border-white/10 dark:text-neutral-200 dark:hover:bg-white/[0.05]"
+                                                                >
+                                                                    {{ $certificateAttribute->name }}
+                                                                </a>
+                                                            @empty
+                                                                <span class="text-neutral-500 dark:text-neutral-400">—</span>
+                                                            @endforelse
+                                                        </div>
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
+                                                        {{ number_format($certificateRatingEntry['usageCount']) }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                @if ($movieCompanyCreditRows->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-movie-company-credits" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Movie company credits</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Company credits linked directly to this title.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 font-medium">Company</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">Category</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">Start year</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">End year</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                            @foreach ($movieCompanyCreditRows as $movieCompanyCreditRow)
+                                                <tr>
+                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
+                                                        {{ $movieCompanyCreditRow->company?->name ?? $movieCompanyCreditRow->company_imdb_id }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieCompanyCreditRow->companyCreditCategory?->name ?? $movieCompanyCreditRow->company_credit_category_id ?? '—' }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieCompanyCreditRow->start_year ?? '—' }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieCompanyCreditRow->end_year ?? '—' }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                @if ($movieDirectorRows->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-movie-directors" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Movie directors</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Directors linked directly to this title.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 font-medium">Director</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                            @foreach ($movieDirectorRows as $movieDirectorRow)
+                                                <tr>
+                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
+                                                        {{ $movieDirectorRow->nameBasic?->displayName ?? $movieDirectorRow->nameBasic?->primaryname ?? $movieDirectorRow->name_basic_id }}
                                                     </td>
                                                 </tr>
                                             @endforeach
@@ -449,6 +1136,239 @@
                                                     </td>
                                                     <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
                                                         {{ $companyRow->name }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                @if ($movieCompanyCreditAttributeRows->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-movie-company-credit-attributes" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Movie company credit attributes</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Company credit attributes linked to this title's company records.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 font-medium">Company</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">Category</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">Attribute</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                            @foreach ($movieCompanyCreditAttributeRows as $movieCompanyCreditAttributeRow)
+                                                <tr>
+                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
+                                                        {{ $movieCompanyCreditAttributeRow->movieCompanyCredit?->company?->name ?? '—' }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieCompanyCreditAttributeRow->movieCompanyCredit?->companyCreditCategory?->name ?? '—' }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieCompanyCreditAttributeRow->companyCreditAttribute?->name ?? $movieCompanyCreditAttributeRow->company_credit_attribute_id }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                @if ($movieCompanyCreditCountryRows->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-movie-company-credit-countries" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Movie company credit countries</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Countries linked to this title's company credits.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 font-medium">Company</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">Category</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">Country</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                            @foreach ($movieCompanyCreditCountryRows as $movieCompanyCreditCountryRow)
+                                                <tr>
+                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
+                                                        {{ $movieCompanyCreditCountryRow->movieCompanyCredit?->company?->name ?? '—' }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieCompanyCreditCountryRow->movieCompanyCredit?->companyCreditCategory?->name ?? '—' }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        @if (filled($movieCompanyCreditCountryRow->country_code))
+                                                            <div class="flex items-center gap-2">
+                                                                <x-ui.flag type="country" :code="$movieCompanyCreditCountryRow->country_code" class="size-4" />
+                                                                <span>{{ $movieCompanyCreditCountryRow->resolvedCountryLabel() ?? $movieCompanyCreditCountryRow->country_code }}</span>
+                                                            </div>
+                                                        @else
+                                                            —
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                @if ($movieCompanyCreditSummaryRows->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-movie-company-credit-summaries" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Movie company credit summaries</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Raw rows imported from the <code>movie_company_credit_summaries</code> table and linked directly to this movie.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 font-medium">movie_id</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">total_count</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">next_page_token</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                            @foreach ($movieCompanyCreditSummaryRows as $movieCompanyCreditSummaryRow)
+                                                <tr>
+                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
+                                                        {{ $movieCompanyCreditSummaryRow->movie_id }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieCompanyCreditSummaryRow->total_count }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieCompanyCreditSummaryRow->next_page_token }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                @if ($movieEpisodeSummaryRows->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-movie-episode-summaries" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Movie episode summaries</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Raw rows imported from the <code>movie_episode_summaries</code> table and linked directly to this movie.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 font-medium">movie_id</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">total_count</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">next_page_token</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                            @foreach ($movieEpisodeSummaryRows as $movieEpisodeSummaryRow)
+                                                <tr>
+                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
+                                                        {{ $movieEpisodeSummaryRow->movie_id }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieEpisodeSummaryRow->total_count }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieEpisodeSummaryRow->next_page_token }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                @if ($movieEpisodeRows->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-movie-episodes" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Movie episodes</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Raw rows imported from the <code>movie_episodes</code> table and linked directly to this movie.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 font-medium">episode_movie_id</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">movie_id</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">season</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">episode_number</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">release_year</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">release_month</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">release_day</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                            @foreach ($movieEpisodeRows as $movieEpisodeRow)
+                                                <tr>
+                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
+                                                        {{ $movieEpisodeRow->episode_movie_id }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieEpisodeRow->movie_id }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieEpisodeRow->season }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieEpisodeRow->episode_number }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieEpisodeRow->release_year }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieEpisodeRow->release_month }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieEpisodeRow->release_day }}
                                                     </td>
                                                 </tr>
                                             @endforeach
@@ -536,15 +1456,452 @@
                     </x-ui.card>
                 @endif
 
+                @if ($countryRows->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-countries" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Countries</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Raw rows imported from the <code>countries</code> table and linked to this movie through its origin country records.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 font-medium">code</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">name</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                            @foreach ($countryRows as $countryRow)
+                                                <tr>
+                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
+                                                        {{ strtoupper((string) $countryRow->code) }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $countryRow->name ?? '—' }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                @if ($movieBoxOfficeRows->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-movie-box-office" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Movie box office</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Raw rows imported from the <code>movie_box_office</code> table and linked directly to this movie.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 font-medium">movie_id</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">domestic_gross_amount</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">domestic_gross_currency_code</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">worldwide_gross_amount</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">worldwide_gross_currency_code</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">opening_weekend_gross_amount</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">opening_weekend_gross_currency_code</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">opening_weekend_end_year</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">opening_weekend_end_month</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">opening_weekend_end_day</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">production_budget_amount</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">production_budget_currency_code</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                            @foreach ($movieBoxOfficeRows as $movieBoxOfficeRow)
+                                                <tr>
+                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
+                                                        {{ $movieBoxOfficeRow->movie_id }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieBoxOfficeRow->domestic_gross_amount }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieBoxOfficeRow->domestic_gross_currency_code }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieBoxOfficeRow->worldwide_gross_amount }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieBoxOfficeRow->worldwide_gross_currency_code }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieBoxOfficeRow->opening_weekend_gross_amount }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieBoxOfficeRow->opening_weekend_gross_currency_code }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieBoxOfficeRow->opening_weekend_end_year }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieBoxOfficeRow->opening_weekend_end_month }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieBoxOfficeRow->opening_weekend_end_day }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieBoxOfficeRow->production_budget_amount }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieBoxOfficeRow->production_budget_currency_code }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                @if ($currencyRows->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-currencies" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Currencies</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Raw rows imported from the <code>currencies</code> table and linked to this movie through its box office records.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 font-medium">code</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                            @foreach ($currencyRows as $currencyRow)
+                                                <tr>
+                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
+                                                        {{ strtoupper((string) $currencyRow->code) }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                @if ($movieImageSummaryRows->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-movie-image-summaries" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Movie image summaries</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Raw rows imported from the <code>movie_image_summaries</code> table and linked directly to this movie.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 font-medium">movie_id</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">total_count</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">next_page_token</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                            @foreach ($movieImageSummaryRows as $movieImageSummaryRow)
+                                                <tr>
+                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
+                                                        {{ $movieImageSummaryRow->movie_id }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieImageSummaryRow->total_count }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieImageSummaryRow->next_page_token }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                @if ($movieGenreRows->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-movie-genres" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Movie genres</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Genre links attached directly to this title.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 font-medium">Genre</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                            @foreach ($movieGenreRows as $movieGenreRow)
+                                                <tr>
+                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
+                                                        {{ $movieGenreRow->genre?->name ?? $movieGenreRow->genre_id }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                @if ($genreRows->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-genres" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Genres</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Raw rows imported from the <code>genres</code> table and linked to this movie through its movie genre records.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 font-medium">id</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">name</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                            @foreach ($genreRows as $genreRow)
+                                                <tr>
+                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
+                                                        {{ $genreRow->id }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $genreRow->name }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                @if ($interestCategoryRows->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-interest-categories" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Interest categories</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Raw rows imported from the <code>interest_categories</code> table and linked to this movie through its imported interests.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 font-medium">id</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">name</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                            @foreach ($interestCategoryRows as $interestCategoryRow)
+                                                <tr>
+                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
+                                                        {{ $interestCategoryRow->id }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $interestCategoryRow->name }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                @if ($interestPrimaryImageRows->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-interest-primary-images" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Interest primary images</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Raw rows imported from the <code>interest_primary_images</code> table and linked to this movie through its imported interests.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 font-medium">interest_imdb_id</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">url</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">width</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">height</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">type</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                            @foreach ($interestPrimaryImageRows as $interestPrimaryImageRow)
+                                                <tr>
+                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
+                                                        {{ $interestPrimaryImageRow->interest_imdb_id }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $interestPrimaryImageRow->url }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $interestPrimaryImageRow->width ?? '—' }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $interestPrimaryImageRow->height ?? '—' }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $interestPrimaryImageRow->type ?? '—' }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                @if ($interestSimilarInterestRows->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-interest-similar-interests" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Interest similar interests</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Raw rows imported from the <code>interest_similar_interests</code> table and linked to this movie through its imported interests.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 font-medium">interest_imdb_id</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">similar_interest_imdb_id</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">position</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                            @foreach ($interestSimilarInterestRows as $interestSimilarInterestRow)
+                                                <tr>
+                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
+                                                        {{ $interestSimilarInterestRow->interest_imdb_id }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $interestSimilarInterestRow->similar_interest_imdb_id }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $interestSimilarInterestRow->position }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                @if ($interestRows->isNotEmpty())
+                    <x-ui.card data-slot="title-detail-interests" class="sb-detail-section !max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="lg">Interests</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Raw rows imported from the <code>interests</code> table and linked to this movie through its movie interest records.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
+                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
+                                            <tr>
+                                                <th scope="col" class="px-4 py-3 font-medium">imdb_id</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">name</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">description</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">is_subgenre</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
+                                            @foreach ($interestRows as $interestRow)
+                                                <tr>
+                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
+                                                        {{ $interestRow->imdb_id }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $interestRow->name }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $interestRow->description ?? '—' }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ (int) $interestRow->is_subgenre }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.card>
+                @endif
+
                 @if ($interestHighlights->isNotEmpty())
                     <x-ui.card data-slot="title-discovery-profile" class="sb-detail-section !max-w-none">
                         <div class="space-y-4">
-                            <div>
-                                <x-ui.heading level="h2" size="lg">Discovery profile</x-ui.heading>
-                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                    Imported interest tags and subgenre signals that shape related-title discovery across the MySQL catalog.
-                                </x-ui.text>
-                            </div>
+                        <div>
+                            <x-ui.heading level="h2" size="lg">Discovery profile</x-ui.heading>
+                        </div>
 
                             <div class="flex flex-wrap gap-2">
                                 @foreach ($interestHighlights as $interestHighlight)
@@ -864,12 +2221,9 @@
                 @if ($archiveLinks->isNotEmpty())
                     <x-ui.card class="sb-detail-section !max-w-none">
                         <div class="space-y-4">
-                            <div>
-                                <x-ui.heading level="h2" size="lg">Archive Views</x-ui.heading>
-                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                    Dedicated read-only surfaces for the imported MySQL data attached to this title.
-                                </x-ui.text>
-                            </div>
+                        <div>
+                            <x-ui.heading level="h2" size="lg">Archive Views</x-ui.heading>
+                        </div>
 
                             <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
                                 @foreach ($archiveLinks as $archiveLink)

@@ -37,6 +37,9 @@ return [
 
     'imdb' => [
         'base_url' => env('IMDB_API_BASE_URL', 'https://api.imdbapi.dev'),
+        'catalog_import' => [
+            'seed_titles' => [],
+        ],
         'graphql' => [
             'enabled' => (bool) env('IMDB_GRAPHQL_ENABLED', false),
             'url' => env('IMDB_GRAPHQL_URL', 'https://graph.imdbapi.dev/v1'),
@@ -46,6 +49,8 @@ return [
             'ttl_seconds' => max(0, (int) env('IMDB_HTTP_CACHE_TTL_SECONDS', 86400)),
         ],
         'inter_request_delay_microseconds' => (int) env('IMDB_INTER_REQUEST_DELAY_MICROSECONDS', 1000000),
+        'retry_attempts' => max(1, (int) env('IMDB_HTTP_RETRY_ATTEMPTS', 5)),
+        'retry_delay_milliseconds' => max(0, (int) env('IMDB_HTTP_RETRY_DELAY_MILLISECONDS', 1000)),
         'default_batch_concurrency' => max(1, (int) env('DEFAULT_BATCH_CONCURRENCY', 5)),
         'title_batch_concurrency' => max(
             1,

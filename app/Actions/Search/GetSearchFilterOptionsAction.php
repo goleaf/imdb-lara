@@ -5,6 +5,7 @@ namespace App\Actions\Search;
 use App\Enums\TitleType;
 use App\Models\Country;
 use App\Models\Genre;
+use App\Models\InterestCategory;
 use App\Models\Language;
 use App\Models\Title;
 use Illuminate\Database\Eloquent\Builder;
@@ -17,6 +18,7 @@ class GetSearchFilterOptionsAction
      * @return array{
      *     countries: list<array{value: string, label: string}>,
      *     genres: Collection<int, Genre>,
+     *     interestCategories: Collection<int, InterestCategory>,
      *     languages: list<array{value: string, label: string}>,
      *     runtimeOptions: list<array{value: string, label: string}>,
      *     sortOptions: list<array{value: string, label: string}>,
@@ -40,17 +42,24 @@ class GetSearchFilterOptionsAction
                     'countries' => Country::query()
                         ->select(['code', 'name'])
                         ->whereHas('movies', fn (Builder $query) => $query->where('isadult', 0))
-                        ->orderBy('name')
                         ->get()
+                        ->sortBy(fn (Country $country): string => mb_strtolower($country->resolvedLabel()))
                         ->map(fn (Country $country): array => [
                             'value' => $country->code,
-                            'label' => $country->name ?: strtoupper($country->code),
+                            'label' => $country->resolvedLabel(),
                         ])
                         ->values()
                         ->all(),
                     'genres' => Genre::query()
                         ->select(['id', 'name'])
                         ->orderBy('name')
+                        ->get(),
+                    'interestCategories' => InterestCategory::query()
+                        ->select(['interest_categories.id', 'interest_categories.name'])
+                        ->withDirectoryMetrics()
+                        ->orderByDesc('title_linked_interests_count')
+                        ->orderByDesc('interests_count')
+                        ->orderBy('interest_categories.name')
                         ->get(),
                     'languages' => Language::query()
                         ->select(['code', 'name'])

@@ -80,6 +80,13 @@ class PublicRouteArchitectureTest extends TestCase
             ->assertOk()
             ->assertSee('Media Gallery');
 
+        $this->get(route('public.titles.media.archive', [
+            'title' => $mediaTitle,
+            'archive' => 'posters',
+        ]))
+            ->assertOk()
+            ->assertSee('Posters');
+
         $this->get(route('public.titles.box-office', $boxOfficeTitle))
             ->assertOk()
             ->assertSee('Box Office Report');
@@ -134,6 +141,7 @@ class PublicRouteArchitectureTest extends TestCase
         $this->assertTrue(Route::has('public.interest-categories.show'));
         $this->assertTrue(Route::has('public.titles.cast'));
         $this->assertTrue(Route::has('public.titles.media'));
+        $this->assertTrue(Route::has('public.titles.media.archive'));
         $this->assertTrue(Route::has('public.titles.box-office'));
         $this->assertTrue(Route::has('public.titles.parents-guide'));
         $this->assertTrue(Route::has('public.titles.trivia'));

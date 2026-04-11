@@ -22,6 +22,7 @@ class TitleCastExperienceTest extends TestCase
             ->assertSeeHtml('data-slot="title-cast-hero"')
             ->assertSeeHtml('data-slot="title-cast-cast-section"')
             ->assertSeeHtml('data-slot="title-cast-crew-section"')
+            ->assertSeeHtml('text-[#f4eee5] decoration-white/20 hover:text-white')
             ->assertSee('Back to title')
             ->assertSee('Cast')
             ->assertSee('Crew');

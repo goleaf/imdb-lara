@@ -16,9 +16,12 @@ class PublicMysqlCatalogSmokeTest extends TestCase
     {
         Livewire::withoutLazyLoading();
 
+        $interestCategory = $this->sampleInterestCategory();
+
         $this->get(route('public.home'))
             ->assertOk()
             ->assertSee('Catalog Spotlight')
+            ->assertSee('Theme lanes')
             ->assertSee('Awards Spotlight')
             ->assertSee('Latest Trailers')
             ->assertSee('Trending titles');
@@ -37,7 +40,12 @@ class PublicMysqlCatalogSmokeTest extends TestCase
 
         $this->get(route('public.titles.index'))
             ->assertOk()
-            ->assertSee('Browse Titles');
+            ->assertSee('Browse Titles')
+            ->assertSee('Theme lanes');
+
+        $this->get(route('public.titles.index', ['theme' => $interestCategory->slug]))
+            ->assertOk()
+            ->assertSee('Clear theme lane');
 
         $this->get(route('public.movies.index'))
             ->assertOk()
@@ -108,6 +116,13 @@ class PublicMysqlCatalogSmokeTest extends TestCase
         $this->get(route('public.titles.media', $mediaTitle))
             ->assertOk()
             ->assertSee('Media Gallery');
+
+        $this->get(route('public.titles.media.archive', [
+            'title' => $mediaTitle,
+            'archive' => 'posters',
+        ]))
+            ->assertOk()
+            ->assertSee('Posters');
 
         $this->get(route('public.titles.box-office', $boxOfficeTitle))
             ->assertOk()

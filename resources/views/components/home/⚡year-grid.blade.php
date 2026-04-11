@@ -60,9 +60,9 @@ new class extends Component
                 </x-ui.text>
             </div>
 
-            <x-ui.link :href="route('public.titles.index')" variant="ghost">
+            <x-ui.link.light :href="route('public.titles.index')">
                 Browse all titles
-            </x-ui.link>
+            </x-ui.link.light>
         </div>
 
         @if ($errorMessage)

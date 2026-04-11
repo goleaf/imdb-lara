@@ -1,0 +1,3209 @@
+{
+    "schemaVersion": 1,
+    "imdbId": "nm3382412",
+    "downloadedAt": "2026-04-11T03:17:15+00:00",
+    "sourceUrl": "https://api.imdbapi.dev/names/nm3382412",
+    "details": {
+        "id": "nm3382412",
+        "displayName": "Michelle Greenidge",
+        "primaryImage": {
+            "url": "https://m.media-amazon.com/images/M/MV5BZjAyMjBhMDgtOTk1Ni00YzcxLThlMjgtYmM5ZmZhYzgyNjJhXkEyXkFqcGc@._V1_.jpg",
+            "width": 1000,
+            "height": 667
+        },
+        "primaryProfessions": [
+            "actress"
+        ],
+        "biography": "Michelle Greenidge was born on 15 June 1969 in Bradford, West Yorkshire, England, UK. She is an actress, known for Cruella (2021), Venom: Let There Be Carnage (2021) and Lonely Planet (2024).",
+        "birthName": "Michelle Denise Greenidge",
+        "birthDate": {
+            "year": 1969,
+            "month": 6,
+            "day": 15
+        },
+        "birthLocation": "Bradford, West Yorkshire, England, UK"
+    },
+    "images": {
+        "images": [
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BZjAyMjBhMDgtOTk1Ni00YzcxLThlMjgtYmM5ZmZhYzgyNjJhXkEyXkFqcGc@._V1_.jpg",
+                "width": 1000,
+                "height": 667,
+                "type": "still_frame"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BZGYzNWY0NjItNTBhZC00OGRhLWFiOWItZTNhN2Q1NmE1ZmNjXkEyXkFqcGc@._V1_.jpg",
+                "width": 3000,
+                "height": 2000,
+                "type": "still_frame"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BM2RiZWU5ZmItNjNiZS00NzEyLTgzZjktNmM3ZTc4YjYwZjg1XkEyXkFqcGc@._V1_.jpg",
+                "width": 7195,
+                "height": 4797,
+                "type": "event"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BM2M0ZGMyNDYtM2U5Zi00OTEwLTkyZTctMzdmMDIxOWZiMjEzXkEyXkFqcGc@._V1_.jpg",
+                "width": 7780,
+                "height": 5187,
+                "type": "event"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BM2FhZDYxZWYtNjFmZi00M2JjLTk4YjUtNjFhMmM5MDRkYjkyXkEyXkFqcGc@._V1_.jpg",
+                "width": 1179,
+                "height": 619,
+                "type": "still_frame"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BMzY3ODQwMDgtNGRhNy00NTQxLTk3MzItZmNkNmFjZTllY2MwXkEyXkFqcGc@._V1_.jpg",
+                "width": 4627,
+                "height": 6940,
+                "type": "event"
+            }
+        ],
+        "totalCount": 6
+    },
+    "filmography": {
+        "credits": [
+            {
+                "title": {
+                    "id": "tt7097896",
+                    "type": "movie",
+                    "primaryTitle": "Venom: Let There Be Carnage",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZGIxMTU1MjItM2FmMi00YmFiLTgwNDMtMTczYmVjYTBhNGZhXkEyXkFqcGc@._V1_.jpg",
+                        "width": 691,
+                        "height": 1024
+                    },
+                    "startYear": 2021,
+                    "genres": [
+                        "Action",
+                        "Adventure",
+                        "Crime",
+                        "Fantasy",
+                        "Horror",
+                        "Sci-Fi",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.9,
+                        "voteCount": 302738
+                    },
+                    "metacritic": {
+                        "score": 49,
+                        "reviewCount": 48
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        },
+                        {
+                            "code": "CA",
+                            "name": "Canada"
+                        },
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Mugging Victim"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt3228774",
+                    "type": "movie",
+                    "primaryTitle": "Cruella",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMWY5MjljNjctZjhjZS00MWY0LTgwYzUtZTJiYTVmMmJkM2E0XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1688,
+                        "height": 2500
+                    },
+                    "startYear": 2021,
+                    "genres": [
+                        "Adventure",
+                        "Comedy",
+                        "Crime",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.3,
+                        "voteCount": 295051
+                    },
+                    "metacritic": {
+                        "score": 59,
+                        "reviewCount": 56
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        },
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        },
+                        {
+                            "code": "CA",
+                            "name": "Canada"
+                        },
+                        {
+                            "code": "IE",
+                            "name": "Ireland"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Viking Gala Guard"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt12042730",
+                    "type": "movie",
+                    "primaryTitle": "Project Hail Mary",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNTkwNzJiYTctNzI3NC00NjE1LTlhYjktY2Q5MTdmMWFmNzcxXkEyXkFqcGc@._V1_.jpg",
+                        "width": 2765,
+                        "height": 4096
+                    },
+                    "startYear": 2026,
+                    "genres": [
+                        "Adventure",
+                        "Comedy",
+                        "Sci-Fi"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.4,
+                        "voteCount": 178625
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Chimamanda"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt8398600",
+                    "type": "tvSeries",
+                    "primaryTitle": "After Life",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNDVkNzU5ZjAtNjE5MC00YjBmLTk0NjAtYmFiOTk3MGIwZDlmXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1012,
+                        "height": 1500
+                    },
+                    "startYear": 2019,
+                    "endYear": 2022,
+                    "genres": [
+                        "Comedy",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.4,
+                        "voteCount": 168502
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Valerie"
+                ],
+                "episodeCount": 17
+            },
+            {
+                "title": {
+                    "id": "tt17491088",
+                    "type": "tvSeries",
+                    "primaryTitle": "The Diplomat",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNWRlNGE3MjAtMGQ2NC00NGNiLWFiM2QtYjRlNmQ1MmI2ZjhiXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1500,
+                        "height": 2222
+                    },
+                    "startYear": 2023,
+                    "genres": [
+                        "Drama",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8,
+                        "voteCount": 97101
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        },
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Suzanne Hotchkiss"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt8550732",
+                    "type": "tvSeries",
+                    "primaryTitle": "Kaos",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZjczMDQ5MTEtYzY1Ni00M2FlLWI2NGMtYTYyZjM1ZGNkNGQyXkEyXkFqcGc@._V1_.jpg",
+                        "width": 604,
+                        "height": 755
+                    },
+                    "startYear": 2024,
+                    "endYear": 2024,
+                    "genres": [
+                        "Comedy",
+                        "Drama",
+                        "Fantasy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.4,
+                        "voteCount": 48155
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "The Tacita"
+                ],
+                "episodeCount": 6
+            },
+            {
+                "title": {
+                    "id": "tt9140342",
+                    "type": "tvMiniSeries",
+                    "primaryTitle": "It's a Sin",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMzI4NThmYTQtY2E2Ni00NjI0LThmYzQtNmZlMmI1NzY2OWQ0XkEyXkFqcGc@._V1_.jpg",
+                        "width": 2025,
+                        "height": 3000
+                    },
+                    "startYear": 2021,
+                    "endYear": 2021,
+                    "genres": [
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.6,
+                        "voteCount": 40649
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Rosa Babatunde"
+                ],
+                "episodeCount": 3
+            },
+            {
+                "title": {
+                    "id": "tt1888075",
+                    "type": "tvSeries",
+                    "primaryTitle": "Death in Paradise",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTc5OTc3MjAwN15BMl5BanBnXkFtZTgwODAxMDQyMTE@._V1_.jpg",
+                        "width": 680,
+                        "height": 1000
+                    },
+                    "startYear": 2011,
+                    "genres": [
+                        "Crime",
+                        "Drama",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.8,
+                        "voteCount": 32809
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        },
+                        {
+                            "code": "FR",
+                            "name": "France"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Paulette Brice"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt11204260",
+                    "type": "tvSeries",
+                    "primaryTitle": "I May Destroy You",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZmM4N2U3YTAtOTY2Zi00ZjYxLWE0ZDUtYzQ2ODdmOTEyN2EzXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1013,
+                        "height": 1500
+                    },
+                    "startYear": 2020,
+                    "endYear": 2020,
+                    "genres": [
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.1,
+                        "voteCount": 28277
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        },
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Grace",
+                    "Grace (2019-2020)"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt31433814",
+                    "type": "tvSeries",
+                    "primaryTitle": "Doctor Who",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BN2I4N2I1MjgtNTE1NS00ODExLWEzMjEtZjgyZjU2MWNkYThkXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1688,
+                        "height": 2500
+                    },
+                    "startYear": 2023,
+                    "genres": [
+                        "Adventure",
+                        "Drama",
+                        "Sci-Fi"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.1,
+                        "voteCount": 26040
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Carla Sunday"
+                ],
+                "episodeCount": 8
+            },
+            {
+                "title": {
+                    "id": "tt31433814",
+                    "type": "tvSeries",
+                    "primaryTitle": "Doctor Who",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BN2I4N2I1MjgtNTE1NS00ODExLWEzMjEtZjgyZjU2MWNkYThkXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1688,
+                        "height": 2500
+                    },
+                    "startYear": 2023,
+                    "genres": [
+                        "Adventure",
+                        "Drama",
+                        "Sci-Fi"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.1,
+                        "voteCount": 26040
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "self",
+                "characters": [
+                    "Carla Sunday"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt3747572",
+                    "type": "tvSeries",
+                    "primaryTitle": "Grantchester",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMzA0NjNmZGUtOTRhOC00NTgxLTg5OGItNDk1NTQ2YmM5Y2QzXkEyXkFqcGc@._V1_.jpg",
+                        "width": 588,
+                        "height": 882
+                    },
+                    "startYear": 2014,
+                    "genres": [
+                        "Crime",
+                        "Drama",
+                        "Mystery"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.9,
+                        "voteCount": 20172
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Rita Daltrey"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt6964748",
+                    "type": "tvSeries",
+                    "primaryTitle": "Alex Rider",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOTgxMWM1YTktNzgwMy00NWY5LTgzMzgtY2ZlYzkxMGUwZTUzXkEyXkFqcGc@._V1_.jpg",
+                        "width": 2000,
+                        "height": 3000
+                    },
+                    "startYear": 2020,
+                    "endYear": 2024,
+                    "genres": [
+                        "Action",
+                        "Adventure",
+                        "Drama",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.5,
+                        "voteCount": 19594
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        },
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Maisie"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt20194882",
+                    "type": "movie",
+                    "primaryTitle": "Lonely Planet",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOTc4YmQ4ODctNjQ5YS00YmNjLTk3MjctZjIwMGJlMDdhNzc1XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1290,
+                        "height": 1599
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Drama",
+                        "Romance"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.7,
+                        "voteCount": 13300
+                    },
+                    "metacritic": {
+                        "score": 46,
+                        "reviewCount": 17
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Philippa Guscott"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt34874258",
+                    "type": "tvSpecial",
+                    "primaryTitle": "Cunk on Life",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMmFkY2ZhMzMtN2M5MS00YzI1LTg1YmEtZmNjOWNmZmZlOTBiXkEyXkFqcGc@._V1_.jpg",
+                        "width": 2000,
+                        "height": 3000
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.3,
+                        "voteCount": 11280
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Jacqui Flink"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt11639300",
+                    "type": "tvSeries",
+                    "primaryTitle": "Grace",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMjY5NmUxMDItMTQ1Yi00NTM5LWI3MTMtYWYxMWZmZDE4ZjZiXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1024,
+                        "height": 1280
+                    },
+                    "startYear": 2021,
+                    "genres": [
+                        "Crime",
+                        "Drama",
+                        "Mystery"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.4,
+                        "voteCount": 10952
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Dr. Noreen Allen"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt28289436",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Space Babies",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOGMwZWVlNDAtMjZjNi00ODIzLTkwZjMtMDZhMzkzNmNjZTUyXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1920,
+                        "height": 1280
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Adventure",
+                        "Drama",
+                        "Sci-Fi"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5,
+                        "voteCount": 9725
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Carla Sunday"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt10551100",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Mangrove",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZDliYmRmM2UtMzRiMC00OGY3LTkyODUtMWNlMDU0ODFjZGRiXkEyXkFqcGc@._V1_.jpg",
+                        "width": 8250,
+                        "height": 12150
+                    },
+                    "startYear": 2020,
+                    "genres": [
+                        "Drama",
+                        "History"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8,
+                        "voteCount": 6156
+                    },
+                    "metacritic": {
+                        "score": 90,
+                        "reviewCount": 27
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Mrs Manning"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt3464896",
+                    "type": "tvMiniSeries",
+                    "primaryTitle": "Small Axe",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOGUwNjc5MGItZmI2YS00YjdjLWE3ODctZGI5MTM4ZDgwN2Y2XkEyXkFqcGc@._V1_.jpg",
+                        "width": 8250,
+                        "height": 12150
+                    },
+                    "startYear": 2020,
+                    "endYear": 2020,
+                    "genres": [
+                        "Drama",
+                        "History"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.8,
+                        "voteCount": 5787
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Mrs Manning"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt30135004",
+                    "type": "tvMiniSeries",
+                    "primaryTitle": "Playing Nice",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTMwYzY0MjItMTg3NC00M2IxLWFkZGYtZGMzYjU5NjA3ZTEzXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1944,
+                        "height": 2880
+                    },
+                    "startYear": 2025,
+                    "endYear": 2025,
+                    "genres": [
+                        "Drama",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.1,
+                        "voteCount": 5061
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Rhoda Verran"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt12283422",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Episode #3.6",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOGU4ZDM4MTktZGY5Yi00YWIyLTk5NmQtYzM5Y2QyM2VlNTBkXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1200,
+                        "height": 675
+                    },
+                    "startYear": 2022,
+                    "genres": [
+                        "Comedy",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 9.2,
+                        "voteCount": 4659
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Valerie"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt8664264",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Episode #1.1",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZTQzZTk2MjEtNzgwMy00NTY4LTg0NWQtMjk3ODY5YTliMzBiXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1100,
+                        "height": 647
+                    },
+                    "startYear": 2019,
+                    "genres": [
+                        "Comedy",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.7,
+                        "voteCount": 4471
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Valerie"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt8664284",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Episode #1.6",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNTVlZjE2YWQtODJhYy00MTQyLWE5ODQtN2E2ZDVmZmU4MjMzXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1112,
+                        "height": 644
+                    },
+                    "startYear": 2019,
+                    "genres": [
+                        "Comedy",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.6,
+                        "voteCount": 4068
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Valerie"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt0096555",
+                    "type": "tvSeries",
+                    "primaryTitle": "Casualty",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOWQzMTMxYzgtZWIzZS00NTVjLTllMjktYzc2ZDdmNGNhNjA5XkEyXkFqcGc@._V1_.jpg",
+                        "width": 367,
+                        "height": 500
+                    },
+                    "startYear": 1986,
+                    "genres": [
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.2,
+                        "voteCount": 4029
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Gail Carrow",
+                    "Prison Guard"
+                ],
+                "episodeCount": 2
+            },
+            {
+                "title": {
+                    "id": "tt8664276",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Episode #1.2",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYjVhNjhhZTAtZjg3Zi00OTgyLTliNDMtZDIzYWYwY2U2NTNlXkEyXkFqcGc@._V1_.jpg",
+                        "width": 960,
+                        "height": 1440
+                    },
+                    "startYear": 2019,
+                    "genres": [
+                        "Comedy",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.9,
+                        "voteCount": 4021
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Valerie"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt8664282",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Episode #1.5",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZGUxNDc1NTktMWJhYi00YTYyLTkyMzgtYTVlN2ZhNjdkYzVjXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1920,
+                        "height": 1080
+                    },
+                    "startYear": 2019,
+                    "genres": [
+                        "Comedy",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.5,
+                        "voteCount": 3877
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Valerie"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt8664280",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Episode #1.4",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BY2U0ZWRlNmItNDNhMC00NmU2LTlkNDgtYTY0YzUyNzc5NjcyXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1021,
+                        "height": 634
+                    },
+                    "startYear": 2019,
+                    "genres": [
+                        "Comedy",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.2,
+                        "voteCount": 3813
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Valerie"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt8664278",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Episode #1.3",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNzBjY2ZhNGYtOGQ0ZC00Y2U2LWE3OTQtNDQ2ZDVhMzVjNzMxXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1088,
+                        "height": 638
+                    },
+                    "startYear": 2019,
+                    "genres": [
+                        "Comedy",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.9,
+                        "voteCount": 3805
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Valerie"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt11782102",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Episode #2.6",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMjNlYzcyM2UtYTUyYS00ZTNlLTk0MTMtNTg2MGI5OGM4MDRmXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1366,
+                        "height": 768
+                    },
+                    "startYear": 2020,
+                    "genres": [
+                        "Comedy",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.8,
+                        "voteCount": 3636
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Valerie"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt10692232",
+                    "type": "tvSeries",
+                    "primaryTitle": "Mandy",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNzUzM2Y0ZTItNzkzOS00ZDRkLTk0OWYtMTIxY2U1NzE3NDBlXkEyXkFqcGc@._V1_.jpg",
+                        "width": 680,
+                        "height": 1000
+                    },
+                    "startYear": 2019,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.4,
+                        "voteCount": 3317
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Lola"
+                ],
+                "episodeCount": 24
+            },
+            {
+                "title": {
+                    "id": "tt11782068",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Episode #2.2",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYmZhZTZkYTMtMDk4MC00MWEzLWIwMjctMTQxODczNjMxMDU5XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1094,
+                        "height": 638
+                    },
+                    "startYear": 2020,
+                    "genres": [
+                        "Comedy",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.7,
+                        "voteCount": 2956
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Valerie"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt11782094",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Episode #2.5",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZGE0ZTYyYmUtZTlkYy00MjFhLWJkNWMtYThkM2FhNWE0ZDBlXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1366,
+                        "height": 768
+                    },
+                    "startYear": 2020,
+                    "genres": [
+                        "Comedy",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.3,
+                        "voteCount": 2887
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Valerie"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt11782080",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Episode #2.3",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZTJlOGM5Y2MtNjdmNC00NjcwLWE0MTMtN2JlMWQ0MzIyMGUyXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1366,
+                        "height": 768
+                    },
+                    "startYear": 2020,
+                    "genres": [
+                        "Comedy",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.9,
+                        "voteCount": 2865
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Valerie"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt11782082",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Episode #2.4",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZGRiMDg5OTEtNmNjYi00MGJkLTlmYmYtMzdlNWJlOGUyOTQyXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1366,
+                        "height": 768
+                    },
+                    "startYear": 2020,
+                    "genres": [
+                        "Comedy",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.1,
+                        "voteCount": 2837
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Valerie"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt8905884",
+                    "type": "tvSeries",
+                    "primaryTitle": "Adult Material",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNWE4ZGUxMTAtYmQxOS00NTgxLWE1YTEtYjhhMzM3NmIyMDJjXkEyXkFqcGc@._V1_.jpg",
+                        "width": 800,
+                        "height": 1200
+                    },
+                    "startYear": 2020,
+                    "endYear": 2020,
+                    "genres": [
+                        "Comedy",
+                        "Drama",
+                        "Romance"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.8,
+                        "voteCount": 2761
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Denise"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt9169784",
+                    "type": "tvSeries",
+                    "primaryTitle": "Code 404",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOTAxMjM1NjMtYmU3OC00YzAzLWIwYTQtYjZkY2VjNDUzYTUwXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1200,
+                        "height": 1777
+                    },
+                    "startYear": 2020,
+                    "endYear": 2022,
+                    "genres": [
+                        "Action",
+                        "Comedy",
+                        "Crime",
+                        "Sci-Fi",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.3,
+                        "voteCount": 2661
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "DS Judith Papastathopoulos",
+                    "PC Williams (Not Judy)"
+                ],
+                "episodeCount": 18
+            },
+            {
+                "title": {
+                    "id": "tt12283394",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Episode #3.1",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNzA5ZDI1OTktODFhZS00OGVkLTkyYjAtZmRhODZiYzMyOWMzXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1200,
+                        "height": 801
+                    },
+                    "startYear": 2022,
+                    "genres": [
+                        "Comedy",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.3,
+                        "voteCount": 2350
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Valerie"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt11133202",
+                    "type": "tvSeries",
+                    "primaryTitle": "The Witchfinder",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYTMxMDRkNGQtNTIwMy00N2FjLWFmYzEtNTA2YTRkODQ2ZDkxXkEyXkFqcGc@._V1_.jpg",
+                        "width": 960,
+                        "height": 1440
+                    },
+                    "startYear": 2022,
+                    "endYear": 2022,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.6,
+                        "voteCount": 2256
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Landlady"
+                ],
+                "episodeCount": 2
+            },
+            {
+                "title": {
+                    "id": "tt12283404",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Episode #3.3",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOWZmOWYxYzgtYTkwZS00N2M1LTgyMDQtYzNiYTJkMjZmZDEyXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1627,
+                        "height": 1248
+                    },
+                    "startYear": 2022,
+                    "genres": [
+                        "Comedy",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.7,
+                        "voteCount": 2197
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Valerie"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt12283400",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Episode #3.2",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNzNlNWJmODItZGEzYy00NGY2LWI0ZjUtOTcxZDhiZDU3OGRjXkEyXkFqcGc@._V1_.jpg",
+                        "width": 860,
+                        "height": 449
+                    },
+                    "startYear": 2022,
+                    "genres": [
+                        "Comedy",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.4,
+                        "voteCount": 2169
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Valerie"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt12283414",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Episode #3.4",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYWE3MmY3NWYtZjk1OC00ZTMyLTg1MjktMzM2ZGVmMmI1ZjQxXkEyXkFqcGc@._V1_.jpg",
+                        "width": 700,
+                        "height": 466
+                    },
+                    "startYear": 2022,
+                    "genres": [
+                        "Comedy",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.8,
+                        "voteCount": 2101
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Valerie"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt0241383",
+                    "type": "tvSeries",
+                    "primaryTitle": "Doctors",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNGU1MGViOTctNjcyOS00YmZmLTkyZjctYmJjM2MzOTE3ZGRlXkEyXkFqcGc@._V1_.jpg",
+                        "width": 592,
+                        "height": 841
+                    },
+                    "startYear": 2000,
+                    "endYear": 2024,
+                    "genres": [
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 4.5,
+                        "voteCount": 2096
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Sandra Fleming"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt12283420",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Episode #3.5",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZTU2MDQxODctNGZiZS00ZTc0LThlYTEtYjI2NjUwODM3ZTM1XkEyXkFqcGc@._V1_.jpg",
+                        "width": 960,
+                        "height": 1440
+                    },
+                    "startYear": 2022,
+                    "genres": [
+                        "Comedy",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8,
+                        "voteCount": 2081
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Valerie"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt9548664",
+                    "type": "tvSeries",
+                    "primaryTitle": "King Gary",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BODM4OGY0YjAtZTI0NS00YjcyLWFiYTEtNWJlMjExMWExZmYxXkEyXkFqcGc@._V1_.jpg",
+                        "width": 600,
+                        "height": 900
+                    },
+                    "startYear": 2018,
+                    "endYear": 2021,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.8,
+                        "voteCount": 1617
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Mrs. Grant"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt8551092",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Episode #1.1",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMWU5NjAxMGItMjMxNy00OWVhLTg1N2MtM2NiNTRhMzE3NjI1XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1920,
+                        "height": 1080
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Comedy",
+                        "Drama",
+                        "Fantasy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.1,
+                        "voteCount": 1578
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "The Tacita"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt27775188",
+                    "type": "tvSeries",
+                    "primaryTitle": "Queenie",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNWRmZmM4MWItYTNiOS00MjM3LWExNzYtM2FiNzU0OTY2YTA4XkEyXkFqcGc@._V1_.jpg",
+                        "width": 8100,
+                        "height": 12000
+                    },
+                    "startYear": 2024,
+                    "endYear": 2024,
+                    "genres": [
+                        "Comedy",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.9,
+                        "voteCount": 1473
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Maggie Jenkins"
+                ],
+                "episodeCount": 6
+            },
+            {
+                "title": {
+                    "id": "tt33100758",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Birdwatchers",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNzZmYTBkMGUtZjUzNy00MmI4LWE5NTMtMmU4YWM2ZDAwOWNlXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1920,
+                        "height": 1280
+                    },
+                    "startYear": 2025,
+                    "genres": [
+                        "Drama",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.6,
+                        "voteCount": 1143
+                    }
+                },
+                "category": "actress",
+                "characters": [
+                    "Suzanne Hotchkiss"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt8551104",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Episode #1.8",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNDA5YTkwYjAtMTk3MS00OWJhLThmMmYtNDA5ZWQ5Nzc2ZTZhXkEyXkFqcGc@._V1_.jpg",
+                        "width": 8640,
+                        "height": 4320
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Comedy",
+                        "Drama",
+                        "Fantasy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.8,
+                        "voteCount": 1077
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "The Tacita"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt8551096",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Episode #1.3",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMzI1MWRhM2QtNDVjNC00YmNjLTljMTMtOTFhNzUyNjFkYWE1XkEyXkFqcGc@._V1_.jpg",
+                        "width": 8640,
+                        "height": 4320
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Comedy",
+                        "Drama",
+                        "Fantasy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.2,
+                        "voteCount": 1070
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "The Tacita"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt3842614",
+                    "type": "movie",
+                    "primaryTitle": "The Intent",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BN2YwYjc5NWItYzNkNy00ZGRmLWEwMGItZjM5NDQ4ZDMzOTA0XkEyXkFqcGc@._V1_.jpg",
+                        "width": 750,
+                        "height": 919
+                    },
+                    "startYear": 2016,
+                    "genres": [
+                        "Crime",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 4.4,
+                        "voteCount": 973
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Ms. Vincent"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt8551098",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Episode #1.5",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMGIyNzU0OWYtZGM1MC00M2Y5LWE0MWEtMjllNGFkNDBiYjkwXkEyXkFqcGc@._V1_.jpg",
+                        "width": 8640,
+                        "height": 4320
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Comedy",
+                        "Drama",
+                        "Fantasy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.3,
+                        "voteCount": 924
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "The Tacita"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt7333970",
+                    "type": "tvSeries",
+                    "primaryTitle": "Timewasters",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYzkyNWI0ZjctOGZkYi00ZjBiLTkyNjMtN2NhYTRmOWQwNmY0XkEyXkFqcGc@._V1_.jpg",
+                        "width": 2000,
+                        "height": 3000
+                    },
+                    "startYear": 2017,
+                    "endYear": 2019,
+                    "genres": [
+                        "Comedy",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.8,
+                        "voteCount": 803
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Maggie"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt12319242",
+                    "type": "tvEpisode",
+                    "primaryTitle": "The Cause the Cure",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNDBjOTY4ZWUtYTkwNC00N2IxLTkxNTItMzdhMWNlYmJlZTA5XkEyXkFqcGc@._V1_.jpg",
+                        "width": 2000,
+                        "height": 1270
+                    },
+                    "startYear": 2020,
+                    "genres": [
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.6,
+                        "voteCount": 675
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        },
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Grace"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt6841828",
+                    "type": "movie",
+                    "primaryTitle": "The Loss Adjuster",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZTVlOWIwNDAtZDY2ZS00ZDllLWJlMWMtYzBiYjUyYzVmOGI4XkEyXkFqcGc@._V1_.jpg",
+                        "width": 2480,
+                        "height": 3675
+                    },
+                    "startYear": 2020,
+                    "genres": [
+                        "Comedy",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 4.1,
+                        "voteCount": 641
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Purdy"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt3197780",
+                    "type": "movie",
+                    "primaryTitle": "My Happy Ending",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNTRhM2M3N2MtMjdlOC00OGE0LTlmYTQtNjY3MzdiZmVkMzdhXkEyXkFqcGc@._V1_.jpg",
+                        "width": 2835,
+                        "height": 4200
+                    },
+                    "startYear": 2023,
+                    "genres": [
+                        "Comedy",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.4,
+                        "voteCount": 616
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        },
+                        {
+                            "code": "IL",
+                            "name": "Israel"
+                        },
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Nurse Emilia"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt30918821",
+                    "type": "movie",
+                    "primaryTitle": "Last Swim",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOWE0OTRiZTAtNTZlMC00NWU2LTg4YTAtOTQ1MzNmMWFhNmIxXkEyXkFqcGc@._V1_.jpg",
+                        "width": 2000,
+                        "height": 3000
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.2,
+                        "voteCount": 526
+                    },
+                    "metacritic": {
+                        "score": 66,
+                        "reviewCount": 7
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Tonya Berry"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt9552908",
+                    "type": "tvSeries",
+                    "primaryTitle": "Semi-Detached",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYzFmMzUxN2ItNzZjMy00MjIwLWEwYTAtN2UyMDgzMmQ3NjA3XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1154,
+                        "height": 1629
+                    },
+                    "startYear": 2019,
+                    "endYear": 2020,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.3,
+                        "voteCount": 498
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Police Officer"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt7613996",
+                    "type": "movie",
+                    "primaryTitle": "The Intent 2: The Come Up",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNjMwZTgzYjgtMzFhYy00MzlkLTg2ZDgtYzZhMzk5ZDRjMjJkXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1594,
+                        "height": 2362
+                    },
+                    "startYear": 2018,
+                    "genres": [
+                        "Crime"
+                    ],
+                    "rating": {
+                        "aggregateRating": 3.8,
+                        "voteCount": 489
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Ms. Vincent"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt26908996",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Episode 1",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMmQ4ZTdmZTgtYWVhNy00N2MyLThiMDItZGYwYjI1NmIyNGI0XkEyXkFqcGc@._V1_.jpg",
+                        "width": 718,
+                        "height": 1024
+                    },
+                    "startYear": 2025,
+                    "genres": [
+                        "Crime",
+                        "Drama",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.3,
+                        "voteCount": 421
+                    }
+                },
+                "category": "actress",
+                "characters": [
+                    "Paulette Brice"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt11418284",
+                    "type": "movie",
+                    "primaryTitle": "The Art of Love",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNDc2YWE3NjUtNGYxMC00YmJkLTkzN2EtOTgyYTg2MDg5MDdmXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1358,
+                        "height": 1920
+                    },
+                    "startYear": 2022,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.8,
+                        "voteCount": 418
+                    },
+                    "originCountries": [
+                        {
+                            "code": "CH",
+                            "name": "Switzerland"
+                        },
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Libby"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt9226312",
+                    "type": "tvSeries",
+                    "primaryTitle": "Sliced",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOTY5YjBjN2YtNTg4Yy00YzBkLWI4NzEtZWQ3NTdlOWZmMzM4XkEyXkFqcGc@._V1_.jpg",
+                        "width": 960,
+                        "height": 1440
+                    },
+                    "startYear": 2019,
+                    "endYear": 2021,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.3,
+                        "voteCount": 321
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt12858870",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Jobseeker",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYzcxMjdlMzMtZGI0Ni00MGJkLTg2NjMtZWFiOGU3YTg5ZDk1XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1280,
+                        "height": 738
+                    },
+                    "startYear": 2020,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.5,
+                        "voteCount": 166
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Lola"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt12858880",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Susan Bloody Blower",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZDI5NGNkZGEtMmIzMC00YmQxLWIzNTItZTkwNDFhZGVlM2I0XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1200,
+                        "height": 675
+                    },
+                    "startYear": 2020,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.1,
+                        "voteCount": 138
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Lola"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt7177326",
+                    "type": "short",
+                    "primaryTitle": "Nadia",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYzZkYjQ3M2YtMGY4ZC00ODkzLWI0MmQtZjhmNzA5NzU0ZTE4XkEyXkFqcGc@._V1_.jpg",
+                        "width": 2083,
+                        "height": 938
+                    },
+                    "startYear": 2017,
+                    "genres": [
+                        "Short",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.9,
+                        "voteCount": 132
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Linda"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt16248470",
+                    "type": "tvEpisode",
+                    "primaryTitle": "We Wish You A Mandy Christmas",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMDY3NTUzYzktMTY4Yi00YWFmLWI1ZmUtN2UwNGVkM2VjMWJjXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1344,
+                        "height": 756
+                    },
+                    "startYear": 2021,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.5,
+                        "voteCount": 132
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Lola"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt12860164",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Russian",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMzljOWI0YWEtZmQ0MS00OTJkLWE4ODMtODJiNDg4ZGU0MjdkXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1280,
+                        "height": 738
+                    },
+                    "startYear": 2020,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.4,
+                        "voteCount": 126
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Lola"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt12860252",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Meat",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNDliM2FiMmEtNmEyMy00MDU3LWE1YzgtNWJlZWIxYTQ3MDJiXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1280,
+                        "height": 738
+                    },
+                    "startYear": 2020,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.3,
+                        "voteCount": 119
+                    }
+                },
+                "category": "actress",
+                "characters": [
+                    "Lola"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt12860204",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Fish",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYTUxNjBiYmMtMDUyMy00ODE0LWJmZmMtNGU2MDI3YmVhODc4XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1280,
+                        "height": 738
+                    },
+                    "startYear": 2020,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.4,
+                        "voteCount": 119
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Lola"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt22767404",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Destination: Dundee",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNDkyMDRiMjgtNDY3MS00YmViLWI4NzAtODYyZmFiYmU2ZDEyXkEyXkFqcGc@._V1_.jpg",
+                        "width": 926,
+                        "height": 491
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.8,
+                        "voteCount": 116
+                    }
+                },
+                "category": "actress",
+                "characters": [
+                    "Lola"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt28001599",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Get Mandy Carter",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYTE1MGMwM2EtM2I0MS00YzIxLTg1ODEtYjg1MDc0NTJhYWFiXkEyXkFqcGc@._V1_.jpg",
+                        "width": 901,
+                        "height": 533
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8,
+                        "voteCount": 112
+                    }
+                },
+                "category": "actress",
+                "characters": [
+                    "Lola"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt15111312",
+                    "type": "tvEpisode",
+                    "primaryTitle": "The Unpleasantness at Brampton Hall",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BN2VhODUxOWQtMzNlMy00ODAyLTgzMjgtZDNjMjlmOGE0N2NlXkEyXkFqcGc@._V1_.jpg",
+                        "width": 4176,
+                        "height": 2784
+                    },
+                    "startYear": 2022,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.2,
+                        "voteCount": 110
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Lola"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt12004060",
+                    "type": "podcastSeries",
+                    "primaryTitle": "The Archers",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZTk2NGI1YjMtNDc1YS00YzA5LWI4NzAtNTI2NzU3ZjUxZWI4XkEyXkFqcGc@._V1_.jpg",
+                        "width": 450,
+                        "height": 600
+                    },
+                    "startYear": 2007,
+                    "genres": [
+                        "Drama",
+                        "Family",
+                        "Romance"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.3,
+                        "voteCount": 108
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Sarah Byron"
+                ],
+                "episodeCount": 2
+            },
+            {
+                "title": {
+                    "id": "tt8905900",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Hayley",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOWU2MjA2N2QtZTAyNS00ZThiLTg5N2EtYzkwZjE2MWRjM2IyXkEyXkFqcGc@._V1_.jpg",
+                        "width": 5000,
+                        "height": 2813
+                    },
+                    "startYear": 2020,
+                    "genres": [
+                        "Comedy",
+                        "Drama",
+                        "Romance"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.6,
+                        "voteCount": 105
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Denise"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt28001629",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Humandy Statue",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZTE2YTJhMzktMThmMC00NzQ5LWJiNzctNzQwMGJjNmUyNzcyXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1201,
+                        "height": 583
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.7,
+                        "voteCount": 102
+                    }
+                },
+                "category": "actress",
+                "characters": [
+                    "Lola"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt15134860",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Fatberg",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZThhNzVmNDEtNDA2MC00ZmIzLTk1NzQtMmIyMWJhN2Q1OTUyXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1223,
+                        "height": 519
+                    },
+                    "startYear": 2022,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8,
+                        "voteCount": 100
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Lola"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt15134854",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Holiday for One",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNzg5NGQwOWYtYzk2MS00YTBiLWEwN2UtZTg4MDVkOTE5ZjBkXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1148,
+                        "height": 489
+                    },
+                    "startYear": 2022,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.5,
+                        "voteCount": 92
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Lola"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt15134862",
+                    "type": "tvEpisode",
+                    "primaryTitle": "The Curse of Mandy Carter",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYWFhZDk3NmItNGRkNy00MTU1LWI5NDUtMDBhZWU0YjQ2NzQ3XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1209,
+                        "height": 517
+                    },
+                    "startYear": 2022,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.8,
+                        "voteCount": 91
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Lola"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt15134858",
+                    "type": "tvEpisode",
+                    "primaryTitle": "SpaceMandy",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYjBiMzUyZDgtZDZhMy00MGQ4LWI3OTktNDNlZDRmYjlhOWNhXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1171,
+                        "height": 499
+                    },
+                    "startYear": 2022,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.4,
+                        "voteCount": 90
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Lola"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt28001662",
+                    "type": "tvEpisode",
+                    "primaryTitle": "The Career Ladder",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZThhMTliMmEtNDI3Yy00ZmIzLTlmNmEtYTVlMWQ2ODVmODlmXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1001,
+                        "height": 577
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.8,
+                        "voteCount": 89
+                    }
+                },
+                "category": "actress",
+                "characters": [
+                    "Lola"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt28001669",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Nandy",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYzYyOGY3ZTgtOTBkZC00ZGNhLWI5NWMtN2I0MjYwMzRhMGQ5XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1179,
+                        "height": 630
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.5,
+                        "voteCount": 87
+                    }
+                },
+                "category": "actress",
+                "characters": [
+                    "Lola"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt28001673",
+                    "type": "tvEpisode",
+                    "primaryTitle": "The Ballad of Mandy Carter",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNTlhY2IyZTctOGE4ZC00NDA0LTliZmQtMTI1M2U2Mzc5OGQxXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1198,
+                        "height": 581
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8,
+                        "voteCount": 80
+                    }
+                },
+                "category": "actress",
+                "characters": [
+                    "Lola"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt35661317",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Mad Mandy: Fury Road",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOWIwNDcwOTktYmRhNS00NWQ3LTliZjAtZGYwZDZhZTAzNGNjXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1256,
+                        "height": 589
+                    },
+                    "startYear": 2025,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8,
+                        "voteCount": 55
+                    }
+                },
+                "category": "actress",
+                "characters": [
+                    "Lola"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt35661310",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Petty Woman",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYWZhMjdjYzAtYWJjNC00NTI1LTk1NWQtMmMzMGZmZTJjNTUwXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1287,
+                        "height": 585
+                    },
+                    "startYear": 2025,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.6,
+                        "voteCount": 51
+                    }
+                },
+                "category": "actress",
+                "characters": [
+                    "Lola"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt16375470",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Episode #3.5",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNzM3MWYwZmItNTI4My00ZDA5LTlmNGYtZmUzMzM4NmJhY2RiXkEyXkFqcGc@._V1_.jpg",
+                        "width": 950,
+                        "height": 595
+                    },
+                    "startYear": 2022,
+                    "genres": [
+                        "Action",
+                        "Comedy",
+                        "Crime",
+                        "Sci-Fi",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8,
+                        "voteCount": 50
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "DS Judith Papastathopoulos"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt35661331",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Mand on the Run",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMzMzOTg5ZWEtNmQ2Zi00N2UzLWFiZDktODE0NzUyOTIyYTEwXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1280,
+                        "height": 580
+                    },
+                    "startYear": 2025,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.7,
+                        "voteCount": 46
+                    }
+                },
+                "category": "actress",
+                "characters": [
+                    "Lola"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt31228061",
+                    "type": "tvEpisode",
+                    "primaryTitle": "The Prodigal Granddaughter Returns",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNWRmZmM4MWItYTNiOS00MjM3LWExNzYtM2FiNzU0OTY2YTA4XkEyXkFqcGc@._V1_.jpg",
+                        "width": 8100,
+                        "height": 12000
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Comedy",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.3,
+                        "voteCount": 44
+                    }
+                },
+                "category": "actress",
+                "characters": [
+                    "Maggie Jenkins"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt35661327",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Seed",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNTE2ZmNjMTctNjQxNS00MTZlLTgzNGQtNWVhMzZlMThmYmI1XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1258,
+                        "height": 596
+                    },
+                    "startYear": 2025,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.6,
+                        "voteCount": 42
+                    }
+                },
+                "category": "actress",
+                "characters": [
+                    "Lola"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt35661334",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Wormhole",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYmQ2MzMxMDEtNjY1MC00OGE3LWI2MjktYzkyZGQ1ZGZhZjVhXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1160,
+                        "height": 567
+                    },
+                    "startYear": 2025,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.3,
+                        "voteCount": 41
+                    }
+                },
+                "category": "actress",
+                "characters": [
+                    "Lola"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt6710828",
+                    "type": "short",
+                    "primaryTitle": "The Right Choice",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYzBmNjdkNjUtNzdiNi00Zjg3LWIyODEtZTEwY2Y2MGNmYWIxXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1300,
+                        "height": 1734
+                    },
+                    "startYear": 2018,
+                    "genres": [
+                        "Short",
+                        "Comedy",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.6,
+                        "voteCount": 38
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Advisor"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt32446479",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Love, Finally",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNWRmZmM4MWItYTNiOS00MjM3LWExNzYtM2FiNzU0OTY2YTA4XkEyXkFqcGc@._V1_.jpg",
+                        "width": 8100,
+                        "height": 12000
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Comedy",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8,
+                        "voteCount": 31
+                    }
+                },
+                "category": "actress",
+                "characters": [
+                    "Maggie Jenkins"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt32446476",
+                    "type": "tvEpisode",
+                    "primaryTitle": "The Nightmare Before Christmas",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNWRmZmM4MWItYTNiOS00MjM3LWExNzYtM2FiNzU0OTY2YTA4XkEyXkFqcGc@._V1_.jpg",
+                        "width": 8100,
+                        "height": 12000
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Comedy",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8,
+                        "voteCount": 28
+                    }
+                },
+                "category": "actress",
+                "characters": [
+                    "Maggie Jenkins"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt4642810",
+                    "type": "tvSeries",
+                    "primaryTitle": "Venus vs. Mars",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTc0NzY3NDMyOF5BMl5BanBnXkFtZTgwNjE3NTc2NTE@._V1_.jpg",
+                        "width": 300,
+                        "height": 444
+                    },
+                    "startYear": 2015,
+                    "genres": [
+                        "Comedy",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7,
+                        "voteCount": 22
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Counselor Gretel"
+                ],
+                "episodeCount": 4
+            },
+            {
+                "title": {
+                    "id": "tt18562722",
+                    "type": "tvSeries",
+                    "primaryTitle": "Holier Than Thou",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMGMwZTJjYWYtMzBmNy00N2U0LWEwZjEtNjRhYjczNjYxNjYxXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1080,
+                        "height": 1080
+                    },
+                    "startYear": 2022,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.1,
+                        "voteCount": 20
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Patience"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt37974449",
+                    "type": "tvMiniSeries",
+                    "primaryTitle": "Dexter Procter: The 10-Year-Old Doctor",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZGQyNGQyOTEtYTRlOS00MGZmLWJhYTEtNTU5NDU0NzRlZTQ0XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1179,
+                        "height": 1451
+                    },
+                    "startYear": 2025,
+                    "genres": [
+                        "Comedy",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.6,
+                        "voteCount": 18
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Ngozi"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt15282222",
+                    "type": "short",
+                    "primaryTitle": "Split Sole",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNDA0ZGM3NGQtY2U1Zi00NTg0LWFhMzAtNTc0ZmZlM2RjMjg1XkEyXkFqcGc@._V1_.jpg",
+                        "width": 3000,
+                        "height": 4247
+                    },
+                    "startYear": 2021,
+                    "genres": [
+                        "Short"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.4,
+                        "voteCount": 18
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress"
+            },
+            {
+                "title": {
+                    "id": "tt5732450",
+                    "type": "short",
+                    "primaryTitle": "Class 15",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOTEyY2Q0NzUtZDljOC00NmNlLThiNzAtYjMyMGE2MzIyODUxXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1225,
+                        "height": 599
+                    },
+                    "startYear": 2016,
+                    "genres": [
+                        "Short",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.2,
+                        "voteCount": 17
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Mary"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt8163424",
+                    "type": "tvSeries",
+                    "primaryTitle": "Intruders",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZTYwYWMzZWQtMTg4YS00ZmZlLWFlYTgtY2RlMGJhZTBhMWM5XkEyXkFqcGc@._V1_.jpg",
+                        "width": 500,
+                        "height": 375
+                    },
+                    "startYear": 2017,
+                    "genres": [
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.2,
+                        "voteCount": 14
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Tonya Bell"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt3394780",
+                    "type": "short",
+                    "primaryTitle": "Crude",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMzMzNzUwMTEwNV5BMl5BanBnXkFtZTgwOTEyMTcwMjE@._V1_.jpg",
+                        "width": 8100,
+                        "height": 12000
+                    },
+                    "startYear": 2014,
+                    "genres": [
+                        "Short",
+                        "Action",
+                        "Drama",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 9.1,
+                        "voteCount": 14
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Aisha"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt2586996",
+                    "type": "tvSeries",
+                    "primaryTitle": "All About the McKenzies",
+                    "startYear": 2012,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.9,
+                        "voteCount": 8
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Auntie Jeanie"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt6657300",
+                    "type": "tvSeries",
+                    "primaryTitle": "A Lesson Learnt",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOWRiMjc3ZjMtMjYzOC00Nzg2LWE4OWItYzRkZDliNzkxYzhjXkEyXkFqcGc@._V1_.jpg",
+                        "width": 694,
+                        "height": 502
+                    },
+                    "startYear": 2015,
+                    "genres": [
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 9.2,
+                        "voteCount": 7
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        }
+                    ]
+                },
+                "category": "actress",
+                "characters": [
+                    "Train Station Woman"
+                ],
+                "episodeCount": 1
+            }
+        ],
+        "totalCount": 109
+    },
+    "relationships": {
+        "relationships": []
+    },
+    "trivia": {
+        "triviaEntries": []
+    },
+    "artifacts": {
+        "details": {
+            "path": "details.json",
+            "url": "https://api.imdbapi.dev/names/nm3382412",
+            "has_payload": true
+        },
+        "images": {
+            "path": "images.json",
+            "url": "https://api.imdbapi.dev/names/nm3382412/images",
+            "has_payload": true
+        },
+        "filmography": {
+            "path": "filmography.json",
+            "url": "https://api.imdbapi.dev/names/nm3382412/filmography",
+            "has_payload": true
+        },
+        "relationships": {
+            "path": "relationships.json",
+            "url": "https://api.imdbapi.dev/names/nm3382412/relationships",
+            "has_payload": true
+        },
+        "trivia": {
+            "path": "trivia.json",
+            "url": "https://api.imdbapi.dev/names/nm3382412/trivia",
+            "has_payload": true
+        }
+    }
+}

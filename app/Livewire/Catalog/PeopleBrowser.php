@@ -4,6 +4,7 @@ namespace App\Livewire\Catalog;
 
 use App\Actions\Catalog\BuildPublicPeopleIndexQueryAction;
 use App\Actions\Catalog\GetPublicPeopleFilterOptionsAction;
+use App\Livewire\Catalog\Concerns\HandlesRemoteCatalogFailures;
 use Illuminate\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
@@ -12,6 +13,7 @@ use Livewire\WithPagination;
 
 class PeopleBrowser extends Component
 {
+    use HandlesRemoteCatalogFailures;
     use WithPagination;
 
     protected BuildPublicPeopleIndexQueryAction $buildPublicPeopleIndexQuery;
@@ -53,17 +55,51 @@ class PeopleBrowser extends Component
     #[Computed]
     public function viewData(): array
     {
-        $people = $this->buildPublicPeopleIndexQuery
-            ->handle([
-                'search' => $this->search,
-                'profession' => $this->profession,
-                'sort' => $this->sort,
-            ])
-            ->simplePaginate(18, pageName: 'people')
-            ->withQueryString();
+        return $this->resolveRemoteCatalogViewData(
+            resolver: function (): array {
+                $people = $this->buildPublicPeopleIndexQuery
+                    ->handle([
+                        'search' => $this->search,
+                        'profession' => $this->profession,
+                        'sort' => $this->sort,
+                    ])
+                    ->simplePaginate(18, pageName: 'people')
+                    ->withQueryString();
 
-        $filterOptions = $this->getPublicPeopleFilterOptions->handle();
-        $sortOptions = collect($filterOptions['sortOptions'])
+                $filterOptions = $this->getPublicPeopleFilterOptions->handle();
+
+                return [
+                    'emptyHeading' => 'No people match the current filters.',
+                    'emptyText' => 'Adjust the keyword or profession filter to widen the directory.',
+                    'isCatalogUnavailable' => false,
+                    'people' => $people,
+                    'professions' => $filterOptions['professions'],
+                    'sortOptions' => $this->formatSortOptions($filterOptions['sortOptions']),
+                    'statusHeading' => '',
+                    'statusText' => '',
+                ];
+            },
+            fallback: fn (): array => [
+                'people' => $this->emptyPaginator(18, 'people'),
+                'professions' => [],
+                'sortOptions' => $this->formatSortOptions([
+                    ['value' => 'popular', 'label' => 'Popular'],
+                    ['value' => 'credits', 'label' => 'Credits'],
+                    ['value' => 'awards', 'label' => 'Awards'],
+                    ['value' => 'name', 'label' => 'Name'],
+                ]),
+                ...$this->unavailableCatalogState('people'),
+            ],
+        );
+    }
+
+    /**
+     * @param  iterable<array-key, array{label: string, value: string}>  $sortOptions
+     * @return list<array{icon: string, label: string, value: string}>
+     */
+    private function formatSortOptions(iterable $sortOptions): array
+    {
+        return collect($sortOptions)
             ->map(fn (array $option): array => [
                 ...$option,
                 'icon' => match ($option['value']) {
@@ -74,12 +110,6 @@ class PeopleBrowser extends Component
                 },
             ])
             ->all();
-
-        return [
-            'people' => $people,
-            'professions' => $filterOptions['professions'],
-            'sortOptions' => $sortOptions,
-        ];
     }
 
     public function render(): View

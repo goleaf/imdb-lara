@@ -1,0 +1,92 @@
+{
+    "stats": {
+        "nominationCount": 1,
+        "winCount": 1
+    },
+    "awardNominations": [
+        {
+            "nominees": [
+                {
+                    "id": "nm0520488",
+                    "displayName": "Phil Lord",
+                    "alternativeNames": [
+                        "Chris & Phil"
+                    ],
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOTI5NTUwMTAwOV5BMl5BanBnXkFtZTcwMDIxMDgzOQ@@._V1_.jpg",
+                        "width": 1662,
+                        "height": 2048
+                    },
+                    "primaryProfessions": [
+                        "actor",
+                        "producer",
+                        "writer"
+                    ]
+                },
+                {
+                    "id": "nm0588087",
+                    "displayName": "Christopher Miller",
+                    "alternativeNames": [
+                        "Christopher Robert Miler",
+                        "Christopher Miler",
+                        "Chris Miler",
+                        "Christopher R. Miller",
+                        "Christopher Robert Miller",
+                        "Chris Miller",
+                        "Chris & Phil",
+                        "Miller Will"
+                    ],
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTAzNDAzODgzOTheQTJeQWpwZ15BbWU3MDc5MDg4MTg@._V1_.jpg",
+                        "width": 1370,
+                        "height": 2048
+                    },
+                    "primaryProfessions": [
+                        "actor",
+                        "producer",
+                        "writer"
+                    ]
+                }
+            ],
+            "event": {
+                "id": "ev0002750",
+                "name": "Heartland Film"
+            },
+            "year": 2026,
+            "text": "Truly Moving Picture Award",
+            "category": "Truly Moving Picture Award",
+            "isWinner": true,
+            "winnerRank": 1
+        },
+        {
+            "nominees": [
+                {
+                    "id": "nm17025713",
+                    "displayName": "Tyler Torrison",
+                    "primaryProfessions": [
+                        "music_department"
+                    ]
+                },
+                {
+                    "id": "nm9232216",
+                    "displayName": "Vanessa Jorge Perry",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNjIyMjA0MjUtZDNhMy00MGNkLWFlOWUtODJjZDcxMDRmMmZiXkEyXkFqcGc@._V1_.jpg",
+                        "width": 750,
+                        "height": 1334
+                    },
+                    "primaryProfessions": [
+                        "music_department"
+                    ]
+                }
+            ],
+            "event": {
+                "id": "ev0004323",
+                "name": "Guild of Music Supervisors Awards"
+            },
+            "year": 2026,
+            "text": "GMS Award",
+            "category": "Best Music Supervision for a Trailer (Film)"
+        }
+    ]
+}

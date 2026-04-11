@@ -21,19 +21,23 @@ class GlobalSearchLivewireTest extends TestCase
 
         $title = $this->sampleTitle();
         $person = $this->samplePerson();
+        $interestCategory = $this->sampleInterestCategory();
         $personSearch = $this->personSearchTermFor($person);
 
         Livewire::test(GlobalSearch::class)
             ->set('query', $this->searchTermFor($title))
-            ->assertSee('Find titles and people fast')
+            ->assertSee('Find titles, people, and themes fast')
             ->assertSee('Top suggestion')
             ->assertSee($title->name)
             ->assertDontSee('Lists')
             ->set('query', $personSearch)
             ->assertSee('Top suggestion')
             ->assertSee($person->name)
+            ->set('query', $interestCategory->name)
+            ->assertSee('Themes')
+            ->assertSee($interestCategory->name)
             ->call('submitSearch')
-            ->assertRedirect(route('public.search', ['q' => $personSearch]));
+            ->assertRedirect(route('public.search', ['q' => $interestCategory->name]));
     }
 
     public function test_global_search_requires_a_meaningful_query_before_showing_suggestions(): void
@@ -44,8 +48,23 @@ class GlobalSearchLivewireTest extends TestCase
 
         Livewire::test(GlobalSearch::class)
             ->set('query', 's')
-            ->assertDontSee('Titles')
+            ->assertDontSeeHtml('sb-search-panel--titles')
+            ->assertDontSeeHtml('sb-search-panel--people')
             ->assertDontSee($title->name);
+    }
+
+    public function test_global_search_shows_a_single_no_matches_state_without_empty_result_lanes(): void
+    {
+        Livewire::withoutLazyLoading();
+
+        Livewire::test(GlobalSearch::class)
+            ->set('query', 'zzzxxyyqqqnomatch')
+            ->assertSee('No quick matches')
+            ->assertDontSee('Poster-led matches with year and type.')
+            ->assertDontSee('Portrait-first profiles with profession cues.')
+            ->assertDontSee('Interest-category lanes from the imported discovery graph.')
+            ->assertDontSeeHtml('sb-search-panel--titles')
+            ->assertDontSeeHtml('sb-search-panel--people');
     }
 
     public function test_global_search_surfaces_a_ranked_person_top_suggestion_and_people_metrics(): void
@@ -108,6 +127,24 @@ class GlobalSearchLivewireTest extends TestCase
             1,
             substr_count($component->html(), route('public.titles.show', $title)),
             'The top title suggestion should not be repeated in the titles list.',
+        );
+    }
+
+    public function test_global_search_surfaces_interest_category_matches_in_a_themes_lane(): void
+    {
+        Livewire::withoutLazyLoading();
+
+        $interestCategory = $this->sampleInterestCategory();
+        $component = Livewire::test(GlobalSearch::class)
+            ->set('query', $interestCategory->name)
+            ->assertSee('Themes')
+            ->assertSee($interestCategory->name)
+            ->assertSee(route('public.interest-categories.show', $interestCategory), false);
+
+        $this->assertGreaterThanOrEqual(
+            1,
+            substr_count($component->html(), route('public.interest-categories.show', $interestCategory)),
+            'The matching interest category should be present in the themes lane.',
         );
     }
 }

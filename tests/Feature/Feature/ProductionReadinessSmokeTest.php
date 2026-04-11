@@ -19,6 +19,7 @@ class ProductionReadinessSmokeTest extends TestCase
         $title = $this->sampleTitle();
         $person = $this->samplePerson();
         $genre = $this->sampleGenre();
+        $interestCategory = $this->sampleInterestCategory();
         $year = $this->sampleReleaseYear();
         $seriesHierarchy = $this->sampleSeriesHierarchy();
 
@@ -29,10 +30,12 @@ class ProductionReadinessSmokeTest extends TestCase
             route('public.series.index'),
             route('public.titles.index'),
             route('public.people.index'),
+            route('public.interest-categories.index'),
             route('public.awards.index'),
             route('public.trailers.latest'),
             route('public.trending'),
             route('public.genres.show', $genre),
+            route('public.interest-categories.show', $interestCategory),
             route('public.years.show', ['year' => $year]),
             route('public.search', ['q' => $this->searchTermFor($title)]),
             route('public.titles.show', $title),
@@ -57,6 +60,8 @@ class ProductionReadinessSmokeTest extends TestCase
             $this->assertSame(200, $response->getStatusCode(), $route);
             $response
                 ->assertSee('Screenbase', false)
+                ->assertSee('Search The Global Catalog')
+                ->assertSee('Browse by Theme')
                 ->assertDontSee('Watchlist')
                 ->assertDontSee('Create account')
                 ->assertDontSee('Sign in');
@@ -70,6 +75,8 @@ class ProductionReadinessSmokeTest extends TestCase
             ->assertSee('Search The Global Catalog')
             ->assertSee('Movies')
             ->assertSee('TV Shows')
+            ->assertSee('Themes')
+            ->assertSee('Browse by Theme')
             ->assertSee('Trending')
             ->assertSee('Awards');
     }

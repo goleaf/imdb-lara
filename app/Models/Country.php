@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\CountryCode;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -51,5 +52,21 @@ class Country extends ImdbModel
     public function movieReleaseDates(): HasMany
     {
         return $this->hasMany(MovieReleaseDate::class, 'country_code', 'code');
+    }
+
+    public function resolvedLabel(): string
+    {
+        return self::labelForCode($this->code, $this->name) ?? strtoupper((string) $this->code);
+    }
+
+    public static function labelForCode(?string $code, ?string $fallbackName = null): ?string
+    {
+        if (! filled($code)) {
+            return filled($fallbackName) ? (string) $fallbackName : null;
+        }
+
+        return CountryCode::labelFor($code)
+            ?? (filled($fallbackName) ? (string) $fallbackName : null)
+            ?? strtoupper((string) $code);
     }
 }

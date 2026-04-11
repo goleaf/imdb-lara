@@ -3,6 +3,7 @@
 namespace App\Actions\Seo;
 
 use App\Models\Genre;
+use App\Models\InterestCategory;
 use App\Models\Person;
 use App\Models\Season;
 use App\Models\Title;
@@ -16,6 +17,8 @@ class GetSitemapDataAction
 
     private const PERSON_LIMIT = 100;
 
+    private const INTEREST_CATEGORY_LIMIT = 100;
+
     private const SEASON_LIMIT = 100;
 
     private const EPISODE_LIMIT = 100;
@@ -24,6 +27,7 @@ class GetSitemapDataAction
      * @return array{
      *     staticRoutes: list<string>,
      *     genres: EloquentCollection<int, Genre>,
+     *     interestCategories: EloquentCollection<int, InterestCategory>,
      *     years: Collection<int, int>,
      *     titles: EloquentCollection<int, Title>,
      *     titleArchiveUrls: Collection<int, string>,
@@ -46,6 +50,7 @@ class GetSitemapDataAction
             'public.discover',
             'public.titles.index',
             'public.people.index',
+            'public.interest-categories.index',
             'public.awards.index',
             'public.trailers.latest',
             'public.movies.index',
@@ -66,6 +71,14 @@ class GetSitemapDataAction
                 ->whereHas('titles', fn ($query) => $query->publishedCatalog())
                 ->orderBy('name')
                 ->get(),
+            'interestCategories' => Route::has('public.interest-categories.show')
+                ? InterestCategory::query()
+                    ->select(['interest_categories.id', 'interest_categories.name'])
+                    ->whereHas('interests.movies')
+                    ->orderBy('interest_categories.name')
+                    ->limit(self::INTEREST_CATEGORY_LIMIT)
+                    ->get()
+                : new EloquentCollection,
             'years' => Title::query()
                 ->select(['startyear'])
                 ->publishedCatalog()

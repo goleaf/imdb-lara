@@ -22,6 +22,7 @@ class TitleMetadataExplorationExperienceTest extends TestCase
             ->assertSeeHtml('data-slot="title-metadata-hero"')
             ->assertSeeHtml('data-slot="title-keyword-map"')
             ->assertSeeHtml('data-slot="title-connection-map"')
+            ->assertSeeHtml('text-[#f4eee5] decoration-white/20 hover:text-white')
             ->assertSee('Keyword Map')
             ->assertSee('Title Connections');
     }

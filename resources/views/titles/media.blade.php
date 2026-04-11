@@ -11,13 +11,54 @@
 @endsection
 
 @section('content')
-    <section class="space-y-6">
+    @php
+        $posterArchiveHref = $posterAssetsPagination->total() > 1
+            ? route('public.titles.media.archive', ['title' => $title, 'archive' => App\Enums\TitleMediaArchiveKind::Posters->value])
+            : null;
+        $stillArchiveHref = $stillAssetsPagination->total() > 1
+            ? route('public.titles.media.archive', ['title' => $title, 'archive' => App\Enums\TitleMediaArchiveKind::Stills->value])
+            : null;
+        $backdropArchiveHref = $backdropAssetsPagination->total() > 1
+            ? route('public.titles.media.archive', ['title' => $title, 'archive' => App\Enums\TitleMediaArchiveKind::Backdrops->value])
+            : null;
+        $trailerArchiveHref = $trailerAssets->count() > 1
+            ? route('public.titles.media.archive', ['title' => $title, 'archive' => App\Enums\TitleMediaArchiveKind::Trailers->value])
+            : null;
+        $heroArchiveCards = collect([
+            [
+                'label' => 'Posters',
+                'count' => $posterAssetsPagination->total(),
+                'copy' => 'Campaign art and primary sheets',
+                'href' => '#title-media-posters',
+            ],
+            [
+                'label' => 'Stills',
+                'count' => $stillAssetsPagination->total(),
+                'copy' => 'Scene captures and editorial frames',
+                'href' => '#title-media-stills',
+            ],
+            [
+                'label' => 'Backdrops',
+                'count' => $backdropAssetsPagination->total(),
+                'copy' => 'Wide artwork for hero surfaces',
+                'href' => '#title-media-backdrops',
+            ],
+            [
+                'label' => 'Trailers',
+                'count' => $trailerAssets->count(),
+                'copy' => 'IMDb video records and links',
+                'href' => '#title-media-trailers',
+            ],
+        ]);
+    @endphp
+
+    <x-catalog.media-lightbox-shell :groups="$imageLightboxGroups" modal-id="title-media-lightbox" class="space-y-6">
         <x-ui.card class="sb-detail-hero sb-media-hero !max-w-none overflow-hidden p-0" data-slot="title-media-hero">
             <div class="relative">
                 @if ($backdrop)
                     <img
                         src="{{ $backdrop->url }}"
-                        alt="{{ $backdrop->alt_text ?: $title->name }}"
+                        alt="{{ $backdrop->accessibleAltText($title->name) }}"
                         class="absolute inset-0 h-full w-full object-cover opacity-26"
                     >
                     <div class="absolute inset-0 bg-[linear-gradient(112deg,rgba(10,10,9,0.96),rgba(10,10,9,0.86),rgba(10,10,9,0.58))]"></div>
@@ -25,148 +66,133 @@
                     <div class="absolute inset-0 bg-[linear-gradient(135deg,rgba(12,11,10,0.98),rgba(10,10,9,0.96))]"></div>
                 @endif
 
-                <div class="relative grid gap-6 p-6 xl:grid-cols-[minmax(0,1.2fr)_22rem]">
-                    <div class="sb-media-viewer-shell" data-slot="title-media-viewer">
-                        <div class="sb-media-viewer-frame">
-                            @if ($viewerAsset)
-                                <img
-                                    src="{{ $viewerAsset->url }}"
-                                    alt="{{ $viewerAsset->alt_text ?: $title->name }}"
-                                    class="sb-media-viewer-image"
-                                >
-                            @else
-                                <div class="sb-media-viewer-empty">
-                                    <x-ui.icon name="photo" class="size-12" />
-                                </div>
-                            @endif
-                        </div>
-
-                        <div class="sb-media-viewer-overlay">
-                            <div class="space-y-2">
-                                <div class="sb-media-kicker">Main viewer</div>
-                                <div class="sb-media-viewer-title">{{ $viewerKindLabel }}</div>
-                                <div class="sb-media-viewer-copy">
-                                    {{ $viewerAsset?->caption ?: $viewerAsset?->alt_text ?: 'Primary gallery imagery selected from the title archive.' }}
-                                </div>
-                            </div>
-
-                            @if ($viewerAsset)
-                                <x-ui.badge variant="outline" color="amber" icon="photo">
-                                    {{ $viewerKindLabel }}
+                <div class="relative p-6 sm:p-7">
+                    <div class="grid gap-6 xl:grid-cols-[minmax(0,1.08fr)_minmax(19rem,0.92fr)] xl:items-stretch">
+                        <div class="space-y-6">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <div class="sb-page-kicker">Media archive</div>
+                                <x-ui.badge variant="outline" color="neutral" icon="film">
+                                    {{ str($title->title_type->value)->headline() }}
                                 </x-ui.badge>
-                            @endif
-                        </div>
-
-                        @if ($viewerStripAssets->isNotEmpty())
-                            <div class="sb-media-viewer-strip" aria-hidden="true">
-                                @foreach ($viewerStripAssets as $asset)
-                                    <div class="sb-media-viewer-thumb{{ $viewerAsset?->id === $asset->id ? ' sb-media-viewer-thumb--active' : '' }}">
-                                        <img
-                                            src="{{ $asset->url }}"
-                                            alt="{{ $asset->alt_text ?: $title->name }}"
-                                            class="sb-media-viewer-thumb-image"
-                                        >
-                                    </div>
-                                @endforeach
-                            </div>
-                        @endif
-                    </div>
-
-                    <div class="sb-media-hero-panel space-y-5">
-                        <div class="space-y-4">
-                            <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
-                                <span class="sb-media-kicker">Media gallery</span>
-                                <span class="sb-cast-meta-item">{{ str($title->title_type->value)->headline() }}</span>
                                 @if ($title->release_year)
-                                    <a href="{{ route('public.years.show', ['year' => $title->release_year]) }}" class="sb-cast-meta-item">
+                                    <x-ui.badge variant="outline" color="slate" icon="calendar-days">
                                         {{ $title->release_year }}
-                                    </a>
+                                    </x-ui.badge>
                                 @endif
-                                @if ($title->runtime_minutes)
-                                    <span class="sb-cast-meta-item">{{ $title->runtime_minutes }} min</span>
+                                @if ($title->runtimeMinutesLabel())
+                                    <x-ui.badge variant="outline" color="slate" icon="clock">
+                                        {{ $title->runtimeMinutesLabel() }}
+                                    </x-ui.badge>
                                 @endif
                                 @if ($title->statistic?->average_rating)
-                                    <span class="sb-cast-meta-item sb-cast-meta-item--rating">
-                                        <x-ui.icon name="star" class="size-4" />
+                                    <x-ui.badge color="amber" icon="star">
                                         {{ number_format((float) $title->statistic->average_rating, 1) }}
-                                    </span>
-                                @endif
-                            </div>
-
-                            <div class="space-y-2">
-                                <x-ui.heading level="h1" size="xl" class="sb-detail-title">{{ $title->name }} Media Gallery</x-ui.heading>
-                                <x-ui.text class="sb-detail-copy text-base">
-                                    {{ $heroCopy }}
-                                </x-ui.text>
-                            </div>
-
-                            <div class="grid gap-3 sm:grid-cols-2">
-                                <div class="sb-media-stat">
-                                    <div class="sb-cast-summary-label">Posters</div>
-                                    <div class="sb-cast-summary-value">{{ number_format($posterAssets->count()) }}</div>
-                                </div>
-                                <div class="sb-media-stat">
-                                    <div class="sb-cast-summary-label">Stills</div>
-                                    <div class="sb-cast-summary-value">{{ number_format($stillAssets->count()) }}</div>
-                                </div>
-                                <div class="sb-media-stat">
-                                    <div class="sb-cast-summary-label">Backdrops</div>
-                                    <div class="sb-cast-summary-value">{{ number_format($backdropAssets->count()) }}</div>
-                                </div>
-                                <div class="sb-media-stat">
-                                    <div class="sb-cast-summary-label">Trailers</div>
-                                    <div class="sb-cast-summary-value">{{ number_format($trailerAssets->count()) }}</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="sb-media-trailer-spotlight">
-                            <div class="flex items-center justify-between gap-3">
-                                <div class="sb-cast-summary-label">Trailer spotlight</div>
-                                @if ($featuredTrailer)
-                                    <x-ui.badge variant="outline" color="amber" icon="play">
-                                        {{ str($featuredTrailer->kind->value)->headline() }}
                                     </x-ui.badge>
                                 @endif
                             </div>
 
-                            @if ($featuredTrailer)
-                                <div class="mt-3 space-y-2">
-                                    <div class="sb-media-trailer-title">{{ $featuredTrailerLabel }}</div>
-                                    <div class="sb-media-trailer-meta">
-                                        @if ($featuredTrailer->provider)
-                                            <span>{{ str($featuredTrailer->provider)->headline() }}</span>
-                                        @endif
-                                        @if ($featuredTrailerDuration)
-                                            <span>{{ $featuredTrailerDuration }}</span>
-                                        @endif
-                                        @if ($featuredTrailer->published_at)
-                                            <span>{{ $featuredTrailer->published_at->format('M j, Y') }}</span>
-                                        @endif
+                            <div class="space-y-4">
+                                <div class="space-y-2">
+                                    <div class="text-sm font-semibold uppercase tracking-[0.18em] text-[#d9ccb7]">
+                                        {{ $title->name }} media gallery
                                     </div>
+                                    <x-ui.heading level="h1" size="xl" class="sb-page-title">
+                                        {{ $title->name }}
+                                    </x-ui.heading>
                                 </div>
 
-                                @if (filled($featuredTrailer->url))
-                                    <div class="mt-4">
-                                        <x-ui.button as="a" :href="$featuredTrailer->url" variant="outline" color="amber" icon="play" target="_blank" rel="noreferrer">
-                                            Watch featured trailer
-                                        </x-ui.button>
-                                    </div>
-                                @endif
-                            @else
-                                <x-ui.text class="mt-3 text-sm text-neutral-500 dark:text-neutral-400">
-                                    No published trailers are attached to this title yet.
+                                <x-ui.text class="sb-page-copy max-w-3xl text-base">
+                                    {{ $heroCopy }}
                                 </x-ui.text>
-                            @endif
+                            </div>
+
+                            <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                                @foreach ($heroArchiveCards as $heroArchiveCard)
+                                    <a
+                                        href="{{ $heroArchiveCard['href'] }}"
+                                        class="rounded-[1.2rem] border border-white/10 bg-white/[0.035] p-4 transition hover:border-white/18 hover:bg-white/[0.06]"
+                                    >
+                                        <div class="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-[#cbbb9c]">
+                                            {{ $heroArchiveCard['label'] }}
+                                        </div>
+                                        <div class="mt-2 text-[1.95rem] font-semibold leading-none tracking-[-0.05em] text-[#f7f1e8]">
+                                            {{ number_format($heroArchiveCard['count']) }}
+                                        </div>
+                                        <div class="mt-3 text-sm leading-6 text-[#b6a997]">
+                                            {{ $heroArchiveCard['copy'] }}
+                                        </div>
+                                    </a>
+                                @endforeach
+                            </div>
+
+                            <div class="flex flex-wrap gap-3">
+                                <x-catalog.back-link :href="route('public.titles.show', $title)" label="Back to title" />
+                                <x-ui.button as="a" href="#title-media-trailers" variant="ghost" icon="play">
+                                    Jump to trailers
+                                </x-ui.button>
+                            </div>
                         </div>
 
-                        <div class="flex flex-wrap gap-3">
-                            <x-ui.button as="a" :href="route('public.titles.show', $title)" variant="outline" color="amber" icon="arrow-left">
-                                Back to title
-                            </x-ui.button>
-                            <x-ui.button as="a" href="#title-media-trailers" variant="ghost" icon="play">
-                                Jump to trailers
-                            </x-ui.button>
+                        <div class="space-y-3" data-slot="title-media-viewer">
+                            <div class="overflow-hidden rounded-[1.6rem] border border-white/10 bg-black/25 shadow-[0_34px_90px_rgba(0,0,0,0.32)] backdrop-blur-sm">
+                                @if ($viewerAsset)
+                                    <button
+                                        type="button"
+                                        class="block w-full text-left"
+                                        x-on:click="openLightboxByUrl(@js($viewerAsset->url))"
+                                    >
+                                        <img
+                                            src="{{ $viewerAsset->url }}"
+                                            alt="{{ $viewerAsset->accessibleAltText($title->name) }}"
+                                            class="block aspect-[16/10] w-full cursor-zoom-in object-cover"
+                                        >
+                                    </button>
+                                @else
+                                    <div class="flex aspect-[16/10] items-center justify-center text-neutral-500">
+                                        <x-ui.icon name="photo" class="size-12" />
+                                    </div>
+                                @endif
+
+                                <div class="space-y-3 border-t border-white/10 p-4">
+                                    <div class="flex flex-wrap items-start justify-between gap-3">
+                                        <div class="space-y-2">
+                                            <div class="sb-media-kicker">Spotlight image</div>
+                                            <div class="text-[1.2rem] font-semibold tracking-[-0.03em] text-[#f4eee5]">
+                                                {{ $viewerKindLabel }}
+                                            </div>
+                                            @if ($viewerAsset?->meaningfulCaption())
+                                                <div class="text-sm leading-6 text-[#bfb3a3]">
+                                                    {{ $viewerAsset->meaningfulCaption() }}
+                                                </div>
+                                            @endif
+                                        </div>
+
+                                        @if ($viewerAsset)
+                                            <x-ui.badge variant="outline" color="amber" icon="photo">
+                                                Open lightbox
+                                            </x-ui.badge>
+                                        @endif
+                                    </div>
+
+                                    @if ($viewerStripAssets->isNotEmpty())
+                                        <div class="flex gap-2 overflow-x-auto pb-1">
+                                            @foreach ($viewerStripAssets as $asset)
+                                                <button
+                                                    type="button"
+                                                    class="shrink-0 overflow-hidden rounded-[0.95rem] border {{ $viewerAsset?->id === $asset->id ? 'border-[rgba(214,181,116,0.34)]' : 'border-white/10' }} bg-black/30 transition hover:border-white/20"
+                                                    x-on:click="openLightboxByUrl(@js($asset->url))"
+                                                >
+                                                    <img
+                                                        src="{{ $asset->url }}"
+                                                        alt="{{ $asset->accessibleAltText($title->name) }}"
+                                                        class="h-[4.7rem] w-[3.5rem] object-cover"
+                                                    >
+                                                </button>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -174,10 +200,10 @@
         </x-ui.card>
 
         <nav class="sb-media-subnav" aria-label="Media sections">
-            <a href="#title-media-posters" class="sb-media-subnav-link">Posters</a>
-            <a href="#title-media-stills" class="sb-media-subnav-link">Stills</a>
-            <a href="#title-media-backdrops" class="sb-media-subnav-link">Backdrops</a>
-            <a href="#title-media-trailers" class="sb-media-subnav-link">Trailers</a>
+            <a href="#title-media-posters" class="sb-media-subnav-link">Posters ({{ number_format($posterAssetsPagination->total()) }})</a>
+            <a href="#title-media-stills" class="sb-media-subnav-link">Stills ({{ number_format($stillAssetsPagination->total()) }})</a>
+            <a href="#title-media-backdrops" class="sb-media-subnav-link">Backdrops ({{ number_format($backdropAssetsPagination->total()) }})</a>
+            <a href="#title-media-trailers" class="sb-media-subnav-link">Trailers ({{ number_format($trailerAssets->count()) }})</a>
         </nav>
 
         <x-ui.card id="title-media-posters" class="sb-detail-section sb-media-section !max-w-none" data-slot="title-media-posters">
@@ -189,31 +215,54 @@
                             Primary key art, campaign sheets, and vertical one-sheets attached directly to this title.
                         </x-ui.text>
                     </div>
-                    <x-ui.badge variant="outline" color="neutral" icon="photo">{{ number_format($posterAssets->count()) }} posters</x-ui.badge>
+                    <div class="flex items-center gap-3">
+                        <x-ui.badge variant="outline" color="neutral" icon="photo">{{ number_format($posterAssetsPagination->total()) }} posters</x-ui.badge>
+                        @if ($posterArchiveHref)
+                            <x-ui.link :href="$posterArchiveHref" iconAfter="arrow-right">
+                                View all posters
+                            </x-ui.link>
+                        @endif
+                    </div>
                 </div>
 
-                @if ($posterAssets->isNotEmpty())
-                    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                        @foreach ($posterAssets as $mediaAsset)
-                            <figure class="sb-media-image-card sb-media-image-card--poster">
-                                <img
-                                    src="{{ $mediaAsset->url }}"
-                                    alt="{{ $mediaAsset->alt_text ?: $title->name }}"
-                                    class="sb-media-card-image sb-media-card-image--poster"
-                                    loading="lazy"
-                                >
-                                <figcaption class="sb-media-image-overlay">
-                                    <div class="sb-media-image-title">{{ $mediaAsset->caption ?: $mediaAsset->alt_text ?: $title->name.' poster' }}</div>
-                                    <div class="sb-media-card-meta">
-                                        @if ($mediaAsset->is_primary)
-                                            <span>Primary</span>
-                                        @endif
-                                        <span>{{ str($mediaAsset->kind->value)->headline() }}</span>
-                                    </div>
-                                </figcaption>
-                            </figure>
+                @if ($posterAssetsPagination->total() > 0)
+                    @php($posterOffset = ($posterAssetsPagination->currentPage() - 1) * $posterAssetsPagination->perPage())
+                    <div class="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
+                        @foreach ($posterAssetsPagination as $mediaAsset)
+                            <button
+                                type="button"
+                                class="sb-media-lightbox-trigger"
+                                x-on:click="openLightbox('posters', {{ $posterOffset + $loop->index }})"
+                            >
+                                <figure class="sb-media-image-card sb-media-image-card--poster">
+                                    <img
+                                        src="{{ $mediaAsset->url }}"
+                                        alt="{{ $mediaAsset->accessibleAltText($title->name) }}"
+                                        class="sb-media-card-image sb-media-card-image--poster"
+                                        loading="lazy"
+                                    >
+                                    @if ($mediaAsset->meaningfulCaption() || $mediaAsset->is_primary)
+                                        <figcaption class="sb-media-image-overlay">
+                                            @if ($mediaAsset->meaningfulCaption())
+                                                <div class="sb-media-image-title">{{ $mediaAsset->meaningfulCaption() }}</div>
+                                            @endif
+                                            @if ($mediaAsset->is_primary)
+                                                <div class="sb-media-card-meta">
+                                                    <span>Primary</span>
+                                                </div>
+                                            @endif
+                                        </figcaption>
+                                    @endif
+                                </figure>
+                            </button>
                         @endforeach
                     </div>
+
+                    @if ($posterAssetsPagination->hasPages())
+                        <div class="pt-2">
+                            {{ $posterAssetsPagination->onEachSide(1)->links() }}
+                        </div>
+                    @endif
                 @else
                     <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
                         <x-ui.empty.media>
@@ -234,31 +283,54 @@
                             Production stills, scene captures, and gallery imagery selected for a cleaner editorial gallery surface.
                         </x-ui.text>
                     </div>
-                    <x-ui.badge variant="outline" color="neutral" icon="rectangle-stack">{{ number_format($stillAssets->count()) }} stills</x-ui.badge>
+                    <div class="flex items-center gap-3">
+                        <x-ui.badge variant="outline" color="neutral" icon="rectangle-stack">{{ number_format($stillAssetsPagination->total()) }} stills</x-ui.badge>
+                        @if ($stillArchiveHref)
+                            <x-ui.link :href="$stillArchiveHref" iconAfter="arrow-right">
+                                View all stills
+                            </x-ui.link>
+                        @endif
+                    </div>
                 </div>
 
-                @if ($stillAssets->isNotEmpty())
-                    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                        @foreach ($stillAssets as $mediaAsset)
-                            <figure class="sb-media-image-card">
-                                <img
-                                    src="{{ $mediaAsset->url }}"
-                                    alt="{{ $mediaAsset->alt_text ?: $title->name }}"
-                                    class="sb-media-card-image"
-                                    loading="lazy"
-                                >
-                                <figcaption class="sb-media-image-overlay">
-                                    <div class="sb-media-image-title">{{ $mediaAsset->caption ?: $mediaAsset->alt_text ?: $title->name.' still' }}</div>
-                                    <div class="sb-media-card-meta">
-                                        <span>{{ str($mediaAsset->kind->value)->headline() }}</span>
-                                        @if ($mediaAsset->published_at)
-                                            <span>{{ $mediaAsset->published_at->format('M j, Y') }}</span>
-                                        @endif
-                                    </div>
-                                </figcaption>
-                            </figure>
+                @if ($stillAssetsPagination->total() > 0)
+                    @php($stillOffset = ($stillAssetsPagination->currentPage() - 1) * $stillAssetsPagination->perPage())
+                    <div class="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
+                        @foreach ($stillAssetsPagination as $mediaAsset)
+                            <button
+                                type="button"
+                                class="sb-media-lightbox-trigger"
+                                x-on:click="openLightbox('stills', {{ $stillOffset + $loop->index }})"
+                            >
+                                <figure class="sb-media-image-card">
+                                    <img
+                                        src="{{ $mediaAsset->url }}"
+                                        alt="{{ $mediaAsset->accessibleAltText($title->name) }}"
+                                        class="sb-media-card-image"
+                                        loading="lazy"
+                                    >
+                                    @if ($mediaAsset->meaningfulCaption() || $mediaAsset->published_at)
+                                        <figcaption class="sb-media-image-overlay">
+                                            @if ($mediaAsset->meaningfulCaption())
+                                                <div class="sb-media-image-title">{{ $mediaAsset->meaningfulCaption() }}</div>
+                                            @endif
+                                            @if ($mediaAsset->published_at)
+                                                <div class="sb-media-card-meta">
+                                                    <span>{{ $mediaAsset->published_at->format('M j, Y') }}</span>
+                                                </div>
+                                            @endif
+                                        </figcaption>
+                                    @endif
+                                </figure>
+                            </button>
                         @endforeach
                     </div>
+
+                    @if ($stillAssetsPagination->hasPages())
+                        <div class="pt-2">
+                            {{ $stillAssetsPagination->onEachSide(1)->links() }}
+                        </div>
+                    @endif
                 @else
                     <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
                         <x-ui.empty.media>
@@ -282,31 +354,54 @@
                             Wide-format hero artwork for atmospheric page headers, viewer surfaces, and cinematic browsing.
                         </x-ui.text>
                     </div>
-                    <x-ui.badge variant="outline" color="neutral" icon="photo">{{ number_format($backdropAssets->count()) }} backdrops</x-ui.badge>
+                    <div class="flex items-center gap-3">
+                        <x-ui.badge variant="outline" color="neutral" icon="photo">{{ number_format($backdropAssetsPagination->total()) }} backdrops</x-ui.badge>
+                        @if ($backdropArchiveHref)
+                            <x-ui.link :href="$backdropArchiveHref" iconAfter="arrow-right">
+                                View all backdrops
+                            </x-ui.link>
+                        @endif
+                    </div>
                 </div>
 
-                @if ($backdropAssets->isNotEmpty())
-                    <div class="grid gap-4 xl:grid-cols-2">
-                        @foreach ($backdropAssets as $mediaAsset)
-                            <figure class="sb-media-image-card sb-media-image-card--backdrop">
-                                <img
-                                    src="{{ $mediaAsset->url }}"
-                                    alt="{{ $mediaAsset->alt_text ?: $title->name }}"
-                                    class="sb-media-card-image sb-media-card-image--backdrop"
-                                    loading="lazy"
-                                >
-                                <figcaption class="sb-media-image-overlay">
-                                    <div class="sb-media-image-title">{{ $mediaAsset->caption ?: $mediaAsset->alt_text ?: $title->name.' backdrop' }}</div>
-                                    <div class="sb-media-card-meta">
-                                        @if ($mediaAsset->is_primary)
-                                            <span>Primary</span>
-                                        @endif
-                                        <span>{{ str($mediaAsset->kind->value)->headline() }}</span>
-                                    </div>
-                                </figcaption>
-                            </figure>
+                @if ($backdropAssetsPagination->total() > 0)
+                    @php($backdropOffset = ($backdropAssetsPagination->currentPage() - 1) * $backdropAssetsPagination->perPage())
+                    <div class="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
+                        @foreach ($backdropAssetsPagination as $mediaAsset)
+                            <button
+                                type="button"
+                                class="sb-media-lightbox-trigger"
+                                x-on:click="openLightbox('backdrops', {{ $backdropOffset + $loop->index }})"
+                            >
+                                <figure class="sb-media-image-card sb-media-image-card--backdrop">
+                                    <img
+                                        src="{{ $mediaAsset->url }}"
+                                        alt="{{ $mediaAsset->accessibleAltText($title->name) }}"
+                                        class="sb-media-card-image sb-media-card-image--backdrop"
+                                        loading="lazy"
+                                    >
+                                    @if ($mediaAsset->meaningfulCaption() || $mediaAsset->is_primary)
+                                        <figcaption class="sb-media-image-overlay">
+                                            @if ($mediaAsset->meaningfulCaption())
+                                                <div class="sb-media-image-title">{{ $mediaAsset->meaningfulCaption() }}</div>
+                                            @endif
+                                            @if ($mediaAsset->is_primary)
+                                                <div class="sb-media-card-meta">
+                                                    <span>Primary</span>
+                                                </div>
+                                            @endif
+                                        </figcaption>
+                                    @endif
+                                </figure>
+                            </button>
                         @endforeach
                     </div>
+
+                    @if ($backdropAssetsPagination->hasPages())
+                        <div class="pt-2">
+                            {{ $backdropAssetsPagination->onEachSide(1)->links() }}
+                        </div>
+                    @endif
                 @else
                     <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
                         <x-ui.empty.media>
@@ -319,128 +414,75 @@
         </x-ui.card>
 
         <x-ui.card id="title-media-trailers" class="sb-detail-section sb-media-section !max-w-none" data-slot="title-media-trailers">
+            @php($trailerPreviewAsset = $backdrop ?? $viewerAsset ?? $poster)
+            @php($trailerListAssets = $trailerArchive->isNotEmpty() ? $trailerArchive : $trailerAssets)
+            @php($trailerListIndexOffset = $trailerAssets->count() === $trailerListAssets->count() ? 0 : 1)
+
             <div class="space-y-4">
                 <div class="flex flex-wrap items-center justify-between gap-4">
                     <div>
                         <x-ui.heading level="h2" size="lg">Trailers</x-ui.heading>
-                        <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                            Trailer, clip, and featurette records arranged in a cleaner dark gallery instead of a noisy public feed.
-                        </x-ui.text>
                     </div>
                     <div class="flex items-center gap-3">
-                        <x-ui.badge variant="outline" color="neutral" icon="play">{{ number_format($trailerAssets->count()) }} videos</x-ui.badge>
-                        <x-ui.link :href="route('public.trailers.latest')" variant="ghost" iconAfter="arrow-right">
+                        <x-ui.badge variant="outline" color="neutral" icon="play">{{ number_format($trailerListAssets->count()) }} videos</x-ui.badge>
+                        @if ($trailerArchiveHref)
+                            <x-ui.link :href="$trailerArchiveHref" iconAfter="arrow-right">
+                                View all trailers
+                            </x-ui.link>
+                        @endif
+                        <x-ui.link.light :href="route('public.trailers.latest')" iconAfter="arrow-right">
                             Browse trailers
-                        </x-ui.link>
+                        </x-ui.link.light>
                     </div>
                 </div>
 
-                @if ($trailerAssets->isNotEmpty())
-                    <div class="grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(19rem,0.8fr)]">
-                        <div class="sb-media-trailer-lead">
-                            <div class="sb-media-trailer-poster sb-media-trailer-poster--lead">
-                                @if ($backdrop ?? $poster)
-                                    <img
-                                        src="{{ ($backdrop ?? $poster)?->url }}"
-                                        alt="{{ ($backdrop ?? $poster)?->alt_text ?: $title->name }}"
-                                        class="sb-media-card-image sb-media-card-image--backdrop"
-                                        loading="lazy"
-                                    >
-                                @else
-                                    <div class="sb-media-viewer-empty">
-                                        <x-ui.icon name="play-circle" class="size-12" />
-                                    </div>
-                                @endif
+                @if ($trailerListAssets->isNotEmpty())
+                    <div class="sb-media-trailer-list" data-slot="title-media-trailer-list">
+                        @foreach ($trailerListAssets as $video)
+                            @php($videoLabel = $video->meaningfulCaption() ?? str($video->kind->value)->headline())
 
-                                @if ($leadTrailer)
-                                    <div class="sb-media-trailer-badge">
-                                        <x-ui.icon name="play" class="size-4" />
-                                        {{ str($leadTrailer->kind->value)->headline() }}
-                                    </div>
-                                @endif
-                            </div>
-
-                            @if ($leadTrailer)
-                                <div class="sb-media-trailer-lead-body">
-                                    <div class="sb-media-kicker">Lead trailer</div>
-                                    <div class="sb-media-trailer-lead-title">{{ $leadTrailer->caption ?: str($leadTrailer->kind->value)->headline() }}</div>
-                                    <div class="sb-media-trailer-lead-copy">
-                                        Editorial lead for this title's video archive, surfaced ahead of clips and supporting featurettes.
-                                    </div>
-                                    <div class="sb-media-trailer-meta">
-                                        @if ($leadTrailer->provider)
-                                            <span>{{ str($leadTrailer->provider)->headline() }}</span>
-                                        @endif
-                                        @if ($leadTrailer->duration_seconds)
-                                            <span>{{ max(1, (int) ceil($leadTrailer->duration_seconds / 60)) }} min</span>
-                                        @endif
-                                        @if ($leadTrailer->published_at)
-                                            <span>{{ $leadTrailer->published_at->format('M j, Y') }}</span>
-                                        @endif
-                                    </div>
-
-                                    @if (filled($leadTrailer->url))
-                                        <div class="mt-5 flex flex-wrap gap-3">
-                                            <x-ui.button as="a" :href="$leadTrailer->url" variant="outline" color="amber" icon="play" target="_blank" rel="noreferrer">
-                                                Open video
-                                            </x-ui.button>
-                                            <x-ui.button as="a" :href="$leadTrailer->url" variant="ghost" icon="play" target="_blank" rel="noreferrer">
-                                                Watch featured trailer
-                                            </x-ui.button>
+                            <article class="sb-media-trailer-item" data-slot="title-media-trailer-item">
+                                <div class="sb-media-trailer-item-media">
+                                    @if ($trailerPreviewAsset)
+                                        <img
+                                            src="{{ $trailerPreviewAsset->url }}"
+                                            alt="{{ $trailerPreviewAsset->accessibleAltText($title->name) }}"
+                                            class="sb-media-trailer-item-image"
+                                            loading="lazy"
+                                        >
+                                    @else
+                                        <div class="sb-media-viewer-empty">
+                                            <x-ui.icon name="play-circle" class="size-12" />
                                         </div>
                                     @endif
+
+                                    <div class="sb-media-trailer-item-index">
+                                        {{ str_pad((string) ($loop->iteration + $trailerListIndexOffset), 2, '0', STR_PAD_LEFT) }}
+                                    </div>
                                 </div>
-                            @endif
-                        </div>
 
-                        <div class="sb-media-trailer-archive">
-                            <div class="space-y-2">
-                                <div class="sb-media-kicker">Trailer archive</div>
-                                <div class="sb-media-trailer-archive-title">
-                                    {{ $trailerArchive->isNotEmpty() ? 'Clips and supporting video records' : 'Single lead record published' }}
+                                <div class="sb-media-trailer-item-body">
+                                    <div class="sb-media-trailer-item-copy">{{ $videoLabel }}</div>
+                                    <div class="sb-media-trailer-meta">
+                                        <span>{{ str($video->kind->value)->headline() }}</span>
+                                        @if ($video->durationMinutesLabel())
+                                            <span>{{ $video->durationMinutesLabel() }}</span>
+                                        @endif
+                                        @if ($video->published_at)
+                                            <span>{{ $video->published_at->format('M j, Y') }}</span>
+                                        @endif
+                                    </div>
                                 </div>
-                            </div>
 
-                            @if ($trailerArchive->isNotEmpty())
-                                <div class="mt-4 grid gap-3">
-                                    @foreach ($trailerArchive as $video)
-                                        <div class="sb-media-trailer-row">
-                                            <div class="sb-media-trailer-row-index">
-                                                {{ str_pad((string) ($loop->iteration + 1), 2, '0', STR_PAD_LEFT) }}
-                                            </div>
-
-                                            <div class="min-w-0 space-y-1">
-                                                <div class="sb-media-trailer-row-title">
-                                                    {{ $video->caption ?: str($video->kind->value)->headline() }}
-                                                </div>
-                                                <div class="sb-media-trailer-meta">
-                                                    <span>{{ str($video->kind->value)->headline() }}</span>
-                                                    @if ($video->provider)
-                                                        <span>{{ str($video->provider)->headline() }}</span>
-                                                    @endif
-                                                    @if ($video->duration_seconds)
-                                                        <span>{{ max(1, (int) ceil($video->duration_seconds / 60)) }} min</span>
-                                                    @endif
-                                                    @if ($video->published_at)
-                                                        <span>{{ $video->published_at->format('M j, Y') }}</span>
-                                                    @endif
-                                                </div>
-                                            </div>
-
-                                            @if (filled($video->url))
-                                                <x-ui.button as="a" :href="$video->url" variant="ghost" icon="play" target="_blank" rel="noreferrer">
-                                                    Open video
-                                                </x-ui.button>
-                                            @endif
-                                        </div>
-                                    @endforeach
-                                </div>
-                            @else
-                                <x-ui.text class="mt-4 text-sm text-neutral-500 dark:text-neutral-400">
-                                    This title currently has one published lead trailer and no supporting clips or featurettes.
-                                </x-ui.text>
-                            @endif
-                        </div>
+                                @if (filled($video->url))
+                                    <div class="sb-media-trailer-item-actions">
+                                        <x-ui.button.light-action :href="$video->url" icon="play" open-in-new-tab>
+                                            Open video
+                                        </x-ui.button.light-action>
+                                    </div>
+                                @endif
+                            </article>
+                        @endforeach
                     </div>
                 @else
                     <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
@@ -455,5 +497,6 @@
                 @endif
             </div>
         </x-ui.card>
-    </section>
+
+    </x-catalog.media-lightbox-shell>
 @endsection

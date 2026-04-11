@@ -169,9 +169,9 @@ new class extends Component
                                     </x-ui.text>
                                 </div>
 
-                                <x-ui.link :href="$group['href']" variant="ghost">
+                                <x-ui.link.light :href="$group['href']">
                                     Full chart
-                                </x-ui.link>
+                                </x-ui.link.light>
                             </div>
 
                             <div class="space-y-3">

@@ -5,6 +5,7 @@ namespace App\Actions\Search;
 use App\Actions\Catalog\BuildPublicTitleIndexQueryAction;
 use App\Models\Title;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class GetDiscoveryTitleSuggestionsAction
 {
@@ -23,14 +24,21 @@ class GetDiscoveryTitleSuggestionsAction
             return new Collection;
         }
 
-        return $this->buildPublicTitleIndexQuery
-            ->handle([
-                'search' => $search,
-                'searchMode' => 'discovery',
-                'sort' => 'popular',
-                'excludeEpisodes' => false,
-            ])
-            ->limit(max(1, min($limit, 8)))
-            ->get();
+        $resolvedLimit = max(1, min($limit, 8));
+
+        return Cache::remember(
+            'search:discovery-title-suggestions:'.md5(mb_strtolower($search).'|'.$resolvedLimit),
+            now()->addMinutes(5),
+            fn (): Collection => $this->buildPublicTitleIndexQuery
+                ->handle([
+                    'search' => $search,
+                    'searchMode' => 'discovery',
+                    'sort' => 'popular',
+                    'excludeEpisodes' => false,
+                    'includePresentationRelations' => false,
+                ])
+                ->limit($resolvedLimit)
+                ->get(),
+        );
     }
 }

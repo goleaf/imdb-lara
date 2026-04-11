@@ -1,7 +1,7 @@
 @extends('layouts.public')
 
 @section('title', $title->name.' Box Office Report')
-@section('meta_description', 'Review opening weekend, lifetime gross, budget, and market coverage for '.$title->name.'.')
+@section('meta_description', 'Review opening weekend, lifetime gross, budget, and reporting footprint for '.$title->name.'.')
 
 @section('breadcrumbs')
     <x-ui.breadcrumbs.item :href="route('public.home')">Home</x-ui.breadcrumbs.item>
@@ -44,14 +44,14 @@
                     <div class="space-y-3">
                         <x-ui.heading level="h1" size="xl" class="sb-page-title">Box Office Report</x-ui.heading>
                         <x-ui.text class="sb-page-copy max-w-3xl text-base">
-                            Opening weekend, lifetime performance, ranked revenue context, and market coverage for {{ $title->name }} in a calmer entertainment-analytics layout.
+                            Opening weekend, lifetime performance, ranked revenue context, and imported reporting footprint for {{ $title->name }} in a calmer entertainment-analytics layout.
                         </x-ui.text>
                     </div>
 
                     <div class="flex flex-wrap gap-2">
                         <x-ui.badge variant="outline" color="amber" icon="banknotes">{{ number_format($reportedFigureCount) }} reported figures</x-ui.badge>
                         <x-ui.badge variant="outline" color="slate" icon="chart-bar">{{ number_format($rankCards->count()) }} ranked positions</x-ui.badge>
-                        <x-ui.badge variant="outline" color="neutral" icon="queue-list">{{ number_format($reportedMarketCount) }} tracked markets</x-ui.badge>
+                        <x-ui.badge variant="outline" color="neutral" icon="queue-list">{{ number_format($reportedCoverageCount) }} imported fields</x-ui.badge>
                     </div>
                 </div>
 
@@ -60,7 +60,7 @@
                         <div>
                             <div class="sb-box-office-panel-kicker">Revenue Spotlight</div>
                             <div class="sb-box-office-panel-copy">
-                                Strong headline grosses stay prominent while the supporting comparisons remain quieter and easier to scan.
+                                Strong headline grosses stay prominent while the supporting cards expose the imported date, currency, rank, and coverage context that already exists on the commercial row.
                             </div>
                         </div>
 
@@ -72,45 +72,39 @@
                             </div>
                         @else
                             <div class="sb-box-office-mini-card">
-                                <div class="sb-box-office-mini-label">Reporting status</div>
-                                <div class="sb-box-office-mini-value">Pending</div>
-                                <div class="sb-box-office-mini-copy">Commercial figures will appear here once the title carries box-office payloads.</div>
+                                <div class="sb-box-office-mini-label">Commercial reporting</div>
+                                <div class="sb-box-office-mini-value">Unavailable</div>
+                                <div class="sb-box-office-mini-copy">The current catalog record does not yet carry structured box-office figures for this title.</div>
                             </div>
                         @endif
 
                         <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-                            @if ($spotlightRank)
+                            @forelse ($heroContextCards as $heroContextCard)
                                 <div class="sb-box-office-mini-card">
-                                    <div class="sb-box-office-mini-label">{{ $spotlightRank['label'] }} rank</div>
-                                    <div class="sb-box-office-mini-value">{{ $spotlightRank['value'] }}</div>
-                                    <div class="sb-box-office-mini-copy">{{ $spotlightRank['copy'] }}</div>
+                                    <div class="sb-box-office-mini-label">{{ $heroContextCard['label'] }}</div>
+                                    <div class="sb-box-office-mini-value">{{ $heroContextCard['value'] }}</div>
+                                    <div class="sb-box-office-mini-copy">{{ $heroContextCard['copy'] }}</div>
                                 </div>
-                            @elseif ($secondaryMetric)
-                                <div class="sb-box-office-mini-card">
-                                    <div class="sb-box-office-mini-label">{{ $secondaryMetric['label'] }}</div>
-                                    <div class="sb-box-office-mini-value">{{ $secondaryMetric['value'] }}</div>
-                                    <div class="sb-box-office-mini-copy">{{ $secondaryMetric['copy'] }}</div>
-                                </div>
-                            @endif
+                            @empty
+                                @if (! $spotlightMetric)
+                                    <div class="sb-box-office-mini-card">
+                                        <div class="sb-box-office-mini-label">Imported fields</div>
+                                        <div class="sb-box-office-mini-value">0 / 4</div>
+                                        <div class="sb-box-office-mini-copy">No headline commercial fields are currently populated on the title's box-office row.</div>
+                                    </div>
+                                @endif
+                            @endforelse
 
-                            @if ($budgetMultiple)
+                            @if (! $spotlightMetric && $heroContextCards->isEmpty())
                                 <div class="sb-box-office-mini-card">
-                                    <div class="sb-box-office-mini-label">{{ $budgetMultiple['label'] }}</div>
-                                    <div class="sb-box-office-mini-value">{{ $budgetMultiple['value'] }}</div>
-                                    <div class="sb-box-office-mini-copy">{{ $budgetMultiple['copy'] }}</div>
-                                </div>
-                            @elseif (! $spotlightMetric)
-                                <div class="sb-box-office-mini-card">
-                                    <div class="sb-box-office-mini-label">Comparison blocks</div>
-                                    <div class="sb-box-office-mini-value">Waiting</div>
-                                    <div class="sb-box-office-mini-copy">Comparisons activate automatically when compatible budget and gross records exist.</div>
+                                    <div class="sb-box-office-mini-label">Comparison availability</div>
+                                    <div class="sb-box-office-mini-value">No inputs</div>
+                                    <div class="sb-box-office-mini-copy">Derived comparisons appear automatically once the catalog row carries compatible gross and budget figures.</div>
                                 </div>
                             @endif
                         </div>
 
-                        <x-ui.link :href="route('public.titles.show', $title)" variant="ghost" iconAfter="arrow-right">
-                            Back to title page
-                        </x-ui.link>
+                        <x-catalog.back-link :href="route('public.titles.show', $title)" />
                     </div>
                 </div>
             </div>
@@ -220,30 +214,30 @@
             <div class="space-y-5">
                 <div class="flex flex-wrap items-center justify-between gap-4">
                     <div>
-                        <x-ui.heading level="h2" size="lg">Market Breakdown</x-ui.heading>
+                        <x-ui.heading level="h2" size="lg">Reporting Footprint</x-ui.heading>
                         <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                            The current import feed carries theatrical runway coverage by market, giving the page a clearer regional footprint even when per-market grosses are absent.
+                            The imported <code>movie_box_office</code> row currently carries these commercial fields, currencies, and date details for {{ $title->name }}.
                         </x-ui.text>
                     </div>
 
                     <x-ui.badge variant="outline" color="neutral" icon="queue-list">
-                        {{ number_format($reportedMarketCount) }} markets
+                        {{ number_format($reportedCoverageCount) }} imported fields
                     </x-ui.badge>
                 </div>
 
-                @if ($marketRows->isNotEmpty())
+                @if ($reportingRows->isNotEmpty())
                     <div class="space-y-3">
-                        @foreach ($marketRows as $marketRow)
+                        @foreach ($reportingRows as $reportingRow)
                             <article class="sb-box-office-market-row">
                                 <div class="flex flex-wrap items-start justify-between gap-3">
                                     <div>
-                                        <div class="sb-box-office-market-label">{{ $marketRow['market'] }}</div>
-                                        <div class="sb-box-office-market-copy">{{ $marketRow['copy'] }}</div>
+                                        <div class="sb-box-office-market-label">{{ $reportingRow['label'] }}</div>
+                                        <div class="sb-box-office-market-copy">{{ $reportingRow['copy'] }}</div>
                                     </div>
 
-                                    @if ($marketRow['weeksLabel'])
+                                    @if ($reportingRow['badge'])
                                         <x-ui.badge variant="outline" color="slate" icon="queue-list">
-                                            {{ $marketRow['weeksLabel'] }}
+                                            {{ $reportingRow['badge'] }}
                                         </x-ui.badge>
                                     @endif
                                 </div>
@@ -255,9 +249,9 @@
                         <x-ui.empty.media>
                             <x-ui.icon name="queue-list" class="size-8 text-neutral-400 dark:text-neutral-500" />
                         </x-ui.empty.media>
-                        <x-ui.heading level="h3">Market coverage has not been attached yet.</x-ui.heading>
+                        <x-ui.heading level="h3">Reporting footprint has not been attached yet.</x-ui.heading>
                         <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
-                            Regional runway notes will appear here once the imported box-office payload includes theatrical market coverage.
+                            This section will populate automatically once the imported <code>movie_box_office</code> row carries structured commercial figures for the title.
                         </x-ui.text>
                     </x-ui.empty>
                 @endif

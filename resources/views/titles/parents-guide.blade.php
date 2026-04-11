@@ -84,9 +84,7 @@
                             <x-ui.badge color="amber" icon="shield-check">{{ $title->age_rating }}</x-ui.badge>
                         @endif
 
-                        <x-ui.link :href="route('public.titles.show', $title)" variant="ghost" iconAfter="arrow-right">
-                            Back to title page
-                        </x-ui.link>
+                        <x-catalog.back-link :href="route('public.titles.show', $title)" />
                     </div>
                 </div>
             </div>

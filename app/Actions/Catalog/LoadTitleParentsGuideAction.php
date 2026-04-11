@@ -247,7 +247,7 @@ class LoadTitleParentsGuideAction
      */
     private function buildCertificateItems(Title $title): Collection
     {
-        return $title->certificateRecords
+        return $title->resolvedMovieCertificates()
             ->map(function (MovieCertificate $certificate): ?array {
                 $rating = $this->nullableString($certificate->certificateRating?->name);
 
@@ -263,7 +263,7 @@ class LoadTitleParentsGuideAction
 
                 return [
                     'rating' => $rating,
-                    'country' => $this->nullableString($certificate->country_code),
+                    'country' => $this->nullableString($certificate->resolvedCountryLabel()),
                     'attributes' => $attributes !== '' ? $attributes : null,
                 ];
             })

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\LanguageCode;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -37,6 +38,22 @@ class MovieAka extends ImdbModel
     public function language(): BelongsTo
     {
         return $this->belongsTo(Language::class, 'language_code', 'code');
+    }
+
+    public function resolvedLanguageLabel(): ?string
+    {
+        if ($this->relationLoaded('language') && filled($this->language?->name)) {
+            return (string) $this->language?->name;
+        }
+
+        return LanguageCode::labelFor($this->language_code) ?? $this->language_code;
+    }
+
+    public function resolvedCountryLabel(): ?string
+    {
+        $fallbackName = $this->relationLoaded('country') ? $this->country?->name : null;
+
+        return Country::labelForCode($this->country_code, $fallbackName);
     }
 
     public function movie(): BelongsTo

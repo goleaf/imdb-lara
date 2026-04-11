@@ -1,0 +1,2696 @@
+{
+    "schemaVersion": 1,
+    "imdbId": "nm0692255",
+    "downloadedAt": "2026-04-11T03:21:28+00:00",
+    "sourceUrl": "https://api.imdbapi.dev/names/nm0692255",
+    "details": {
+        "id": "nm0692255",
+        "displayName": "Ray Porter",
+        "primaryImage": {
+            "url": "https://m.media-amazon.com/images/M/MV5BNGYzZGQ4NDMtOGNjYi00ZDE3LWI5NmItZDk0ZWY3YmZiZjdmXkEyXkFqcGc@._V1_.jpg",
+            "width": 3840,
+            "height": 4800
+        },
+        "primaryProfessions": [
+            "actor"
+        ],
+        "biography": "Raymond Porter is an American actor and audio-book narrator who is widely known for portraying Darkseid from Zack Snyder's Justice League, the 2021 extended director's cut of the 2017 DC film. He did minor roles in The Runaways, Argo and Almost Famous. He did voice acting work for BioShock 2, Curious George, The Scarecrow and The Little Engine That Could.",
+        "heightCm": 183,
+        "birthDate": {
+            "year": 1965,
+            "month": 7,
+            "day": 9
+        },
+        "birthLocation": "Indiana, USA"
+    },
+    "images": {
+        "images": [
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BNDU3MDkzNDQ5NV5BMl5BanBnXkFtZTgwMjQxMjM0MjE@._V1_.jpg",
+                "width": 500,
+                "height": 374,
+                "type": "still_frame"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BOGM0NDYxZTktZDNkNS00M2IwLTk0ZWYtZmM0ZWJiYTc4NThmXkEyXkFqcGc@._V1_.jpg",
+                "width": 2880,
+                "height": 2160,
+                "type": "still_frame"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BMjAwNzYyNjYwNV5BMl5BanBnXkFtZTcwMzkwNTI3Mg@@._V1_.jpg",
+                "width": 700,
+                "height": 467,
+                "type": "still_frame"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BNGYzZGQ4NDMtOGNjYi00ZDE3LWI5NmItZDk0ZWY3YmZiZjdmXkEyXkFqcGc@._V1_.jpg",
+                "width": 3840,
+                "height": 4800,
+                "type": "publicity"
+            }
+        ],
+        "totalCount": 4
+    },
+    "filmography": {
+        "credits": [
+            {
+                "title": {
+                    "id": "tt1024648",
+                    "type": "movie",
+                    "primaryTitle": "Argo",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BM2QyMGUyZTEtMjE4Yi00M2RiLTgwN2QtZDMxZDNiMTFkMTFjXkEyXkFqcGc@._V1_.jpg",
+                        "width": 2025,
+                        "height": 3000
+                    },
+                    "startYear": 2012,
+                    "genres": [
+                        "Biography",
+                        "Drama",
+                        "History",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.7,
+                        "voteCount": 665441
+                    },
+                    "metacritic": {
+                        "score": 86,
+                        "reviewCount": 45
+                    },
+                    "originCountries": [
+                        {
+                            "code": "GB",
+                            "name": "United Kingdom"
+                        },
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "First A.D."
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt1442437",
+                    "type": "tvSeries",
+                    "primaryTitle": "Modern Family",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYzFlOWFjNzQtODViNC00NzgzLThhZmItZTc1N2VlZDgwODUwXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1500,
+                        "height": 2238
+                    },
+                    "startYear": 2009,
+                    "endYear": 2020,
+                    "genres": [
+                        "Comedy",
+                        "Drama",
+                        "Romance"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.5,
+                        "voteCount": 537953
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Lazlo"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt12361974",
+                    "type": "movie",
+                    "primaryTitle": "Zack Snyder's Justice League",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNDA0MzM5YTctZTU2My00NGQ5LWE2NTEtNDM0MjZmMDBkOTZkXkEyXkFqcGc@._V1_.jpg",
+                        "width": 2025,
+                        "height": 3000
+                    },
+                    "startYear": 2021,
+                    "genres": [
+                        "Action",
+                        "Adventure",
+                        "Fantasy",
+                        "Sci-Fi"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.9,
+                        "voteCount": 471826
+                    },
+                    "metacritic": {
+                        "score": 54,
+                        "reviewCount": 46
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Darkseid"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt1124373",
+                    "type": "tvSeries",
+                    "primaryTitle": "Sons of Anarchy",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZWNiZjFiNGEtNGZmMS00YTBlLWJlNmQtZTA2NzEzZWE4ZGQyXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1509,
+                        "height": 2048
+                    },
+                    "startYear": 2008,
+                    "endYear": 2014,
+                    "genres": [
+                        "Crime",
+                        "Drama",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.5,
+                        "voteCount": 354089
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Head Red"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt1586680",
+                    "type": "tvSeries",
+                    "primaryTitle": "Shameless",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMWUwZjJmYjctYTY3MC00ZTVlLWI1ZGEtNWQzMTFlMTcwMTY2XkEyXkFqcGc@._V1_.jpg",
+                        "width": 480,
+                        "height": 720
+                    },
+                    "startYear": 2011,
+                    "endYear": 2021,
+                    "genres": [
+                        "Comedy",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.5,
+                        "voteCount": 332044
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Lip's Boss"
+                ],
+                "episodeCount": 2
+            },
+            {
+                "title": {
+                    "id": "tt0181875",
+                    "type": "movie",
+                    "primaryTitle": "Almost Famous",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZGFmNDQzOTItOGZkNS00NjFkLWE4MjQtNmRjMjNlMjg3YzdiXkEyXkFqcGc@._V1_.jpg",
+                        "width": 2466,
+                        "height": 3651
+                    },
+                    "startYear": 2000,
+                    "genres": [
+                        "Adventure",
+                        "Comedy",
+                        "Drama",
+                        "Music"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.9,
+                        "voteCount": 314664
+                    },
+                    "metacritic": {
+                        "score": 90,
+                        "reviewCount": 38
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Roadie Mick"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt0472954",
+                    "type": "tvSeries",
+                    "primaryTitle": "It's Always Sunny in Philadelphia",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTFiMDg5ZTItNWU2Ni00YzJlLWE4NTQtZjUwNWFhOTViYTk2XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1080,
+                        "height": 1350
+                    },
+                    "startYear": 2005,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.8,
+                        "voteCount": 280828
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Gerry"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt1196946",
+                    "type": "tvSeries",
+                    "primaryTitle": "The Mentalist",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTQ5OTgzOTczM15BMl5BanBnXkFtZTcwMDM2OTY4MQ@@._V1_.jpg",
+                        "width": 566,
+                        "height": 755
+                    },
+                    "startYear": 2008,
+                    "endYear": 2015,
+                    "genres": [
+                        "Crime",
+                        "Drama",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.2,
+                        "voteCount": 225458
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Wick Ammon"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt12042730",
+                    "type": "movie",
+                    "primaryTitle": "Project Hail Mary",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNTkwNzJiYTctNzI3NC00NjE1LTlhYjktY2Q5MTdmMWFmNzcxXkEyXkFqcGc@._V1_.jpg",
+                        "width": 2765,
+                        "height": 4096
+                    },
+                    "startYear": 2026,
+                    "genres": [
+                        "Adventure",
+                        "Comedy",
+                        "Sci-Fi"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.4,
+                        "voteCount": 178625
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Rejected Rocky Voice"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt14998742",
+                    "type": "movie",
+                    "primaryTitle": "Rebel Moon - Part One: A Child of Fire",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYTRmOTk2ZDYtY2Q3Mi00MGYwLWFjNDQtYTliODc3NzM1ZjBlXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1013,
+                        "height": 1500
+                    },
+                    "startYear": 2023,
+                    "genres": [
+                        "Action",
+                        "Adventure",
+                        "Drama",
+                        "Fantasy",
+                        "Sci-Fi"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.6,
+                        "voteCount": 140237
+                    },
+                    "metacritic": {
+                        "score": 31,
+                        "reviewCount": 40
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Hickman"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt1489428",
+                    "type": "tvSeries",
+                    "primaryTitle": "Justified",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZGIzNmFlMzgtYWY0MC00NjFmLWJhMGItZTM2YjVlZjY3ZjBlXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1188,
+                        "height": 1800
+                    },
+                    "startYear": 2010,
+                    "endYear": 2015,
+                    "genres": [
+                        "Action",
+                        "Crime",
+                        "Drama",
+                        "Mystery",
+                        "Thriller",
+                        "Western"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.6,
+                        "voteCount": 130295
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Hestler"
+                ],
+                "episodeCount": 3
+            },
+            {
+                "title": {
+                    "id": "tt0106004",
+                    "type": "tvSeries",
+                    "primaryTitle": "Frasier",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYTYwMjY1OTctZjk4My00ZjllLWFkNTMtNzg2OGVlMGI0MmQ1XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1400,
+                        "height": 2100
+                    },
+                    "startYear": 1993,
+                    "endYear": 2004,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.2,
+                        "voteCount": 102748
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Dwayne"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt0312172",
+                    "type": "tvSeries",
+                    "primaryTitle": "Monk",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNWM0YjQ4ZjYtNWYyYi00ZDVmLTg5NDQtOTkzZjljYzg2ZWI1XkEyXkFqcGc@._V1_.jpg",
+                        "width": 933,
+                        "height": 1400
+                    },
+                    "startYear": 2002,
+                    "endYear": 2009,
+                    "genres": [
+                        "Comedy",
+                        "Crime",
+                        "Drama",
+                        "Mystery"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.1,
+                        "voteCount": 101595
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Dale 'The Whale' Biederbeck"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt0247082",
+                    "type": "tvSeries",
+                    "primaryTitle": "CSI: Crime Scene Investigation",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYWRjMjU2NmUtMmQ0MS00NDMyLTg4NGItNjg1OWY2OGI4ZDM5XkEyXkFqcGc@._V1_.jpg",
+                        "width": 2660,
+                        "height": 3600
+                    },
+                    "startYear": 2000,
+                    "endYear": 2015,
+                    "genres": [
+                        "Crime",
+                        "Drama",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.7,
+                        "voteCount": 93945
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        },
+                        {
+                            "code": "CA",
+                            "name": "Canada"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Carl Van Goe"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt0108757",
+                    "type": "tvSeries",
+                    "primaryTitle": "ER",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMzM5NjQ4M2QtNWQyMy00OWUxLWIyZjktNmY2ZjMyZjA2NWE0XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1000,
+                        "height": 1426
+                    },
+                    "startYear": 1994,
+                    "endYear": 2009,
+                    "genres": [
+                        "Drama",
+                        "Romance"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.9,
+                        "voteCount": 77323
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Sam Broder"
+                ],
+                "episodeCount": 3
+            },
+            {
+                "title": {
+                    "id": "tt0157246",
+                    "type": "tvSeries",
+                    "primaryTitle": "Will & Grace",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNDMwOTExZGUtNjFiMS00MzljLWJhMzYtYWFhMDUzOWUyYjMwXkEyXkFqcGc@._V1_.jpg",
+                        "width": 424,
+                        "height": 626
+                    },
+                    "startYear": 1998,
+                    "endYear": 2020,
+                    "genres": [
+                        "Comedy",
+                        "Romance"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.4,
+                        "voteCount": 64044
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Dad"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt7235466",
+                    "type": "tvSeries",
+                    "primaryTitle": "9-1-1",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYTllNGE4MjctZDI5Mi00ODEyLWFhNTUtZDUyYTBlMzMxYTBkXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1080,
+                        "height": 1350
+                    },
+                    "startYear": 2018,
+                    "genres": [
+                        "Action",
+                        "Drama",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.9,
+                        "voteCount": 63197
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Eugene"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt5574490",
+                    "type": "tvSeries",
+                    "primaryTitle": "Animal Kingdom",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNjFjOGU5NTUtZTYwNy00NDhmLTk2NjgtOTc2MTUwMTgzNTY3XkEyXkFqcGc@._V1_.jpg",
+                        "width": 867,
+                        "height": 1285
+                    },
+                    "startYear": 2016,
+                    "endYear": 2022,
+                    "genres": [
+                        "Crime",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.2,
+                        "voteCount": 56726
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Contractor"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt1017451",
+                    "type": "movie",
+                    "primaryTitle": "The Runaways",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTI3Nzc2ODI4NV5BMl5BanBnXkFtZTcwMzkxNDMyMw@@._V1_.jpg",
+                        "width": 1383,
+                        "height": 2048
+                    },
+                    "startYear": 2010,
+                    "genres": [
+                        "Biography",
+                        "Drama",
+                        "Music"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.5,
+                        "voteCount": 52578
+                    },
+                    "metacritic": {
+                        "score": 65,
+                        "reviewCount": 36
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Band Member"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt0426371",
+                    "type": "tvSeries",
+                    "primaryTitle": "The Suite Life of Zack & Cody",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BY2JkNzFmYWItMGI1Yi00OGU1LTg3NzUtM2M0NWFkOTFjZTI5XkEyXkFqcGc@._V1_.jpg",
+                        "width": 2000,
+                        "height": 3000
+                    },
+                    "startYear": 2005,
+                    "endYear": 2008,
+                    "genres": [
+                        "Comedy",
+                        "Family"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.7,
+                        "voteCount": 42903
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Derrick"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt0412175",
+                    "type": "tvSeries",
+                    "primaryTitle": "Medium",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTIyMTE3MTA2N15BMl5BanBnXkFtZTcwMjU3NTg1MQ@@._V1_.jpg",
+                        "width": 566,
+                        "height": 755
+                    },
+                    "startYear": 2005,
+                    "endYear": 2011,
+                    "genres": [
+                        "Crime",
+                        "Drama",
+                        "Fantasy",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.2,
+                        "voteCount": 33181
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Putt Putt Golf Man"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt0458253",
+                    "type": "tvSeries",
+                    "primaryTitle": "The Closer",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BODg5MTc0MTg3OV5BMl5BanBnXkFtZTcwNTUwNjAzMQ@@._V1_.jpg",
+                        "width": 1800,
+                        "height": 2700
+                    },
+                    "startYear": 2005,
+                    "endYear": 2012,
+                    "genres": [
+                        "Crime",
+                        "Drama",
+                        "Mystery"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.8,
+                        "voteCount": 32406
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Adrian Beck"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt1299368",
+                    "type": "tvSeries",
+                    "primaryTitle": "Southland",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMjAwNzQ4MTMyMF5BMl5BanBnXkFtZTcwMDk3NTYyNw@@._V1_.jpg",
+                        "width": 529,
+                        "height": 755
+                    },
+                    "startYear": 2009,
+                    "endYear": 2013,
+                    "genres": [
+                        "Crime",
+                        "Drama",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.5,
+                        "voteCount": 32321
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Roy"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt26576161",
+                    "type": "tvSeries",
+                    "primaryTitle": "The Terminal List: Dark Wolf",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNGVlNmU2YmItOTE1Mi00NjhlLWE0ODMtNDVjMjY0OTUyOWY2XkEyXkFqcGc@._V1_.jpg",
+                        "width": 2000,
+                        "height": 3000
+                    },
+                    "startYear": 2025,
+                    "genres": [
+                        "Action",
+                        "Drama",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.6,
+                        "voteCount": 27770
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Phone Source"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt1506437",
+                    "type": "videoGame",
+                    "primaryTitle": "BioShock 2",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOWZjMWM2NjctZDU4MC00ZjU3LWEzZjMtZGJjYzA4M2I5OTM2XkEyXkFqcGc@._V1_.jpg",
+                        "width": 600,
+                        "height": 900
+                    },
+                    "startYear": 2010,
+                    "genres": [
+                        "Action",
+                        "Adventure",
+                        "Horror",
+                        "Mystery",
+                        "Sci-Fi",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.2,
+                        "voteCount": 11604
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        },
+                        {
+                            "code": "AU",
+                            "name": "Australia"
+                        },
+                        {
+                            "code": "CA",
+                            "name": "Canada"
+                        },
+                        {
+                            "code": "FR",
+                            "name": "France"
+                        },
+                        {
+                            "code": "CN",
+                            "name": "China"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Mark Meltzer"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt0094514",
+                    "type": "tvSeries",
+                    "primaryTitle": "Murphy Brown",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYzJkNWY1ZGEtYzk2Zi00NzliLTk1YmYtZTA2ODRkZGZhZDM0XkEyXkFqcGc@._V1_.jpg",
+                        "width": 600,
+                        "height": 900
+                    },
+                    "startYear": 1988,
+                    "endYear": 2018,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.9,
+                        "voteCount": 11530
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Young Man"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt10625492",
+                    "type": "tvSeries",
+                    "primaryTitle": "Twilight of the Gods",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYjI0ZmVmMGItYjcxMi00ZmU0LWIxNjQtMmRjNjdjYjZjMWViXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1500,
+                        "height": 2222
+                    },
+                    "startYear": 2024,
+                    "endYear": 2024,
+                    "genres": [
+                        "Animation",
+                        "Action",
+                        "Adventure",
+                        "Fantasy",
+                        "Mystery"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.2,
+                        "voteCount": 10962
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        },
+                        {
+                            "code": "FR",
+                            "name": "France"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Leif's Father",
+                    "Bolverkr",
+                    "Jorg"
+                ],
+                "episodeCount": 3
+            },
+            {
+                "title": {
+                    "id": "tt13624900",
+                    "type": "tvSeries",
+                    "primaryTitle": "Naomi",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BODRlNTg4ODctNWQ1Ni00Zjg4LThmMWItMWVhOWU0YjQ4MGNkXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1080,
+                        "height": 1350
+                    },
+                    "startYear": 2022,
+                    "endYear": 2022,
+                    "genres": [
+                        "Action",
+                        "Adventure",
+                        "Drama",
+                        "Sci-Fi"
+                    ],
+                    "rating": {
+                        "aggregateRating": 4.9,
+                        "voteCount": 5997
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Brutus"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt0449545",
+                    "type": "tvSeries",
+                    "primaryTitle": "Curious George",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNTJjNDNlMmUtNzkxNi00ZDMwLThlMjItNDIyZGY5Y2U4MTk3XkEyXkFqcGc@._V1_.jpg",
+                        "width": 4050,
+                        "height": 6000
+                    },
+                    "startYear": 2006,
+                    "endYear": 2022,
+                    "genres": [
+                        "Animation",
+                        "Adventure",
+                        "Comedy",
+                        "Family"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.2,
+                        "voteCount": 4808
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Howlin' Hal"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt7440732",
+                    "type": "tvSeries",
+                    "primaryTitle": "The Kids Are Alright",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BN2RjMDc3OTQtMjc0Yy00YzViLWJiZTMtZDA4ZGZhNmU1ZWI2XkEyXkFqcGc@._V1_.jpg",
+                        "width": 480,
+                        "height": 720
+                    },
+                    "startYear": 2018,
+                    "endYear": 2019,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.9,
+                        "voteCount": 3909
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Ernie"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt1754190",
+                    "type": "videoGame",
+                    "primaryTitle": "Medal of Honor",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNjRkNWRjOWQtMDRkNS00MjBlLTgxYmItZTEzZDNhZDVlYTBlXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1200,
+                        "height": 1800
+                    },
+                    "startYear": 2010,
+                    "genres": [
+                        "Action",
+                        "War"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.2,
+                        "voteCount": 2953
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        },
+                        {
+                            "code": "SE",
+                            "name": "Sweden"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Gunfighter 06"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt12326830",
+                    "type": "podcastSeries",
+                    "primaryTitle": "The Sandman",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNGYxYTRmOTItMTc5My00ZjRkLWI4OTQtM2E0MGEyYjdiMTQxXkEyXkFqcGc@._V1_.jpg",
+                        "width": 2500,
+                        "height": 3704
+                    },
+                    "startYear": 2020,
+                    "endYear": 2022,
+                    "genres": [
+                        "Drama",
+                        "Fantasy",
+                        "Horror",
+                        "Sci-Fi"
+                    ],
+                    "rating": {
+                        "aggregateRating": 9,
+                        "voteCount": 2819
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "The Gryphon",
+                    "Gilbert",
+                    "Martin Tenbones",
+                    "Wesley Dodds",
+                    "Hector Hall",
+                    "Beelzebub",
+                    "Security Guard",
+                    "Richard Burbage",
+                    "Griffin",
+                    "Mark",
+                    "Mulligan"
+                ],
+                "episodeCount": 21
+            },
+            {
+                "title": {
+                    "id": "tt1712931",
+                    "type": "video",
+                    "primaryTitle": "Lost: Epilogue - The New Man in Charge",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZWM0MmE2MWYtYWM5Ni00YjZmLTk2NjItNjZmMzIxMGE3NDg2XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1300,
+                        "height": 1733
+                    },
+                    "startYear": 2010,
+                    "genres": [
+                        "Short"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.1,
+                        "voteCount": 2088
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Glenn"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt0307466",
+                    "type": "movie",
+                    "primaryTitle": "Sin",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTIyMDQwMTUzNl5BMl5BanBnXkFtZTcwMjk2MDUyMQ@@._V1_.jpg",
+                        "width": 314,
+                        "height": 460
+                    },
+                    "startYear": 2003,
+                    "genres": [
+                        "Crime",
+                        "Drama",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 4.5,
+                        "voteCount": 2073
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Jeff"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt3485722",
+                    "type": "videoGame",
+                    "primaryTitle": "The Elder Scrolls Online",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZDU4MDNiNDAtMTQzMy00YWM3LThkOGMtMDZkYjgyMzljMTc0XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1200,
+                        "height": 1800
+                    },
+                    "startYear": 2014,
+                    "genres": [
+                        "Action",
+                        "Adventure",
+                        "Drama",
+                        "Fantasy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.4,
+                        "voteCount": 1938
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor"
+            },
+            {
+                "title": {
+                    "id": "tt1133124",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Mr. Monk Is on the Run: Part 2",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMjA5MTcyNTAxMV5BMl5BanBnXkFtZTgwOTk1MDIzMjE@._V1_.jpg",
+                        "width": 500,
+                        "height": 375
+                    },
+                    "startYear": 2008,
+                    "genres": [
+                        "Comedy",
+                        "Crime",
+                        "Drama",
+                        "Mystery"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.5,
+                        "voteCount": 1520
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Dale 'The Whale' Biederbeck"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt0892737",
+                    "type": "tvMovie",
+                    "primaryTitle": "Last Stand of the 300",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNmE5ZTA4ODktODUwNC00ZGNhLWJmOTctYzU0ODBkNTZiMGRmXkEyXkFqcGc@._V1_.jpg",
+                        "width": 708,
+                        "height": 1000
+                    },
+                    "startYear": 2007,
+                    "genres": [
+                        "Documentary"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.4,
+                        "voteCount": 1361
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Priest of the Oracle"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt0319987",
+                    "type": "tvSeries",
+                    "primaryTitle": "Dragnet",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BM2FmNDgzMGUtZjAxNy00ZWU5LTg4ZGYtZDhmNjA0M2IwZjY1XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1535,
+                        "height": 1920
+                    },
+                    "startYear": 2003,
+                    "endYear": 2004,
+                    "genres": [
+                        "Crime",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7,
+                        "voteCount": 1271
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt21253596",
+                    "type": "video",
+                    "primaryTitle": "Project Hail Mary",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BM2U0NDE2MDMtYWU3ZC00OTUzLWIxYmItMTY3YWRjNmFkYmIzXkEyXkFqcGc@._V1_.jpg",
+                        "width": 500,
+                        "height": 500
+                    },
+                    "startYear": 2021,
+                    "genres": [
+                        "Sci-Fi"
+                    ],
+                    "rating": {
+                        "aggregateRating": 9.6,
+                        "voteCount": 1024
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Narrator"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt5535270",
+                    "type": "tvSeries",
+                    "primaryTitle": "The Jimmy Star Show with Ron Russell",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BN2EyYWI4NTQtODgwYS00OGNiLTkwZTYtZjk5MDQ4ZDQ5ZGE3XkEyXkFqcGc@._V1_.jpg",
+                        "width": 660,
+                        "height": 600
+                    },
+                    "startYear": 2014,
+                    "genres": [
+                        "Talk-Show"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.5,
+                        "voteCount": 511
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "self",
+                "characters": [
+                    "Guest"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt1764666",
+                    "type": "movie",
+                    "primaryTitle": "The Little Engine That Could",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNjE1YWE1NzYtMThjYi00NTcyLWIyYjItYTZiYzY0NzNhZDMzXkEyXkFqcGc@._V1_.jpg",
+                        "width": 900,
+                        "height": 1200
+                    },
+                    "startYear": 2011,
+                    "genres": [
+                        "Animation",
+                        "Family"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.6,
+                        "voteCount": 480
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        },
+                        {
+                            "code": "IN",
+                            "name": "India"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Nightmare Train"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt0263971",
+                    "type": "movie",
+                    "primaryTitle": "The Scarecrow",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTI4MTYyNTEwOF5BMl5BanBnXkFtZTcwNjExMzcxMQ@@._V1_.jpg",
+                        "width": 306,
+                        "height": 475
+                    },
+                    "startYear": 2000,
+                    "genres": [
+                        "Animation",
+                        "Family",
+                        "Fantasy",
+                        "Musical",
+                        "Romance"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.5,
+                        "voteCount": 315
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Grisham"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt0149252",
+                    "type": "video",
+                    "primaryTitle": "Tender Loving Care",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTI2NjI1ODUyMl5BMl5BanBnXkFtZTcwMDQzOTEzMQ@@._V1_.jpg",
+                        "width": 345,
+                        "height": 475
+                    },
+                    "startYear": 1996,
+                    "genres": [
+                        "Drama",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.3,
+                        "voteCount": 252
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Radio voice"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt5153902",
+                    "type": "tvSeries",
+                    "primaryTitle": "Animated Stories from the New Testament",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOGQ5YWUwNjQtODlmMy00OGUyLTg0YmMtODM4Y2FhODc2ZmQ4XkEyXkFqcGc@._V1_.jpg",
+                        "width": 379,
+                        "height": 533
+                    },
+                    "startYear": 1987,
+                    "endYear": 2005,
+                    "genres": [
+                        "Animation",
+                        "Drama",
+                        "Family"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.2,
+                        "voteCount": 183
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Narrator",
+                    "Collector",
+                    "Paul",
+                    "Sahara",
+                    "Satan"
+                ],
+                "episodeCount": 6
+            },
+            {
+                "title": {
+                    "id": "tt5153902",
+                    "type": "tvSeries",
+                    "primaryTitle": "Animated Stories from the New Testament",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOGQ5YWUwNjQtODlmMy00OGUyLTg0YmMtODM4Y2FhODc2ZmQ4XkEyXkFqcGc@._V1_.jpg",
+                        "width": 379,
+                        "height": 533
+                    },
+                    "startYear": 1987,
+                    "endYear": 2005,
+                    "genres": [
+                        "Animation",
+                        "Drama",
+                        "Family"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.2,
+                        "voteCount": 183
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "casting_director",
+                "episodeCount": 2
+            },
+            {
+                "title": {
+                    "id": "tt5126884",
+                    "type": "tvSeries",
+                    "primaryTitle": "Animated Stories from the Bible",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYTc5NDk4YmEtNDgyMi00OTc1LWE2OTItY2E1OTNhNWUzNmViXkEyXkFqcGc@._V1_.jpg",
+                        "width": 379,
+                        "height": 539
+                    },
+                    "startYear": 1987,
+                    "endYear": 2005,
+                    "genres": [
+                        "Animation",
+                        "Drama",
+                        "Family",
+                        "History",
+                        "Music"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.6,
+                        "voteCount": 175
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Ahab",
+                    "Cook",
+                    "King Saul",
+                    "Moses",
+                    "Naaman",
+                    "Narrator",
+                    "Phineas",
+                    "Younger King David"
+                ],
+                "episodeCount": 7
+            },
+            {
+                "title": {
+                    "id": "tt5126884",
+                    "type": "tvSeries",
+                    "primaryTitle": "Animated Stories from the Bible",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYTc5NDk4YmEtNDgyMi00OTc1LWE2OTItY2E1OTNhNWUzNmViXkEyXkFqcGc@._V1_.jpg",
+                        "width": 379,
+                        "height": 539
+                    },
+                    "startYear": 1987,
+                    "endYear": 2005,
+                    "genres": [
+                        "Animation",
+                        "Drama",
+                        "Family",
+                        "History",
+                        "Music"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.6,
+                        "voteCount": 175
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "casting_director",
+                "episodeCount": 10
+            },
+            {
+                "title": {
+                    "id": "tt1086724",
+                    "type": "short",
+                    "primaryTitle": "The Trap",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNzgwY2FjZWMtZWNlNC00MTdhLWExOWYtNjA0YzMwYzM3YTMxXkEyXkFqcGc@._V1_.jpg",
+                        "width": 720,
+                        "height": 1068
+                    },
+                    "startYear": 2007,
+                    "genres": [
+                        "Short",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5,
+                        "voteCount": 174
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Flasher"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt0315682",
+                    "type": "tvSeries",
+                    "primaryTitle": "In-Laws",
+                    "originalTitle": "The In-laws",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNWI0ODJhZmMtYTA5Zi00ZTVkLWE0ZGYtOTk4MTY3MDIyZDMyXkEyXkFqcGc@._V1_.jpg",
+                        "width": 332,
+                        "height": 472
+                    },
+                    "startYear": 2002,
+                    "endYear": 2003,
+                    "genres": [
+                        "Comedy",
+                        "Romance"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.7,
+                        "voteCount": 119
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Jeff"
+                ],
+                "episodeCount": 1
+            },
+            {
+                "title": {
+                    "id": "tt31169593",
+                    "type": "videoGame",
+                    "primaryTitle": "World of Warcraft: The War Within",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BN2M5NzM3NGMtZjA5Zi00MjBhLWFmMGYtZWUzMGMwZDMyMTM3XkEyXkFqcGc@._V1_.jpg",
+                        "width": 2480,
+                        "height": 3508
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Action"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.1,
+                        "voteCount": 116
+                    }
+                },
+                "category": "actor",
+                "characters": [
+                    "Locus-Walker"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt0119139",
+                    "type": "movie",
+                    "primaryTitle": "Follow the Bitch",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTYxODE3Mzc4Ml5BMl5BanBnXkFtZTcwMTAwMjkwOA@@._V1_.jpg",
+                        "width": 500,
+                        "height": 740
+                    },
+                    "startYear": 1996,
+                    "genres": [
+                        "Comedy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8.2,
+                        "voteCount": 113
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Bill"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt5102426",
+                    "type": "tvSeries",
+                    "primaryTitle": "Animated Hero Classics",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOWQyYWU0NGEtMWJkYi00ODgzLTgyMzUtZjVmZjUyZTdkZGQzXkEyXkFqcGc@._V1_.jpg",
+                        "width": 569,
+                        "height": 854
+                    },
+                    "startYear": 1991,
+                    "endYear": 2005,
+                    "genres": [
+                        "Animation"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.7,
+                        "voteCount": 107
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "casting_director",
+                "episodeCount": 10
+            },
+            {
+                "title": {
+                    "id": "tt5102426",
+                    "type": "tvSeries",
+                    "primaryTitle": "Animated Hero Classics",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOWQyYWU0NGEtMWJkYi00ODgzLTgyMzUtZjVmZjUyZTdkZGQzXkEyXkFqcGc@._V1_.jpg",
+                        "width": 569,
+                        "height": 854
+                    },
+                    "startYear": 1991,
+                    "endYear": 2005,
+                    "genres": [
+                        "Animation"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.7,
+                        "voteCount": 107
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Narrator",
+                    "Captain",
+                    "Cauchon",
+                    "George Washington",
+                    "Jean",
+                    "King Ferdinand",
+                    "King John",
+                    "Ludwig Boehm",
+                    "Lysias",
+                    "Nashum",
+                    "Reporter #2",
+                    "Stanton",
+                    "William Russell"
+                ],
+                "episodeCount": 12
+            },
+            {
+                "title": {
+                    "id": "tt37146909",
+                    "type": "videoGame",
+                    "primaryTitle": "Dune: Awakening",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZmUxMTA3MzItNTc0Zi00YWVmLWFmMzQtMWIyYTJiODY5Njc4XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1920,
+                        "height": 1600
+                    },
+                    "startYear": 2025,
+                    "genres": [
+                        "Action",
+                        "Adventure",
+                        "Sci-Fi"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.9,
+                        "voteCount": 92
+                    },
+                    "originCountries": [
+                        {
+                            "code": "NO",
+                            "name": "Norway"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Additional Voices"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt0446935",
+                    "type": "tvMovie",
+                    "primaryTitle": "Bible Battles",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZDI5NjNmZjAtNWEzOS00N2JiLTk4ODktMDU2ZDFiMzcxNzA0XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1284,
+                        "height": 1816
+                    },
+                    "startYear": 2005,
+                    "genres": [
+                        "Documentary",
+                        "History",
+                        "War"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.6,
+                        "voteCount": 76
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Abraham"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt5154104",
+                    "type": "tvSeries",
+                    "primaryTitle": "The Animated Book of Mormon",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZWZjODQ1ZmMtYTlhMC00ODI2LWEyY2YtMzI5MzI5YzYwNzMyXkEyXkFqcGc@._V1_.jpg",
+                        "width": 300,
+                        "height": 391
+                    },
+                    "startYear": 1987,
+                    "genres": [
+                        "Animation"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.1,
+                        "voteCount": 75
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "casting_director",
+                "episodeCount": 2
+            },
+            {
+                "title": {
+                    "id": "tt5154104",
+                    "type": "tvSeries",
+                    "primaryTitle": "The Animated Book of Mormon",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZWZjODQ1ZmMtYTlhMC00ODI2LWEyY2YtMzI5MzI5YzYwNzMyXkEyXkFqcGc@._V1_.jpg",
+                        "width": 300,
+                        "height": 391
+                    },
+                    "startYear": 1987,
+                    "genres": [
+                        "Animation"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.1,
+                        "voteCount": 75
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Jarom",
+                    "Mahonri",
+                    "Midian",
+                    "Nephite Captain",
+                    "Zoramite"
+                ],
+                "episodeCount": 4
+            },
+            {
+                "title": {
+                    "id": "tt32567640",
+                    "type": "videoGame",
+                    "primaryTitle": "The Elder Scrolls Online: Gold Road",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNWE3ZDU3ZGEtNDEzZS00YzliLThkNWQtMjYxZjc0OGQwZTI1XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1440,
+                        "height": 2160
+                    },
+                    "startYear": 2024,
+                    "genres": [
+                        "Fantasy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.1,
+                        "voteCount": 67
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor"
+            },
+            {
+                "title": {
+                    "id": "tt0383665",
+                    "type": "videoGame",
+                    "primaryTitle": "Tender Loving Care",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMjQ4ZTZmYzQtYTBlNS00MDRkLWE4MTItMWY4MTBlZWNhOTk0XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1200,
+                        "height": 1800
+                    },
+                    "startYear": 1998,
+                    "genres": [
+                        "Adventure",
+                        "Drama",
+                        "Horror",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.3,
+                        "voteCount": 60
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Radio Voice #1"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt0953985",
+                    "type": "tvEpisode",
+                    "primaryTitle": "David and Goliath",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTQyMzYzMzQ2MV5BMl5BanBnXkFtZTcwNjM2OTI0MQ@@._V1_.jpg",
+                        "width": 450,
+                        "height": 637
+                    },
+                    "startYear": 1995,
+                    "genres": [
+                        "Animation",
+                        "Drama",
+                        "Family",
+                        "History",
+                        "Music"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8,
+                        "voteCount": 56
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "King Saul"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt0167294",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Moses: From Birth to Burning Bush",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTIxMDQyOTY0N15BMl5BanBnXkFtZTcwMjEyMTM0MQ@@._V1_.jpg",
+                        "width": 450,
+                        "height": 637
+                    },
+                    "startYear": 1993,
+                    "genres": [
+                        "Animation",
+                        "Drama",
+                        "Family",
+                        "History",
+                        "Music"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.6,
+                        "voteCount": 51
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Moses"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt0167133",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Elijah",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTM4NDA1Nzc3N15BMl5BanBnXkFtZTcwNTI5ODQ0MQ@@._V1_.jpg",
+                        "width": 450,
+                        "height": 637
+                    },
+                    "startYear": 1993,
+                    "genres": [
+                        "Animation",
+                        "Drama",
+                        "Family",
+                        "History",
+                        "Music"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.5,
+                        "voteCount": 49
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Ahab"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt0167161",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Forgive Us Our Debts",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYzg3YWI2NmQtOTVhNS00YjZlLTkxOWUtNzhkNzg4OTFhNjg2XkEyXkFqcGc@._V1_.jpg",
+                        "width": 867,
+                        "height": 1216
+                    },
+                    "startYear": 1991,
+                    "genres": [
+                        "Animation",
+                        "Drama",
+                        "Family"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.8,
+                        "voteCount": 47
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Collector"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt0312777",
+                    "type": "short",
+                    "primaryTitle": "Hot Rush",
+                    "startYear": 2003,
+                    "genres": [
+                        "Short",
+                        "Comedy",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.7,
+                        "voteCount": 42
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Billy"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt0167409",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Solomon",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNzcwMTUyMDgwNl5BMl5BanBnXkFtZTcwMzE5ODQ0MQ@@._V1_.jpg",
+                        "width": 450,
+                        "height": 637
+                    },
+                    "startYear": 1995,
+                    "genres": [
+                        "Animation",
+                        "Drama",
+                        "Family",
+                        "History",
+                        "Music"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.5,
+                        "voteCount": 42
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Younger King David",
+                    "Narrator"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt0167286",
+                    "type": "tvEpisode",
+                    "primaryTitle": "The Ministry of Paul",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOGQ5YWUwNjQtODlmMy00OGUyLTg0YmMtODM4Y2FhODc2ZmQ4XkEyXkFqcGc@._V1_.jpg",
+                        "width": 379,
+                        "height": 533
+                    },
+                    "startYear": 1991,
+                    "genres": [
+                        "Animation",
+                        "Drama",
+                        "Family"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.5,
+                        "voteCount": 38
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Paul"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt0961169",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Worthy Is the Lamb",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTkxNzcwOTIyOV5BMl5BanBnXkFtZTcwMzEzMDM0MQ@@._V1_.jpg",
+                        "width": 450,
+                        "height": 637
+                    },
+                    "startYear": 2004,
+                    "genres": [
+                        "Animation",
+                        "Drama",
+                        "Family"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.4,
+                        "voteCount": 35
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Narrator"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt0961132",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Built Upon the Rock",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMjAyMTQxNTc4OF5BMl5BanBnXkFtZTcwMDYwODQ0MQ@@._V1_.jpg",
+                        "width": 450,
+                        "height": 637
+                    },
+                    "startYear": 2004,
+                    "genres": [
+                        "Animation",
+                        "Drama",
+                        "Family"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7,
+                        "voteCount": 30
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Sahara"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt26841728",
+                    "type": "podcastSeries",
+                    "primaryTitle": "ElfQuest: Journey to Sorrow's End",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYzJmNGYzNTAtNWY1YS00NDM5LWJkMDUtOWQ3M2UxODIyMDFmXkEyXkFqcGc@._V1_.jpg",
+                        "width": 825,
+                        "height": 1200
+                    },
+                    "startYear": 2022,
+                    "endYear": 2022,
+                    "genres": [
+                        "Fantasy"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.1,
+                        "voteCount": 27
+                    }
+                },
+                "category": "actor",
+                "characters": [
+                    "Madcoil",
+                    "Spirit Man",
+                    "Greymung"
+                ],
+                "episodeCount": 4
+            },
+            {
+                "title": {
+                    "id": "tt0956143",
+                    "type": "tvEpisode",
+                    "primaryTitle": "General George Washington",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTc1MTE4NzA4M15BMl5BanBnXkFtZTcwMDEzMDM0MQ@@._V1_.jpg",
+                        "width": 450,
+                        "height": 636
+                    },
+                    "startYear": 1992,
+                    "genres": [
+                        "Animation"
+                    ],
+                    "rating": {
+                        "aggregateRating": 6.6,
+                        "voteCount": 27
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "George Washington"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt0956087",
+                    "type": "tvEpisode",
+                    "primaryTitle": "President Abraham Lincoln",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BMTI2NTc1MzU3Nl5BMl5BanBnXkFtZTcwMDI5ODQ0MQ@@._V1_.jpg",
+                        "width": 450,
+                        "height": 637
+                    },
+                    "startYear": 1993,
+                    "genres": [
+                        "Animation"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.9,
+                        "voteCount": 26
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Stanton",
+                    "Narrator"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt11310908",
+                    "type": "tvSeries",
+                    "primaryTitle": "The Observant Lineman",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BNmZlNmZiZmEtNzNjYS00ZTViLWExZmMtYzVkYjgzNWYwM2Q1XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1280,
+                        "height": 720
+                    },
+                    "startYear": 2019,
+                    "endYear": 2022,
+                    "genres": [
+                        "Talk-Show"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8,
+                        "voteCount": 17
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "self",
+                "characters": [
+                    "Self"
+                ],
+                "episodeCount": 2
+            },
+            {
+                "title": {
+                    "id": "tt0191898",
+                    "type": "videoGame",
+                    "primaryTitle": "Clandestiny",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYjQ2MGU2NTktZTQyYy00OGRiLTk4YTgtZTViODhmOTRjZmEzXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1023,
+                        "height": 872
+                    },
+                    "startYear": 1996,
+                    "genres": [
+                        "Animation",
+                        "Adventure",
+                        "Comedy",
+                        "Fantasy",
+                        "Horror"
+                    ],
+                    "rating": {
+                        "aggregateRating": 5.4,
+                        "voteCount": 17
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        },
+                        {
+                            "code": "CA",
+                            "name": "Canada"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Magnus Og",
+                    "Vicar",
+                    "Jester and Doll"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt27419341",
+                    "type": "short",
+                    "primaryTitle": "Bat Boy",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BOWZkNjhmOTYtYzc5NS00OTcyLTg3MzctMjQxZjU0NTFjZjMwXkEyXkFqcGc@._V1_.jpg",
+                        "width": 1200,
+                        "height": 1800
+                    },
+                    "startYear": 2023,
+                    "genres": [
+                        "Short",
+                        "Drama"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.5,
+                        "voteCount": 15
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Pat"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt1454150",
+                    "type": "tvEpisode",
+                    "primaryTitle": "Samuel the Lamanite",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BYzI1ZTZkMTUtYzYwMy00MGZmLWJjNDEtYjFlNzA3MjFiYjE0XkEyXkFqcGc@._V1_.jpg",
+                        "width": 291,
+                        "height": 407
+                    },
+                    "startYear": 1990,
+                    "genres": [
+                        "Animation"
+                    ],
+                    "rating": {
+                        "aggregateRating": 8,
+                        "voteCount": 11
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Jarom"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt15444558",
+                    "type": "podcastSeries",
+                    "primaryTitle": "Operation Cordelia",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZjFiNDZkZWUtNWQ5MC00ZDg0LWFkMTEtOTFhMmY2NWIzNzMxXkEyXkFqcGc@._V1_.jpg",
+                        "width": 500,
+                        "height": 500
+                    },
+                    "startYear": 2021,
+                    "genres": [
+                        "Comedy",
+                        "Crime",
+                        "Mystery",
+                        "Thriller"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.2,
+                        "voteCount": 10
+                    }
+                },
+                "category": "actor",
+                "characters": [
+                    "Cal"
+                ]
+            },
+            {
+                "title": {
+                    "id": "tt1454158",
+                    "type": "tvEpisode",
+                    "primaryTitle": "The Brother of Jared",
+                    "primaryImage": {
+                        "url": "https://m.media-amazon.com/images/M/MV5BZTQ3MjNjNjgtZjc5NC00YzBhLTliOTUtZjJlYzE1NjVhNjk4XkEyXkFqcGc@._V1_.jpg",
+                        "width": 1149,
+                        "height": 647
+                    },
+                    "startYear": 1990,
+                    "genres": [
+                        "Animation"
+                    ],
+                    "rating": {
+                        "aggregateRating": 7.4,
+                        "voteCount": 10
+                    },
+                    "originCountries": [
+                        {
+                            "code": "US",
+                            "name": "United States"
+                        }
+                    ]
+                },
+                "category": "actor",
+                "characters": [
+                    "Mahonri"
+                ]
+            }
+        ],
+        "totalCount": 86
+    },
+    "relationships": {
+        "relationships": []
+    },
+    "trivia": {
+        "triviaEntries": [
+            {
+                "id": "nt0265915",
+                "text": "Acted with the Oregon Shakespeare Festival 1990-2008.",
+                "interestCount": 14,
+                "voteCount": 15
+            },
+            {
+                "id": "nt0764736",
+                "text": "He reads the Blackstone Audio books for NY Times bestseller Jonathan Maberry's Joe Ledger series.",
+                "interestCount": 23,
+                "voteCount": 23
+            },
+            {
+                "id": "nt2066378",
+                "text": "Narrated the Andy Weir novel \"Project Hail Mary\".",
+                "interestCount": 34,
+                "voteCount": 34
+            }
+        ],
+        "totalCount": 3
+    },
+    "artifacts": {
+        "details": {
+            "path": "details.json",
+            "url": "https://api.imdbapi.dev/names/nm0692255",
+            "has_payload": true
+        },
+        "images": {
+            "path": "images.json",
+            "url": "https://api.imdbapi.dev/names/nm0692255/images",
+            "has_payload": true
+        },
+        "filmography": {
+            "path": "filmography.json",
+            "url": "https://api.imdbapi.dev/names/nm0692255/filmography",
+            "has_payload": true
+        },
+        "relationships": {
+            "path": "relationships.json",
+            "url": "https://api.imdbapi.dev/names/nm0692255/relationships",
+            "has_payload": true
+        },
+        "trivia": {
+            "path": "trivia.json",
+            "url": "https://api.imdbapi.dev/names/nm0692255/trivia",
+            "has_payload": true
+        }
+    }
+}

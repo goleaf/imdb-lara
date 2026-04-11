@@ -1,0 +1,33 @@
+{
+    "schemaVersion": 1,
+    "imdbId": "nm3142672",
+    "downloadedAt": "2026-04-11T03:20:56+00:00",
+    "sourceUrl": "https://api.imdbapi.dev/names/nm3142672",
+    "artifacts": {
+        "details": {
+            "path": "details.json",
+            "url": "https://api.imdbapi.dev/names/nm3142672",
+            "has_payload": true
+        },
+        "images": {
+            "path": "images.json",
+            "url": "https://api.imdbapi.dev/names/nm3142672/images",
+            "has_payload": true
+        },
+        "filmography": {
+            "path": "filmography.json",
+            "url": "https://api.imdbapi.dev/names/nm3142672/filmography",
+            "has_payload": false
+        },
+        "relationships": {
+            "path": "relationships.json",
+            "url": "https://api.imdbapi.dev/names/nm3142672/relationships",
+            "has_payload": true
+        },
+        "trivia": {
+            "path": "trivia.json",
+            "url": "https://api.imdbapi.dev/names/nm3142672/trivia",
+            "has_payload": true
+        }
+    }
+}

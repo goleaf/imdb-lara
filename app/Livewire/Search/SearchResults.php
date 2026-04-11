@@ -25,6 +25,9 @@ class SearchResults extends Component
     public ?string $genre = null;
 
     #[Url]
+    public ?string $theme = null;
+
+    #[Url]
     public ?string $yearFrom = null;
 
     #[Url]
@@ -71,6 +74,7 @@ class SearchResults extends Component
     {
         $this->type = null;
         $this->genre = null;
+        $this->theme = null;
         $this->yearFrom = null;
         $this->yearTo = null;
         $this->ratingMin = null;
@@ -97,6 +101,7 @@ class SearchResults extends Component
             'runtime' => $this->runtime,
             'sort' => $this->sort,
             'status' => $this->status,
+            'theme' => $this->theme,
             'type' => $this->type,
             'votesMin' => $this->votesMin,
             'yearFrom' => $this->yearFrom,

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -37,9 +38,19 @@ class Interest extends ImdbModel
         return $this->belongsToMany(Movie::class, 'movie_interests', 'interest_imdb_id', 'movie_id', 'imdb_id', 'id');
     }
 
+    public function titles(): BelongsToMany
+    {
+        return $this->belongsToMany(Title::class, 'movie_interests', 'interest_imdb_id', 'movie_id', 'imdb_id', 'id');
+    }
+
     public function interestCategories(): BelongsToMany
     {
         return $this->belongsToMany(InterestCategory::class, 'interest_category_interests', 'interest_imdb_id', 'interest_category_id', 'imdb_id', 'id');
+    }
+
+    public function categories(): BelongsToMany
+    {
+        return $this->interestCategories();
     }
 
     public function similarInterests(): BelongsToMany
@@ -75,5 +86,10 @@ class Interest extends ImdbModel
     public function movieInterests(): HasMany
     {
         return $this->hasMany(MovieInterest::class, 'interest_imdb_id', 'imdb_id');
+    }
+
+    public function scopeLinkedToPublishedTitles(Builder $query): Builder
+    {
+        return $query->whereHas('titles', fn (Builder $titleQuery) => $titleQuery->publishedCatalog());
     }
 }

@@ -423,20 +423,7 @@ class LoadTitleMetadataExplorationAction
     private function baseConnectionTitleQuery(Title $title): Builder
     {
         return Title::query()
-            ->select([
-                'movies.id',
-                'movies.tconst',
-                'movies.imdb_id',
-                'movies.primarytitle',
-                'movies.originaltitle',
-                'movies.titletype',
-                'movies.isadult',
-                'movies.startyear',
-                'movies.endyear',
-                'movies.runtimeminutes',
-                'movies.title_type_id',
-                'movies.runtimeSeconds',
-            ])
+            ->selectCatalogCardColumns()
             ->addSelect([
                 'popularity_rank' => TitleStatistic::query()
                     ->select('vote_count')
@@ -445,11 +432,7 @@ class LoadTitleMetadataExplorationAction
             ])
             ->publishedCatalog()
             ->whereKeyNot($title->getKey())
-            ->with([
-                'statistic:movie_id,aggregate_rating,vote_count',
-                'titleImages:id,movie_id,position,url,width,height,type',
-                'primaryImageRecord:movie_id,url,width,height,type',
-            ])
+            ->withCatalogCardRelations()
             ->orderByDesc('popularity_rank')
             ->orderByDesc('movies.startyear')
             ->orderBy('movies.primarytitle');

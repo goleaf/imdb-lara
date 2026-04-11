@@ -38,4 +38,9 @@ class NameBasicAlternativeName extends ImdbModel
     {
         return $this->belongsTo(NameBasic::class, 'name_basic_id', 'id');
     }
+
+    public function person(): BelongsTo
+    {
+        return $this->belongsTo(Person::class, 'name_basic_id', 'id');
+    }
 }

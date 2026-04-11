@@ -1,0 +1,107 @@
+{
+    "images": [
+        {
+            "url": "https://m.media-amazon.com/images/M/MV5BMjE4OTQ3OTM4Nl5BMl5BanBnXkFtZTgwMTIxODE1MTE@._V1_.jpg",
+            "width": 427,
+            "height": 603,
+            "type": "publicity"
+        },
+        {
+            "url": "https://m.media-amazon.com/images/M/MV5BNzFjOGQwYmUtZmU2OS00NDE4LTk4OGEtMDBmM2VjNjZkYWJkXkEyXkFqcGc@._V1_.jpg",
+            "width": 2768,
+            "height": 1848,
+            "type": "publicity"
+        },
+        {
+            "url": "https://m.media-amazon.com/images/M/MV5BMTcwODU0MzU4OF5BMl5BanBnXkFtZTgwNjMwMDI0ODE@._V1_.jpg",
+            "width": 720,
+            "height": 900,
+            "type": "publicity"
+        },
+        {
+            "url": "https://m.media-amazon.com/images/M/MV5BODA0MzA5YzQtYzgwMy00ZWNhLWFkZjctNTYyYTE0MzMxZTIyXkEyXkFqcGc@._V1_.jpg",
+            "width": 960,
+            "height": 1200,
+            "type": "publicity"
+        },
+        {
+            "url": "https://m.media-amazon.com/images/M/MV5BNzZhYjMzZTItNDI2NS00MWIyLWI0OGQtMTc2ZTEyZmJkMGEyXkEyXkFqcGc@._V1_.jpg",
+            "width": 1125,
+            "height": 1377,
+            "type": "publicity"
+        },
+        {
+            "url": "https://m.media-amazon.com/images/M/MV5BOWMwODgwZTItNTc3OC00NjU0LThkMGMtNjc4MTg3YmQ4NWFlXkEyXkFqcGc@._V1_.jpg",
+            "width": 960,
+            "height": 1200,
+            "type": "publicity"
+        },
+        {
+            "url": "https://m.media-amazon.com/images/M/MV5BMzI1NDUzNzg2OF5BMl5BanBnXkFtZTgwNDU1ODE1MTE@._V1_.jpg",
+            "width": 1136,
+            "height": 640,
+            "type": "publicity"
+        },
+        {
+            "url": "https://m.media-amazon.com/images/M/MV5BMmZjNjQzMzgtMTljNi00ZTliLWFmOTctOTZiMWNkNWIwMDEwXkEyXkFqcGc@._V1_.jpg",
+            "width": 1920,
+            "height": 1080,
+            "type": "publicity"
+        },
+        {
+            "url": "https://m.media-amazon.com/images/M/MV5BOTQ5YTIzOGMtYWMxZi00OWJjLTkzZjItNjkwYTkyNmU5OTY3XkEyXkFqcGc@._V1_.jpg",
+            "width": 1920,
+            "height": 1080,
+            "type": "publicity"
+        },
+        {
+            "url": "https://m.media-amazon.com/images/M/MV5BODkwNTgzYmQtZTFlMC00MjZkLWE0MTQtZWFkZmJmOWViNzQ2XkEyXkFqcGc@._V1_.jpg",
+            "width": 1920,
+            "height": 2880,
+            "type": "publicity"
+        },
+        {
+            "url": "https://m.media-amazon.com/images/M/MV5BMTAwMjM0OTA5NDReQTJeQWpwZ15BbWU4MDI0MzgxNTEx._V1_.jpg",
+            "width": 1136,
+            "height": 640,
+            "type": "publicity"
+        },
+        {
+            "url": "https://m.media-amazon.com/images/M/MV5BMTcyMDQxMjc3Nl5BMl5BanBnXkFtZTgwNDI1MDk5MjE@._V1_.jpg",
+            "width": 2048,
+            "height": 1181,
+            "type": "event"
+        },
+        {
+            "url": "https://m.media-amazon.com/images/M/MV5BNzM1Mzc4NTczOV5BMl5BanBnXkFtZTgwNDM4ODIwMzE@._V1_.jpg",
+            "width": 900,
+            "height": 583,
+            "type": "publicity"
+        },
+        {
+            "url": "https://m.media-amazon.com/images/M/MV5BY2U5YzBjNzMtOTQ4OS00Y2I1LThkZTAtYjI0N2MyMWFhNmJlXkEyXkFqcGc@._V1_.jpg",
+            "width": 1920,
+            "height": 1280,
+            "type": "publicity"
+        },
+        {
+            "url": "https://m.media-amazon.com/images/M/MV5BMTQxMjM4OTM3Nl5BMl5BanBnXkFtZTgwMjgyODE1MTE@._V1_.jpg",
+            "width": 1136,
+            "height": 640,
+            "type": "publicity"
+        },
+        {
+            "url": "https://m.media-amazon.com/images/M/MV5BMTQzMTQyMTE0MV5BMl5BanBnXkFtZTgwNzQ1ODE1MTE@._V1_.jpg",
+            "width": 1136,
+            "height": 640,
+            "type": "publicity"
+        },
+        {
+            "url": "https://m.media-amazon.com/images/M/MV5BNTg3NTg4ZjItYmFjMi00ZGQxLWFiMjctOWE4ZTFmYTRlYWE3XkEyXkFqcGc@._V1_.jpg",
+            "width": 960,
+            "height": 1200,
+            "type": "publicity"
+        }
+    ],
+    "totalCount": 17
+}

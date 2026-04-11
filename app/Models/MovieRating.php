@@ -34,4 +34,9 @@ class MovieRating extends ImdbModel
     {
         return $this->belongsTo(Movie::class, 'movie_id', 'id');
     }
+
+    public function title(): BelongsTo
+    {
+        return $this->belongsTo(Title::class, 'movie_id', 'id');
+    }
 }

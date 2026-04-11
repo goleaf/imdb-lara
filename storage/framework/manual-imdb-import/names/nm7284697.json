@@ -1,0 +1,300 @@
+{
+    "schemaVersion": 1,
+    "imdbId": "nm7284697",
+    "downloadedAt": "2026-04-11T03:17:53+00:00",
+    "sourceUrl": "https://api.imdbapi.dev/names/nm7284697",
+    "details": {
+        "id": "nm7284697",
+        "displayName": "Liz Kingsman",
+        "primaryImage": {
+            "url": "https://m.media-amazon.com/images/M/MV5BMTc5OTA0NDItYzgyZC00YzhjLWE4ZGEtYzdmY2YzMmFmZTMxXkEyXkFqcGc@._V1_CR401,1086,2871,4307_.jpg",
+            "width": 2871,
+            "height": 4307
+        },
+        "primaryProfessions": [
+            "actress",
+            "writer"
+        ],
+        "biography": "Liz Kingsman is known for F1: The Movie (2025), Parlement (2020) and Power Monkeys (2016).",
+        "heightCm": 163
+    },
+    "images": {
+        "images": [
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BNmRiYmE2MjYtMmE3OS00YjQ1LWFkY2MtNzY5MjgzMTg5OTc3XkEyXkFqcGc@._V1_.jpg",
+                "width": 7360,
+                "height": 4912,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BYmNmZDZmNDItNTUxMi00MDQ1LWJjYzAtZDZkM2RmN2RjNjQ0XkEyXkFqcGc@._V1_.jpg",
+                "width": 685,
+                "height": 683,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BMTc5OTA0NDItYzgyZC00YzhjLWE4ZGEtYzdmY2YzMmFmZTMxXkEyXkFqcGc@._V1_CR401,1086,2871,4307_.jpg",
+                "width": 2871,
+                "height": 4307,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BNWQyNzBlMTMtOTExNS00Y2YyLWI0MDgtODE5ZDBlYTQzNjdiXkEyXkFqcGc@._V1_.jpg",
+                "width": 1639,
+                "height": 2048,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BZGY2MmQzMWItY2JjZS00ZGQyLWEwYTctZGQ1MDc4NzU2M2YwXkEyXkFqcGc@._V1_.jpg",
+                "width": 1247,
+                "height": 569,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BZjM4M2QyMTMtZTc2Mi00YjFjLTgwNWEtMmE4MzA3NGYyM2JjXkEyXkFqcGc@._V1_.jpg",
+                "width": 1361,
+                "height": 571,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BYjk4MWM0ZTMtZjM3My00NGJhLWJkYzYtMjZhMGNjN2NkN2I2XkEyXkFqcGc@._V1_.jpg",
+                "width": 594,
+                "height": 396,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BZDI0MzgxZDEtMmE3ZS00ZmRiLTk3ODctODA4Nzk3NzRlN2MzXkEyXkFqcGc@._V1_.jpg",
+                "width": 2916,
+                "height": 4375,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BZTNiYmUzYTYtZTBmZC00NWQyLWIwYzItOTQ3ZWE0NjU1ZTFlXkEyXkFqcGc@._V1_.jpg",
+                "width": 682,
+                "height": 1024,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BYWEwNTgzYTItZDUyZS00YWQ1LThmMTMtY2Q1ZThhM2JjNDQ2XkEyXkFqcGc@._V1_.jpg",
+                "width": 762,
+                "height": 762,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BY2JhODY2YmItN2JmNS00NzNlLThiZTktNGQ1NmIzYjMwODg2XkEyXkFqcGc@._V1_.jpg",
+                "width": 682,
+                "height": 1024,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BZjVmMmY4MjEtZDlmYi00MDkwLWE0YWUtNTExNTgyODMwYzgwXkEyXkFqcGc@._V1_.jpg",
+                "width": 594,
+                "height": 396,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BZTdiMjVjYzgtZmE1OC00MmY2LTk5ZjMtYmRhOTI4Yzc3NzQ3XkEyXkFqcGc@._V1_.jpg",
+                "width": 254,
+                "height": 364,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BZjIxZWIyZDEtZjc1Ny00ZTdmLWJjNjAtMWU3MzRmMmM4ZTg4XkEyXkFqcGc@._V1_.jpg",
+                "width": 5760,
+                "height": 3840,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BMmRlMDdkMTMtMTRjZC00ZDg4LWFiMDgtOTk5ZjMzYzZiNTk0XkEyXkFqcGc@._V1_.jpg",
+                "width": 5186,
+                "height": 7776,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BMTY0NDEzZTAtMzA2NC00OGIxLWFlZDktYzI3NmVjYTczMTkzXkEyXkFqcGc@._V1_.jpg",
+                "width": 2240,
+                "height": 3200,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BZjM1MWU4NGItYTI3ZC00NmI3LTkxNTEtYTI2YjBkODg3MTY5XkEyXkFqcGc@._V1_.jpg",
+                "width": 3333,
+                "height": 5000,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BMTQwMDRhMDgtMzg0Yi00MDQzLTg4ZWMtYmUwNTVmZjEyYmI1XkEyXkFqcGc@._V1_.jpg",
+                "width": 3072,
+                "height": 4096,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BNzU3YWMxYWQtMzQ1NS00NTcwLTk0MzAtMDliZTk3YjRmZjg5XkEyXkFqcGc@._V1_.jpg",
+                "width": 3840,
+                "height": 5205,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BNGYzNmQyNzItNzA4Zi00MjBmLTljNGEtMDFjYzZhNWYzNTcxXkEyXkFqcGc@._V1_.jpg",
+                "width": 1366,
+                "height": 768,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BNmRiYmE2MjYtMmE3OS00YjQ1LWFkY2MtNzY5MjgzMTg5OTc3XkEyXkFqcGc@._V1_.jpg",
+                "width": 7360,
+                "height": 4912,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BYmNmZDZmNDItNTUxMi00MDQ1LWJjYzAtZDZkM2RmN2RjNjQ0XkEyXkFqcGc@._V1_.jpg",
+                "width": 685,
+                "height": 683,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BMTc5OTA0NDItYzgyZC00YzhjLWE4ZGEtYzdmY2YzMmFmZTMxXkEyXkFqcGc@._V1_CR401,1086,2871,4307_.jpg",
+                "width": 2871,
+                "height": 4307,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BNWQyNzBlMTMtOTExNS00Y2YyLWI0MDgtODE5ZDBlYTQzNjdiXkEyXkFqcGc@._V1_.jpg",
+                "width": 1639,
+                "height": 2048,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BZGY2MmQzMWItY2JjZS00ZGQyLWEwYTctZGQ1MDc4NzU2M2YwXkEyXkFqcGc@._V1_.jpg",
+                "width": 1247,
+                "height": 569,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BZjM4M2QyMTMtZTc2Mi00YjFjLTgwNWEtMmE4MzA3NGYyM2JjXkEyXkFqcGc@._V1_.jpg",
+                "width": 1361,
+                "height": 571,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BYjk4MWM0ZTMtZjM3My00NGJhLWJkYzYtMjZhMGNjN2NkN2I2XkEyXkFqcGc@._V1_.jpg",
+                "width": 594,
+                "height": 396,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BZDI0MzgxZDEtMmE3ZS00ZmRiLTk3ODctODA4Nzk3NzRlN2MzXkEyXkFqcGc@._V1_.jpg",
+                "width": 2916,
+                "height": 4375,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BZTNiYmUzYTYtZTBmZC00NWQyLWIwYzItOTQ3ZWE0NjU1ZTFlXkEyXkFqcGc@._V1_.jpg",
+                "width": 682,
+                "height": 1024,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BYWEwNTgzYTItZDUyZS00YWQ1LThmMTMtY2Q1ZThhM2JjNDQ2XkEyXkFqcGc@._V1_.jpg",
+                "width": 762,
+                "height": 762,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BY2JhODY2YmItN2JmNS00NzNlLThiZTktNGQ1NmIzYjMwODg2XkEyXkFqcGc@._V1_.jpg",
+                "width": 682,
+                "height": 1024,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BZjVmMmY4MjEtZDlmYi00MDkwLWE0YWUtNTExNTgyODMwYzgwXkEyXkFqcGc@._V1_.jpg",
+                "width": 594,
+                "height": 396,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BZTdiMjVjYzgtZmE1OC00MmY2LTk5ZjMtYmRhOTI4Yzc3NzQ3XkEyXkFqcGc@._V1_.jpg",
+                "width": 254,
+                "height": 364,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BZjIxZWIyZDEtZjc1Ny00ZTdmLWJjNjAtMWU3MzRmMmM4ZTg4XkEyXkFqcGc@._V1_.jpg",
+                "width": 5760,
+                "height": 3840,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BMmRlMDdkMTMtMTRjZC00ZDg4LWFiMDgtOTk5ZjMzYzZiNTk0XkEyXkFqcGc@._V1_.jpg",
+                "width": 5186,
+                "height": 7776,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BMTY0NDEzZTAtMzA2NC00OGIxLWFlZDktYzI3NmVjYTczMTkzXkEyXkFqcGc@._V1_.jpg",
+                "width": 2240,
+                "height": 3200,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BZjM1MWU4NGItYTI3ZC00NmI3LTkxNTEtYTI2YjBkODg3MTY5XkEyXkFqcGc@._V1_.jpg",
+                "width": 3333,
+                "height": 5000,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BMTQwMDRhMDgtMzg0Yi00MDQzLTg4ZWMtYmUwNTVmZjEyYmI1XkEyXkFqcGc@._V1_.jpg",
+                "width": 3072,
+                "height": 4096,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BNzU3YWMxYWQtMzQ1NS00NTcwLTk0MzAtMDliZTk3YjRmZjg5XkEyXkFqcGc@._V1_.jpg",
+                "width": 3840,
+                "height": 5205,
+                "type": "publicity"
+            },
+            {
+                "url": "https://m.media-amazon.com/images/M/MV5BNGYzNmQyNzItNzA4Zi00MjBmLTljNGEtMDFjYzZhNWYzNTcxXkEyXkFqcGc@._V1_.jpg",
+                "width": 1366,
+                "height": 768,
+                "type": "publicity"
+            }
+        ],
+        "totalCount": 41
+    },
+    "filmography": null,
+    "relationships": {
+        "relationships": []
+    },
+    "trivia": {
+        "triviaEntries": []
+    },
+    "artifacts": {
+        "details": {
+            "path": "details.json",
+            "url": "https://api.imdbapi.dev/names/nm7284697",
+            "has_payload": true
+        },
+        "images": {
+            "path": "images.json",
+            "url": "https://api.imdbapi.dev/names/nm7284697/images",
+            "has_payload": true
+        },
+        "filmography": {
+            "path": "filmography.json",
+            "url": "https://api.imdbapi.dev/names/nm7284697/filmography",
+            "has_payload": false
+        },
+        "relationships": {
+            "path": "relationships.json",
+            "url": "https://api.imdbapi.dev/names/nm7284697/relationships",
+            "has_payload": true
+        },
+        "trivia": {
+            "path": "trivia.json",
+            "url": "https://api.imdbapi.dev/names/nm7284697/trivia",
+            "has_payload": true
+        }
+    }
+}

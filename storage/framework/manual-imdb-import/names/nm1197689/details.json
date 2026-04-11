@@ -1,0 +1,22 @@
+{
+    "id": "nm1197689",
+    "displayName": "Sandra Hüller",
+    "primaryImage": {
+        "url": "https://m.media-amazon.com/images/M/MV5BOGM2NzE5ODAtZjdiMi00YzgwLWI3YTItZWExMTE2MjM4MmE3XkEyXkFqcGc@._V1_.jpg",
+        "width": 837,
+        "height": 1488
+    },
+    "primaryProfessions": [
+        "actress",
+        "miscellaneous",
+        "soundtrack"
+    ],
+    "biography": "Sandra Hüller was born in Suhl. She studied acting at the Ernst Busch Academy of Dramatic Arts in Berlin. For her performance of Anneliese Michel in Hans-Christian Schmid's drama Requiem she won The Silver Bear for Best Actress. She is internationally known for her starring role in Maren Ade's Toni Erdmann, for which she won among others the European Film Award and the Toronto Film Critics Association Award for Best Actress.",
+    "heightCm": 173,
+    "birthDate": {
+        "year": 1978,
+        "month": 4,
+        "day": 30
+    },
+    "birthLocation": "Suhl, East Germany [now Suhl, Thuringia, Germany]"
+}

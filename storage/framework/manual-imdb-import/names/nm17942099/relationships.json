@@ -1,0 +1,26 @@
+{
+    "relationships": [
+        {
+            "name": {
+                "id": "nm17869250",
+                "displayName": "Maysilee McGraw",
+                "alternativeNames": [
+                    "Maisie McGraw",
+                    "Maisilee McGraw",
+                    "Mckenna McGraw"
+                ],
+                "primaryImage": {
+                    "url": "https://m.media-amazon.com/images/M/MV5BMWQzNDZiYmQtNTUwNC00YzVhLTk2OWItYTYwYThkNzk1OGRkXkEyXkFqcGc@._V1_CR0,8,1005,1508_.jpg",
+                    "width": 1005,
+                    "height": 1508
+                },
+                "primaryProfessions": [
+                    "actress",
+                    "miscellaneous",
+                    "stunts"
+                ]
+            },
+            "relationType": "sibling"
+        }
+    ]
+}

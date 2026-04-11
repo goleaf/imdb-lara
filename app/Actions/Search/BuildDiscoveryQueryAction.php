@@ -15,6 +15,7 @@ class BuildDiscoveryQueryAction
      * @param  array{
      *     search?: string,
      *     genre?: string|null,
+     *     theme?: string|null,
      *     minimumRating?: int|float|string|null,
      *     type?: string|null,
      *     sort?: string|null,
@@ -24,7 +25,8 @@ class BuildDiscoveryQueryAction
      *     language?: string|null,
      *     country?: string|null,
      *     runtime?: string|null,
-     *     awards?: string|null
+     *     awards?: string|null,
+     *     includePresentationRelations?: bool
      * }  $filters
      */
     public function handle(array $filters = []): Builder
