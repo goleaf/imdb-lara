@@ -12,6 +12,7 @@ use App\Models\AwardNomination;
 use App\Models\Contribution;
 use App\Models\Episode;
 use App\Models\ListItem;
+use App\Models\MediaAsset;
 use App\Models\Person;
 use App\Models\Season;
 use App\Models\Title;
@@ -65,7 +66,15 @@ class DemoCatalogSeeder extends Seeder
             ]))
             ->values();
 
-        $movieTitles = Title::factory()->count(5)->movie()->create();
+        $movieTitles = collect([
+            Title::factory()->movie()->create([
+                'name' => 'Northern Signal',
+                'original_name' => 'Northern Signal',
+                'slug' => 'northern-signal',
+            ]),
+        ])->concat(
+            Title::factory()->count(4)->movie()->create()
+        )->values();
         $seriesTitles = Title::factory()->count(3)->series()->create();
         $episodeTitles = Title::factory()->count(4)->episode()->create();
 
@@ -110,7 +119,14 @@ class DemoCatalogSeeder extends Seeder
             'absolute_number' => 1,
         ]));
 
-        Person::factory()->count(8)->create();
+        $people = collect([
+            Person::factory()->create([
+                'name' => 'Ava Mercer',
+                'slug' => 'ava-mercer',
+            ]),
+        ])->concat(
+            Person::factory()->count(7)->create()
+        )->values();
 
         TitleTranslation::factory()->for($movieTitles[0])->create([
             'locale' => 'lt',
@@ -171,6 +187,16 @@ class DemoCatalogSeeder extends Seeder
         ListItem::factory()->for($watchlist, 'userList')->for($movieTitles[0], 'title')->completed()->create([
             'position' => 1,
         ]);
+
+        MediaAsset::factory()
+            ->for($movieTitles[0], 'mediable')
+            ->poster()
+            ->create();
+
+        MediaAsset::factory()
+            ->for($people[0], 'mediable')
+            ->headshot()
+            ->create();
 
         $member->notifications()->create([
             'id' => (string) Str::uuid(),

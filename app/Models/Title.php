@@ -848,7 +848,16 @@ class Title extends Model
 
     public function scopeWithMatchedInterestCount(Builder $query, InterestCategory|int $interestCategory): Builder
     {
-        return $query->addSelect(['matched_interest_count' => 0]);
+        $interestCategoryId = $interestCategory instanceof InterestCategory
+            ? (int) $interestCategory->getKey()
+            : $interestCategory;
+
+        return $query->withCount([
+            'interests as matched_interest_count' => fn (Builder $interestQuery) => $interestQuery->whereHas(
+                'interestCategories',
+                fn (Builder $interestCategoryQuery) => $interestCategoryQuery->where('interest_categories.id', $interestCategoryId),
+            ),
+        ]);
     }
 
     public function canonicalTitle(): BelongsTo
@@ -2175,20 +2184,7 @@ class Title extends Model
         if ($this->relationLoaded('mediaAssets')) {
             $assets = $assets->merge($this->mediaAssets
                 ->filter(fn (mixed $asset): bool => $asset instanceof MediaAsset)
-                ->map(function (MediaAsset $mediaAsset): CatalogMediaAsset {
-                    return CatalogMediaAsset::fromCatalog([
-                        'kind' => $mediaAsset->kind,
-                        'url' => $mediaAsset->url,
-                        'alt_text' => $mediaAsset->alt_text,
-                        'caption' => $mediaAsset->caption,
-                        'width' => $mediaAsset->width,
-                        'height' => $mediaAsset->height,
-                        'duration_seconds' => $mediaAsset->duration_seconds,
-                        'is_primary' => $mediaAsset->is_primary,
-                        'position' => $mediaAsset->position,
-                        'metadata' => $mediaAsset->metadata,
-                    ]);
-                }));
+                ->map(fn (MediaAsset $mediaAsset): CatalogMediaAsset => $mediaAsset->toCatalogMediaAsset()));
         }
 
         if ($this->relationLoaded('moviePrimaryImage') && $this->moviePrimaryImage instanceof MoviePrimaryImage && filled($this->moviePrimaryImage->url)) {
@@ -2280,8 +2276,11 @@ class Title extends Model
                     'width' => $mediaAsset->width,
                     'height' => $mediaAsset->height,
                     'duration_seconds' => $mediaAsset->duration_seconds,
+                    'provider' => $mediaAsset->provider,
+                    'provider_key' => $mediaAsset->provider_key,
                     'is_primary' => $mediaAsset->is_primary,
                     'position' => $mediaAsset->position,
+                    'published_at' => $mediaAsset->published_at,
                     'metadata' => $mediaAsset->metadata,
                 ]);
             })

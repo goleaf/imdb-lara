@@ -86,7 +86,10 @@ class CustomListFlowTest extends TestCase
 
         $this->assertSame(
             2,
-            substr_count((string) $response->getContent(), route('public.users.show', $user)),
+            substr_count(
+                (string) $response->getContent(),
+                'href="'.e(route('public.users.show', $user)).'"',
+            ),
         );
     }
 

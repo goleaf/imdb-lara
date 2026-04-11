@@ -113,7 +113,7 @@ class FilmographyPanel extends Component
     {
         return $professionOptions
             ->map(fn (string $profession): array => [
-                'key' => Str::slug($profession)->toString(),
+                'key' => Str::slug($profession),
                 'label' => $profession,
                 'value' => $profession,
             ])

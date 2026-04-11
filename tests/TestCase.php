@@ -3,6 +3,7 @@
 namespace Tests;
 
 use App\Actions\Import\DownloadImdbTitlePayloadAction;
+use App\Actions\Import\EnsureLegacyImportPipelineIsEnabledAction;
 use App\Actions\Import\FetchImdbGraphqlAction;
 use App\Actions\Import\FetchImdbJsonAction;
 use App\Actions\Import\ImportImdbNamePayloadAction;
@@ -35,6 +36,13 @@ abstract class TestCase extends BaseTestCase
             && ! $this->supportsCatalogOnlyApplicationTestContract()
         ) {
             $this->markTestSkipped('Legacy local-schema or write-side test is not applicable in the current catalog-only MySQL application mode.');
+        }
+
+        if (
+            $this->targetsDisabledLegacyImportPipeline()
+            && ! (bool) config('screenbase.legacy_import_pipeline_enabled', false)
+        ) {
+            $this->markTestSkipped(EnsureLegacyImportPipelineIsEnabledAction::disabledMessage());
         }
 
         if ($this->supportsRemoteCatalogTestContract()) {
@@ -82,6 +90,11 @@ abstract class TestCase extends BaseTestCase
             class_uses_recursive(static::class),
             true,
         );
+    }
+
+    protected function targetsDisabledLegacyImportPipeline(): bool
+    {
+        return str_contains(static::class, 'Tests\\Feature\\Feature\\Feature\\Import\\');
     }
 
     protected function runTest(): mixed

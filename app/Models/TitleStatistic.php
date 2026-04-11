@@ -147,17 +147,17 @@ class TitleStatistic extends Model
         return (int) ($this->attributes['vote_count'] ?? $this->attributes['rating_count'] ?? 0);
     }
 
-    public function getAverageRatingAttribute(): ?float
+    public function getAverageRatingAttribute(): ?string
     {
         $rating = $this->attributes['average_rating'] ?? $this->attributes['aggregate_rating'] ?? null;
 
-        return $rating !== null ? (float) $rating : null;
+        return $rating !== null ? number_format((float) $rating, 2, '.', '') : null;
     }
 
-    public function getAggregateRatingAttribute(): ?float
+    public function getAggregateRatingAttribute(): ?string
     {
         $rating = $this->attributes['aggregate_rating'] ?? $this->attributes['average_rating'] ?? null;
 
-        return $rating !== null ? (float) $rating : null;
+        return $rating !== null ? number_format((float) $rating, 2, '.', '') : null;
     }
 }

@@ -18,6 +18,7 @@ class MediaAsset extends Model
 
     /** @use HasFactory<MediaAssetFactory> */
     use HasFactory;
+
     use SoftDeletes;
 
     /**
@@ -121,6 +122,25 @@ class MediaAsset extends Model
         }
 
         return $collection->first();
+    }
+
+    public function toCatalogMediaAsset(): CatalogMediaAsset
+    {
+        return CatalogMediaAsset::fromCatalog([
+            'kind' => $this->getAttributeFromArray('kind'),
+            'url' => $this->getAttributeFromArray('url'),
+            'alt_text' => $this->getAttributeFromArray('alt_text'),
+            'caption' => $this->getAttributeFromArray('caption'),
+            'width' => $this->getAttributeFromArray('width'),
+            'height' => $this->getAttributeFromArray('height'),
+            'duration_seconds' => $this->getAttributeFromArray('duration_seconds'),
+            'provider' => $this->getAttributeFromArray('provider'),
+            'provider_key' => $this->getAttributeFromArray('provider_key'),
+            'is_primary' => $this->getAttributeFromArray('is_primary') ?? false,
+            'position' => $this->getAttributeFromArray('position') ?? 0,
+            'published_at' => $this->getAttributeFromArray('published_at'),
+            'metadata' => $this->getAttributeFromArray('metadata'),
+        ]);
     }
 
     public function isUploadBacked(): bool

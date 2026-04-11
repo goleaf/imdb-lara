@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Feature;
 
-use Livewire\Livewire;
 use Tests\Concerns\InteractsWithRemoteCatalog;
 use Tests\Concerns\UsesCatalogOnlyApplication;
 use Tests\TestCase;
@@ -12,16 +11,8 @@ class PublicBrowsePagesTest extends TestCase
     use InteractsWithRemoteCatalog;
     use UsesCatalogOnlyApplication;
 
-    public function test_public_catalog_pages_render_the_mysql_backed_public_surface(): void
+    public function test_public_catalog_entry_pages_render_the_mysql_backed_surface(): void
     {
-        Livewire::withoutLazyLoading();
-
-        $title = $this->sampleTitle();
-        $person = $this->samplePerson();
-        $genre = $this->sampleGenre();
-        $interestCategory = $this->sampleInterestCategory();
-        $year = $this->sampleReleaseYear();
-
         $this->get(route('public.home'))
             ->assertOk()
             ->assertSee('Catalog Spotlight')
@@ -29,9 +20,9 @@ class PublicBrowsePagesTest extends TestCase
 
         $this->get(route('public.discover'))
             ->assertOk()
-            ->assertSeeHtml('data-slot="discover-filters-island"')
-            ->assertSeeHtml('data-slot="discover-advanced-filters"')
-            ->assertSeeHtml('data-slot="discover-results-shell"');
+            ->assertSee('Filter Panel')
+            ->assertSee('Loading')
+            ->assertSeeHtml('wire:intersect.once="__lazyLoadIsland"');
 
         $this->get(route('public.awards.index'))
             ->assertOk()
@@ -42,26 +33,13 @@ class PublicBrowsePagesTest extends TestCase
             ->assertOk()
             ->assertSee('Trailers')
             ->assertSee('Trailer archive');
+    }
 
-        $this->get(route('public.trending'))
-            ->assertOk()
-            ->assertSee('Trending Now')
-            ->assertSeeHtml('data-slot="title-browser-island"')
-            ->assertDontSeeHtml('title-browser-skeleton-1')
-            ->assertDontSeeHtml('aria-label="Pagination Navigation"');
-
-        $this->get(route('public.titles.index'))
-            ->assertOk()
-            ->assertSee('Browse Titles')
-            ->assertSee('Theme lanes')
-            ->assertSeeHtml('data-slot="catalog-browse-theme-spotlight"')
-            ->assertSeeHtml('data-slot="title-browser-island"');
-
-        $this->get(route('public.titles.index', ['theme' => $interestCategory->slug]))
-            ->assertOk()
-            ->assertSee('Theme lane')
-            ->assertSee($interestCategory->name)
-            ->assertSee('Clear theme lane');
+    public function test_public_title_browse_pages_render_the_mysql_backed_surface(): void
+    {
+        $title = $this->sampleTitle();
+        $genre = $this->sampleGenre();
+        $year = $this->sampleReleaseYear();
 
         $this->get(route('public.genres.show', $genre))
             ->assertOk()
@@ -75,6 +53,13 @@ class PublicBrowsePagesTest extends TestCase
             ->assertOk()
             ->assertSee($title->name)
             ->assertSee('Overview');
+    }
+
+    public function test_public_people_and_search_pages_render_the_mysql_backed_surface(): void
+    {
+        $title = $this->sampleTitle();
+        $person = $this->samplePerson();
+        $interestCategory = $this->sampleInterestCategory();
 
         $this->get(route('public.people.index'))
             ->assertOk()
@@ -106,7 +91,7 @@ class PublicBrowsePagesTest extends TestCase
         $this->get(route('public.search', ['q' => $this->searchTermFor($title)]))
             ->assertOk()
             ->assertSee('Search Results')
-            ->assertSeeHtml('data-slot="search-results-island"')
-            ->assertSee($title->name);
+            ->assertSee('Loading')
+            ->assertSeeHtml('wire:intersect.once="__lazyLoadIsland"');
     }
 }

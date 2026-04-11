@@ -69,8 +69,8 @@ class LoadInterestCategoryDetailsAction
             ->withMatchedInterestCount($interestCategory)
             ->withCatalogCardRelations()
             ->orderByDesc('matched_interest_count')
-            ->orderByDesc('startyear')
-            ->orderBy('primarytitle');
+            ->orderByDesc(Title::catalogColumn('release_year'))
+            ->orderBy(Title::catalogColumn('name'));
 
         $linkedTitleCount = (clone $linkedTitlesQuery)->count();
 

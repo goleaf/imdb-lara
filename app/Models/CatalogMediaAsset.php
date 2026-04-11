@@ -35,8 +35,11 @@ class CatalogMediaAsset extends Model
         'width',
         'height',
         'duration_seconds',
+        'provider',
+        'provider_key',
         'is_primary',
         'position',
+        'published_at',
         'metadata',
     ];
 
@@ -49,6 +52,7 @@ class CatalogMediaAsset extends Model
             'duration_seconds' => 'integer',
             'is_primary' => 'boolean',
             'position' => 'integer',
+            'published_at' => 'datetime',
             'metadata' => 'array',
         ];
     }
@@ -67,8 +71,11 @@ class CatalogMediaAsset extends Model
             'width' => null,
             'height' => null,
             'duration_seconds' => null,
+            'provider' => null,
+            'provider_key' => null,
             'is_primary' => false,
             'position' => 0,
+            'published_at' => null,
             'metadata' => null,
             ...$attributes,
         ]);

@@ -3,6 +3,7 @@
 namespace App\Actions\Catalog;
 
 use App\Models\Credit;
+use App\Models\MovieRating;
 use App\Models\Person;
 use App\Models\Title;
 use App\Models\TitleStatistic;
@@ -29,25 +30,35 @@ class BuildPersonFilmographyQueryAction
             ? (string) $filters['profession']
             : null;
         $sort = (string) ($filters['sort'] ?? 'latest');
+        $catalogOnly = Title::usesCatalogOnlySchema();
+        $creditRelations = [
+            'title' => fn ($query) => $query
+                ->selectCatalogCardColumns()
+                ->addSelect([
+                    'popularity_rank' => $catalogOnly
+                        ? MovieRating::query()
+                            ->select('vote_count')
+                            ->whereColumn('movie_ratings.movie_id', 'movies.id')
+                            ->limit(1)
+                        : TitleStatistic::query()
+                            ->select('watchlist_count')
+                            ->whereColumn('title_statistics.title_id', 'titles.id')
+                            ->limit(1),
+                ])
+                ->publishedCatalog()
+                ->withCatalogCardRelations(),
+        ];
+
+        if (! $catalogOnly) {
+            $creditRelations[] = 'profession:id,person_id,department,profession,is_primary,sort_order';
+        }
 
         $credits = Credit::query()
             ->select(Credit::projectedColumns())
             ->with(Credit::projectedRelations())
             ->whereBelongsTo($person, 'person')
             ->ordered()
-            ->with([
-                'title' => fn ($query) => $query
-                    ->selectCatalogCardColumns()
-                    ->addSelect([
-                        'popularity_rank' => TitleStatistic::query()
-                            ->select('watchlist_count')
-                            ->whereColumn('title_statistics.title_id', 'titles.id')
-                            ->limit(1),
-                    ])
-                    ->publishedCatalog()
-                    ->withCatalogCardRelations(),
-                'profession:id,person_id,department,profession,is_primary,sort_order',
-            ])
+            ->with($creditRelations)
             ->get()
             ->filter(fn (Credit $credit): bool => $credit->title instanceof Title)
             ->values();
@@ -99,7 +110,15 @@ class BuildPersonFilmographyQueryAction
 
     private function resolveProfessionLabel(Credit $credit): string
     {
-        return $credit->profession?->profession ?: ($credit->job ?: $credit->department);
+        if ($credit->relationLoaded('profession')) {
+            $profession = $credit->getRelation('profession');
+
+            if (filled($profession?->profession)) {
+                return (string) $profession->profession;
+            }
+        }
+
+        return $credit->job ?: $credit->department;
     }
 
     /**

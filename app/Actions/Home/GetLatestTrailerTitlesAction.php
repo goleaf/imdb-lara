@@ -17,11 +17,19 @@ class GetLatestTrailerTitlesAction
 
     public function query(): Builder
     {
-        return $this->buildPublicTitleIndexQuery
+        $query = $this->buildPublicTitleIndexQuery
             ->handle(['sort' => 'trending'])
-            ->whereHas('mediaAssets', fn (Builder $mediaQuery) => $mediaQuery
-                ->whereIn('kind', [MediaKind::Trailer, MediaKind::Clip, MediaKind::Featurette])
-                ->whereNotNull('url'));
+            ->when(
+                Title::usesCatalogOnlySchema(),
+                fn (Builder $titleQuery): Builder => $titleQuery
+                    ->withCatalogMediaRelations()
+                    ->whereHas('titleVideos', fn (Builder $videoQuery) => $videoQuery->whereNotNull('imdb_id')),
+                fn (Builder $titleQuery): Builder => $titleQuery->whereHas('mediaAssets', fn (Builder $mediaQuery) => $mediaQuery
+                    ->whereIn('kind', [MediaKind::Trailer, MediaKind::Clip, MediaKind::Featurette])
+                    ->whereNotNull('url')),
+            );
+
+        return $query;
     }
 
     /**

@@ -334,6 +334,21 @@ class Credit extends Model
         return isset($this->attributes['position']) ? (int) $this->attributes['position'] : null;
     }
 
+    public function getPersonProfessionIdAttribute(?int $value): ?int
+    {
+        return $value !== null ? (int) $value : null;
+    }
+
+    public function getEpisodeIdAttribute(?int $value): ?int
+    {
+        return $value !== null ? (int) $value : null;
+    }
+
+    public function getCreditedAsAttribute(?string $value): ?string
+    {
+        return filled($value) ? (string) $value : null;
+    }
+
     public function getIsPrincipalAttribute(mixed $value): bool
     {
         if ($value !== null) {

@@ -2,7 +2,9 @@
 
 namespace Tests\Unit\Models;
 
+use App\Models\MediaAsset;
 use App\Models\Person;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Tests\Concerns\UsesCatalogOnlyApplication;
 use Tests\TestCase;
 
@@ -48,5 +50,33 @@ class PersonTest extends TestCase
 
         $this->assertSame(['A. Stone', 'Ava Marie Stone'], $person->resolvedAlternateNames());
         $this->assertSame('A. Stone | Ava Marie Stone', $person->alternate_names);
+    }
+
+    public function test_preferred_headshot_tolerates_partial_loaded_media_assets(): void
+    {
+        $headshot = new MediaAsset;
+        $headshot->forceFill([
+            'mediable_type' => Person::class,
+            'mediable_id' => 1,
+            'kind' => 'headshot',
+            'url' => 'https://cdn.example.com/ava-mercer.jpg',
+            'is_primary' => true,
+        ]);
+        $headshot->exists = true;
+
+        $person = new Person;
+        $person->forceFill([
+            'id' => 1,
+            'name' => 'Ava Mercer',
+        ]);
+        $person->exists = true;
+        $person->setRelation('mediaAssets', new EloquentCollection([$headshot]));
+
+        $preferredHeadshot = $person->preferredHeadshot();
+
+        $this->assertNotNull($preferredHeadshot);
+        $this->assertSame('https://cdn.example.com/ava-mercer.jpg', $preferredHeadshot->url);
+        $this->assertNull($preferredHeadshot->caption);
+        $this->assertTrue($preferredHeadshot->is_primary);
     }
 }

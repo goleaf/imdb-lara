@@ -244,6 +244,7 @@ class Person extends Model
         if (static::usesCatalogOnlySchema()) {
             return [
                 ...self::directoryRelations(),
+                'meterRanking:name_basic_id,current_rank,change_direction,difference',
                 'credits' => fn ($query) => $query
                     ->select(Credit::projectedColumns())
                     ->ordered()
@@ -295,7 +296,11 @@ class Person extends Model
 
     public function resolveRouteBindingQuery($query, $value, $field = null)
     {
-        if (static::usesCatalogOnlySchema() && $field === null) {
+        if ($field !== null && (! static::usesCatalogOnlySchema() || $field !== 'slug')) {
+            return $query->where($field, $value);
+        }
+
+        if (static::usesCatalogOnlySchema()) {
             return $query->where(function (Builder $personQuery) use ($value): void {
                 if (is_numeric($value)) {
                     $personQuery->whereKey((int) $value);
@@ -315,10 +320,6 @@ class Person extends Model
                     }
                 }
             });
-        }
-
-        if ($field !== null) {
-            return $query->where($field, $value);
         }
 
         return $query->where(function (Builder $personQuery) use ($value): void {
@@ -467,6 +468,23 @@ class Person extends Model
 
     public function knownForTitles(): BelongsToMany
     {
+        if (static::usesCatalogOnlySchema()) {
+            return $this->belongsToMany(
+                Title::class,
+                'name_basic_known_for_titles',
+                'name_basic_id',
+                'title_basic_id',
+                'id',
+                'id',
+            )
+                ->withPivot('position')
+                ->select(Title::catalogCardColumns())
+                ->with(Title::catalogCardRelations())
+                ->publishedCatalog()
+                ->orderBy('name_basic_known_for_titles.position')
+                ->orderBy(Title::catalogColumn('name'));
+        }
+
         return $this->belongsToMany(Title::class, 'credits')
             ->whereNull('credits.deleted_at')
             ->withPivot([
@@ -619,6 +637,19 @@ class Person extends Model
         return Str::slug($this->name).'-'.($this->imdb_id ?: $this->getKey());
     }
 
+    public function getIsPublishedAttribute(?bool $value): bool
+    {
+        if ($value !== null) {
+            return (bool) $value;
+        }
+
+        if (static::usesCatalogOnlySchema()) {
+            return filled($this->attributes['primaryname'] ?? $this->attributes['displayName'] ?? null);
+        }
+
+        return false;
+    }
+
     public function getNameAttribute(?string $value): string
     {
         if (filled($value)) {
@@ -706,6 +737,39 @@ class Person extends Model
     }
 
     public function getNationalityAttribute(?string $value): ?string
+    {
+        return filled($value) ? (string) $value : null;
+    }
+
+    public function getPopularityRankAttribute(mixed $value): ?int
+    {
+        if ($value !== null) {
+            return (int) $value;
+        }
+
+        $selectedValue = $this->getAttributeFromArray('current_rank');
+
+        if ($selectedValue !== null) {
+            return (int) $selectedValue;
+        }
+
+        if ($this->relationLoaded('meterRanking')) {
+            $meterRanking = $this->getRelation('meterRanking');
+
+            if ($meterRanking instanceof NameBasicMeterRanking) {
+                return $meterRanking->current_rank;
+            }
+        }
+
+        return null;
+    }
+
+    public function getMetaTitleAttribute(?string $value): ?string
+    {
+        return filled($value) ? (string) $value : null;
+    }
+
+    public function getMetaDescriptionAttribute(?string $value): ?string
     {
         return filled($value) ? (string) $value : null;
     }
@@ -901,20 +965,7 @@ class Person extends Model
             $assets = $assets->merge(
                 $this->mediaAssets
                     ->filter(fn (mixed $asset): bool => $asset instanceof MediaAsset)
-                    ->map(function (MediaAsset $mediaAsset): CatalogMediaAsset {
-                        return CatalogMediaAsset::fromCatalog([
-                            'kind' => $mediaAsset->kind,
-                            'url' => $mediaAsset->url,
-                            'alt_text' => $mediaAsset->alt_text,
-                            'caption' => $mediaAsset->caption,
-                            'width' => $mediaAsset->width,
-                            'height' => $mediaAsset->height,
-                            'duration_seconds' => $mediaAsset->duration_seconds,
-                            'is_primary' => $mediaAsset->is_primary,
-                            'position' => $mediaAsset->position,
-                            'metadata' => $mediaAsset->metadata,
-                        ]);
-                    }),
+                    ->map(fn (MediaAsset $mediaAsset): CatalogMediaAsset => $mediaAsset->toCatalogMediaAsset()),
             );
         }
 

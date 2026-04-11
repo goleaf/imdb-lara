@@ -47,6 +47,22 @@ class Genre extends Model
 
     public function resolveRouteBindingQuery($query, $value, $field = null)
     {
+        if (Title::usesCatalogOnlySchema() && ($field === null || $field === 'slug')) {
+            return $query->where(function ($genreQuery) use ($value): void {
+                if (is_numeric($value)) {
+                    $genreQuery->whereKey((int) $value);
+                }
+
+                if (is_string($value) && preg_match('/-g(?P<id>\d+)$/', $value, $matches) === 1) {
+                    $genreQuery->orWhere($this->qualifyColumn($this->getKeyName()), (int) $matches['id']);
+                }
+            });
+        }
+
+        if ($field !== null) {
+            return $query->where($field, $value);
+        }
+
         return $query->where(function ($genreQuery) use ($value): void {
             $genreQuery->where('slug', (string) $value);
 

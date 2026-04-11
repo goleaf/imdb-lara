@@ -20,6 +20,7 @@ use App\Models\InterestCategory;
 use App\Models\InterestCategoryInterest;
 use App\Models\InterestPrimaryImage;
 use App\Models\InterestSimilarInterest;
+use App\Models\MediaAsset;
 use App\Models\MovieAka;
 use App\Models\MovieAkaAttribute;
 use App\Models\MovieAkaType;
@@ -91,6 +92,28 @@ class TitleTest extends TestCase
 
         $this->assertSame(8.7, $title->displayAverageRating());
         $this->assertSame(2100000, $title->displayRatingCount());
+    }
+
+    public function test_preferred_poster_tolerates_partial_loaded_media_assets(): void
+    {
+        $poster = new MediaAsset;
+        $poster->forceFill([
+            'mediable_type' => Title::class,
+            'mediable_id' => 1,
+            'kind' => 'poster',
+            'url' => 'https://cdn.example.com/matrix-poster.jpg',
+        ]);
+        $poster->exists = true;
+
+        $title = new Title(['id' => 1, 'tconst' => 'tt0133093', 'primarytitle' => 'The Matrix']);
+        $title->setRelation('mediaAssets', new EloquentCollection([$poster]));
+
+        $preferredPoster = $title->preferredPoster();
+
+        $this->assertNotNull($preferredPoster);
+        $this->assertSame('https://cdn.example.com/matrix-poster.jpg', $preferredPoster->url);
+        $this->assertNull($preferredPoster->caption);
+        $this->assertSame(0, $preferredPoster->position);
     }
 
     public function test_runtime_minutes_label_adds_hours_and_minutes_for_longer_titles(): void

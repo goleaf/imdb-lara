@@ -200,6 +200,16 @@ trait BootstrapsImdbMysqlSqlite
             $table->string('next_page_token')->nullable();
         });
 
+        Schema::connection('imdb_mysql')->create('name_basic_known_for_titles', function (Blueprint $table): void {
+            $table->unsignedInteger('name_basic_id');
+            $table->unsignedInteger('title_basic_id');
+            $table->unsignedSmallInteger('position')->nullable();
+            $table->primary(
+                ['name_basic_id', 'title_basic_id'],
+                'pk_name_basic_known_for_titles',
+            );
+        });
+
         Schema::connection('imdb_mysql')->create('name_basic_meter_rankings', function (Blueprint $table): void {
             $table->unsignedInteger('name_basic_id')->primary();
             $table->unsignedInteger('current_rank')->nullable();
