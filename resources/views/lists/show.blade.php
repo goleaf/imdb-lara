@@ -6,7 +6,7 @@
 @section('breadcrumbs')
     <x-ui.breadcrumbs.item :href="route('public.home')">Home</x-ui.breadcrumbs.item>
     <x-ui.breadcrumbs.item :href="route('public.lists.index')">Public Lists</x-ui.breadcrumbs.item>
-    <x-ui.breadcrumbs.item>{{ $owner->name }}</x-ui.breadcrumbs.item>
+    <x-ui.breadcrumbs.item :href="route('public.users.show', $owner)">{{ $owner->name }}</x-ui.breadcrumbs.item>
     <x-ui.breadcrumbs.item>{{ $list->name }}</x-ui.breadcrumbs.item>
 @endsection
 

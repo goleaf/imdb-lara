@@ -80,7 +80,14 @@
 
         <p class="text-center text-sm text-[#9c9284]">
             Already have a Screenbase profile?
-            <a href="{{ route('login') }}" class="sb-auth-inline-link font-medium">Sign in</a>
+            <x-ui.link
+                :href="route('login')"
+                variant="soft"
+                :primary="false"
+                class="sb-auth-inline-link font-medium"
+            >
+                Sign in
+            </x-ui.link>
         </p>
 
         <p class="sb-auth-note text-center">

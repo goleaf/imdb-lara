@@ -1,6 +1,7 @@
 @php
     $currentYear = now()->year;
     $footerData = $footerData ?? [];
+    $legalLinks = $footerData['legalLinks'] ?? [];
 @endphp
 
 <footer {{ $attributes->class('mt-10 w-full border-t border-white/8 bg-[radial-gradient(circle_at_top_right,rgba(251,191,36,0.12),transparent_20%),radial-gradient(circle_at_bottom_left,rgba(14,165,233,0.12),transparent_24%),linear-gradient(180deg,rgba(18,18,18,0.98),rgba(6,6,6,1))]') }} data-slot="site-footer">
@@ -39,9 +40,27 @@
         </div>
 
         <div class="mt-5 border-t border-white/8 pt-4 text-sm text-neutral-400">
-            <x-ui.text class="w-full text-sm leading-6 text-[#b2a796]">
-                © {{ $currentYear }} Screenbase. {{ $footerData['legalCopy'] }}
-            </x-ui.text>
+            <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+                <x-ui.text class="min-w-0 flex-1 text-sm leading-6 text-[#b2a796]">
+                    © {{ $currentYear }} Screenbase. {{ $footerData['legalCopy'] }}
+                </x-ui.text>
+
+                @if ($legalLinks !== [])
+                    <div class="flex shrink-0 items-center gap-3 whitespace-nowrap">
+                        @foreach ($legalLinks as $link)
+                            <x-ui.link
+                                :href="$link['href']"
+                                variant="soft"
+                                :primary="false"
+                                :icon="$link['icon']"
+                                class="text-sm !text-[#f4eee5] no-underline transition hover:!text-white"
+                            >
+                                {{ $link['label'] }}
+                            </x-ui.link>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
         </div>
     </div>
 </footer>

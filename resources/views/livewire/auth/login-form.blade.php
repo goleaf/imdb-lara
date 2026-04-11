@@ -26,14 +26,13 @@
         <x-ui.error name="form.password" />
     </x-ui.field>
 
-    <label class="sb-auth-remember flex items-center gap-3 text-sm">
-        <input
-            wire:model.live="form.remember"
-            type="checkbox"
-            class="size-4 rounded border border-white/15 bg-white/5 text-[#d6b574] focus:ring-2 focus:ring-[#d6b574]/30 focus:ring-offset-0"
-        >
-        <span>Remember this device</span>
-    </label>
+    <x-ui.checkbox
+        wire:model.live="form.remember"
+        name="remember"
+        label="Remember this device"
+        class="sb-auth-remember"
+        x-on:click="toggle()"
+    />
 
     <div class="space-y-3 pt-1">
         <x-ui.button
@@ -47,7 +46,14 @@
 
         <p class="text-center text-sm text-[#9c9284]">
             New to Screenbase?
-            <a href="{{ route('register') }}" class="sb-auth-inline-link font-medium">Create account</a>
+            <x-ui.link
+                :href="route('register')"
+                variant="soft"
+                :primary="false"
+                class="sb-auth-inline-link font-medium"
+            >
+                Create account
+            </x-ui.link>
         </p>
 
         <p class="sb-auth-note text-center">

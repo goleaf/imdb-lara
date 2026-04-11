@@ -1,5 +1,6 @@
 <?php
 
+use App\Actions\Content\LoadChangelogPageAction;
 use App\Actions\Seo\GetSitemapDataAction;
 use App\Enums\TitleMediaArchiveKind;
 use App\Livewire\Pages\Public\AkaAttributePage;
@@ -9,13 +10,15 @@ use App\Livewire\Pages\Public\BrowseTitlesPage;
 use App\Livewire\Pages\Public\CatalogExplorerPage;
 use App\Livewire\Pages\Public\CertificateAttributePage;
 use App\Livewire\Pages\Public\CertificateRatingPage;
-use App\Livewire\Pages\Public\CompanyPage;
 use App\Livewire\Pages\Public\CompanyCreditAttributePage;
+use App\Livewire\Pages\Public\CompanyPage;
 use App\Livewire\Pages\Public\DiscoverPage;
 use App\Livewire\Pages\Public\EpisodeShowPage;
 use App\Livewire\Pages\Public\HomePage;
 use App\Livewire\Pages\Public\InterestCategoriesPage;
+use App\Livewire\Pages\Public\LatestReviewsPage;
 use App\Livewire\Pages\Public\LatestTrailersPage;
+use App\Livewire\Pages\Public\ListsPage;
 use App\Livewire\Pages\Public\PeoplePage;
 use App\Livewire\Pages\Public\SearchPage;
 use App\Livewire\Pages\Public\SeasonShowPage;
@@ -27,6 +30,7 @@ use App\Livewire\Pages\Public\TitleMetadataPage;
 use App\Livewire\Pages\Public\TitlePage;
 use App\Livewire\Pages\Public\TitleParentsGuidePage;
 use App\Livewire\Pages\Public\TitleTriviaPage;
+use App\Livewire\Pages\Public\UserPage;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Route;
 
@@ -72,6 +76,10 @@ Route::name('public.')->group(function (): void {
     Route::livewire('/aka-attributes/{akaAttribute:slug}', AkaAttributePage::class)->name('aka-attributes.show');
     Route::livewire('/certificate-ratings/{certificateRating:slug}', CertificateRatingPage::class)->name('certificate-ratings.show');
     Route::livewire('/certificate-attributes/{certificateAttribute:slug}', CertificateAttributePage::class)->name('certificate-attributes.show');
+    Route::livewire('/reviews', LatestReviewsPage::class)->name('reviews.latest');
+    Route::livewire('/lists', ListsPage::class)->name('lists.index');
+    Route::livewire('/users/{user:username}', UserPage::class)->name('users.show');
+    Route::livewire('/users/{user:username}/lists/{list:slug}', UserPage::class)->name('lists.show');
     Route::livewire('/trailers', LatestTrailersPage::class)->name('trailers.latest');
     Route::livewire('/genres/{genre:slug}', BrowseTitlesPage::class)->name('genres.show');
     Route::livewire('/years/{year}', BrowseTitlesPage::class)->whereNumber('year')->name('years.show');
@@ -79,9 +87,16 @@ Route::name('public.')->group(function (): void {
     Route::livewire('/top-rated/series', BrowseTitlesPage::class)->name('rankings.series');
     Route::livewire('/trending', BrowseTitlesPage::class)->name('trending');
     Route::livewire('/search', SearchPage::class)->name('search');
+    Route::get('/changes', function (LoadChangelogPageAction $loadChangelogPageAction) {
+        return view('changes.index', $loadChangelogPageAction->handle());
+    })->name('changes');
 
     Route::withoutScopedBindings()->group(function (): void {
         Route::livewire('/series/{series:slug}/seasons/{season:slug}', SeasonShowPage::class)->name('seasons.show');
         Route::livewire('/series/{series:slug}/seasons/{season:slug}/episodes/{episode:slug}', EpisodeShowPage::class)->name('episodes.show');
     });
 });
+
+require __DIR__.'/auth.php';
+require __DIR__.'/account.php';
+require __DIR__.'/admin.php';

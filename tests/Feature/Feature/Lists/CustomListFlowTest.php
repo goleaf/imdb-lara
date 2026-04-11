@@ -79,10 +79,15 @@ class CustomListFlowTest extends TestCase
             'title_id' => $title->id,
         ]);
 
-        $this->get(route('public.lists.show', [$user, $list]))
+        $response = $this->get(route('public.lists.show', [$user, $list]))
             ->assertOk()
             ->assertSee('Friday Night Picks')
             ->assertSee('Northern Signal');
+
+        $this->assertSame(
+            2,
+            substr_count((string) $response->getContent(), route('public.users.show', $user)),
+        );
     }
 
     public function test_title_picker_can_create_a_list_inline_and_preselect_it(): void

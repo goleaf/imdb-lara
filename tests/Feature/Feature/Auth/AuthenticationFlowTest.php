@@ -49,6 +49,24 @@ class AuthenticationFlowTest extends TestCase
         ]);
     }
 
+    public function test_auth_pages_render_sheaf_member_entry_controls(): void
+    {
+        $loginResponse = $this->get(route('login'))->assertOk();
+        $registerResponse = $this->get(route('register'))->assertOk();
+
+        $loginMarkup = $loginResponse->getContent();
+        $registerMarkup = $registerResponse->getContent();
+
+        self::assertIsString($loginMarkup);
+        self::assertIsString($registerMarkup);
+
+        self::assertStringContainsString('data-slot="checkbox-wrapper"', $loginMarkup);
+        self::assertStringContainsString('data-slot="link"', $loginMarkup);
+        self::assertStringContainsString('data-slot="link"', $registerMarkup);
+        self::assertGreaterThanOrEqual(3, substr_count($loginMarkup, 'data-slot="button"'));
+        self::assertGreaterThanOrEqual(3, substr_count($registerMarkup, 'data-slot="button"'));
+    }
+
     public function test_existing_user_can_log_in_and_out(): void
     {
         $user = User::factory()->create([

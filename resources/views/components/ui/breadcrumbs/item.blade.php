@@ -1,3 +1,5 @@
+@inject('resolveBreadcrumbIcon', 'App\Actions\Layout\ResolveBreadcrumbIconAction')
+
 @props([
     'separator' => null,
     'iconVariant' => 'mini',
@@ -16,24 +18,29 @@
         'dark:text-gray-300 text-sm flex items-center gap-x-1'
     ];
 
+    $resolvedIcon = $icon ?? $resolveBreadcrumbIcon->handle(
+        label: (string) $slot,
+        href: $href,
+    );
+
     $iconClasses = [
-        'size-5' => $iconVariant === 'outline' 
+        'size-5' => $iconVariant === 'outline'
     ];
 @endphp
 
 <div class="{{ Arr::toCssClasses($classes) }}">
     @if ($href)
         <a href="{{ $href }}" {{ $attributes->class(Arr::toCssClasses($linkClasses)) }}>
-            @if ($icon)
-                <x-ui.icon name="{{ $icon }}" variant="{{ $iconVariant }}"
+            @if ($resolvedIcon)
+                <x-ui.icon :name="$resolvedIcon" variant="{{ $iconVariant }}"
                     class="{{ Arr::toCssClasses($iconClasses) }}" />
             @endif
             {{ $slot }}
         </a>
     @else
         <div {{ $attributes->class(Arr::toCssClasses($staticTextClasses)) }}>
-            @if ($icon)
-                <x-ui.icon name="{{ $icon }}" variant="{{ $iconVariant }}"
+            @if ($resolvedIcon)
+                <x-ui.icon :name="$resolvedIcon" variant="{{ $iconVariant }}"
                     class="{{ Arr::toCssClasses($iconClasses) }}" />
             @endif
             {{ $slot }}

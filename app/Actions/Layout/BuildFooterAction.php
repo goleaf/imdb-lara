@@ -13,6 +13,7 @@ class BuildFooterAction
      *         description: string,
      *         links: list<array{href: string, label: string, icon: string}>
      *     }>,
+     *     legalLinks: list<array{href: string, label: string, icon: string}>,
      *     legalCopy: string
      * }
      */
@@ -43,6 +44,10 @@ class BuildFooterAction
             $this->link('public.search', 'Advanced Search', 'magnifying-glass'),
         ]));
 
+        $legalLinks = array_values(array_filter([
+            $this->link('public.changes', 'Changes', 'clock'),
+        ]));
+
         return [
             'sections' => [
                 [
@@ -61,6 +66,7 @@ class BuildFooterAction
                     'links' => $deepCatalogLinks,
                 ],
             ],
+            'legalLinks' => $legalLinks,
             'legalCopy' => 'Built for title discovery, trailer browsing, awards tracking, and IMDb-style public catalog exploration.',
         ];
     }

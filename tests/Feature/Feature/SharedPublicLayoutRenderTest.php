@@ -31,6 +31,7 @@ class SharedPublicLayoutRenderTest extends TestCase
             ->assertOk()
             ->assertSee('Search The Global Catalog')
             ->assertSee('Browse by Theme')
+            ->assertSee('Changes')
             ->assertSee('Search Results');
     }
 }

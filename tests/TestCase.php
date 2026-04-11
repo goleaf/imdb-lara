@@ -14,7 +14,6 @@ use App\Models\Title;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Sleep;
 use Illuminate\Testing\TestResponse;
 use ReflectionClass;
@@ -55,9 +54,7 @@ abstract class TestCase extends BaseTestCase
 
     protected function isCatalogOnlySurface(): bool
     {
-        return Route::has('public.home')
-            && ! Route::has('account.watchlist')
-            && ! Route::has('admin.dashboard');
+        return (bool) config('screenbase.catalog_only', false);
     }
 
     protected function supportsCatalogOnlyApplicationTestContract(): bool

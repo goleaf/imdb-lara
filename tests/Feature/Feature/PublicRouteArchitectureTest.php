@@ -130,9 +130,14 @@ class PublicRouteArchitectureTest extends TestCase
         $this->get(route('public.trending'))
             ->assertOk()
             ->assertSee('Trending Now');
+
+        $this->get(route('public.changes'))
+            ->assertOk()
+            ->assertSee('Portal Changes')
+            ->assertSee('What Was Improved');
     }
 
-    public function test_public_route_registry_matches_the_catalog_only_surface(): void
+    public function test_public_route_registry_matches_the_livewire_catalog_surface(): void
     {
         $this->assertTrue(Route::has('public.home'));
         $this->assertTrue(Route::has('public.awards.index'));
@@ -147,8 +152,9 @@ class PublicRouteArchitectureTest extends TestCase
         $this->assertTrue(Route::has('public.titles.trivia'));
         $this->assertTrue(Route::has('public.titles.metadata'));
         $this->assertTrue(Route::has('public.search'));
-        $this->assertFalse(Route::has('public.lists.index'));
-        $this->assertFalse(Route::has('public.users.show'));
-        $this->assertFalse(Route::has('public.reviews.latest'));
+        $this->assertTrue(Route::has('public.changes'));
+        $this->assertTrue(Route::has('public.lists.index'));
+        $this->assertTrue(Route::has('public.users.show'));
+        $this->assertTrue(Route::has('public.reviews.latest'));
     }
 }

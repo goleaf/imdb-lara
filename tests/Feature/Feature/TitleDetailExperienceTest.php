@@ -1123,7 +1123,7 @@ class TitleDetailExperienceTest extends TestCase
         $response = $this->get(route('public.titles.show', $title))
             ->assertOk()
             ->assertSeeHtml('data-slot="title-detail-movie-company-credit-attributes"')
-            ->assertSee('Company credit attributes linked to this title\'s company records, with direct paths into the related company and attribute archives.')
+            ->assertSee('Company credit attributes linked to this title\'s company records, with direct paths into the related company and attribute archives.', false)
             ->assertSee($movieCompanyCreditAttribute->movieCompanyCredit->company->name)
             ->assertSee($movieCompanyCreditAttribute->movieCompanyCredit->companyCreditCategory->name)
             ->assertSee($movieCompanyCreditAttribute->companyCreditAttribute->name)
