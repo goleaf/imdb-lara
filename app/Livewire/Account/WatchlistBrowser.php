@@ -12,6 +12,8 @@ use App\Actions\Titles\SetUserWatchStateForTitleAction;
 use App\Enums\ListVisibility;
 use App\Enums\WatchState;
 use App\Models\Title;
+use Illuminate\Contracts\View\View;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -191,10 +193,12 @@ class WatchlistBrowser extends Component
         $this->visibilityMessage = 'Watchlist visibility updated.';
     }
 
-    public function render()
+    public function render(): View
     {
         $user = auth()->user();
         $watchlist = $this->ensureWatchlist->handle($user);
+        $pageName = 'watchlist';
+        $perPage = 12;
 
         $watchlist->loadCount([
             'items',
@@ -202,16 +206,26 @@ class WatchlistBrowser extends Component
         ]);
 
         $filterOptions = $this->getAccountWatchlistFilterOptions->handle($watchlist);
-        $items = $this->buildAccountWatchlistQuery
+        $watchlistItems = $this->buildAccountWatchlistQuery
             ->handle($watchlist, [
                 'genre' => $this->genre,
                 'sort' => $this->sort,
                 'state' => $this->state,
                 'type' => $this->type,
                 'year' => $this->year,
-            ])
-            ->simplePaginate(12, pageName: 'watchlist')
-            ->withQueryString();
+            ]);
+        $currentPage = $this->getPage(pageName: $pageName);
+        $items = new LengthAwarePaginator(
+            items: $watchlistItems->forPage($currentPage, $perPage)->values(),
+            total: $watchlistItems->count(),
+            perPage: $perPage,
+            currentPage: $currentPage,
+            options: [
+                'pageName' => $pageName,
+                'path' => route('account.watchlist'),
+            ],
+        );
+        $items->withQueryString();
 
         return view('livewire.account.watchlist-browser', [
             'filterOptions' => $filterOptions,
@@ -227,6 +241,11 @@ class WatchlistBrowser extends Component
             ],
             'watchlist' => $watchlist,
         ]);
+    }
+
+    public function placeholder(): View
+    {
+        return view('livewire.placeholders.account-watchlist-browser');
     }
 
     private function resetWatchlistPage(): void

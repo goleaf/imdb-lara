@@ -61,7 +61,7 @@ class GetAccountWatchlistFilterOptionsAction
                 ->flatMap(fn (Title $title): Collection => $title->resolvedGenres())
                 ->filter(fn (mixed $genre): bool => $genre instanceof Genre)
                 ->unique('id')
-                ->orderBy('name')
+                ->sortBy('name')
                 ->values(),
             'years' => $titles
                 ->pluck('release_year')

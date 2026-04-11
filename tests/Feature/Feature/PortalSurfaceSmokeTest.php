@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Feature;
 
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\UsesCatalogOnlyApplication;
-use App\Models\User;
 use Tests\TestCase;
 
 class PortalSurfaceSmokeTest extends TestCase
@@ -47,7 +47,7 @@ class PortalSurfaceSmokeTest extends TestCase
 
         $this->get(route('public.lists.index'))
             ->assertOk()
-            ->assertSee('Browse public lists');
+            ->assertSee('Browse Public Lists');
 
         $this->get(route('public.reviews.latest'))
             ->assertOk()

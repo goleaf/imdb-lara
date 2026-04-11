@@ -9,5 +9,5 @@
 @endsection
 
 @section('content')
-    <livewire:lists.manage-list :list="$list" />
+    <livewire:lists.manage-list :list="$list" defer />
 @endsection

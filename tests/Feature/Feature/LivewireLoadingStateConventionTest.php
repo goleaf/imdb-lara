@@ -38,6 +38,36 @@ class LivewireLoadingStateConventionTest extends TestCase
         $this->assertMatchesRegularExpression('/<livewire:people\\.filmography-panel[\\s\\S]*?\\slazy\\s*\\/>/', $contents);
     }
 
+    public function test_account_pages_defer_heavier_livewire_components(): void
+    {
+        $watchlistPage = file_get_contents(resource_path('views/account/watchlist.blade.php'));
+        $listsIndexPage = file_get_contents(resource_path('views/account/lists/index.blade.php'));
+        $manageListPage = file_get_contents(resource_path('views/account/lists/show.blade.php'));
+
+        $this->assertNotFalse($watchlistPage);
+        $this->assertNotFalse($listsIndexPage);
+        $this->assertNotFalse($manageListPage);
+        $this->assertMatchesRegularExpression('/<livewire:account\\.watchlist-browser[\\s\\S]*?\\sdefer\\s*\\/>/', $watchlistPage);
+        $this->assertMatchesRegularExpression('/<livewire:lists\\.create-list-form[\\s\\S]*?\\sdefer\\s*\\/>/', $listsIndexPage);
+        $this->assertMatchesRegularExpression('/<livewire:lists\\.manage-list[\\s\\S]*?\\sdefer\\s*\\/>/', $manageListPage);
+    }
+
+    public function test_deferred_account_components_define_placeholder_methods(): void
+    {
+        $classPaths = [
+            app_path('Livewire/Account/WatchlistBrowser.php'),
+            app_path('Livewire/Lists/CreateListForm.php'),
+            app_path('Livewire/Lists/ManageList.php'),
+        ];
+
+        foreach ($classPaths as $classPath) {
+            $contents = file_get_contents($classPath);
+
+            $this->assertNotFalse($contents);
+            $this->assertStringContainsString('function placeholder()', $contents, $classPath);
+        }
+    }
+
     public function test_title_review_list_uses_tailwind_has_data_loading_variant(): void
     {
         $contents = file_get_contents(resource_path('views/livewire/reviews/title-review-list.blade.php'));
@@ -56,5 +86,16 @@ class LivewireLoadingStateConventionTest extends TestCase
         $this->assertStringContainsString('not-data-loading:hidden', $contents);
         $this->assertStringContainsString('in-data-loading:hidden', $contents);
         $this->assertStringNotContainsString('wire:loading.remove', $contents);
+    }
+
+    public function test_watchlist_browser_limits_loading_state_to_results_interactions(): void
+    {
+        $contents = file_get_contents(resource_path('views/livewire/account/watchlist-browser.blade.php'));
+
+        $this->assertNotFalse($contents);
+        $this->assertStringContainsString(
+            'wire:target="genre,sort,state,type,year,clearFilters,toggleWatched,removeFromWatchlist,gotoPage,nextPage,previousPage,setPage"',
+            $contents,
+        );
     }
 }

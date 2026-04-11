@@ -6,9 +6,8 @@ use App\Actions\Lists\BuildUserListItemsQueryAction;
 use App\Actions\Lists\LoadPublicUserListAction;
 use App\Actions\Seo\PageSeoData;
 use App\Actions\Users\LoadPublicUserProfileAction;
-use App\Enums\MediaKind;
 use App\Livewire\Pages\Concerns\RendersPageView;
-use App\Models\MediaAsset;
+use App\Models\ListItem;
 use App\Models\User;
 use App\Models\UserList;
 use Illuminate\Contracts\View\View;
@@ -50,13 +49,16 @@ class UserPage extends Component
         if (request()->routeIs('public.lists.show')) {
             $list = $loadPublicUserList->handle($this->list);
             $itemsQuery = $buildUserListItemsQuery->handle($list);
-            $listPreviewTitle = (clone $itemsQuery)->first()?->title;
             $items = $itemsQuery
                 ->simplePaginate(18, pageName: 'titles')
                 ->withQueryString();
-            $listPreviewImage = $listPreviewTitle
-                ? MediaAsset::preferredFrom($listPreviewTitle->mediaAssets, MediaKind::Poster, MediaKind::Backdrop)
-                : null;
+            $items->setCollection(
+                $items->getCollection()
+                    ->filter(fn (ListItem $item): bool => $item->title !== null)
+                    ->values(),
+            );
+            $listPreviewTitle = $items->getCollection()->first()?->title;
+            $listPreviewImage = $listPreviewTitle?->preferredPoster() ?? $listPreviewTitle?->preferredBackdrop();
             $breadcrumbs = [
                 ['label' => 'Home', 'href' => route('public.home')],
                 ['label' => 'Public Lists', 'href' => route('public.lists.index')],

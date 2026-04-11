@@ -79,7 +79,9 @@ class LoadAccountDashboardAction
                     ->publishedCatalog()
                     ->withCatalogCardRelations(),
             ])
-            ->get();
+            ->get()
+            ->filter(fn (ListItem $item): bool => $item->title !== null)
+            ->values();
 
         $recentRatings = Rating::query()
             ->select(['id', 'user_id', 'title_id', 'score', 'created_at'])
@@ -92,7 +94,9 @@ class LoadAccountDashboardAction
             ])
             ->latest('created_at')
             ->limit(5)
-            ->get();
+            ->get()
+            ->filter(fn (Rating $rating): bool => $rating->title !== null)
+            ->values();
 
         $recentReviews = Review::query()
             ->select([
@@ -115,7 +119,9 @@ class LoadAccountDashboardAction
             ->latest('published_at')
             ->latest('created_at')
             ->limit(5)
-            ->get();
+            ->get()
+            ->filter(fn (Review $review): bool => $review->title !== null)
+            ->values();
 
         $quickLinks = UserList::query()
             ->select([

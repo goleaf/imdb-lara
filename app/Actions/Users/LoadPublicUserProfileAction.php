@@ -4,6 +4,7 @@ namespace App\Actions\Users;
 
 use App\Actions\Seo\PageSeoData;
 use App\Enums\ListVisibility;
+use App\Models\ListItem;
 use App\Models\Rating;
 use App\Models\Review;
 use App\Models\Title;
@@ -66,6 +67,15 @@ class LoadPublicUserProfileAction
             ])
             ->first();
 
+        if ($publicWatchlist instanceof UserList) {
+            $publicWatchlist->setRelation(
+                'items',
+                $publicWatchlist->items
+                    ->filter(fn (ListItem $item): bool => $item->title !== null)
+                    ->values(),
+            );
+        }
+
         $publicLists = $user->customLists()
             ->select(['id', 'user_id', 'name', 'slug', 'description', 'visibility', 'is_watchlist', 'created_at', 'updated_at'])
             ->where('visibility', ListVisibility::Public->value)
@@ -78,10 +88,17 @@ class LoadPublicUserProfileAction
         $recentReviews = $this->buildPublicUserReviewsQuery
             ->handle($user, $viewer)
             ->limit(6)
-            ->get();
+            ->get()
+            ->filter(fn (Review $review): bool => $review->title !== null)
+            ->values();
 
         $recentRatings = $user->showsRatingsOnProfile()
-            ? $this->buildPublicUserRatingsQuery->handle($user)->limit(8)->get()
+            ? $this->buildPublicUserRatingsQuery
+                ->handle($user)
+                ->limit(8)
+                ->get()
+                ->filter(fn (Rating $rating): bool => $rating->title !== null)
+                ->values()
             : new EloquentCollection;
 
         return [

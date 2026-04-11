@@ -22,7 +22,7 @@
             </x-ui.link>
         </div>
 
-        <livewire:lists.create-list-form />
+        <livewire:lists.create-list-form defer />
 
         <div class="grid gap-4 lg:grid-cols-2">
             @forelse ($lists as $list)

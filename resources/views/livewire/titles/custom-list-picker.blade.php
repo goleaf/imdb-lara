@@ -21,19 +21,19 @@
                 </x-ui.alerts>
             @endif
 
-            @if ($selectedLists->isNotEmpty())
+            @if ($this->selectedLists->isNotEmpty())
                 <div class="space-y-2">
                     <div class="flex flex-wrap items-center justify-between gap-3">
                         <x-ui.text class="text-sm font-medium text-neutral-700 dark:text-neutral-200">
                             Already saved in your lists
                         </x-ui.text>
                         <x-ui.badge variant="outline" color="neutral" icon="queue-list">
-                            {{ number_format($selectedLists->count()) }} {{ str('list')->plural($selectedLists->count()) }}
+                            {{ number_format($this->selectedLists->count()) }} {{ str('list')->plural($this->selectedLists->count()) }}
                         </x-ui.badge>
                     </div>
 
                     <div class="flex flex-wrap gap-2">
-                        @foreach ($selectedLists as $selectedList)
+                        @foreach ($this->selectedLists as $selectedList)
                             <x-ui.badge
                                 wire:key="selected-title-list-{{ $selectedList->id }}"
                                 variant="outline"
@@ -55,7 +55,7 @@
                     multiple
                     clearable
                     placeholder="Search or choose lists"
-                    :prevent-loading="filled($listQuery) && $lists->isEmpty()"
+                    :prevent-loading="filled($listQuery) && $this->lists->isEmpty()"
                 >
                     <x-slot:search>
                         <x-ui.combobox.input
@@ -64,7 +64,7 @@
                         />
                     </x-slot:search>
 
-                    @forelse ($lists as $list)
+                    @forelse ($this->lists as $list)
                         <x-ui.combobox.option
                             wire:key="title-list-{{ $list->id }}"
                             value="{{ $list->id }}"
@@ -124,7 +124,7 @@
                                 placeholder="Select visibility"
                                 :invalid="$errors->has('createListForm.visibility')"
                             >
-                                @foreach ($visibilityOptions as $visibilityOption)
+                                @foreach ($this->visibilityOptions as $visibilityOption)
                                     <x-ui.combobox.option
                                         wire:key="inline-list-visibility-{{ $visibilityOption['value'] }}"
                                         value="{{ $visibilityOption['value'] }}"

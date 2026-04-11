@@ -49,7 +49,7 @@
         </div>
 
         <div class="flex justify-end">
-            <x-ui.button type="submit" icon="plus">
+            <x-ui.button type="submit" wire:target="save" icon="plus">
                 Create list
             </x-ui.button>
         </div>

@@ -12,6 +12,7 @@ use App\Actions\Lists\UpdateUserListAction;
 use App\Enums\ListVisibility;
 use App\Models\Title;
 use App\Models\UserList;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Url;
@@ -160,7 +161,7 @@ class ManageList extends Component
         $this->redirectRoute('account.lists.index');
     }
 
-    public function render()
+    public function render(): View
     {
         $list = $this->list->fresh(['user:id,name,username']);
 
@@ -184,6 +185,11 @@ class ManageList extends Component
                 ['value' => ListVisibility::Public->value, 'label' => 'Public'],
             ],
         ]);
+    }
+
+    public function placeholder(): View
+    {
+        return view('livewire.placeholders.manage-list');
     }
 
     private function resetItemsPage(): void

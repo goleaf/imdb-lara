@@ -175,7 +175,11 @@
         </div>
     </x-ui.card>
 
-    <div wire:loading.delay.attr="data-loading" class="space-y-4">
+    <div
+        wire:loading.delay.attr="data-loading"
+        wire:target="genre,sort,state,type,year,clearFilters,toggleWatched,removeFromWatchlist,gotoPage,nextPage,previousPage,setPage"
+        class="space-y-4"
+    >
         <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3 not-data-loading:hidden">
             @foreach (range(1, 6) as $index)
                 <x-ui.card class="!max-w-none h-full overflow-hidden" wire:key="watchlist-skeleton-{{ $index }}">

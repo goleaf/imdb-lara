@@ -8,5 +8,5 @@
 @endsection
 
 @section('content')
-    <livewire:account.watchlist-browser />
+    <livewire:account.watchlist-browser defer />
 @endsection
