@@ -34,4 +34,13 @@ class SharedPublicLayoutRenderTest extends TestCase
             ->assertSee('Changes')
             ->assertSee('Search Results');
     }
+
+    public function test_welcome_scaffold_uses_livewire_script_config_for_manual_bundling(): void
+    {
+        $contents = file_get_contents(resource_path('views/welcome.blade.php'));
+
+        $this->assertNotFalse($contents);
+        $this->assertStringContainsString('@livewireScriptConfig', $contents);
+        $this->assertStringNotContainsString('@livewireScripts', $contents);
+    }
 }

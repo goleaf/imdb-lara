@@ -130,4 +130,24 @@ class CustomListFlowTest extends TestCase
         Livewire::test(CustomListPicker::class, ['title' => $title])
             ->assertSeeHtml('data-slot="alert-description"');
     }
+
+    public function test_suspended_user_cannot_create_lists_from_livewire_list_components(): void
+    {
+        $user = User::factory()->suspended()->create();
+        $title = Title::factory()->create();
+
+        Livewire::actingAs($user)
+            ->test(CreateListForm::class)
+            ->set('form.name', 'Blocked List')
+            ->set('form.visibility', ListVisibility::Private->value)
+            ->call('save')
+            ->assertForbidden();
+
+        Livewire::actingAs($user)
+            ->test(CustomListPicker::class, ['title' => $title])
+            ->set('createListForm.name', 'Blocked Inline List')
+            ->set('createListForm.visibility', ListVisibility::Private->value)
+            ->call('createList')
+            ->assertForbidden();
+    }
 }

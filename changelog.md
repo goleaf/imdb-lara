@@ -6,7 +6,7 @@ Hey! Here is what changed today in this project:
 Screenbase now has a public `Changes` page that renders straight from the root `changelog.md`, so release notes finally live inside the product instead of only in the repository. The public surface also now formally includes latest reviews, public lists, and public user pages, and the footer points people to the changelog so they can actually discover what shipped.
 
 ### What Was Improved
-Breadcrumbs got much smarter: shared breadcrumb items can now infer the right icon from the label or URL, which removes a lot of repetitive view wiring while making navigation feel more polished. The long-form changelog page also received dedicated editorial styling, the public list detail page now links its owner breadcrumb back to the public profile route, and the auth entry screens now reuse the shared button component for their placeholder social controls. Account and admin shell data is also cleaner now, with explicit portal-shell flags and flattened navbar items shared from one place so the Blade layer does less recomputing on its own. Public review and list queries now reuse the shared title card loading helpers too, which keeps those catalog surfaces consistent and easier to maintain.
+Breadcrumbs got much smarter: shared breadcrumb items can now infer the right icon from the label or URL, which removes a lot of repetitive view wiring while making navigation feel more polished. The long-form changelog page also received dedicated editorial styling, the public list detail page now links its owner breadcrumb back to the public profile route, and the auth entry screens now reuse the shared button component for their placeholder social controls. Account and admin shell data is also cleaner now, with explicit portal-shell flags and flattened navbar items shared from one place so the Blade layer does less recomputing on its own. Public review and list queries now reuse the shared title card loading helpers too, Livewire list creation now authorizes suspended users correctly, and the welcome scaffold now uses the Livewire script config expected by the manual bundling setup.
 
 ### What Was Removed or Cleaned Up
 The route layer is less crowded now that auth, account, and admin definitions were split out of `routes/web.php` into dedicated files. The test harness also stopped guessing whether the app is running in catalog-only mode by inspecting route registration, and the lockfile dropped an unnecessary root package name entry.
@@ -18,7 +18,12 @@ The route layer is less crowded now that auth, account, and admin definitions we
 - `app/Actions/Layout/ResolveBreadcrumbIconAction.php` — added a shared icon resolver for breadcrumb labels and paths.
 - `app/Actions/Lists/BuildPublicListsIndexQueryAction.php` — simplified public list loading and reused the shared title card query helpers.
 - `app/Actions/Lists/BuildUserListItemsQueryAction.php` — switched user list item title loading over to the shared title card query helpers.
+- `app/Actions/Lists/GetAccountWatchlistFilterOptionsAction.php` — switched watchlist filter option building to collection-based title data instead of repeated query clones.
 - `app/Actions/Seo/ResolvePageShellViewDataAction.php` — added explicit auth and portal shell state flags so layouts can react without guessing.
+- `app/Actions/Users/BuildPublicUserRatingsQueryAction.php` — switched public user ratings to the shared title card query helpers.
+- `app/Actions/Users/BuildPublicUserReviewsQueryAction.php` — switched public user reviews to the shared title card query helpers.
+- `app/Actions/Users/LoadAccountDashboardAction.php` — switched dashboard title cards and recent ratings over to the shared title card query helpers.
+- `app/Actions/Users/LoadPublicUserProfileAction.php` — switched public profile highlights over to the shared title card query helpers.
 - `app/Providers/ViewServiceProvider.php` — started sharing flattened account and admin navbar items plus the current portal user with shell views.
 - `changelog.md` — added this new top-of-file release note entry for the current update.
 - `package-lock.json` — removed the root package name field from the lockfile metadata.
@@ -31,6 +36,7 @@ The route layer is less crowded now that auth, account, and admin definitions we
 - `resources/views/layouts/partials/admin-navbar.blade.php` — switched the admin top navbar to the pre-flattened shared navigation items.
 - `resources/views/layouts/partials/admin-sidebar.blade.php` — switched the admin sidebar to the shared portal user payload instead of fetching auth data inline.
 - `resources/views/layouts/partials/app-shell.blade.php` — switched the shell template over to explicit shell-state flags instead of recomputing them in Blade.
+- `resources/views/welcome.blade.php` — switched the default scaffold to `@livewireScriptConfig` for manual bundling.
 - `resources/views/components/ui/breadcrumbs/item.blade.php` — taught breadcrumb items to auto-resolve icons when no explicit icon is passed.
 - `resources/views/components/ui/footer.blade.php` — added footer rendering for the new legal link group, including Changes.
 - `resources/views/lists/show.blade.php` — linked the list-owner breadcrumb back to the public user page.
@@ -40,11 +46,13 @@ The route layer is less crowded now that auth, account, and admin definitions we
 - `routes/admin.php` — moved admin dashboard, moderation, and catalog-management routes into their own file.
 - `tests/Feature/Feature/ChangelogPageTest.php` — verified the changes page renders the markdown-driven editorial layout.
 - `tests/Feature/Feature/Auth/AuthenticationFlowTest.php` — added coverage for the updated auth-page member entry controls and shared CTA structure.
-- `tests/Feature/Feature/Lists/CustomListFlowTest.php` — asserted the public list page links back to the owner profile.
+- `app/Livewire/Lists/CreateListForm.php` — added explicit list-creation authorization inside the Livewire create-list component.
+- `app/Livewire/Titles/CustomListPicker.php` — added authorization, locked title IDs, and computed data loaders for the inline list picker.
 - `tests/Feature/Feature/PortalRouteRegistrationTest.php` — verified auth, account, admin, and public portal routes are all registered.
 - `tests/Feature/Feature/PortalSurfaceSmokeTest.php` — smoke-tested auth, account, latest reviews, public lists, and public user pages.
 - `tests/Feature/Feature/PublicRouteArchitectureTest.php` — updated route-surface expectations to include Changes, lists, users, and reviews.
-- `tests/Feature/Feature/SharedPublicLayoutRenderTest.php` — confirmed the shared public footer now shows the Changes link.
+- `tests/Feature/Feature/Lists/CustomListFlowTest.php` — covered the public list owner breadcrumb and blocked suspended users from creating lists through Livewire list components.
+- `tests/Feature/Feature/SharedPublicLayoutRenderTest.php` — confirmed the shared public footer shows the Changes link and the welcome scaffold uses the Livewire script config.
 - `tests/Feature/Feature/TitleDetailExperienceTest.php` — relaxed one title-page assertion so encoded punctuation is matched correctly.
 - `tests/Feature/Feature/Ui/BreadcrumbIconRenderingTest.php` — covered automatic breadcrumb icon rendering.
 - `tests/TestCase.php` — switched catalog-only detection to the `screenbase.catalog_only` config flag.

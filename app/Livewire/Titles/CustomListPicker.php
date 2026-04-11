@@ -9,15 +9,24 @@ use App\Actions\Lists\SyncTitleInUserListsAction;
 use App\Enums\ListVisibility;
 use App\Livewire\Forms\Lists\CreateUserListForm as CreateUserListDataForm;
 use App\Models\Title;
+use App\Models\UserList;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\View\View;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class CustomListPicker extends Component
 {
+    use AuthorizesRequests;
+
     protected BuildOwnedCustomListsQueryAction $buildOwnedCustomListsQuery;
 
     protected GetSelectedOwnedCustomListIdsAction $getSelectedOwnedCustomListIds;
 
-    public Title $title;
+    #[Locked]
+    public int $titleId;
 
     /**
      * @var list<string>
@@ -42,7 +51,7 @@ class CustomListPicker extends Component
 
     public function mount(Title $title): void
     {
-        $this->title = $title;
+        $this->titleId = $title->id;
 
         if (! auth()->check()) {
             return;
@@ -54,11 +63,15 @@ class CustomListPicker extends Component
 
     public function save(SyncTitleInUserListsAction $syncTitleInUserLists): void
     {
-        if (! auth()->check()) {
+        $user = auth()->user();
+
+        if (! $user) {
             $this->redirectRoute('login');
 
             return;
         }
+
+        $this->authorize('viewAny', UserList::class);
 
         $selectedListIds = collect($this->selectedListIds)
             ->filter(fn (?string $value): bool => filled($value))
@@ -67,7 +80,7 @@ class CustomListPicker extends Component
             ->values()
             ->all();
 
-        $syncTitleInUserLists->handle(auth()->user(), $this->title, $selectedListIds);
+        $syncTitleInUserLists->handle($user, $this->title(), $selectedListIds);
 
         $this->statusMessage = 'Custom lists updated.';
     }
@@ -79,6 +92,8 @@ class CustomListPicker extends Component
 
             return;
         }
+
+        $this->authorize('create', UserList::class);
 
         $this->showCreateListForm = true;
         $this->createListForm->name = trim($this->listQuery);
@@ -93,13 +108,17 @@ class CustomListPicker extends Component
 
     public function createList(CreateUserListAction $createUserList): void
     {
-        if (! auth()->check()) {
+        $user = auth()->user();
+
+        if (! $user) {
             $this->redirectRoute('login');
 
             return;
         }
 
-        $list = $createUserList->handle(auth()->user(), $this->createListForm->payload());
+        $this->authorize('create', UserList::class);
+
+        $list = $createUserList->handle($user, $this->createListForm->payload());
 
         $this->selectedListIds = collect($this->selectedListIds)
             ->push((string) $list->id)
@@ -112,32 +131,73 @@ class CustomListPicker extends Component
         $this->statusMessage = 'List created. Click update lists to save this title.';
     }
 
-    public function render()
+    #[Computed]
+    public function title(): Title
     {
+        return Title::query()
+            ->select(['id'])
+            ->findOrFail($this->titleId);
+    }
+
+    /**
+     * @return EloquentCollection<int, UserList>
+     */
+    #[Computed]
+    public function lists(): EloquentCollection
+    {
+        if (! auth()->check()) {
+            return new EloquentCollection;
+        }
+
+        return $this->buildOwnedCustomListsQuery
+            ->handle(auth()->user(), $this->listQuery)
+            ->get();
+    }
+
+    /**
+     * @return EloquentCollection<int, UserList>
+     */
+    #[Computed]
+    public function selectedLists(): EloquentCollection
+    {
+        if (! auth()->check()) {
+            return new EloquentCollection;
+        }
+
         $selectedListIds = collect($this->selectedListIds)
             ->map(fn (string $listId): int => (int) $listId)
             ->filter(fn (int $listId): bool => $listId > 0)
             ->values()
             ->all();
 
-        return view('livewire.titles.custom-list-picker', [
-            'lists' => auth()->check()
-                ? $this->buildOwnedCustomListsQuery->handle(auth()->user(), $this->listQuery)->get()
-                : collect(),
-            'selectedLists' => auth()->check() && $selectedListIds !== []
-                ? $this->buildOwnedCustomListsQuery
-                    ->handle(auth()->user())
-                    ->whereIn('id', $selectedListIds)
-                    ->get()
-                : collect(),
-            'visibilityOptions' => array_map(
-                static fn (ListVisibility $visibility): array => [
-                    'value' => $visibility->value,
-                    'label' => $visibility->label(),
-                    'icon' => $visibility->icon(),
-                ],
-                ListVisibility::cases(),
-            ),
-        ]);
+        if ($selectedListIds === []) {
+            return new EloquentCollection;
+        }
+
+        return $this->buildOwnedCustomListsQuery
+            ->handle(auth()->user())
+            ->whereIn('id', $selectedListIds)
+            ->get();
+    }
+
+    /**
+     * @return list<array{value: string, label: string, icon: string}>
+     */
+    #[Computed]
+    public function visibilityOptions(): array
+    {
+        return array_map(
+            static fn (ListVisibility $visibility): array => [
+                'value' => $visibility->value,
+                'label' => $visibility->label(),
+                'icon' => $visibility->icon(),
+            ],
+            ListVisibility::cases(),
+        );
+    }
+
+    public function render(): View
+    {
+        return view('livewire.titles.custom-list-picker');
     }
 }

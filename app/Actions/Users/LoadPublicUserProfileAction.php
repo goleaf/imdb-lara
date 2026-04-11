@@ -6,6 +6,7 @@ use App\Actions\Seo\PageSeoData;
 use App\Enums\ListVisibility;
 use App\Models\Rating;
 use App\Models\Review;
+use App\Models\Title;
 use App\Models\User;
 use App\Models\UserList;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -57,10 +58,10 @@ class LoadPublicUserProfileAction
                     ->latest('created_at')
                     ->limit(3)
                     ->with([
-                        'title:id,name,slug,title_type,release_year,plot_outline',
-                        'title.mediaAssets:id,mediable_type,mediable_id,kind,url,alt_text,position,is_primary',
-                        'title.statistic:id,title_id,average_rating,rating_count,review_count,watchlist_count',
-                        'title.genres:id,name,slug',
+                        'title' => fn ($titleQuery) => $titleQuery
+                            ->select(Title::catalogCardColumns())
+                            ->publishedCatalog()
+                            ->withCatalogCardRelations(),
                     ]),
             ])
             ->first();

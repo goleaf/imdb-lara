@@ -5,10 +5,15 @@ namespace App\Livewire\Lists;
 use App\Actions\Lists\CreateUserListAction;
 use App\Enums\ListVisibility;
 use App\Livewire\Forms\Lists\CreateUserListForm as CreateUserListDataForm;
+use App\Models\UserList;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\View\View;
 use Livewire\Component;
 
 class CreateListForm extends Component
 {
+    use AuthorizesRequests;
+
     public CreateUserListDataForm $form;
 
     public ?string $statusMessage = null;
@@ -21,6 +26,8 @@ class CreateListForm extends Component
             return;
         }
 
+        $this->authorize('create', UserList::class);
+
         $createUserList->handle(auth()->user(), $this->form->payload());
 
         $this->form->reset('name', 'description');
@@ -28,7 +35,7 @@ class CreateListForm extends Component
         $this->statusMessage = 'List created.';
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.lists.create-list-form', [
             'visibilityOptions' => array_map(
@@ -40,5 +47,10 @@ class CreateListForm extends Component
                 ListVisibility::cases(),
             ),
         ]);
+    }
+
+    public function placeholder(): View
+    {
+        return view('livewire.placeholders.create-list-form');
     }
 }

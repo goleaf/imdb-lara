@@ -22,13 +22,33 @@ class GetAccountWatchlistFilterOptionsAction
      */
     public function handle(UserList $watchlist): array
     {
-        $titleBaseQuery = Title::query()
-            ->whereHas('listItems', fn ($query) => $query->where('user_list_id', $watchlist->id));
+        $titleIds = $watchlist->items()
+            ->pluck('title_id')
+            ->filter()
+            ->map(fn (mixed $titleId): int => (int) $titleId)
+            ->unique()
+            ->values();
+
+        if ($titleIds->isEmpty()) {
+            return [
+                'genres' => collect(),
+                'years' => collect(),
+                'titleTypes' => [],
+                'stateOptions' => $this->stateOptions(),
+                'sortOptions' => $this->sortOptions(),
+            ];
+        }
+
+        /** @var Collection<int, Title> $titles */
+        $titles = Title::query()
+            ->select(Title::catalogCardColumns())
+            ->publishedCatalog()
+            ->whereIn('id', $titleIds->all())
+            ->with('genres:id,name')
+            ->get();
 
         /** @var list<TitleType> $titleTypes */
-        $titleTypes = (clone $titleBaseQuery)
-            ->select(['id', 'title_type'])
-            ->get()
+        $titleTypes = $titles
             ->pluck('title_type')
             ->filter(fn (mixed $titleType): bool => $titleType instanceof TitleType)
             ->unique(fn (TitleType $titleType): string => $titleType->value)
@@ -37,19 +57,17 @@ class GetAccountWatchlistFilterOptionsAction
             ->all();
 
         return [
-            'genres' => Genre::query()
-                ->select(['genres.id', 'genres.name', 'genres.slug'])
-                ->whereHas(
-                    'titles.listItems',
-                    fn ($query) => $query->where('user_list_id', $watchlist->id),
-                )
+            'genres' => $titles
+                ->flatMap(fn (Title $title): Collection => $title->resolvedGenres())
+                ->filter(fn (mixed $genre): bool => $genre instanceof Genre)
+                ->unique('id')
                 ->orderBy('name')
-                ->get(),
-            'years' => (clone $titleBaseQuery)
-                ->whereNotNull('release_year')
-                ->orderByDesc('release_year')
+                ->values(),
+            'years' => $titles
                 ->pluck('release_year')
+                ->filter(fn (mixed $releaseYear): bool => is_int($releaseYear))
                 ->unique()
+                ->sortDesc()
                 ->values(),
             'titleTypes' => $titleTypes,
             'stateOptions' => $this->stateOptions(),

@@ -3,6 +3,7 @@
 namespace App\Actions\Users;
 
 use App\Models\Review;
+use App\Models\Title;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -26,7 +27,10 @@ class BuildPublicUserReviewsQueryAction
             ->authoredBy($profileUser)
             ->published()
             ->with([
-                'title:id,name,slug,title_type,release_year',
+                'title' => fn ($titleQuery) => $titleQuery
+                    ->select(Title::catalogCardColumns())
+                    ->publishedCatalog()
+                    ->withCatalogCardRelations(),
                 'author:id,name,username',
             ])
             ->withHelpfulMetrics($viewer)
