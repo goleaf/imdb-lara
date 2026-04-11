@@ -1,5 +1,45 @@
 <div>
-@island(name: 'discover-results-page')
+@island(name: 'discover-results-page', lazy: true)
+    @placeholder
+        <div class="sb-discovery-layout grid gap-6 xl:grid-cols-[19.5rem_minmax(0,1fr)]">
+            <aside class="self-start xl:sticky xl:top-24">
+                <x-ui.card class="sb-filter-shell sb-discovery-sidebar !max-w-none rounded-[1.6rem] p-4 sm:p-5">
+                    <div class="space-y-5">
+                        <div class="space-y-2">
+                            <div class="sb-page-kicker">Filter Panel</div>
+                            <x-ui.skeleton.text class="w-40" />
+                            <x-ui.skeleton.text class="w-full" />
+                            <x-ui.skeleton.text class="w-4/5" />
+                        </div>
+
+                        <div class="grid gap-4">
+                            @foreach (range(1, 8) as $index)
+                                <x-ui.field wire:key="discover-placeholder-filter-{{ $index }}">
+                                    <x-ui.label>Loading</x-ui.label>
+                                    <x-ui.skeleton class="h-10 w-full rounded-box" />
+                                </x-ui.field>
+                            @endforeach
+                        </div>
+                    </div>
+                </x-ui.card>
+            </aside>
+
+            <div class="space-y-4">
+                <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    @foreach (range(1, 6) as $index)
+                        <x-ui.card class="sb-poster-card !max-w-none h-full overflow-hidden rounded-[1.4rem]" wire:key="discover-placeholder-card-{{ $index }}">
+                            <div class="space-y-4">
+                                <x-ui.skeleton class="aspect-[2/3] w-full rounded-box" />
+                                <x-ui.skeleton.text class="w-1/3" />
+                                <x-ui.skeleton.text class="w-3/4" />
+                                <x-ui.skeleton.text class="w-5/6" />
+                            </div>
+                        </x-ui.card>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    @endplaceholder
     <div
         class="sb-discovery-layout grid gap-6 xl:grid-cols-[19.5rem_minmax(0,1fr)] has-data-loading:[&_[data-slot=discover-skeletons]]:grid has-data-loading:[&_[data-slot=discover-results]]:hidden"
         data-slot="discover-filters-island"

@@ -49,24 +49,9 @@ class LoadAkaAttributeDetailsAction
         $languageOptions = $this->languageOptions($akaAttribute, $filters);
 
         $archiveRecords = (clone $archiveQuery)
-            ->select(['id', 'movie_id', 'text', 'country_code', 'language_code', 'position'])
-            ->with([
-                'country:code,name',
-                'language:code,name',
-                'title' => fn ($titleQuery) => $titleQuery
-                    ->selectCatalogCardColumns()
-                    ->publishedCatalog()
-                    ->withCatalogCardRelations(),
-                'movieAkaAttributes' => fn ($movieAkaAttributeQuery) => $movieAkaAttributeQuery
-                    ->select(['movie_aka_id', 'aka_attribute_id', 'position'])
-                    ->with([
-                        'akaAttribute:id,name',
-                    ])
-                    ->orderBy('position'),
-            ])
-            ->orderBy('movie_id')
-            ->orderBy('position')
-            ->orderBy('id')
+            ->selectArchiveColumns()
+            ->withArchiveRelations()
+            ->archiveOrdered()
             ->paginate(self::PAGE_SIZE, pageName: 'aka_records')
             ->withQueryString()
             ->through(fn (MovieAka $movieAka): array => $this->mapArchiveRecord($movieAka, $akaAttribute));
@@ -120,12 +105,7 @@ class LoadAkaAttributeDetailsAction
 
     private function baseArchiveQuery(AkaAttribute $akaAttribute, array $filters): Builder
     {
-        $query = MovieAka::query()
-            ->whereHas(
-                'movieAkaAttributes',
-                fn (Builder $movieAkaAttributeQuery): Builder => $movieAkaAttributeQuery
-                    ->where('aka_attribute_id', $akaAttribute->getKey()),
-            );
+        $query = MovieAka::query()->forAkaAttribute($akaAttribute);
 
         return $this->applyArchiveFilters($query, $filters);
     }

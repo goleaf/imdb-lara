@@ -106,6 +106,9 @@ class BuildTopNavigationAction
      *     canViewAdminTitles: bool,
      *     canViewAdminPeople: bool,
      *     canViewAdminGenres: bool,
+     *     canViewAdminAkaAttributes: bool,
+     *     canViewAdminAkaTypes: bool,
+     *     canViewAdminAwardCategories: bool,
      *     canViewAdminMediaAssets: bool,
      *     canViewAdminContributions: bool,
      *     canViewAdminReviews: bool,
@@ -139,6 +142,15 @@ class BuildTopNavigationAction
                     : null,
                 $permissions['canViewAdminGenres']
                     ? $this->item('admin.genres.index', 'Genres', 'tag', ['admin.genres.*'])
+                    : null,
+                $permissions['canViewAdminAkaAttributes']
+                    ? $this->item('admin.aka-attributes.index', 'AKA Attributes', 'language', ['admin.aka-attributes.*'])
+                    : null,
+                $permissions['canViewAdminAkaTypes']
+                    ? $this->item('admin.aka-types.index', 'AKA Types', 'queue-list', ['admin.aka-types.*'])
+                    : null,
+                $permissions['canViewAdminAwardCategories']
+                    ? $this->item('admin.award-categories.index', 'Award Categories', 'trophy', ['admin.award-categories.*'])
                     : null,
                 $permissions['canViewAdminMediaAssets']
                     ? $this->item('admin.media-assets.index', 'Media', 'photo', ['admin.media-assets.*'])

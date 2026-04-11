@@ -43,6 +43,45 @@ class AwardNomination extends Model
         ];
     }
 
+    public function scopeForTitle(Builder $query, Title|int $title): Builder
+    {
+        $titleId = $title instanceof Title
+            ? (int) $title->getKey()
+            : $title;
+
+        return $query->where('movie_id', $titleId);
+    }
+
+    public function scopeSelectTitleDetailColumns(Builder $query): Builder
+    {
+        return $query->select([
+            'id',
+            'movie_id',
+            'event_imdb_id',
+            'award_category_id',
+            'award_year',
+            'text',
+            'is_winner',
+            'winner_rank',
+            'position',
+        ]);
+    }
+
+    public function scopeWithTitleDetailRelations(Builder $query): Builder
+    {
+        return $query->with([
+            'awardEvent:imdb_id,name',
+            'awardCategory:id,name',
+        ]);
+    }
+
+    public function scopeOrdered(Builder $query): Builder
+    {
+        return $query
+            ->orderBy('position')
+            ->orderBy('id');
+    }
+
     public function getRouteKeyName(): string
     {
         return 'slug';

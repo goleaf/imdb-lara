@@ -2,6 +2,7 @@
 
 namespace App\Actions\Lists;
 
+use App\Models\ListItem;
 use App\Models\UserList;
 
 class DetachTitleFromUserListAction
@@ -26,10 +27,12 @@ class DetachTitleFromUserListAction
             ->orderBy('position')
             ->get()
             ->values()
-            ->each(function ($item, int $index): void {
-                $item->forceFill([
-                    'position' => $index + 1,
-                ])->save();
+            ->each(function (ListItem $item, int $index): void {
+                ListItem::query()
+                    ->whereKey($item->id)
+                    ->update([
+                        'position' => $index + 1,
+                    ]);
             });
     }
 }

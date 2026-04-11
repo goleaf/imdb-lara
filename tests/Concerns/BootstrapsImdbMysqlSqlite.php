@@ -53,6 +53,26 @@ trait BootstrapsImdbMysqlSqlite
             $table->string('name')->unique();
         });
 
+        Schema::connection('imdb_mysql')->create('aka_attributes', function (Blueprint $table): void {
+            $table->increments('id');
+            $table->string('name', 128)->unique();
+        });
+
+        Schema::connection('imdb_mysql')->create('aka_types', function (Blueprint $table): void {
+            $table->increments('id');
+            $table->string('name', 128)->unique();
+        });
+
+        Schema::connection('imdb_mysql')->create('award_categories', function (Blueprint $table): void {
+            $table->increments('id');
+            $table->string('name')->unique();
+        });
+
+        Schema::connection('imdb_mysql')->create('award_events', function (Blueprint $table): void {
+            $table->string('imdb_id')->primary();
+            $table->string('name')->nullable();
+        });
+
         Schema::connection('imdb_mysql')->create('title_types', function (Blueprint $table): void {
             $table->increments('id');
             $table->string('name')->unique();
@@ -61,6 +81,18 @@ trait BootstrapsImdbMysqlSqlite
         Schema::connection('imdb_mysql')->create('movie_genres', function (Blueprint $table): void {
             $table->unsignedInteger('movie_id');
             $table->unsignedInteger('genre_id');
+            $table->unsignedSmallInteger('position')->nullable();
+        });
+
+        Schema::connection('imdb_mysql')->create('movie_aka_attributes', function (Blueprint $table): void {
+            $table->unsignedInteger('movie_aka_id');
+            $table->unsignedInteger('aka_attribute_id');
+            $table->unsignedSmallInteger('position')->nullable();
+        });
+
+        Schema::connection('imdb_mysql')->create('movie_aka_types', function (Blueprint $table): void {
+            $table->unsignedInteger('movie_aka_id');
+            $table->unsignedInteger('aka_type_id');
             $table->unsignedSmallInteger('position')->nullable();
         });
 
@@ -134,6 +166,15 @@ trait BootstrapsImdbMysqlSqlite
             $table->unsignedSmallInteger('position')->nullable();
         });
 
+        Schema::connection('imdb_mysql')->create('person_professions', function (Blueprint $table): void {
+            $table->increments('id');
+            $table->unsignedInteger('person_id');
+            $table->string('department')->nullable();
+            $table->string('profession')->nullable();
+            $table->boolean('is_primary')->default(false);
+            $table->unsignedInteger('sort_order')->default(0);
+        });
+
         Schema::connection('imdb_mysql')->create('name_credits', function (Blueprint $table): void {
             $table->increments('id');
             $table->unsignedInteger('name_basic_id');
@@ -151,6 +192,29 @@ trait BootstrapsImdbMysqlSqlite
             $table->unsignedInteger('name_credit_id');
             $table->unsignedSmallInteger('position');
             $table->string('character_name');
+        });
+
+        Schema::connection('imdb_mysql')->create('name_credit_summaries', function (Blueprint $table): void {
+            $table->unsignedInteger('name_basic_id')->primary();
+            $table->unsignedInteger('total_count')->nullable();
+            $table->string('next_page_token')->nullable();
+        });
+
+        Schema::connection('imdb_mysql')->create('name_basic_meter_rankings', function (Blueprint $table): void {
+            $table->unsignedInteger('name_basic_id')->primary();
+            $table->unsignedInteger('current_rank')->nullable();
+            $table->string('change_direction')->nullable();
+            $table->integer('difference')->nullable();
+        });
+
+        Schema::connection('imdb_mysql')->create('name_images', function (Blueprint $table): void {
+            $table->increments('id');
+            $table->unsignedInteger('name_basic_id');
+            $table->unsignedInteger('position')->nullable();
+            $table->text('url');
+            $table->unsignedInteger('width')->nullable();
+            $table->unsignedInteger('height')->nullable();
+            $table->string('type')->nullable();
         });
 
         Schema::connection('imdb_mysql')->create('movie_directors', function (Blueprint $table): void {

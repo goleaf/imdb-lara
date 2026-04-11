@@ -12,15 +12,13 @@ use App\Models\AwardEvent;
 use App\Models\AwardNomination;
 use App\Models\Contribution;
 use App\Models\Episode;
+use App\Models\MediaAsset;
 use App\Models\Person;
-use App\Models\PersonImage;
 use App\Models\PersonProfession;
 use App\Models\Season;
 use App\Models\Title;
-use App\Models\TitleImage;
 use App\Models\TitleRelationship;
 use App\Models\TitleTranslation;
-use App\Models\TitleVideo;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
@@ -194,13 +192,11 @@ class ImdbCatalogSchemaTest extends TestCase
             'localized_slug' => 'statinis-zydejimas',
         ]);
 
-        $titleImage = TitleImage::factory()->for($series, 'mediable')->create([
-            'kind' => MediaKind::Poster,
-        ]);
-        $titleVideo = TitleVideo::factory()->for($series, 'mediable')->create([
+        $titleImage = MediaAsset::factory()->for($series, 'mediable')->poster()->create();
+        $titleVideo = MediaAsset::factory()->for($series, 'mediable')->trailer()->create([
             'kind' => MediaKind::Trailer,
         ]);
-        $personImage = PersonImage::factory()->for($person, 'mediable')->create([
+        $personImage = MediaAsset::factory()->for($person, 'mediable')->headshot()->create([
             'kind' => MediaKind::Headshot,
         ]);
 
@@ -249,15 +245,14 @@ class ImdbCatalogSchemaTest extends TestCase
             'credits.person',
             'credits.profession',
             'credits.episode.title',
-            'titleImages',
-            'titleVideos',
+            'mediaAssets',
             'outgoingRelationships.toTitle',
             'awardNominations.awardEvent',
             'contributions',
         ]);
         $person->load([
             'professions',
-            'personImages',
+            'mediaAssets',
         ]);
 
         $this->assertTrue($series->translations->contains($translation));
@@ -265,9 +260,9 @@ class ImdbCatalogSchemaTest extends TestCase
         $this->assertSame('Special Guest Star', $series->credits->first()->credited_as);
         $this->assertTrue($series->credits->first()->profession->is($profession));
         $this->assertTrue($series->credits->first()->episode->is($episode));
-        $this->assertTrue($series->titleImages->contains($titleImage));
-        $this->assertTrue($series->titleVideos->contains($titleVideo));
-        $this->assertTrue($person->personImages->contains($personImage));
+        $this->assertTrue($series->mediaAssets->contains($titleImage));
+        $this->assertTrue($series->mediaAssets->contains($titleVideo));
+        $this->assertTrue($person->mediaAssets->contains($personImage));
         $this->assertTrue($series->outgoingRelationships->first()->toTitle->is($relatedTitle));
         $this->assertTrue($series->awardNominations->first()->is($nomination));
         $this->assertTrue($series->contributions->first()->is($contribution));

@@ -36,6 +36,9 @@ class AdminCatalogReadonlyPagesTest extends TestCase
             route('admin.titles.create'),
             route('admin.people.create'),
             route('admin.genres.create'),
+            route('admin.aka-attributes.create'),
+            route('admin.aka-types.create'),
+            route('admin.award-categories.create'),
             route('admin.credits.create'),
         ];
 
@@ -57,6 +60,9 @@ class AdminCatalogReadonlyPagesTest extends TestCase
         $titleId = $this->seedCatalogMovie('tt0000001', 'Readonly Title');
         $personId = $this->seedCatalogPerson('nm0000001', 'Readonly Person');
         $genreId = $this->seedCatalogGenre('Thriller');
+        $akaAttributeId = $this->seedCatalogAkaAttribute('Festival title');
+        $akaTypeId = $this->seedCatalogAkaType('imdbDisplay');
+        $awardCategoryId = $this->seedCatalogAwardCategory('Best Picture');
         $seriesId = $this->seedCatalogMovie('tt0000002', 'Readonly Series', 'tvSeries');
         $season = Season::factory()->create([
             'series_id' => $seriesId,
@@ -79,6 +85,9 @@ class AdminCatalogReadonlyPagesTest extends TestCase
             route('admin.titles.edit', ['title' => $titleId]),
             route('admin.people.edit', ['person' => $personId]),
             route('admin.genres.edit', ['genre' => $genreId]),
+            route('admin.aka-attributes.edit', ['akaAttribute' => $akaAttributeId]),
+            route('admin.aka-types.edit', ['akaType' => $akaTypeId]),
+            route('admin.award-categories.edit', ['awardCategory' => $awardCategoryId]),
             route('admin.credits.edit', ['credit' => $creditId]),
             route('admin.media-assets.edit', $mediaAsset),
             route('admin.seasons.edit', $season),
@@ -156,6 +165,39 @@ class AdminCatalogReadonlyPagesTest extends TestCase
         ]);
 
         return (int) DB::connection('imdb_mysql')->table('genres')
+            ->where('name', $name)
+            ->value('id');
+    }
+
+    private function seedCatalogAkaAttribute(string $name): int
+    {
+        DB::connection('imdb_mysql')->table('aka_attributes')->insert([
+            'name' => $name,
+        ]);
+
+        return (int) DB::connection('imdb_mysql')->table('aka_attributes')
+            ->where('name', $name)
+            ->value('id');
+    }
+
+    private function seedCatalogAkaType(string $name): int
+    {
+        DB::connection('imdb_mysql')->table('aka_types')->insert([
+            'name' => $name,
+        ]);
+
+        return (int) DB::connection('imdb_mysql')->table('aka_types')
+            ->where('name', $name)
+            ->value('id');
+    }
+
+    private function seedCatalogAwardCategory(string $name): int
+    {
+        DB::connection('imdb_mysql')->table('award_categories')->insert([
+            'name' => $name,
+        ]);
+
+        return (int) DB::connection('imdb_mysql')->table('award_categories')
             ->where('name', $name)
             ->value('id');
     }

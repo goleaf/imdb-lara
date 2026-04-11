@@ -29,6 +29,7 @@ class ResolveBreadcrumbIconAction
         'keywords & connections' => 'rectangle-stack',
         'latest reviews' => 'chat-bubble-left-right',
         'manage genres' => 'tag',
+        'manage award categories' => 'trophy',
         'manage media assets' => 'photo',
         'manage people' => 'users',
         'manage titles' => 'film',
@@ -158,8 +159,13 @@ class ResolveBreadcrumbIconAction
             return 'building-office-2';
         }
 
-        if (in_array('aka-attributes', $segments, true) || in_array('company-credit-attributes', $segments, true)) {
-            return 'tag';
+        if (
+            in_array('aka-attributes', $segments, true)
+            || in_array('aka-types', $segments, true)
+            || in_array('award-categories', $segments, true)
+            || in_array('company-credit-attributes', $segments, true)
+        ) {
+            return in_array('award-categories', $segments, true) ? 'trophy' : 'tag';
         }
 
         if (in_array('certificates', $segments, true)) {
@@ -192,6 +198,10 @@ class ResolveBreadcrumbIconAction
 
         if (in_array('genres', $segments, true)) {
             return 'tag';
+        }
+
+        if (in_array('award-categories', $segments, true)) {
+            return 'trophy';
         }
 
         if (in_array('people', $segments, true)) {

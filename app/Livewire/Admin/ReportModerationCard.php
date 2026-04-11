@@ -7,6 +7,7 @@ use App\Enums\ReportStatus;
 use App\Models\Report;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class ReportModerationCard extends Component
@@ -15,6 +16,7 @@ class ReportModerationCard extends Component
 
     public string $contentAction = 'none';
 
+    #[Locked]
     public Report $report;
 
     public ?string $resolutionNotes = null;

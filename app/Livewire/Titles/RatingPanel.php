@@ -9,10 +9,13 @@ use App\Livewire\Forms\Titles\RatingForm;
 use App\Models\Title;
 use App\Models\TitleStatistic;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class RatingPanel extends Component
 {
+    #[Locked]
     public Title $title;
 
     public string $anchorId = 'title-rating';
@@ -72,7 +75,8 @@ class RatingPanel extends Component
         $this->form->score = $score;
     }
 
-    public function render(): View
+    #[Computed]
+    public function viewData(): array
     {
         $ratingDistribution = $this->title->statistic?->normalizedRatingDistribution()
             ?? TitleStatistic::normalizeRatingDistribution();
@@ -89,9 +93,14 @@ class RatingPanel extends Component
             })
             ->values();
 
-        return view('livewire.titles.rating-panel', [
+        return [
             'ratingCount' => (int) ($this->title->statistic?->rating_count ?? 0),
             'ratingsBreakdown' => $ratingsBreakdown,
-        ]);
+        ];
+    }
+
+    public function render(): View
+    {
+        return view('livewire.titles.rating-panel', $this->viewData);
     }
 }

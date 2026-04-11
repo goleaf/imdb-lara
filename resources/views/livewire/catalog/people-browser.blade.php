@@ -1,5 +1,4 @@
 <div>
-@island(name: 'people-browser-page')
 <div class="space-y-4" data-slot="people-browser-island">
     @if ($this->viewData['isCatalogUnavailable'])
         <x-ui.card class="sb-results-shell !max-w-none rounded-[1.6rem] p-4 sm:p-5" data-slot="people-browser-status">
@@ -110,5 +109,4 @@
         </div>
     </div>
 </div>
-@endisland
 </div>

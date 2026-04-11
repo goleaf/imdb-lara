@@ -4,6 +4,9 @@ namespace App\Providers;
 
 use App\Actions\Layout\BuildFooterAction;
 use App\Actions\Layout\BuildTopNavigationAction;
+use App\Models\AkaAttribute;
+use App\Models\AkaType;
+use App\Models\AwardCategory;
 use App\Models\Contribution;
 use App\Models\Genre;
 use App\Models\MediaAsset;
@@ -47,6 +50,9 @@ class ViewServiceProvider extends ServiceProvider
                 'canViewAdminTitles' => $user?->can('viewAny', Title::class) ?? false,
                 'canViewAdminPeople' => $user?->can('viewAny', Person::class) ?? false,
                 'canViewAdminGenres' => $user?->can('viewAny', Genre::class) ?? false,
+                'canViewAdminAkaAttributes' => $user?->can('viewAny', AkaAttribute::class) ?? false,
+                'canViewAdminAkaTypes' => $user?->can('viewAny', AkaType::class) ?? false,
+                'canViewAdminAwardCategories' => $user?->can('viewAny', AwardCategory::class) ?? false,
                 'canViewAdminMediaAssets' => $user?->can('viewAny', MediaAsset::class) ?? false,
                 'canViewAdminContributions' => $user?->can('viewAny', Contribution::class) ?? false,
                 'canViewAdminReviews' => $user?->can('viewAny', Review::class) ?? false,

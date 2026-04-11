@@ -150,19 +150,8 @@ class LoadEpisodeDetailsAction
     private function loadEpisodeCredits(Title $episode): void
     {
         $episode->setRelation('credits', $episode->credits()
-            ->select([
-                'id',
-                'title_id',
-                'person_id',
-                'department',
-                'job',
-                'character_name',
-                'billing_order',
-                'is_principal',
-                'person_profession_id',
-                'episode_id',
-                'credited_as',
-            ])
+            ->select(Credit::projectedColumns())
+            ->with(Credit::projectedRelations())
             ->ordered()
             ->withPersonPreview()
             ->limit(24)

@@ -9,14 +9,17 @@ use App\Livewire\Pages\Admin\Concerns\ValidatesFormRequests;
 use App\Models\Person;
 use App\Models\PersonProfession;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class PersonProfessionEditor extends Component
 {
     use ValidatesFormRequests;
 
+    #[Locked]
     public Person $person;
 
+    #[Locked]
     public ?PersonProfession $professionRecord = null;
 
     public string $department = '';

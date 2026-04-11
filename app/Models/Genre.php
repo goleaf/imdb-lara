@@ -67,9 +67,19 @@ class Genre extends Model
 
     public function titles(): BelongsToMany
     {
+        if (Title::usesCatalogOnlySchema()) {
+            return $this->belongsToMany(Title::class, 'movie_genres', 'genre_id', 'movie_id', 'id', 'id')
+                ->orderBy('movies.primarytitle');
+        }
+
         return $this->belongsToMany(Title::class)
             ->withTimestamps()
             ->orderBy('titles.name');
+    }
+
+    public function movies(): BelongsToMany
+    {
+        return $this->titles();
     }
 
     public function publishedTitleCount(): int
@@ -86,6 +96,10 @@ class Genre extends Model
 
     public function descriptionText(): string
     {
-        return $this->description ?: 'Browse '.$this->name.' titles from the curated catalog.';
+        $selectedDescription = $this->getAttributeFromArray('description');
+
+        return filled($selectedDescription)
+            ? (string) $selectedDescription
+            : 'Browse '.$this->name.' titles from the curated catalog.';
     }
 }

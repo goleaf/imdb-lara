@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\MediaKind;
 use Database\Factories\PersonFactory;
+use Illuminate\Container\Container;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Collection as SupportCollection;
@@ -53,9 +55,13 @@ class Person extends Model
         'primaryname',
         'displayName',
         'alternativeNames',
+        'primaryprofession',
         'primaryProfessions',
         'birthLocation',
         'deathLocation',
+        'primaryImage_url',
+        'primaryImage_width',
+        'primaryImage_height',
     ];
 
     protected function casts(): array
@@ -75,6 +81,12 @@ class Person extends Model
     protected static function booted(): void
     {
         static::saving(function (self $person): void {
+            if (static::usesCatalogOnlySchema()) {
+                $person->normalizeCatalogOnlyAttributesForPersistence();
+
+                return;
+            }
+
             $person->slug = $person->slug ?: Str::slug($person->name ?: 'unknown-person');
         });
     }
@@ -100,9 +112,20 @@ class Person extends Model
         return static::usesCatalogOnlySchema() ? 'imdb_mysql' : parent::getConnectionName();
     }
 
+    public function usesTimestamps(): bool
+    {
+        return static::usesCatalogOnlySchema() ? false : parent::usesTimestamps();
+    }
+
     public static function usesCatalogOnlySchema(): bool
     {
-        return (bool) config('screenbase.catalog_only', false);
+        $container = Container::getInstance();
+
+        if (! $container instanceof Container || ! $container->bound('config')) {
+            return false;
+        }
+
+        return (bool) $container->make('config')->get('screenbase.catalog_only', false);
     }
 
     public static function catalogColumn(string $localColumn): string
@@ -179,6 +202,14 @@ class Person extends Model
         if (static::usesCatalogOnlySchema()) {
             return [
                 'personImages:name_basic_id,position,url,width,height,type',
+                'professions' => fn ($query) => $query
+                    ->select([
+                        'name_basic_professions.name_basic_id',
+                        'name_basic_professions.profession_id',
+                        'name_basic_professions.position',
+                    ])
+                    ->with('professionTerm:id,name')
+                    ->ordered(),
             ];
         }
 
@@ -210,6 +241,21 @@ class Person extends Model
      */
     public static function detailRelations(): array
     {
+        if (static::usesCatalogOnlySchema()) {
+            return [
+                ...self::directoryRelations(),
+                'credits' => fn ($query) => $query
+                    ->select(Credit::projectedColumns())
+                    ->ordered()
+                    ->with([
+                        ...Credit::projectedRelations(),
+                        'title' => fn ($titleQuery) => $titleQuery
+                            ->select(Title::catalogCardColumns())
+                            ->with(Title::catalogCardRelations()),
+                    ]),
+            ];
+        }
+
         return [
             ...self::directoryRelations(),
             'credits' => fn ($query) => $query
@@ -370,6 +416,13 @@ class Person extends Model
 
     public function scopeInProfession(Builder $query, string $profession): Builder
     {
+        if (static::usesCatalogOnlySchema()) {
+            return $query->whereHas(
+                'professionTerms',
+                fn (Builder $builder) => $builder->where('professions.name', $profession),
+            );
+        }
+
         return $query->whereHas(
             'professions',
             fn (Builder $builder) => $builder->where('profession', $profession),
@@ -386,11 +439,19 @@ class Person extends Model
 
     public function professions(): HasMany
     {
-        return $this->hasMany(PersonProfession::class)->ordered();
+        return $this->hasMany(
+            PersonProfession::class,
+            static::usesCatalogOnlySchema() ? 'name_basic_id' : 'person_id',
+        )->ordered();
     }
 
-    public function professionTerms(): HasMany
+    public function professionTerms(): HasMany|BelongsToMany
     {
+        if (static::usesCatalogOnlySchema()) {
+            return $this->belongsToMany(Profession::class, 'name_basic_professions', 'name_basic_id', 'profession_id', 'id', 'id')
+                ->orderBy('professions.name');
+        }
+
         return $this->professions();
     }
 
@@ -426,8 +487,19 @@ class Person extends Model
         return $this->morphMany(MediaAsset::class, 'mediable')->ordered();
     }
 
-    public function awardNominations(): HasMany
+    public function awardNominations(): Relation
     {
+        if (static::usesCatalogOnlySchema()) {
+            return $this->belongsToMany(
+                AwardNomination::class,
+                'movie_award_nomination_nominees',
+                'name_basic_id',
+                'movie_award_nomination_id',
+                'id',
+                'id',
+            );
+        }
+
         return $this->hasMany(AwardNomination::class);
     }
 
@@ -875,5 +947,45 @@ class Person extends Model
             ->filter(fn (mixed $asset): bool => $asset instanceof CatalogMediaAsset)
             ->unique('url')
             ->values();
+    }
+
+    private function normalizeCatalogOnlyAttributesForPersistence(): void
+    {
+        $name = $this->attributes['primaryname'] ?? $this->attributes['displayName'] ?? $this->attributes['name'] ?? null;
+        $imdbId = $this->attributes['imdb_id'] ?? $this->attributes['nconst'] ?? null;
+
+        $this->attributes['primaryname'] = $name;
+        $this->attributes['displayName'] = $this->attributes['displayName'] ?? $name;
+        $this->attributes['imdb_id'] = $imdbId;
+        $this->attributes['nconst'] = $imdbId;
+        $this->attributes['alternativeNames'] = $this->attributes['alternativeNames'] ?? $this->attributes['alternate_names'] ?? null;
+        $this->attributes['primaryprofession'] = $this->attributes['primaryprofession']
+            ?? $this->attributes['known_for_department']
+            ?? null;
+        $this->attributes['birthLocation'] = $this->attributes['birthLocation'] ?? $this->attributes['birth_place'] ?? null;
+        $this->attributes['deathLocation'] = $this->attributes['deathLocation'] ?? $this->attributes['death_place'] ?? null;
+
+        foreach ([
+            'name',
+            'alternate_names',
+            'slug',
+            'short_biography',
+            'known_for_department',
+            'birth_date',
+            'death_date',
+            'birth_place',
+            'death_place',
+            'nationality',
+            'popularity_rank',
+            'meta_title',
+            'meta_description',
+            'search_keywords',
+            'is_published',
+            'imdb_alternative_names',
+            'imdb_primary_professions',
+            'imdb_payload',
+        ] as $attribute) {
+            unset($this->attributes[$attribute]);
+        }
     }
 }

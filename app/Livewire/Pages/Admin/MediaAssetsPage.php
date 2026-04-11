@@ -6,6 +6,7 @@ use App\Actions\Admin\BuildAdminMediaAssetsIndexQueryAction;
 use App\Actions\Admin\DeleteMediaAssetAction;
 use App\Actions\Admin\SaveMediaAssetAction;
 use App\Http\Requests\Admin\UpdateMediaAssetRequest;
+use App\Livewire\Pages\Admin\Concerns\ResolvesAdminFormState;
 use App\Livewire\Pages\Admin\Concerns\ValidatesFormRequests;
 use App\Livewire\Pages\Concerns\RendersPageView;
 use App\Models\MediaAsset;
@@ -17,6 +18,7 @@ use Livewire\WithFileUploads;
 class MediaAssetsPage extends Component
 {
     use RendersPageView;
+    use ResolvesAdminFormState;
     use ValidatesFormRequests;
     use WithFileUploads;
 

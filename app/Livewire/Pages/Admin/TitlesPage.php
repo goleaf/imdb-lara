@@ -15,6 +15,7 @@ use App\Http\Requests\Admin\StoreSeasonRequest;
 use App\Http\Requests\Admin\StoreTitleRequest;
 use App\Http\Requests\Admin\UpdateTitleRequest;
 use App\Livewire\Pages\Admin\Concerns\InteractsWithCatalogTitleState;
+use App\Livewire\Pages\Admin\Concerns\ResolvesAdminFormState;
 use App\Livewire\Pages\Admin\Concerns\ValidatesFormRequests;
 use App\Livewire\Pages\Concerns\RendersPageView;
 use App\Models\Genre;
@@ -31,6 +32,7 @@ class TitlesPage extends Component
 {
     use InteractsWithCatalogTitleState;
     use RendersPageView;
+    use ResolvesAdminFormState;
     use ValidatesFormRequests;
     use WithFileUploads;
 

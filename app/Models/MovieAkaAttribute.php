@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasCompositePrimaryKey;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class MovieAkaAttribute extends ImdbModel
@@ -33,6 +34,23 @@ class MovieAkaAttribute extends ImdbModel
             'aka_attribute_id' => 'integer',
             'position' => 'integer',
         ];
+    }
+
+    public function scopeForAkaAttribute(Builder $query, AkaAttribute|int $akaAttribute): Builder
+    {
+        $akaAttributeId = $akaAttribute instanceof AkaAttribute
+            ? (int) $akaAttribute->getKey()
+            : (int) $akaAttribute;
+
+        return $query->where('aka_attribute_id', $akaAttributeId);
+    }
+
+    public function scopeOrdered(Builder $query): Builder
+    {
+        return $query
+            ->orderBy('position')
+            ->orderBy('movie_aka_id')
+            ->orderBy('aka_attribute_id');
     }
 
     public function akaAttribute(): BelongsTo

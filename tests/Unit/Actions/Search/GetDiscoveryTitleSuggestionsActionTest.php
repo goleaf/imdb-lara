@@ -42,4 +42,30 @@ class GetDiscoveryTitleSuggestionsActionTest extends TestCase
         $this->assertFalse($suggestion->relationLoaded('languages'));
         $this->assertFalse($suggestion->relationLoaded('plotRecord'));
     }
+
+    public function test_it_excludes_remote_episode_titles_from_catalog_suggestions(): void
+    {
+        Title::query()->create([
+            'tconst' => 'tt0100001',
+            'imdb_id' => 'tt0100001',
+            'titletype' => 'movie',
+            'primarytitle' => 'Signal North',
+            'originaltitle' => 'Signal North',
+            'isadult' => 0,
+            'startyear' => 2024,
+        ]);
+        Title::query()->create([
+            'tconst' => 'tt0100002',
+            'imdb_id' => 'tt0100002',
+            'titletype' => 'tvepisode',
+            'primarytitle' => 'Signal Episode',
+            'originaltitle' => 'Signal Episode',
+            'isadult' => 0,
+            'startyear' => 2024,
+        ]);
+
+        $suggestions = app(GetDiscoveryTitleSuggestionsAction::class)->handle('Signal');
+
+        $this->assertSame(['Signal North'], $suggestions->pluck('name')->all());
+    }
 }

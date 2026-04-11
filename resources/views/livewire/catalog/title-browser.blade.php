@@ -1,5 +1,4 @@
 <div>
-@island(name: 'title-browser-page')
 <div class="space-y-4" data-slot="title-browser-island">
     @if ($this->viewData['isCatalogUnavailable'])
         <x-ui.card class="sb-results-shell !max-w-none rounded-[1.6rem] p-4 sm:p-5" data-slot="title-browser-status">
@@ -125,5 +124,4 @@
         @endif
     </div>
 </div>
-@endisland
 </div>

@@ -5,6 +5,7 @@ namespace App\Livewire\Titles;
 use App\Actions\Lists\IsTitleInWatchlistAction;
 use App\Actions\Lists\ToggleWatchlistItemAction;
 use App\Models\Title;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -12,6 +13,7 @@ class WatchlistToggle extends Component
 {
     protected IsTitleInWatchlistAction $isTitleInWatchlist;
 
+    #[Locked]
     public Title $title;
 
     public bool $inWatchlist = false;

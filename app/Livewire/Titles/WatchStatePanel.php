@@ -7,6 +7,7 @@ use App\Actions\Titles\SetUserWatchStateForTitleAction;
 use App\Enums\WatchState;
 use App\Models\Title;
 use Illuminate\Support\Carbon;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -14,6 +15,7 @@ class WatchStatePanel extends Component
 {
     protected GetUserWatchStateForTitleAction $getUserWatchStateForTitle;
 
+    #[Locked]
     public Title $title;
 
     public ?WatchState $watchState = null;

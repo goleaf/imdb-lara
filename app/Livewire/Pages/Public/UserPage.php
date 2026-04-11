@@ -12,14 +12,17 @@ use App\Models\User;
 use App\Models\UserList;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class UserPage extends Component
 {
     use RendersPageView;
 
+    #[Locked]
     public ?UserList $list = null;
 
+    #[Locked]
     public User $user;
 
     public function mount(User $user, ?UserList $list = null): void

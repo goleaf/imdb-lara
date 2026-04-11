@@ -3,6 +3,7 @@
 namespace Tests\Feature\Feature;
 
 use App\Actions\Catalog\GetInterestCategoryDirectorySnapshotAction;
+use Livewire\Livewire;
 use Tests\Concerns\InteractsWithRemoteCatalog;
 use Tests\Concerns\UsesCatalogOnlyApplication;
 use Tests\TestCase;
@@ -27,6 +28,8 @@ class InterestCategoryDirectoryTest extends TestCase
 
     public function test_interest_category_directory_page_surfaces_the_catalog_snapshot_and_browser(): void
     {
+        Livewire::withoutLazyLoading();
+
         $this->get(route('public.interest-categories.index'))
             ->assertOk()
             ->assertSee('Interest Categories')

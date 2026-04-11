@@ -4,6 +4,7 @@ namespace App\Actions\Home;
 
 use App\Actions\Catalog\BuildPublicTitleIndexQueryAction;
 use App\Enums\TitleType;
+use App\Models\Credit;
 use App\Models\Title;
 use Illuminate\Support\Facades\Cache;
 
@@ -48,20 +49,9 @@ class GetHeroSpotlightAction
     private function loadFeaturedCredits(Title $title): void
     {
         $title->setRelation('credits', $title->credits()
-            ->select([
-                'id',
-                'title_id',
-                'person_id',
-                'department',
-                'job',
-                'character_name',
-                'billing_order',
-                'is_principal',
-                'person_profession_id',
-                'episode_id',
-                'credited_as',
-            ])
-            ->whereIn('credits.department', ['Cast', 'Directing', 'Writing', 'Production'])
+            ->select(Credit::projectedColumns())
+            ->with(Credit::projectedRelations())
+            ->inDepartments(['Cast', 'Directing', 'Writing', 'Production'])
             ->ordered()
             ->withPersonPreview()
             ->limit(8)

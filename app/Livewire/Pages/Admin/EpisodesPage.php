@@ -6,6 +6,7 @@ use App\Actions\Admin\DeleteEpisodeAction;
 use App\Actions\Admin\SaveEpisodeAction;
 use App\Http\Requests\Admin\UpdateEpisodeRequest;
 use App\Livewire\Pages\Admin\Concerns\InteractsWithCatalogTitleState;
+use App\Livewire\Pages\Admin\Concerns\ResolvesAdminFormState;
 use App\Livewire\Pages\Admin\Concerns\ValidatesFormRequests;
 use App\Livewire\Pages\Concerns\RendersPageView;
 use App\Models\Episode;
@@ -18,6 +19,7 @@ class EpisodesPage extends Component
 {
     use InteractsWithCatalogTitleState;
     use RendersPageView;
+    use ResolvesAdminFormState;
     use ValidatesFormRequests;
 
     public ?Episode $episode = null;

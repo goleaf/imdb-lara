@@ -4,6 +4,9 @@ namespace Tests\Feature\Feature\Import;
 
 use App\Actions\Import\ImportImdbCatalogTitlePayloadAction;
 use App\Console\Commands\ImdbImportTitlesFrontierCommand;
+use App\Models\AkaAttribute;
+use App\Models\AkaType;
+use App\Models\AwardCategory;
 use App\Models\CertificateAttribute;
 use App\Models\CertificateRating;
 use App\Models\Company;
@@ -11,6 +14,9 @@ use App\Models\CompanyCreditAttribute;
 use App\Models\CompanyCreditCategory;
 use App\Models\Country;
 use App\Models\Movie;
+use App\Models\MovieAka;
+use App\Models\MovieAkaAttribute;
+use App\Models\MovieAkaType;
 use App\Models\MovieCertificate;
 use App\Models\MovieCertificateAttribute;
 use App\Models\MovieCompanyCredit;
@@ -47,6 +53,7 @@ class ImportImdbCatalogTitlePayloadActionTest extends TestCase
         $this->setUpParentsGuideTables();
         $this->setUpReleaseDateTables();
         $this->setUpCertificateTables();
+        $this->setUpAkaTables();
         $this->setUpCompanyCreditTables();
     }
 
@@ -107,6 +114,194 @@ class ImportImdbCatalogTitlePayloadActionTest extends TestCase
 
         $this->assertCount(2, $breakdowns);
         $this->assertSame([12, 0], $breakdowns->pluck('vote_count')->all());
+    }
+
+    public function test_sync_akas_creates_aka_attribute_lookup_rows_and_bridge_records(): void
+    {
+        $movie = Movie::query()->create([
+            'tconst' => 'tt0423295',
+            'imdb_id' => 'tt0423295',
+            'titletype' => 'movie',
+            'primarytitle' => 'Rogue Akas',
+            'originaltitle' => 'Rogue Akas',
+            'isadult' => 0,
+            'startyear' => 2006,
+        ]);
+
+        $action = app(ImportImdbCatalogTitlePayloadAction::class);
+
+        $syncAkas = \Closure::bind(
+            function (Movie $movie, array $akasPayload): void {
+                $this->syncAkas($movie, $akasPayload);
+            },
+            $action,
+            ImportImdbCatalogTitlePayloadAction::class,
+        );
+
+        $syncAkas($movie, [
+            'akas' => [
+                [
+                    'text' => 'Festival title',
+                    'country' => ['code' => 'US', 'name' => 'United States'],
+                    'language' => ['code' => 'en', 'name' => 'English'],
+                    'attributes' => ['festival title', 'literal title'],
+                ],
+                [
+                    'text' => 'Festival title international',
+                    'country' => ['code' => 'GB', 'name' => 'United Kingdom'],
+                    'language' => ['code' => 'en', 'name' => 'English'],
+                    'attributes' => ['festival title'],
+                ],
+            ],
+        ]);
+
+        $this->assertSame(
+            ['festival title', 'literal title'],
+            AkaAttribute::query()->orderBy('name')->pluck('name')->all(),
+        );
+
+        $movieAkaIds = MovieAka::query()
+            ->where('movie_id', $movie->getKey())
+            ->orderBy('position')
+            ->pluck('id');
+
+        $bridgeRows = MovieAkaAttribute::query()
+            ->whereIn('movie_aka_id', $movieAkaIds)
+            ->orderBy('movie_aka_id')
+            ->orderBy('position')
+            ->get(['movie_aka_id', 'aka_attribute_id', 'position']);
+
+        $this->assertCount(3, $bridgeRows);
+        $this->assertSame([1, 2, 1], $bridgeRows->pluck('position')->all());
+    }
+
+    public function test_sync_akas_creates_aka_type_lookup_rows_and_bridge_records(): void
+    {
+        $movie = Movie::query()->create([
+            'tconst' => 'tt0423296',
+            'imdb_id' => 'tt0423296',
+            'titletype' => 'movie',
+            'primarytitle' => 'Rogue Aka Types',
+            'originaltitle' => 'Rogue Aka Types',
+            'isadult' => 0,
+            'startyear' => 2006,
+        ]);
+
+        $action = app(ImportImdbCatalogTitlePayloadAction::class);
+
+        $syncAkas = \Closure::bind(
+            function (Movie $movie, array $akasPayload): void {
+                $this->syncAkas($movie, $akasPayload);
+            },
+            $action,
+            ImportImdbCatalogTitlePayloadAction::class,
+        );
+
+        $syncAkas($movie, [
+            'akas' => [
+                [
+                    'text' => 'Festival title',
+                    'country' => ['code' => 'US', 'name' => 'United States'],
+                    'language' => ['code' => 'en', 'name' => 'English'],
+                    'types' => ['imdbDisplay', 'festival'],
+                ],
+                [
+                    'text' => 'Festival title international',
+                    'country' => ['code' => 'GB', 'name' => 'United Kingdom'],
+                    'language' => ['code' => 'en', 'name' => 'English'],
+                    'types' => ['festival'],
+                ],
+            ],
+        ]);
+
+        $this->assertSame(
+            ['festival', 'imdbDisplay'],
+            AkaType::query()->orderBy('name')->pluck('name')->all(),
+        );
+
+        $movieAkaIds = MovieAka::query()
+            ->where('movie_id', $movie->getKey())
+            ->orderBy('position')
+            ->pluck('id');
+
+        $bridgeRows = MovieAkaType::query()
+            ->whereIn('movie_aka_id', $movieAkaIds)
+            ->orderBy('movie_aka_id')
+            ->orderBy('position')
+            ->get(['movie_aka_id', 'aka_type_id', 'position']);
+
+        $this->assertCount(3, $bridgeRows);
+        $this->assertSame([1, 2, 1], $bridgeRows->pluck('position')->all());
+    }
+
+    public function test_sync_awards_creates_award_category_lookup_rows_and_nomination_records(): void
+    {
+        $movie = Movie::query()->create([
+            'tconst' => 'tt0423297',
+            'imdb_id' => 'tt0423297',
+            'titletype' => 'movie',
+            'primarytitle' => 'Rogue Awards',
+            'originaltitle' => 'Rogue Awards',
+            'isadult' => 0,
+            'startyear' => 2006,
+        ]);
+
+        $action = app(ImportImdbCatalogTitlePayloadAction::class);
+
+        $syncAwards = \Closure::bind(
+            function (Movie $movie, array $awardsPayload): void {
+                $this->syncAwards($movie, $awardsPayload);
+            },
+            $action,
+            ImportImdbCatalogTitlePayloadAction::class,
+        );
+
+        $syncAwards($movie, [
+            'awardNominations' => [
+                [
+                    'event' => ['id' => 'ev0000003', 'name' => 'Academy Awards'],
+                    'category' => 'Best Picture',
+                    'year' => 2000,
+                    'text' => 'Primary nomination',
+                    'isWinner' => true,
+                ],
+                [
+                    'event' => ['id' => 'ev0000003', 'name' => 'Academy Awards'],
+                    'category' => 'Best Director',
+                    'year' => 2000,
+                    'text' => 'Second nomination',
+                    'isWinner' => false,
+                ],
+                [
+                    'event' => ['id' => 'ev0000123', 'name' => 'BAFTA Film Awards'],
+                    'category' => 'Best Picture',
+                    'year' => 2001,
+                    'text' => 'Third nomination',
+                    'isWinner' => false,
+                ],
+            ],
+        ]);
+
+        $this->assertSame(
+            ['Best Director', 'Best Picture'],
+            AwardCategory::query()->orderBy('name')->pluck('name')->all(),
+        );
+
+        $nominations = DB::connection('imdb_mysql')->table('movie_award_nominations')
+            ->where('movie_id', $movie->getKey())
+            ->orderBy('position')
+            ->get(['award_category_id', 'award_year', 'position']);
+
+        $this->assertCount(3, $nominations);
+        $this->assertSame([1, 2, 3], $nominations->pluck('position')->all());
+        $this->assertSame([2000, 2000, 2001], $nominations->pluck('award_year')->all());
+        $this->assertSame(['Best Picture', 'Best Director', 'Best Picture'], $nominations
+            ->map(function (object $nomination): string {
+                return (string) AwardCategory::query()
+                    ->whereKey($nomination->award_category_id)
+                    ->value('name');
+            })
+            ->all());
     }
 
     public function test_locked_import_uses_a_title_scoped_cache_lock_key(): void
@@ -645,6 +840,23 @@ class ImportImdbCatalogTitlePayloadActionTest extends TestCase
             $table->primary(['movie_certificate_id', 'certificate_attribute_id']);
             $table->foreign('movie_certificate_id')->references('id')->on('movie_certificates')->cascadeOnDelete();
             $table->foreign('certificate_attribute_id')->references('id')->on('certificate_attributes')->cascadeOnUpdate()->restrictOnDelete();
+        });
+    }
+
+    private function setUpAkaTables(): void
+    {
+        Schema::connection('imdb_mysql')->create('languages', function (Blueprint $table): void {
+            $table->string('code', 16)->primary();
+            $table->string('name')->nullable();
+        });
+
+        Schema::connection('imdb_mysql')->create('movie_akas', function (Blueprint $table): void {
+            $table->increments('id');
+            $table->unsignedInteger('movie_id');
+            $table->string('text', 1024);
+            $table->string('country_code', 8)->nullable();
+            $table->string('language_code', 16)->nullable();
+            $table->unsignedInteger('position')->nullable();
         });
     }
 

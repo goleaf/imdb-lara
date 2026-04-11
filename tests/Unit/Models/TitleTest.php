@@ -3,6 +3,7 @@
 namespace Tests\Unit\Models;
 
 use App\Enums\TitleType as CatalogTitleType;
+use App\Models\AkaType;
 use App\Models\AwardCategory;
 use App\Models\AwardEvent;
 use App\Models\AwardNomination;
@@ -21,6 +22,7 @@ use App\Models\InterestPrimaryImage;
 use App\Models\InterestSimilarInterest;
 use App\Models\MovieAka;
 use App\Models\MovieAkaAttribute;
+use App\Models\MovieAkaType;
 use App\Models\MovieAwardNominationNominee;
 use App\Models\MovieAwardNominationSummary;
 use App\Models\MovieAwardNominationTitle;
@@ -41,12 +43,27 @@ use App\Models\MoviePlot;
 use App\Models\Title;
 use App\Models\TitleStatistic;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Database\Eloquent\Model;
 use Tests\Concerns\UsesCatalogOnlyApplication;
 use Tests\TestCase;
 
 class TitleTest extends TestCase
 {
     use UsesCatalogOnlyApplication;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Model::unguard();
+    }
+
+    protected function tearDown(): void
+    {
+        Model::reguard();
+
+        parent::tearDown();
+    }
 
     public function test_title_type_normalizes_lowercase_remote_series_variants(): void
     {
@@ -210,13 +227,66 @@ class TitleTest extends TestCase
         $this->assertSame([1, 2], $resolvedMovieAkaAttributes->pluck('position')->all());
     }
 
-    public function test_resolved_aka_types_returns_an_empty_collection_without_a_supported_bridge(): void
+    public function test_resolved_aka_types_flattens_loaded_movie_aka_types(): void
     {
-        $title = new Title(['id' => 1, 'tconst' => 'tt0133093', 'primarytitle' => 'The Matrix']);
+        $festivalType = new AkaType;
+        $festivalType->setRawAttributes([
+            'id' => 11,
+            'name' => 'festival',
+        ], sync: true);
+
+        $festivalDisplayType = new AkaType;
+        $festivalDisplayType->setRawAttributes([
+            'id' => 24,
+            'name' => 'imdbDisplay',
+        ], sync: true);
+
+        $firstMovieAkaType = new MovieAkaType([
+            'movie_aka_id' => 100,
+            'aka_type_id' => 11,
+            'position' => 1,
+        ]);
+        $firstMovieAkaType->setRelation('akaType', $festivalType);
+
+        $duplicateMovieAkaType = new MovieAkaType([
+            'movie_aka_id' => 101,
+            'aka_type_id' => 11,
+            'position' => 1,
+        ]);
+        $duplicateMovieAkaType->setRelation('akaType', $festivalType);
+
+        $secondMovieAkaType = new MovieAkaType([
+            'movie_aka_id' => 101,
+            'aka_type_id' => 24,
+            'position' => 2,
+        ]);
+        $secondMovieAkaType->setRelation('akaType', $festivalDisplayType);
+
+        $firstMovieAka = new MovieAka([
+            'movie_id' => 1,
+            'text' => 'The Matrix',
+            'position' => 1,
+        ]);
+        $firstMovieAka->setAttribute('id', 100);
+        $firstMovieAka->setRelation('movieAkaTypes', new EloquentCollection([$firstMovieAkaType]));
+
+        $secondMovieAka = new MovieAka([
+            'movie_id' => 1,
+            'text' => 'Matrix',
+            'position' => 2,
+        ]);
+        $secondMovieAka->setAttribute('id', 101);
+        $secondMovieAka->setRelation('movieAkaTypes', new EloquentCollection([$duplicateMovieAkaType, $secondMovieAkaType]));
+
+        $title = new Title(['tconst' => 'tt0133093', 'primarytitle' => 'The Matrix']);
+        $title->setAttribute('id', 1);
+        $title->setRelation('movieAkas', new EloquentCollection([$firstMovieAka, $secondMovieAka]));
 
         $resolvedAkaTypes = $title->resolvedAkaTypes();
 
-        $this->assertCount(0, $resolvedAkaTypes);
+        $this->assertCount(2, $resolvedAkaTypes);
+        $this->assertSame([11, 24], $resolvedAkaTypes->pluck('id')->all());
+        $this->assertSame(['festival', 'imdbDisplay'], $resolvedAkaTypes->pluck('name')->all());
     }
 
     public function test_resolved_award_categories_flattens_loaded_award_nominations(): void
@@ -233,16 +303,20 @@ class TitleTest extends TestCase
             'name' => 'Best Editing',
         ], sync: true);
 
-        $firstNomination = new AwardNomination(['id' => 100, 'movie_id' => 1, 'award_category_id' => 9]);
+        $firstNomination = new AwardNomination(['movie_id' => 1, 'award_category_id' => 9]);
+        $firstNomination->setAttribute('id', 100);
         $firstNomination->setRelation('awardCategory', $bestPicture);
 
-        $duplicateNomination = new AwardNomination(['id' => 101, 'movie_id' => 1, 'award_category_id' => 9]);
+        $duplicateNomination = new AwardNomination(['movie_id' => 1, 'award_category_id' => 9]);
+        $duplicateNomination->setAttribute('id', 101);
         $duplicateNomination->setRelation('awardCategory', $bestPicture);
 
-        $secondNomination = new AwardNomination(['id' => 102, 'movie_id' => 1, 'award_category_id' => 15]);
+        $secondNomination = new AwardNomination(['movie_id' => 1, 'award_category_id' => 15]);
+        $secondNomination->setAttribute('id', 102);
         $secondNomination->setRelation('awardCategory', $bestEditing);
 
-        $title = new Title(['id' => 1, 'tconst' => 'tt0133093', 'primarytitle' => 'The Matrix']);
+        $title = new Title(['tconst' => 'tt0133093', 'primarytitle' => 'The Matrix']);
+        $title->setAttribute('id', 1);
         $title->setRelation('awardNominations', new EloquentCollection([$firstNomination, $duplicateNomination, $secondNomination]));
 
         $resolvedAwardCategories = $title->resolvedAwardCategories();
@@ -266,16 +340,20 @@ class TitleTest extends TestCase
             'name' => 'BAFTA Film Awards',
         ], sync: true);
 
-        $firstNomination = new AwardNomination(['id' => 100, 'movie_id' => 1, 'event_imdb_id' => 'ev0000003']);
+        $firstNomination = new AwardNomination(['movie_id' => 1, 'event_imdb_id' => 'ev0000003']);
+        $firstNomination->setAttribute('id', 100);
         $firstNomination->setRelation('awardEvent', $oscars);
 
-        $duplicateNomination = new AwardNomination(['id' => 101, 'movie_id' => 1, 'event_imdb_id' => 'ev0000003']);
+        $duplicateNomination = new AwardNomination(['movie_id' => 1, 'event_imdb_id' => 'ev0000003']);
+        $duplicateNomination->setAttribute('id', 101);
         $duplicateNomination->setRelation('awardEvent', $oscars);
 
-        $secondNomination = new AwardNomination(['id' => 102, 'movie_id' => 1, 'event_imdb_id' => 'ev0000123']);
+        $secondNomination = new AwardNomination(['movie_id' => 1, 'event_imdb_id' => 'ev0000123']);
+        $secondNomination->setAttribute('id', 102);
         $secondNomination->setRelation('awardEvent', $baftas);
 
-        $title = new Title(['id' => 1, 'tconst' => 'tt0133093', 'primarytitle' => 'The Matrix']);
+        $title = new Title(['tconst' => 'tt0133093', 'primarytitle' => 'The Matrix']);
+        $title->setAttribute('id', 1);
         $title->setRelation('awardNominations', new EloquentCollection([$firstNomination, $duplicateNomination, $secondNomination]));
 
         $resolvedAwardEvents = $title->resolvedAwardEvents();
@@ -390,7 +468,8 @@ class TitleTest extends TestCase
             'position' => 2,
         ], sync: true);
 
-        $title = new Title(['id' => 1, 'tconst' => 'tt0133093', 'primarytitle' => 'The Matrix']);
+        $title = new Title(['tconst' => 'tt0133093', 'primarytitle' => 'The Matrix']);
+        $title->setAttribute('id', 1);
         $title->setRelation('awardNominations', new EloquentCollection([$firstNomination, $duplicateNomination, $secondNomination]));
 
         $resolvedNominations = $title->resolvedMovieAwardNominations();

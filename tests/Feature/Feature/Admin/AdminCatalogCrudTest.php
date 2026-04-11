@@ -30,7 +30,7 @@ class AdminCatalogCrudTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_admin_catalog_mutation_routes_are_registered(): void
+    public function test_admin_catalog_surface_omits_legacy_controller_mutation_routes(): void
     {
         $routeNames = [
             'admin.titles.store',
@@ -57,7 +57,7 @@ class AdminCatalogCrudTest extends TestCase
         ];
 
         foreach ($routeNames as $routeName) {
-            $this->assertTrue(Route::has($routeName), $routeName.' should stay available on the admin route surface.');
+            $this->assertFalse(Route::has($routeName), $routeName.' should not be registered on the Livewire-only admin surface.');
         }
     }
 

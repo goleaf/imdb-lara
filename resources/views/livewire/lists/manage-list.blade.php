@@ -1,9 +1,4 @@
 <div>
-@island(name: 'manage-list-panel', defer: true)
-    @placeholder
-        @include('livewire.placeholders.manage-list')
-    @endplaceholder
-
 <div class="space-y-4" data-slot="manage-list-island">
     <x-ui.card class="!max-w-none">
         <div class="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
@@ -282,5 +277,4 @@
         </div>
     </div>
 </div>
-@endisland
 </div>

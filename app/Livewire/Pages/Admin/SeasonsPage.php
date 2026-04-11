@@ -7,6 +7,7 @@ use App\Actions\Admin\SaveEpisodeAction;
 use App\Actions\Admin\SaveSeasonAction;
 use App\Http\Requests\Admin\StoreEpisodeRequest;
 use App\Http\Requests\Admin\UpdateSeasonRequest;
+use App\Livewire\Pages\Admin\Concerns\ResolvesAdminFormState;
 use App\Livewire\Pages\Admin\Concerns\ValidatesFormRequests;
 use App\Livewire\Pages\Concerns\RendersPageView;
 use App\Models\Episode;
@@ -19,6 +20,7 @@ use Livewire\Component;
 class SeasonsPage extends Component
 {
     use RendersPageView;
+    use ResolvesAdminFormState;
     use ValidatesFormRequests;
 
     public ?Season $season = null;

@@ -4,12 +4,27 @@ namespace Tests\Unit\Models;
 
 use App\Enums\MediaKind;
 use App\Models\InterestCategory;
+use Illuminate\Database\Eloquent\Model;
 use Tests\Concerns\UsesCatalogOnlyApplication;
 use Tests\TestCase;
 
 class InterestCategoryTest extends TestCase
 {
     use UsesCatalogOnlyApplication;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Model::unguard();
+    }
+
+    protected function tearDown(): void
+    {
+        Model::reguard();
+
+        parent::tearDown();
+    }
 
     public function test_preferred_directory_image_builds_a_catalog_media_asset_from_selected_columns(): void
     {

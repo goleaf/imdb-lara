@@ -10,19 +10,9 @@ class BuildTitleCreditsQueryAction
 {
     public function handle(Title $title): Builder
     {
-        return Credit::query()
-            ->select([
-                'id',
-                'title_id',
-                'person_id',
-                'department',
-                'job',
-                'character_name',
-                'billing_order',
-                'is_principal',
-                'episode_id',
-                'credited_as',
-            ])
+        $query = Credit::query()
+            ->select(Credit::projectedColumns())
+            ->with(Credit::projectedRelations())
             ->whereBelongsTo($title)
             ->with([
                 'person:id,name,slug,known_for_department',
@@ -30,7 +20,16 @@ class BuildTitleCreditsQueryAction
                 'episode.title:id,name,slug',
                 'episode.season:id,series_id,slug',
                 'episode.series:id,slug',
-            ])
+            ]);
+
+        if (Credit::usesCatalogOnlySchema()) {
+            return $query
+                ->orderBy(Credit::qualifiedColumn('category'))
+                ->orderBy(Credit::qualifiedColumn('billing_order'))
+                ->orderBy('name_credits.id');
+        }
+
+        return $query
             ->orderBy('department')
             ->orderBy('billing_order')
             ->orderBy('job')

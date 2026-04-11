@@ -141,19 +141,8 @@ class LoadTitleCastAction
     private function creditQuery(Title $title, bool $castOnly): HasMany
     {
         $query = $title->credits()
-            ->select([
-                'id',
-                'title_id',
-                'person_id',
-                'department',
-                'job',
-                'character_name',
-                'billing_order',
-                'is_principal',
-                'person_profession_id',
-                'episode_id',
-                'credited_as',
-            ])
+            ->select(Credit::projectedColumns())
+            ->with(Credit::projectedRelations())
             ->whereHas('person')
             ->ordered()
             ->withPersonPreview();
@@ -181,12 +170,10 @@ class LoadTitleCastAction
             return true;
         }
 
-        if (! $title->credits()->where('department', 'Cast')->exists()) {
+        if (! $title->credits()->cast()->exists()) {
             return true;
         }
 
-        return ! $title->credits()
-            ->where('department', '!=', 'Cast')
-            ->exists();
+        return ! $title->credits()->crew()->exists();
     }
 }

@@ -16,6 +16,8 @@ class PersonFilmographyPanelTest extends TestCase
 
     public function test_filmography_panel_renders_live_catalog_rows_for_a_remote_person(): void
     {
+        Livewire::withoutLazyLoading();
+
         $person = $this->samplePerson();
         $filmography = app(BuildPersonFilmographyQueryAction::class)->handle($person);
         $firstGroup = $filmography['groups']->first();
@@ -38,6 +40,8 @@ class PersonFilmographyPanelTest extends TestCase
 
     public function test_filmography_panel_applies_group_filter_and_rating_sort_for_remote_catalog_rows(): void
     {
+        Livewire::withoutLazyLoading();
+
         $person = $this->samplePerson();
         $baseFilmography = app(BuildPersonFilmographyQueryAction::class)->handle($person);
         $group = $baseFilmography['groups']->first(

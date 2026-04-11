@@ -10,6 +10,8 @@ use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Collection;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -19,6 +21,9 @@ class TitleReviewList extends Component
     use AuthorizesRequests;
     use WithPagination;
 
+    protected BuildTitleReviewsQueryAction $buildTitleReviewsQuery;
+
+    #[Locked]
     public Title $title;
 
     public string $sort = 'newest';
@@ -28,6 +33,11 @@ class TitleReviewList extends Component
     public function mount(Title $title): void
     {
         $this->title = $title;
+    }
+
+    public function boot(BuildTitleReviewsQueryAction $buildTitleReviewsQuery): void
+    {
+        $this->buildTitleReviewsQuery = $buildTitleReviewsQuery;
     }
 
     public function setSort(string $sort): void
@@ -74,21 +84,27 @@ class TitleReviewList extends Component
         $this->resetPage(pageName: 'reviewsPage');
     }
 
-    public function render(BuildTitleReviewsQueryAction $buildTitleReviewsQuery): View
+    #[Computed]
+    public function viewData(): array
     {
         $viewer = auth()->user();
-        $reviews = $buildTitleReviewsQuery
+        $reviews = $this->buildTitleReviewsQuery
             ->handle($this->title, $this->sort, $viewer)
             ->paginate(10, pageName: 'reviewsPage')
             ->withQueryString();
         $reviewCollection = $reviews->getCollection();
 
-        return view('livewire.reviews.title-review-list', [
+        return [
             'helpfulButtons' => $this->helpfulButtons($reviewCollection),
             'reviewPermissions' => $this->reviewPermissions($reviewCollection, $viewer),
             'reviews' => $reviews,
             'sortOptions' => $this->sortOptions(),
-        ]);
+        ];
+    }
+
+    public function render(): View
+    {
+        return view('livewire.reviews.title-review-list', $this->viewData);
     }
 
     /**

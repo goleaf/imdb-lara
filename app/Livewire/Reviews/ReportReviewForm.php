@@ -7,12 +7,14 @@ use App\Enums\ReportReason;
 use App\Livewire\Forms\Reviews\ReportReviewForm as ReportReviewDataForm;
 use App\Models\Review;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class ReportReviewForm extends Component
 {
     use AuthorizesRequests;
 
+    #[Locked]
     public Review $review;
 
     public ReportReviewDataForm $form;

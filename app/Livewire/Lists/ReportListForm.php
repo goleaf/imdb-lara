@@ -8,12 +8,14 @@ use App\Livewire\Forms\Reviews\ReportReviewForm as ReportContentForm;
 use App\Models\UserList;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class ReportListForm extends Component
 {
     use AuthorizesRequests;
 
+    #[Locked]
     public UserList $list;
 
     public ReportContentForm $form;

@@ -77,14 +77,16 @@
                     </div>
                 </div>
 
-                <button
+                <x-ui.button
                     type="button"
+                    variant="none"
+                    size="sm"
+                    icon="x-mark"
                     x-on:click="open = false"
-                    class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/8 bg-white/[0.03] text-[#c0b5a5] transition hover:bg-white/[0.06] hover:text-[#f4eee5]"
+                    class="!h-9 !w-9 !rounded-full border border-white/8 bg-white/[0.03] text-[#c0b5a5] transition hover:bg-white/[0.06] hover:text-[#f4eee5]"
+                    data-slot="global-search-close"
                     aria-label="Close search"
-                >
-                    <x-ui.icon name="x-mark" class="size-4" />
-                </button>
+                />
             </div>
 
             <div data-slot="global-search-loading" class="sb-search-panel hidden rounded-[1.35rem] border border-white/8 bg-white/[0.03] p-4">
@@ -359,25 +361,29 @@
                             @endforeach
                         </div>
                     @else
-                        <div class="sb-search-panel rounded-[1.35rem] border border-dashed border-white/10 bg-white/[0.02] p-6 text-center">
-                            <div class="space-y-2">
-                                <div class="sb-search-group-title">No quick matches</div>
-                                <div class="sb-search-group-copy mx-auto max-w-md">
-                                    Try a broader title, actor, creator, or theme keyword. The full search page will still let you widen the query and filter further.
-                                </div>
-                            </div>
-                        </div>
+                        <x-ui.empty
+                            data-slot="global-search-no-matches"
+                            class="sb-search-panel !rounded-[1.35rem] !border !border-dashed !border-white/10 !bg-white/[0.02] !p-6"
+                        >
+                            <x-ui.heading level="h3" class="sb-search-group-title">No quick matches</x-ui.heading>
+                            <x-ui.text class="sb-search-group-copy mx-auto mt-2 max-w-md !text-[#9e9384]">
+                                Try a broader title, actor, creator, or theme keyword. The full search page will still let you widen the query and filter further.
+                            </x-ui.text>
+                        </x-ui.empty>
                     @endif
 
                     <div class="border-t border-white/8 pt-4">
-                        <button
+                        <x-ui.button
                             type="button"
+                            variant="none"
+                            size="sm"
+                            iconAfter="arrow-right"
                             x-on:click="goToSearch(@js($trimmedQuery))"
-                            class="inline-flex items-center gap-2 text-sm font-medium text-[#dcc38d] transition hover:text-[#f5ddaa]"
+                            class="!h-auto !px-0 !py-0 text-sm font-medium text-[#dcc38d] transition hover:text-[#f5ddaa]"
+                            data-slot="global-search-view-all"
                         >
-                            <span>View all results for "{{ $trimmedQuery }}"</span>
-                            <x-ui.icon name="arrow-right" class="size-4" />
-                        </button>
+                            View all results for "{{ $trimmedQuery }}"
+                        </x-ui.button>
                     </div>
                 @else
                     <section class="sb-search-panel rounded-[1.35rem] p-4">
@@ -392,28 +398,40 @@
                         <div class="grid gap-2 sm:grid-cols-2" x-show="recent.length > 0">
                             <template x-for="item in recent" :key="item">
                                 <div class="sb-search-item flex items-center justify-between gap-3 border border-white/6 bg-white/[0.025] px-3 py-3">
-                                    <button
+                                    <x-ui.button
                                         type="button"
-                                        class="min-w-0 flex-1 truncate text-left text-sm font-medium text-[#f4eee5]"
+                                        variant="none"
+                                        size="sm"
+                                        class="min-w-0 flex-1 !h-auto !justify-start !px-0 !py-0 text-left text-sm font-medium text-[#f4eee5]"
                                         x-on:click="goToSearch(item)"
-                                        x-text="item"
-                                    ></button>
-
-                                    <button
-                                        type="button"
-                                        class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/8 bg-white/[0.03] text-[#9e9384] transition hover:bg-white/[0.06] hover:text-[#f4eee5]"
-                                        x-on:click="removeRecent(item)"
-                                        aria-label="Remove recent search"
+                                        data-slot="global-search-recent-link"
                                     >
-                                        <x-ui.icon name="x-mark" class="size-4" />
-                                    </button>
+                                        <span class="truncate" x-text="item"></span>
+                                    </x-ui.button>
+
+                                    <x-ui.button
+                                        type="button"
+                                        variant="none"
+                                        size="sm"
+                                        icon="x-mark"
+                                        class="!h-8 !w-8 !rounded-full border border-white/8 bg-white/[0.03] text-[#9e9384] transition hover:bg-white/[0.06] hover:text-[#f4eee5]"
+                                        x-on:click="removeRecent(item)"
+                                        data-slot="global-search-recent-remove"
+                                        aria-label="Remove recent search"
+                                    />
                                 </div>
                             </template>
                         </div>
 
-                        <div x-show="recent.length === 0" class="rounded-[1rem] border border-dashed border-white/10 px-4 py-6 text-center text-sm text-[#9e9384]">
-                            Start typing to surface fast title and people matches.
-                        </div>
+                        <x-ui.empty
+                            x-show="recent.length === 0"
+                            data-slot="global-search-recent-empty"
+                            class="!rounded-[1rem] !border !border-dashed !border-white/10 !px-4 !py-6 !text-sm"
+                        >
+                            <x-ui.text class="!text-sm !text-[#9e9384]">
+                                Start typing to surface fast title and people matches.
+                            </x-ui.text>
+                        </x-ui.empty>
                     </section>
                 @endif
             </div>

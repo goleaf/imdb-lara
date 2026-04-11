@@ -23,6 +23,8 @@ class WatchlistBrowserTest extends TestCase
 
     public function test_watchlist_browser_filters_and_sorts_private_tracking_items(): void
     {
+        Livewire::withoutLazyLoading();
+
         $user = User::factory()->create();
         $watchlist = UserList::factory()->watchlist()->for($user)->create();
 
@@ -84,8 +86,7 @@ class WatchlistBrowserTest extends TestCase
             ->assertDontSee($coldHarbor->name);
 
         $sortedItems = app(BuildAccountWatchlistQueryAction::class)
-            ->handle($watchlist, ['sort' => 'title'])
-            ->get();
+            ->handle($watchlist, ['sort' => 'title']);
 
         $this->assertSame([
             $afterlight->id,
@@ -96,6 +97,8 @@ class WatchlistBrowserTest extends TestCase
 
     public function test_member_can_toggle_watched_state_and_watchlist_visibility(): void
     {
+        Livewire::withoutLazyLoading();
+
         $user = User::factory()->create();
         $watchlist = UserList::factory()->watchlist()->for($user)->create();
         $title = Title::factory()->movie()->create();
@@ -138,6 +141,8 @@ class WatchlistBrowserTest extends TestCase
 
     public function test_member_can_clear_watchlist_filters_back_to_the_default_tracking_view(): void
     {
+        Livewire::withoutLazyLoading();
+
         $user = User::factory()->create();
         $watchlist = UserList::factory()->watchlist()->for($user)->create();
         $genre = Genre::factory()->create(['name' => 'Mystery', 'slug' => 'mystery']);

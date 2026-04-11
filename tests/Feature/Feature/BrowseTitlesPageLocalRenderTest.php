@@ -9,6 +9,7 @@ use App\Models\Title;
 use App\Models\TitleStatistic;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Pagination\Paginator;
+use Livewire\Livewire;
 use Mockery;
 use Tests\Concerns\UsesCatalogOnlyApplication;
 use Tests\TestCase;
@@ -19,6 +20,8 @@ class BrowseTitlesPageLocalRenderTest extends TestCase
 
     public function test_titles_index_renders_local_title_cards_with_rating_and_votes(): void
     {
+        Livewire::withoutLazyLoading();
+
         $title = $this->makeTitle(
             attributes: [
                 'id' => 1,
@@ -64,6 +67,8 @@ class BrowseTitlesPageLocalRenderTest extends TestCase
 
     public function test_trending_chart_respects_the_selected_country_context(): void
     {
+        Livewire::withoutLazyLoading();
+
         $title = $this->makeTitle(
             attributes: [
                 'id' => 2,

@@ -29,6 +29,7 @@ class TitlePage extends Component
         'akaAttributeRows',
         'akaAttributeEntries',
         'akaTypeRows',
+        'akaTypeEntries',
         'awardCategoryRows',
         'awardEventRows',
         'movieAwardNominationRows',
@@ -165,7 +166,7 @@ class TitlePage extends Component
         return collect([
             $data['movieAkaRows']->isNotEmpty(),
             $data['akaAttributeEntries']->isNotEmpty(),
-            $data['akaTypeRows']->isNotEmpty(),
+            $data['akaTypeEntries']->isNotEmpty(),
             $data['awardCategoryRows']->isNotEmpty(),
             $data['awardEventRows']->isNotEmpty(),
             $data['movieAwardNominationRows']->isNotEmpty(),
@@ -232,7 +233,7 @@ class TitlePage extends Component
                     'roleLabel' => $credit->character_name ?: $credit->job ?: 'Cast',
                     'summary' => $castPerson->summaryText(),
                     'nationality' => $castPerson->nationality,
-                    'creditsBadgeLabel' => $castPerson->credits_count ? $castPerson->creditsBadgeLabel() : null,
+                    'creditsBadgeLabel' => $castPerson->creditsCount() > 0 ? $castPerson->creditsBadgeLabel() : null,
                 ];
             })
             ->filter()
@@ -313,7 +314,7 @@ class TitlePage extends Component
                     'summary' => $directorPerson?->summaryText(),
                     'professionLabels' => $directorPerson instanceof Person ? $directorPerson->professionLabels() : [],
                     'nationality' => $directorPerson?->nationality,
-                    'creditsBadgeLabel' => $directorPerson?->credits_count ? $directorPerson->creditsBadgeLabel() : null,
+                    'creditsBadgeLabel' => $directorPerson?->creditsCount() > 0 ? $directorPerson->creditsBadgeLabel() : null,
                 ];
             })
             ->values();

@@ -67,23 +67,6 @@ class LivewireLoadingStateConventionTest extends TestCase
         }
     }
 
-    public function test_heavier_embedded_livewire_views_are_wrapped_in_islands(): void
-    {
-        $viewExpectations = [
-            resource_path('views/livewire/account/watchlist-browser.blade.php') => 'data-slot="watchlist-browser-island"',
-            resource_path('views/livewire/lists/manage-list.blade.php') => 'data-slot="manage-list-island"',
-            resource_path('views/livewire/people/filmography-panel.blade.php') => 'data-slot="person-filmography-island"',
-        ];
-
-        foreach ($viewExpectations as $viewPath => $islandSlot) {
-            $contents = file_get_contents($viewPath);
-
-            $this->assertNotFalse($contents);
-            $this->assertStringContainsString('@island(name:', $contents, $viewPath);
-            $this->assertStringContainsString($islandSlot, $contents, $viewPath);
-        }
-    }
-
     public function test_profile_settings_panel_defines_a_lazy_placeholder_and_scoped_submit_loading_state(): void
     {
         $contents = file_get_contents(resource_path('views/components/account/⚡profile-settings-panel.blade.php'));
@@ -116,6 +99,10 @@ class LivewireLoadingStateConventionTest extends TestCase
 
         $this->assertNotFalse($contents);
         $this->assertStringContainsString('has-data-loading:[&_[data-slot=review-list-loading]]:inline-flex', $contents);
+        $this->assertStringContainsString('wire:target="setSort(\'{{ $sortOption[\'value\'] }}\')"', $contents);
+        $this->assertStringContainsString('wire:target="toggleHelpful({{ $review->id }})"', $contents);
+        $this->assertStringNotContainsString('wire:target="setSort"', $contents);
+        $this->assertStringNotContainsString('wire:target="toggleHelpful"', $contents);
         $this->assertStringNotContainsString('has-[button[data-loading]]', $contents);
     }
 
@@ -172,6 +159,23 @@ class LivewireLoadingStateConventionTest extends TestCase
         }
     }
 
+    public function test_search_shells_use_lazy_islands_with_placeholder_fallbacks(): void
+    {
+        $viewExpectations = [
+            resource_path('views/livewire/search/discovery-filters.blade.php') => "@island(name: 'discover-results-page', lazy: true)",
+            resource_path('views/livewire/search/search-results.blade.php') => "@island(name: 'search-results-page', lazy: true)",
+        ];
+
+        foreach ($viewExpectations as $viewPath => $lazyIslandDeclaration) {
+            $contents = file_get_contents($viewPath);
+
+            $this->assertNotFalse($contents);
+            $this->assertStringContainsString($lazyIslandDeclaration, $contents, $viewPath);
+            $this->assertStringContainsString('@placeholder', $contents, $viewPath);
+            $this->assertStringContainsString('@endplaceholder', $contents, $viewPath);
+        }
+    }
+
     public function test_heavier_livewire_components_shift_view_assembly_into_computed_properties(): void
     {
         $classExpectations = [
@@ -185,6 +189,47 @@ class LivewireLoadingStateConventionTest extends TestCase
                 '#[Locked]',
                 'public function viewData(): array',
                 "return view('livewire.people.filmography-panel', \$this->viewData);",
+            ],
+            app_path('Livewire/Lists/ManageList.php') => [
+                '#[Computed]',
+                '#[Locked]',
+                'public function viewData(): array',
+                "return view('livewire.lists.manage-list', \$this->viewData);",
+            ],
+        ];
+
+        foreach ($classExpectations as $classPath => $expectedStrings) {
+            $contents = file_get_contents($classPath);
+
+            $this->assertNotFalse($contents);
+
+            foreach ($expectedStrings as $expectedString) {
+                $this->assertStringContainsString($expectedString, $contents, $classPath);
+            }
+        }
+    }
+
+    public function test_review_and_title_interaction_components_lock_server_owned_models(): void
+    {
+        $classExpectations = [
+            app_path('Livewire/Reviews/TitleReviewList.php') => [
+                '#[Locked]',
+                'public Title $title;',
+                '#[Computed]',
+                'public function viewData(): array',
+            ],
+            app_path('Livewire/Titles/RatingPanel.php') => [
+                '#[Locked]',
+                'public Title $title;',
+                '#[Computed]',
+                'public function viewData(): array',
+            ],
+            app_path('Livewire/Titles/ReviewComposer.php') => [
+                '#[Locked]',
+                'public Title $title;',
+                'public ?Review $review = null;',
+                '#[Computed]',
+                'public function viewData(): array',
             ],
         ];
 

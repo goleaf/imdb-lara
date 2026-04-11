@@ -9,7 +9,7 @@
                     :color="$sortOption['color']"
                     wire:key="title-review-sort-{{ $sortOption['value'] }}"
                     wire:click="setSort('{{ $sortOption['value'] }}')"
-                    wire:target="setSort"
+                    wire:target="setSort('{{ $sortOption['value'] }}')"
                 >
                     {{ $sortOption['label'] }}
                 </x-ui.button>
@@ -79,7 +79,7 @@
                                     :color="$helpfulButtons[$review->id]['color'] ?? 'neutral'"
                                     icon="hand-thumb-up"
                                     wire:click="toggleHelpful({{ $review->id }})"
-                                    wire:target="toggleHelpful"
+                                    wire:target="toggleHelpful({{ $review->id }})"
                                 >
                                     {{ $helpfulButtons[$review->id]['label'] ?? 'Mark helpful' }}
                                 </x-ui.button>

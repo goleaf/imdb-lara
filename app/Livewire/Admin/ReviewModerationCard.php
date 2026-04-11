@@ -8,6 +8,7 @@ use App\Enums\ReviewStatus;
 use App\Models\Review;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class ReviewModerationCard extends Component
@@ -16,6 +17,7 @@ class ReviewModerationCard extends Component
 
     public ?string $moderationNotes = null;
 
+    #[Locked]
     public Review $review;
 
     public string $status = ReviewStatus::Pending->value;

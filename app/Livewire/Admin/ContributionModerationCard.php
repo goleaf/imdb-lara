@@ -7,12 +7,14 @@ use App\Enums\ContributionStatus;
 use App\Models\Contribution;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class ContributionModerationCard extends Component
 {
     use AuthorizesRequests;
 
+    #[Locked]
     public Contribution $contribution;
 
     public ?string $notes = null;

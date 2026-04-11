@@ -10,6 +10,7 @@ use App\Models\Credit;
 use App\Models\Person;
 use App\Models\Profession;
 use Illuminate\Support\Collection;
+use Livewire\Livewire;
 use Mockery;
 use Tests\Concerns\BootstrapsImdbMysqlSqlite;
 use Tests\Concerns\UsesCatalogOnlyApplication;
@@ -29,10 +30,10 @@ class PeopleDirectorySnapshotTest extends TestCase
 
     public function test_people_directory_snapshot_action_returns_local_metrics(): void
     {
-        $actor = Profession::query()->create(['id' => 1, 'name' => 'actor']);
-        $director = Profession::query()->create(['id' => 2, 'name' => 'director']);
+        $actor = Profession::query()->forceCreate(['id' => 1, 'name' => 'actor']);
+        $director = Profession::query()->forceCreate(['id' => 2, 'name' => 'director']);
 
-        $keanu = Person::query()->create([
+        $keanu = Person::query()->forceCreate([
             'id' => 1,
             'nconst' => 'nm0000206',
             'imdb_id' => 'nm0000206',
@@ -40,7 +41,7 @@ class PeopleDirectorySnapshotTest extends TestCase
             'displayName' => 'Keanu Reeves',
         ]);
 
-        $lana = Person::query()->create([
+        $lana = Person::query()->forceCreate([
             'id' => 2,
             'nconst' => 'nm0905154',
             'imdb_id' => 'nm0905154',
@@ -48,8 +49,18 @@ class PeopleDirectorySnapshotTest extends TestCase
             'displayName' => 'Lana Wachowski',
         ]);
 
-        $keanu->professionTerms()->attach($actor->id, ['position' => 1]);
-        $lana->professionTerms()->attach($director->id, ['position' => 1]);
+        $keanu->professions()->create([
+            'department' => 'acting',
+            'profession' => $actor->name,
+            'is_primary' => true,
+            'sort_order' => 1,
+        ]);
+        $lana->professions()->create([
+            'department' => 'directing',
+            'profession' => $director->name,
+            'is_primary' => true,
+            'sort_order' => 1,
+        ]);
 
         Credit::query()->create([
             'name_basic_id' => $keanu->id,
@@ -58,7 +69,7 @@ class PeopleDirectorySnapshotTest extends TestCase
             'position' => 1,
         ]);
 
-        $nomination = AwardNomination::query()->create([
+        $nomination = AwardNomination::query()->forceCreate([
             'id' => 1,
             'movie_id' => 1,
             'event_imdb_id' => 'ev0000003',
@@ -83,8 +94,47 @@ class PeopleDirectorySnapshotTest extends TestCase
         ], $snapshot['topProfessions']);
     }
 
+    public function test_people_filter_options_read_remote_professions_from_mysql_catalog_terms(): void
+    {
+        $actor = Profession::query()->forceCreate(['id' => 1, 'name' => 'actor']);
+        $director = Profession::query()->forceCreate(['id' => 2, 'name' => 'director']);
+
+        $keanu = Person::query()->forceCreate([
+            'id' => 1,
+            'nconst' => 'nm0000206',
+            'imdb_id' => 'nm0000206',
+            'primaryname' => 'Keanu Reeves',
+            'displayName' => 'Keanu Reeves',
+        ]);
+
+        $lana = Person::query()->forceCreate([
+            'id' => 2,
+            'nconst' => 'nm0905154',
+            'imdb_id' => 'nm0905154',
+            'primaryname' => 'Lana Wachowski',
+            'displayName' => 'Lana Wachowski',
+        ]);
+
+        $keanu->professions()->create([
+            'profession' => $actor->name,
+            'is_primary' => true,
+            'sort_order' => 1,
+        ]);
+        $lana->professions()->create([
+            'profession' => $director->name,
+            'is_primary' => true,
+            'sort_order' => 1,
+        ]);
+
+        $filterOptions = app(GetPublicPeopleFilterOptionsAction::class)->handle();
+
+        $this->assertSame(['actor', 'director'], $filterOptions['professions']->all());
+    }
+
     public function test_people_directory_page_surfaces_the_catalog_snapshot_without_remote_queries(): void
     {
+        Livewire::withoutLazyLoading();
+
         $snapshot = [
             'publishedPeopleCount' => 2,
             'awardLinkedPeopleCount' => 1,

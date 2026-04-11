@@ -8,12 +8,15 @@ use App\Models\Season;
 use App\Models\Title;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class WatchProgressPanel extends Component
 {
+    #[Locked]
     public Title $series;
 
+    #[Locked]
     public Season $season;
 
     public int $totalEpisodes = 0;

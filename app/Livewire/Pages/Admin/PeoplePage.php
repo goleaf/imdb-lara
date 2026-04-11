@@ -11,6 +11,7 @@ use App\Http\Requests\Admin\StoreMediaAssetRequest;
 use App\Http\Requests\Admin\StorePersonRequest;
 use App\Http\Requests\Admin\UpdatePersonRequest;
 use App\Livewire\Pages\Admin\Concerns\InteractsWithCatalogPersonState;
+use App\Livewire\Pages\Admin\Concerns\ResolvesAdminFormState;
 use App\Livewire\Pages\Admin\Concerns\ValidatesFormRequests;
 use App\Livewire\Pages\Concerns\RendersPageView;
 use App\Models\MediaAsset;
@@ -25,6 +26,7 @@ class PeoplePage extends Component
 {
     use InteractsWithCatalogPersonState;
     use RendersPageView;
+    use ResolvesAdminFormState;
     use ValidatesFormRequests;
     use WithFileUploads;
 

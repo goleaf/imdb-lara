@@ -18,6 +18,8 @@ class ListManagementTest extends TestCase
 
     public function test_account_list_page_requires_authentication_and_hides_other_users_private_lists(): void
     {
+        Livewire::withoutLazyLoading();
+
         $owner = User::factory()->create();
         $list = UserList::factory()->for($owner)->create([
             'name' => 'Secret Sequels',
@@ -39,6 +41,8 @@ class ListManagementTest extends TestCase
 
     public function test_owner_can_update_list_metadata_add_titles_remove_titles_and_reorder_items(): void
     {
+        Livewire::withoutLazyLoading();
+
         $user = User::factory()->create();
         $list = UserList::factory()->for($user)->create([
             'name' => 'Late Night Watches',
@@ -97,6 +101,8 @@ class ListManagementTest extends TestCase
 
     public function test_sortable_reorder_respects_the_current_paginated_page_offset(): void
     {
+        Livewire::withoutLazyLoading();
+
         $user = User::factory()->create();
         $list = UserList::factory()->for($user)->create([
             'name' => 'Long Weekend Queue',
@@ -153,6 +159,8 @@ class ListManagementTest extends TestCase
 
     public function test_non_owner_cannot_mount_the_manage_list_component(): void
     {
+        Livewire::withoutLazyLoading();
+
         $owner = User::factory()->create();
         $intruder = User::factory()->create();
         $list = UserList::factory()->for($owner)->create([
@@ -167,6 +175,8 @@ class ListManagementTest extends TestCase
 
     public function test_owner_can_delete_a_custom_list(): void
     {
+        Livewire::withoutLazyLoading();
+
         $user = User::factory()->create();
         $list = UserList::factory()->for($user)->create([
             'name' => 'One-Off Experiments',

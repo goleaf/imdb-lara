@@ -107,22 +107,10 @@ class LoadPersonDetailsAction
 
         if ($collaborationTitleIds !== []) {
             $frequentCollaborators = Credit::query()
-                ->select([
-                    'id',
-                    'title_id',
-                    'person_id',
-                    'department',
-                    'job',
-                    'character_name',
-                    'billing_order',
-                    'is_principal',
-                    'person_profession_id',
-                    'episode_id',
-                    'credited_as',
-                    'imdb_source_group',
-                ])
-                ->whereIn('title_id', $collaborationTitleIds)
-                ->where('person_id', '!=', $person->getKey())
+                ->select(Credit::projectedColumns())
+                ->with(Credit::projectedRelations())
+                ->whereIn(Credit::qualifiedColumn('title_id'), $collaborationTitleIds)
+                ->where(Credit::qualifiedColumn('person_id'), '!=', $person->getKey())
                 ->ordered()
                 ->withPersonPreview()
                 ->with([
@@ -266,20 +254,8 @@ class LoadPersonDetailsAction
     private function loadPreviewCredits(Person $person): void
     {
         $person->setRelation('credits', $person->credits()
-            ->select([
-                'id',
-                'title_id',
-                'person_id',
-                'department',
-                'job',
-                'character_name',
-                'billing_order',
-                'is_principal',
-                'person_profession_id',
-                'episode_id',
-                'credited_as',
-                'imdb_source_group',
-            ])
+            ->select(Credit::projectedColumns())
+            ->with(Credit::projectedRelations())
             ->with([
                 'title' => fn ($titleQuery) => $titleQuery
                     ->selectCatalogCardColumns()

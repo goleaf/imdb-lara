@@ -117,7 +117,10 @@ class HydrateTitleCastCatalogActionTest extends TestCase
         $this->assertSame('A hacker discovers reality is a simulation.', MoviePlot::query()->where('movie_id', $title->id)->value('plot'));
         $this->assertSame('https://example.com/matrix-primary.jpg', MoviePrimaryImage::query()->where('movie_id', $title->id)->value('url'));
         $this->assertSame('https://example.com/matrix-still.jpg', TitleImage::query()->where('movie_id', $title->id)->value('url'));
-        $this->assertSame('8.70', (string) TitleStatistic::query()->where('movie_id', $title->id)->value('aggregate_rating'));
+        $this->assertSame(
+            '8.70',
+            number_format((float) TitleStatistic::query()->where('movie_id', $title->id)->value('aggregate_rating'), 2, '.', ''),
+        );
         $this->assertSame(1987654, TitleStatistic::query()->where('movie_id', $title->id)->value('vote_count'));
 
         $keanu = Person::query()->where('nconst', 'nm0000206')->firstOrFail();

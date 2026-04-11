@@ -6,6 +6,7 @@ use App\Actions\Catalog\BuildPublicInterestCategoryIndexQueryAction;
 use App\Actions\Catalog\BuildPublicPeopleIndexQueryAction;
 use App\Actions\Catalog\LoadPublicTitleBrowserPageAction;
 use Illuminate\Pagination\Paginator;
+use Livewire\Livewire;
 use Mockery;
 use RuntimeException;
 use Tests\Concerns\UsesCatalogOnlyApplication;
@@ -17,6 +18,8 @@ class CatalogExplorerPageTest extends TestCase
 
     public function test_catalog_titles_section_stays_available_when_the_remote_catalog_is_unavailable(): void
     {
+        Livewire::withoutLazyLoading();
+
         $action = Mockery::mock(LoadPublicTitleBrowserPageAction::class);
         $action
             ->shouldReceive('handleSafely')
@@ -35,12 +38,14 @@ class CatalogExplorerPageTest extends TestCase
         $this->get(route('public.catalog.explorer'))
             ->assertOk()
             ->assertSee('Catalog Explorer')
-            ->assertSee('Live catalog temporarily unavailable')
-            ->assertSee('The live title catalog is unavailable right now. Try again shortly.');
+            ->assertSee('Catalog temporarily unavailable.')
+            ->assertSee('The imported IMDb catalog could not be reached. Try again in a few minutes.');
     }
 
     public function test_catalog_people_section_stays_available_when_the_remote_catalog_is_unavailable(): void
     {
+        Livewire::withoutLazyLoading();
+
         $this->mockCatalogFailure(BuildPublicPeopleIndexQueryAction::class);
 
         $this->get(route('public.catalog.explorer', ['section' => 'people']))
@@ -52,6 +57,8 @@ class CatalogExplorerPageTest extends TestCase
 
     public function test_catalog_themes_section_stays_available_when_the_remote_catalog_is_unavailable(): void
     {
+        Livewire::withoutLazyLoading();
+
         $this->mockCatalogFailure(BuildPublicInterestCategoryIndexQueryAction::class);
 
         $this->get(route('public.catalog.explorer', ['section' => 'themes']))

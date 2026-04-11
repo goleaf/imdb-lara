@@ -31,20 +31,9 @@ class BuildPersonFilmographyQueryAction
         $sort = (string) ($filters['sort'] ?? 'latest');
 
         $credits = Credit::query()
-            ->select([
-                'id',
-                'title_id',
-                'person_id',
-                'department',
-                'job',
-                'character_name',
-                'billing_order',
-                'is_principal',
-                'person_profession_id',
-                'episode_id',
-                'credited_as',
-            ])
-            ->where('credits.person_id', $person->getKey())
+            ->select(Credit::projectedColumns())
+            ->with(Credit::projectedRelations())
+            ->whereBelongsTo($person, 'person')
             ->ordered()
             ->with([
                 'title' => fn ($query) => $query

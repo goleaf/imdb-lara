@@ -5,6 +5,7 @@ namespace Tests\Feature\Feature;
 use App\Actions\Catalog\LoadPublicTitleBrowserPageAction;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Pagination\Paginator;
+use Livewire\Livewire;
 use Mockery;
 use Tests\Concerns\BuildsCatalogTitleFixtures;
 use Tests\Concerns\UsesCatalogOnlyApplication;
@@ -17,6 +18,8 @@ class BrowseTopRatedSeriesPageLocalRenderTest extends TestCase
 
     public function test_top_rated_series_page_renders_lowercase_imdb_series_types(): void
     {
+        Livewire::withoutLazyLoading();
+
         $series = $this->makeCatalogTitle(
             attributes: [
                 'id' => 1,

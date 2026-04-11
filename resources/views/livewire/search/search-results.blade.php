@@ -1,5 +1,65 @@
 <div>
-@island(name: 'search-results-page')
+@island(name: 'search-results-page', lazy: true)
+    @placeholder
+        <div class="space-y-6">
+            <x-ui.card class="sb-search-page-hero !max-w-none p-6 sm:p-7">
+                <div class="space-y-5">
+                    <div class="space-y-3">
+                        <div class="sb-page-kicker">Search Results</div>
+                        <x-ui.skeleton.text class="h-10 w-3/5" />
+                        <x-ui.skeleton.text class="w-full max-w-3xl" />
+                        <x-ui.skeleton.text class="w-2/3 max-w-2xl" />
+                    </div>
+
+                    <x-ui.field class="max-w-3xl">
+                        <x-ui.label>Query</x-ui.label>
+                        <x-ui.skeleton class="h-12 w-full rounded-box" />
+                    </x-ui.field>
+
+                    <div class="flex flex-wrap gap-2">
+                        @foreach (range(1, 4) as $index)
+                            <x-ui.skeleton class="h-7 w-28 rounded-full" wire:key="search-results-placeholder-badge-{{ $index }}" />
+                        @endforeach
+                    </div>
+                </div>
+            </x-ui.card>
+
+            <x-ui.card class="sb-filter-shell !max-w-none rounded-[1.6rem] p-5">
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between gap-3">
+                        <div class="space-y-2">
+                            <div class="sb-page-kicker">Title Filters</div>
+                            <x-ui.skeleton.text class="w-44" />
+                        </div>
+
+                        <x-ui.skeleton class="h-9 w-24 rounded-full" />
+                    </div>
+
+                    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+                        @foreach (range(1, 12) as $index)
+                            <x-ui.field wire:key="search-results-placeholder-filter-{{ $index }}">
+                                <x-ui.label>Loading</x-ui.label>
+                                <x-ui.skeleton class="h-10 w-full rounded-box" />
+                            </x-ui.field>
+                        @endforeach
+                    </div>
+                </div>
+            </x-ui.card>
+
+            <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                @foreach (range(1, 6) as $index)
+                    <x-ui.card class="sb-poster-card !max-w-none h-full overflow-hidden rounded-[1.4rem]" wire:key="search-results-placeholder-card-{{ $index }}">
+                        <div class="space-y-4">
+                            <x-ui.skeleton class="aspect-[2/3] w-full rounded-box" />
+                            <x-ui.skeleton.text class="w-1/3" />
+                            <x-ui.skeleton.text class="w-4/5" />
+                            <x-ui.skeleton.text class="w-3/5" />
+                        </div>
+                    </x-ui.card>
+                @endforeach
+            </div>
+        </div>
+    @endplaceholder
 <div
     class="space-y-6 has-data-loading:[&_[data-slot=search-results-loading]]:block has-data-loading:[&_[data-slot=search-results-results]]:hidden"
     data-slot="search-results-island"

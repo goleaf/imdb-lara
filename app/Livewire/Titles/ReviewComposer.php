@@ -9,13 +9,17 @@ use App\Enums\ReviewStatus;
 use App\Livewire\Forms\Titles\ReviewForm;
 use App\Models\Review;
 use App\Models\Title;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class ReviewComposer extends Component
 {
     use AuthorizesRequests;
 
+    #[Locked]
     public Title $title;
 
     public string $anchorId = 'title-review';
@@ -24,6 +28,7 @@ class ReviewComposer extends Component
 
     public ?string $statusMessage = null;
 
+    #[Locked]
     public ?Review $review = null;
 
     public function mount(Title $title, GetUserReviewForTitleAction $getUserReviewForTitle): void
@@ -72,9 +77,10 @@ class ReviewComposer extends Component
         $this->dispatch('title-review-updated');
     }
 
-    public function render()
+    #[Computed]
+    public function viewData(): array
     {
-        return view('livewire.titles.review-composer', [
+        return [
             'reviewSavedAt' => $this->review?->edited_at ?? $this->review?->created_at,
             'reviewStatusBadge' => $this->review?->status
                 ? [
@@ -82,7 +88,12 @@ class ReviewComposer extends Component
                     'label' => $this->review->status->label(),
                 ]
                 : null,
-        ]);
+        ];
+    }
+
+    public function render(): View
+    {
+        return view('livewire.titles.review-composer', $this->viewData);
     }
 
     private function storeReview(StoreReviewAction $storeReview, ReviewStatus $requestedStatus): void

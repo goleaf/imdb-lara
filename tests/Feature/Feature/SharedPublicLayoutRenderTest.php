@@ -42,5 +42,6 @@ class SharedPublicLayoutRenderTest extends TestCase
         $this->assertNotFalse($contents);
         $this->assertStringContainsString('@livewireScriptConfig', $contents);
         $this->assertStringNotContainsString('@livewireScripts', $contents);
+        $this->assertStringNotContainsString('fonts.bunny.net', $contents);
     }
 }

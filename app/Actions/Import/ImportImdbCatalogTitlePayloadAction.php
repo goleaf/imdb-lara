@@ -5,6 +5,7 @@ namespace App\Actions\Import;
 use App\Actions\Import\Concerns\BatchesCatalogImportLookups;
 use App\Actions\Import\Concerns\ManagesImdbImportConcurrency;
 use App\Models\AkaAttribute;
+use App\Models\AkaType;
 use App\Models\AwardCategory;
 use App\Models\AwardEvent;
 use App\Models\CertificateAttribute;
@@ -20,6 +21,7 @@ use App\Models\Language;
 use App\Models\Movie;
 use App\Models\MovieAka;
 use App\Models\MovieAkaAttribute;
+use App\Models\MovieAkaType;
 use App\Models\MovieAwardNomination;
 use App\Models\MovieAwardNominationNominee;
 use App\Models\MovieAwardNominationSummary;
@@ -502,6 +504,7 @@ class ImportImdbCatalogTitlePayloadAction
 
         if ($existingIds->isNotEmpty()) {
             MovieAkaAttribute::query()->whereIn('movie_aka_id', $existingIds)->delete();
+            MovieAkaType::query()->whereIn('movie_aka_id', $existingIds)->delete();
         }
 
         MovieAka::query()->where('movie_id', $movie->getKey())->delete();
@@ -519,7 +522,12 @@ class ImportImdbCatalogTitlePayloadAction
             fn (array $akaPayload): array => $this->normalizeStringList(data_get($akaPayload, 'attributes')),
             $akas,
         )));
+        $akaTypesByName = $this->resolveAkaTypesByName($this->flattenStringLists(array_map(
+            fn (array $akaPayload): array => $this->normalizeStringList(data_get($akaPayload, 'types')),
+            $akas,
+        )));
         $attributeRows = [];
+        $typeRows = [];
 
         foreach ($akas as $index => $akaPayload) {
             $text = $this->nullableString(data_get($akaPayload, 'text'));
@@ -557,10 +565,28 @@ class ImportImdbCatalogTitlePayloadAction
                     'position' => $attributeIndex + 1,
                 ];
             }
+
+            foreach ($this->normalizeStringList(data_get($akaPayload, 'types')) as $typeIndex => $typeName) {
+                $akaType = $akaTypesByName[$typeName] ?? null;
+
+                if (! $akaType instanceof AkaType) {
+                    continue;
+                }
+
+                $typeRows[] = [
+                    'movie_aka_id' => $movieAka->getKey(),
+                    'aka_type_id' => $akaType->getKey(),
+                    'position' => $typeIndex + 1,
+                ];
+            }
         }
 
         if ($attributeRows !== []) {
             MovieAkaAttribute::query()->insert($attributeRows);
+        }
+
+        if ($typeRows !== []) {
+            MovieAkaType::query()->insert($typeRows);
         }
     }
 
@@ -1728,7 +1754,20 @@ class ImportImdbCatalogTitlePayloadAction
         return $this->batchLookupModels(
             AkaAttribute::class,
             'name',
-            $this->stringLookupRows($attributeNames),
+            AkaAttribute::lookupRows($attributeNames),
+        );
+    }
+
+    /**
+     * @param  list<string>  $typeNames
+     * @return array<string, AkaType>
+     */
+    private function resolveAkaTypesByName(array $typeNames): array
+    {
+        return $this->batchLookupModels(
+            AkaType::class,
+            'name',
+            AkaType::lookupRows($typeNames),
         );
     }
 
@@ -1778,7 +1817,7 @@ class ImportImdbCatalogTitlePayloadAction
         return $this->batchLookupModels(
             AwardCategory::class,
             'name',
-            $this->stringLookupRows(array_values(array_filter($categoryNames))),
+            AwardCategory::lookupRows($categoryNames),
         );
     }
 

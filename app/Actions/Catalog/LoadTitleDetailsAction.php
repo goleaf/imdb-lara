@@ -25,6 +25,7 @@ use App\Models\InterestPrimaryImage;
 use App\Models\InterestSimilarInterest;
 use App\Models\MovieAka;
 use App\Models\MovieAkaAttribute;
+use App\Models\MovieAkaType;
 use App\Models\MovieAwardNominationNominee;
 use App\Models\MovieAwardNominationSummary;
 use App\Models\MovieAwardNominationTitle;
@@ -73,6 +74,13 @@ class LoadTitleDetailsAction
      *         linkedAkas: Collection<int, array{text: string, meta: string|null}>
      *     }>,
      *     akaTypeRows: Collection<int, AkaType>,
+     *     akaTypeEntries: Collection<int, array{
+     *         id: int,
+     *         label: string,
+     *         description: string,
+     *         linkedAkaCount: int,
+     *         linkedAkas: Collection<int, array{text: string, meta: string|null}>
+     *     }>,
      *     awardCategoryRows: Collection<int, AwardCategory>,
      *     awardEventRows: Collection<int, AwardEvent>,
      *     movieAwardNominationRows: Collection<int, AwardNomination>,
@@ -216,6 +224,7 @@ class LoadTitleDetailsAction
             ->values();
         $akaAttributeEntries = $this->buildAkaAttributeEntries($movieAkaRows, $movieAkaAttributeRows);
         $akaTypeRows = $title->resolvedAkaTypes();
+        $akaTypeEntries = $this->buildAkaTypeEntries($movieAkaRows);
         $awardCategoryRows = $title->resolvedAwardCategories();
         $awardEventRows = $title->resolvedAwardEvents();
         $movieAwardNominationRows = $title->resolvedMovieAwardNominations();
@@ -331,9 +340,11 @@ class LoadTitleDetailsAction
             ],
         ]);
         $relatedTitles = collect();
-        $genreIds = $title->genres->pluck('id')->all();
+        $genreIds = $genreRows->pluck('id')->all();
         $isSeriesLike = in_array($title->title_type, [TitleType::Series, TitleType::MiniSeries], true);
-        $seasonNavigation = $title->seasons->values();
+        $seasonNavigation = $title->relationLoaded('seasons')
+            ? $title->getRelation('seasons')->values()
+            : collect();
         $latestSeason = null;
         $latestSeasonEpisodes = collect();
         $topRatedEpisodes = collect();
@@ -345,9 +356,7 @@ class LoadTitleDetailsAction
                 ->whereKeyNot($title->getKey())
                 ->whereHas('genres', fn ($genreQuery) => $genreQuery->whereIn('genres.id', $genreIds))
                 ->withCatalogCardRelations()
-                ->orderByDesc('titles.popularity_rank')
-                ->orderByDesc('titles.release_year')
-                ->orderBy('titles.name')
+                ->orderByRelatedTitles()
                 ->limit(6)
                 ->get();
         }
@@ -407,7 +416,7 @@ class LoadTitleDetailsAction
             [
                 'label' => $isSeriesLike ? 'Seasons' : 'Gallery',
                 'value' => $isSeriesLike
-                    ? number_format($title->seasons->count())
+                    ? number_format($seasonNavigation->count())
                     : number_format($galleryAssets->count()),
                 'copy' => $isSeriesLike ? 'Published season records' : 'Images and trailers available',
             ],
@@ -426,6 +435,7 @@ class LoadTitleDetailsAction
             'akaAttributeRows' => $akaAttributeRows,
             'akaAttributeEntries' => $akaAttributeEntries,
             'akaTypeRows' => $akaTypeRows,
+            'akaTypeEntries' => $akaTypeEntries,
             'awardCategoryRows' => $awardCategoryRows,
             'awardEventRows' => $awardEventRows,
             'movieAwardNominationRows' => $movieAwardNominationRows,
@@ -469,7 +479,7 @@ class LoadTitleDetailsAction
             'awardHighlights' => $title->awardNominations->values(),
             'relatedTitles' => $relatedTitles,
             'seasonNavigation' => $seasonNavigation,
-            'seasons' => $title->seasons->values(),
+            'seasons' => $seasonNavigation,
             'latestSeason' => $latestSeason,
             'latestSeasonEpisodes' => $latestSeasonEpisodes,
             'topRatedEpisodes' => $topRatedEpisodes,
@@ -483,8 +493,8 @@ class LoadTitleDetailsAction
             'ratingCount' => (int) ($title->statistic?->rating_count ?? 0),
             'heroStats' => $heroStats,
             'seo' => new PageSeoData(
-                title: $title->meta_title ?: $title->name,
-                description: $title->meta_description ?: ($title->plot_outline ?: 'Browse cast, awards, genres, ratings, and release details for '.$title->name.'.'),
+                title: $title->seoTitle(),
+                description: $title->seoDescription(),
                 canonical: $shareUrl,
                 openGraphType: $isSeriesLike ? 'video.tv_show' : 'video.movie',
                 openGraphImage: ($backdrop ?? $poster)?->url,
@@ -536,6 +546,69 @@ class LoadTitleDetailsAction
                     'label' => $akaAttribute->resolvedLabel(),
                     'description' => $akaAttribute->shortDescription(),
                     'href' => route('public.aka-attributes.show', $akaAttribute),
+                    'linkedAkaCount' => $linkedAkas->count(),
+                    'linkedAkas' => $linkedAkas
+                        ->map(fn (MovieAka $movieAka): array => [
+                            'text' => (string) $movieAka->text,
+                            'meta' => collect([
+                                $movieAka->resolvedCountryLabel(),
+                                $movieAka->resolvedLanguageLabel(),
+                            ])->filter()->implode(' · ') ?: null,
+                        ])
+                        ->values(),
+                ];
+            })
+            ->sortBy('label')
+            ->values();
+    }
+
+    /**
+     * @param  Collection<int, MovieAka>  $movieAkaRows
+     * @return Collection<int, array{
+     *     id: int,
+     *     label: string,
+     *     description: string,
+     *     linkedAkaCount: int,
+     *     linkedAkas: Collection<int, array{text: string, meta: string|null}>
+     * }>
+     */
+    private function buildAkaTypeEntries(Collection $movieAkaRows): Collection
+    {
+        return $movieAkaRows
+            ->flatMap(function (MovieAka $movieAka): Collection {
+                if (! $movieAka->relationLoaded('movieAkaTypes')) {
+                    return collect();
+                }
+
+                return $movieAka->movieAkaTypes;
+            })
+            ->map(fn (MovieAkaType $movieAkaType): ?AkaType => $movieAkaType->akaType)
+            ->filter(fn (mixed $akaType): bool => $akaType instanceof AkaType && filled($akaType->name))
+            ->unique('id')
+            ->map(function (AkaType $akaType) use ($movieAkaRows): array {
+                $linkedAkas = $movieAkaRows
+                    ->filter(function (MovieAka $movieAka) use ($akaType): bool {
+                        if (! $movieAka->relationLoaded('movieAkaTypes')) {
+                            return false;
+                        }
+
+                        return $movieAka->movieAkaTypes->contains(
+                            fn (MovieAkaType $movieAkaType): bool => (int) $movieAkaType->aka_type_id === (int) $akaType->getKey()
+                        );
+                    })
+                    ->filter(fn (MovieAka $movieAka): bool => filled($movieAka->text))
+                    ->unique(fn (MovieAka $movieAka): string => implode('|', [
+                        $movieAka->text,
+                        $movieAka->country_code,
+                        $movieAka->language_code,
+                    ]))
+                    ->sortBy('position')
+                    ->values();
+
+                return [
+                    'id' => (int) $akaType->getKey(),
+                    'label' => $akaType->resolvedLabel(),
+                    'description' => $akaType->shortDescription(),
                     'linkedAkaCount' => $linkedAkas->count(),
                     'linkedAkas' => $linkedAkas
                         ->map(fn (MovieAka $movieAka): array => [
@@ -974,29 +1047,22 @@ class LoadTitleDetailsAction
 
     private function loadCreditPreview(Title $title): void
     {
+        $creditRelations = [
+            ...Credit::projectedRelations(),
+            'person' => fn ($personQuery) => $personQuery
+                ->select(Person::directoryColumns())
+                ->with(Person::directoryRelations()),
+        ];
+
+        if (! Credit::usesCatalogOnlySchema()) {
+            $creditRelations['profession'] = 'id,person_id,department,profession,is_primary,sort_order';
+            $creditRelations['episode'] = 'id,title_id,series_id,season_id,season_number,episode_number,absolute_number,production_code,aired_at';
+            $creditRelations['episode.title'] = 'id,name,slug,title_type,is_published';
+        }
+
         $title->setRelation('credits', $title->credits()
-            ->select([
-                'id',
-                'title_id',
-                'person_id',
-                'department',
-                'job',
-                'character_name',
-                'billing_order',
-                'is_principal',
-                'person_profession_id',
-                'episode_id',
-                'credited_as',
-                'imdb_source_group',
-            ])
-            ->with([
-                'person' => fn ($personQuery) => $personQuery
-                    ->select(Person::directoryColumns())
-                    ->with(Person::directoryRelations()),
-                'profession:id,person_id,department,profession,is_primary,sort_order',
-                'episode:id,title_id,series_id,season_id,season_number,episode_number,absolute_number,production_code,aired_at',
-                'episode.title:id,name,slug,title_type,is_published',
-            ])
+            ->select(Credit::projectedColumns())
+            ->with($creditRelations)
             ->ordered()
             ->limit(24)
             ->get());
@@ -1004,7 +1070,17 @@ class LoadTitleDetailsAction
 
     private function loadAwardHighlights(Title $title): void
     {
-        $title->setRelation('awardNominations', collect());
+        if (! Title::usesCatalogOnlySchema()) {
+            $title->setRelation('awardNominations', collect());
+
+            return;
+        }
+
+        $title->setRelation('awardNominations', $title->awardNominations()
+            ->selectTitleDetailColumns()
+            ->withTitleDetailRelations()
+            ->ordered()
+            ->get());
     }
 
     private function episodeGuideQuery(Title $series, ?int $seasonNumber = null): Builder

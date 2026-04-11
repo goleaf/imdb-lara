@@ -15,6 +15,7 @@ class ExampleTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertSee('Hero Spotlight');
+            ->assertSee('Start anywhere')
+            ->assertSeeHtml('data-slot="home-theme-lanes"');
     }
 }

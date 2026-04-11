@@ -1,7 +1,7 @@
 @extends('layouts.public')
 
-@section('title', $title->meta_title ?: $title->name)
-@section('meta_description', $title->meta_description ?: ($title->plot_outline ?: 'Browse cast, awards, genres, ratings, and release details for '.$title->name.'.'))
+@section('title', $title->seoTitle())
+@section('meta_description', $title->seoDescription())
 
 @section('breadcrumbs')
     <x-ui.breadcrumbs.item :href="route('public.home')">Home</x-ui.breadcrumbs.item>
@@ -80,9 +80,9 @@
                                 </x-ui.text>
                             </div>
 
-                            @if ($title->genres->isNotEmpty())
+                            @if ($genreRows->isNotEmpty())
                                 <div class="flex flex-wrap gap-2">
-                                    @foreach ($title->genres as $genre)
+                                    @foreach ($genreRows as $genre)
                                         <a href="{{ route('public.genres.show', $genre) }}" class="sb-detail-chip">
                                             {{ $genre->name }}
                                         </a>
@@ -382,13 +382,13 @@
                     </x-ui.card>
                 @endif
 
-                @if ($akaTypeRows->isNotEmpty())
+                @if ($akaTypeEntries->isNotEmpty())
                     <x-ui.card data-slot="title-detail-aka-types" class="sb-detail-section !max-w-none">
                         <div class="space-y-4">
                             <div>
                                 <x-ui.heading level="h2" size="lg">AKA types</x-ui.heading>
                                 <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                    Raw rows imported from the <code>aka_types</code> table and linked to this movie through its title AKA records.
+                                    Imported alternate-title classifications linked to this title through its published AKA rows.
                                 </x-ui.text>
                             </div>
 
@@ -397,18 +397,37 @@
                                     <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
                                         <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
                                             <tr>
-                                                <th scope="col" class="px-4 py-3 font-medium">id</th>
-                                                <th scope="col" class="px-4 py-3 font-medium">name</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">Type</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">Meaning</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">Used on this title</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
-                                            @foreach ($akaTypeRows as $akaTypeRow)
+                                            @foreach ($akaTypeEntries as $akaTypeEntry)
                                                 <tr>
                                                     <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
-                                                        {{ $akaTypeRow->id }}
+                                                        <div>{{ $akaTypeEntry['label'] }}</div>
+                                                        <div class="text-xs text-neutral-500 dark:text-neutral-400">
+                                                            {{ number_format($akaTypeEntry['linkedAkaCount']) }} linked AKA {{ \Illuminate\Support\Str::plural('record', $akaTypeEntry['linkedAkaCount']) }}
+                                                        </div>
                                                     </td>
                                                     <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
-                                                        {{ $akaTypeRow->name }}
+                                                        {{ $akaTypeEntry['description'] }}
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        <div class="flex flex-wrap gap-2">
+                                                            @foreach ($akaTypeEntry['linkedAkas'] as $linkedAka)
+                                                                <span class="inline-flex items-center gap-2 rounded-full border border-black/8 px-3 py-1 text-xs font-medium dark:border-white/10">
+                                                                    <span>{{ $linkedAka['text'] }}</span>
+
+                                                                    @if ($linkedAka['meta'])
+                                                                        <span class="text-[11px] uppercase tracking-[0.14em] text-neutral-500 dark:text-neutral-400">
+                                                                            {{ $linkedAka['meta'] }}
+                                                                        </span>
+                                                                    @endif
+                                                                </span>
+                                                            @endforeach
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             @endforeach
