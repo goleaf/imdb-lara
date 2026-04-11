@@ -100,6 +100,12 @@ class Title extends Model
     protected static function booted(): void
     {
         static::saving(function (self $title): void {
+            if (static::usesCatalogOnlySchema()) {
+                $title->normalizeCatalogOnlyAttributesForPersistence();
+
+                return;
+            }
+
             $title->slug = $title->slug ?: Str::slug($title->name ?: 'untitled');
             $title->sort_title = $title->sort_title ?: $title->name;
             $title->imdb_id = $title->imdb_id ?: null;
@@ -1538,6 +1544,64 @@ class Title extends Model
         parent::setAttribute($key, $value);
 
         return $this;
+    }
+
+    private function normalizeCatalogOnlyAttributesForPersistence(): void
+    {
+        $name = $this->attributes['primarytitle'] ?? $this->attributes['name'] ?? null;
+        $originalName = $this->attributes['originaltitle'] ?? $this->attributes['original_name'] ?? $name;
+        $imdbId = $this->attributes['imdb_id'] ?? $this->attributes['tconst'] ?? null;
+        $catalogType = $this->attributes['titletype']
+            ?? $this->attributes['imdb_type']
+            ?? (($this->attributes['title_type'] ?? null) !== null
+                ? (self::remoteTypesForCatalogType($this->title_type)[0] ?? null)
+                : null);
+        $runtimeMinutes = $this->attributes['runtimeminutes'] ?? $this->attributes['runtime_minutes'] ?? null;
+        $runtimeSeconds = $this->attributes['runtimeSeconds'] ?? $this->attributes['runtime_seconds'] ?? null;
+
+        $this->attributes['primarytitle'] = $name;
+        $this->attributes['originaltitle'] = $originalName;
+        $this->attributes['imdb_id'] = $imdbId;
+        $this->attributes['tconst'] = $imdbId;
+        $this->attributes['titletype'] = $catalogType;
+        $this->attributes['startyear'] = $this->attributes['startyear'] ?? $this->attributes['release_year'] ?? null;
+        $this->attributes['endyear'] = $this->attributes['endyear'] ?? $this->attributes['end_year'] ?? null;
+        $this->attributes['runtimeminutes'] = $runtimeMinutes;
+        $this->attributes['runtimeSeconds'] = $runtimeSeconds ?? ($runtimeMinutes !== null ? ((int) $runtimeMinutes) * 60 : null);
+        $this->attributes['isadult'] = (int) ($this->attributes['isadult'] ?? 0);
+
+        foreach ([
+            'name',
+            'original_name',
+            'slug',
+            'sort_title',
+            'title_type',
+            'release_year',
+            'end_year',
+            'release_date',
+            'runtime_minutes',
+            'age_rating',
+            'plot_outline',
+            'synopsis',
+            'tagline',
+            'origin_country',
+            'original_language',
+            'popularity_rank',
+            'canonical_title_id',
+            'meta_title',
+            'meta_description',
+            'search_keywords',
+            'is_published',
+            'imdb_type',
+            'runtime_seconds',
+            'imdb_genres',
+            'imdb_interests',
+            'imdb_origin_countries',
+            'imdb_spoken_languages',
+            'imdb_payload',
+        ] as $attribute) {
+            unset($this->attributes[$attribute]);
+        }
     }
 
     /**
