@@ -1,3 +1,19 @@
+@php
+    $statePath = $statePath ?? null;
+    $fieldStatePath = static fn (?string $prefix, string $field): string => filled($prefix)
+        ? sprintf('%s.%s', $prefix, $field)
+        : $field;
+    $fieldName = static fn (?string $prefix, string $field): string => filled($prefix)
+        ? sprintf('%s[%s]', $prefix, $field)
+        : $field;
+    $allowedMediaKinds = \App\Enums\MediaKind::allowedForMediable($mediaAsset->mediable ?? $mediaAsset->mediable_type);
+    $allowedMediaKindsIncludeVideo = collect($allowedMediaKinds)->contains(
+        static fn (\App\Enums\MediaKind $mediaKind): bool => $mediaKind->isVideo(),
+    );
+    $selectedKind = old('kind', $mediaAsset->kind?->value);
+    $selectedKindIsImage = is_string($selectedKind) && in_array($selectedKind, \App\Enums\MediaKind::imageValues(), true);
+@endphp
+
 @if ($mediaAsset->exists)
     <div class="rounded-box border border-black/10 bg-neutral-50 p-4 dark:border-white/10 dark:bg-neutral-900/60">
         <div class="grid gap-4 md:grid-cols-[12rem_minmax(0,1fr)]">
@@ -79,8 +95,8 @@
 <div class="grid gap-4 lg:grid-cols-2">
     <x-ui.field>
         <x-ui.label>Kind</x-ui.label>
-        <select wire:model.live="{{ $this->adminFieldStatePath($statePath ?? null, 'kind') }}" name="{{ $this->adminFieldName($statePath ?? null, 'kind') }}" class="min-h-10 rounded-box border border-black/10 bg-white px-3 text-sm text-neutral-800 shadow-xs transition focus:border-black/15 focus:outline-none focus:ring-2 focus:ring-neutral-900/15 dark:border-white/15 dark:bg-neutral-900 dark:text-neutral-200 dark:focus:border-white/20 dark:focus:ring-neutral-100/15">
-            @foreach ($this->adminAllowedMediaKinds($mediaAsset) as $mediaKind)
+        <select wire:model.live="{{ $fieldStatePath($statePath, 'kind') }}" name="{{ $fieldName($statePath, 'kind') }}" class="min-h-10 rounded-box border border-black/10 bg-white px-3 text-sm text-neutral-800 shadow-xs transition focus:border-black/15 focus:outline-none focus:ring-2 focus:ring-neutral-900/15 dark:border-white/15 dark:bg-neutral-900 dark:text-neutral-200 dark:focus:border-white/20 dark:focus:ring-neutral-100/15">
+            @foreach ($allowedMediaKinds as $mediaKind)
                 <option value="{{ $mediaKind->value }}" @selected(old('kind', $mediaAsset->kind?->value) === $mediaKind->value)>
                     {{ $mediaKind->label() }}
                 </option>
@@ -90,7 +106,7 @@
     </x-ui.field>
     <x-ui.field>
         <x-ui.label>Upload image</x-ui.label>
-        <x-ui.input wire:model="{{ $this->adminFieldStatePath($statePath ?? null, 'file') }}" name="{{ $this->adminFieldName($statePath ?? null, 'file') }}" type="file" accept="image/*" />
+        <x-ui.input wire:model="{{ $fieldStatePath($statePath, 'file') }}" name="{{ $fieldName($statePath, 'file') }}" type="file" accept="image/*" />
         <x-ui.text class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
             Use uploads for posters, backdrops, stills, galleries, and headshots.
         </x-ui.text>
@@ -98,9 +114,9 @@
     </x-ui.field>
     <x-ui.field>
         <x-ui.label>URL</x-ui.label>
-        <x-ui.input wire:model.defer="{{ $this->adminFieldStatePath($statePath ?? null, 'url') }}" name="{{ $this->adminFieldName($statePath ?? null, 'url') }}" type="url" :value="old('url', $mediaAsset->url)" />
+        <x-ui.input wire:model.defer="{{ $fieldStatePath($statePath, 'url') }}" name="{{ $fieldName($statePath, 'url') }}" type="url" :value="old('url', $mediaAsset->url)" />
         <x-ui.text class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-            @if ($this->adminAllowedMediaKindsIncludeVideo($mediaAsset))
+            @if ($allowedMediaKindsIncludeVideo)
                 Required for trailers, clips, and featurettes. Optional for image assets when you upload a file.
             @else
                 Optional for externally hosted images. Uploads still populate local storage metadata automatically.
@@ -110,14 +126,14 @@
     </x-ui.field>
     <x-ui.field>
         <x-ui.label>Alt text</x-ui.label>
-        <x-ui.input wire:model.defer="{{ $this->adminFieldStatePath($statePath ?? null, 'alt_text') }}" name="{{ $this->adminFieldName($statePath ?? null, 'alt_text') }}" :value="old('alt_text', $mediaAsset->alt_text)" />
+        <x-ui.input wire:model.defer="{{ $fieldStatePath($statePath, 'alt_text') }}" name="{{ $fieldName($statePath, 'alt_text') }}" :value="old('alt_text', $mediaAsset->alt_text)" />
         <x-ui.error name="alt_text" />
     </x-ui.field>
     <x-ui.field>
         <x-ui.label>Provider</x-ui.label>
-        <x-ui.input wire:model.defer="{{ $this->adminFieldStatePath($statePath ?? null, 'provider') }}" name="{{ $this->adminFieldName($statePath ?? null, 'provider') }}" :value="old('provider', $mediaAsset->provider)" />
+        <x-ui.input wire:model.defer="{{ $fieldStatePath($statePath, 'provider') }}" name="{{ $fieldName($statePath, 'provider') }}" :value="old('provider', $mediaAsset->provider)" />
         <x-ui.text class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-            @if ($this->adminAllowedMediaKindsIncludeVideo($mediaAsset))
+            @if ($allowedMediaKindsIncludeVideo)
                 Leave blank for uploads. Use this for external sources like YouTube, Vimeo, or internal video providers.
             @else
                 Leave blank for uploads. Use this only when you need to label a remote image source.
@@ -127,28 +143,28 @@
     </x-ui.field>
     <x-ui.field>
         <x-ui.label>Provider key</x-ui.label>
-        <x-ui.input wire:model.defer="{{ $this->adminFieldStatePath($statePath ?? null, 'provider_key') }}" name="{{ $this->adminFieldName($statePath ?? null, 'provider_key') }}" :value="old('provider_key', $mediaAsset->provider_key)" />
+        <x-ui.input wire:model.defer="{{ $fieldStatePath($statePath, 'provider_key') }}" name="{{ $fieldName($statePath, 'provider_key') }}" :value="old('provider_key', $mediaAsset->provider_key)" />
         <x-ui.error name="provider_key" />
     </x-ui.field>
     <x-ui.field>
         <x-ui.label>Language</x-ui.label>
-        <x-ui.input wire:model.defer="{{ $this->adminFieldStatePath($statePath ?? null, 'language') }}" name="{{ $this->adminFieldName($statePath ?? null, 'language') }}" :value="old('language', $mediaAsset->language)" />
+        <x-ui.input wire:model.defer="{{ $fieldStatePath($statePath, 'language') }}" name="{{ $fieldName($statePath, 'language') }}" :value="old('language', $mediaAsset->language)" />
         <x-ui.error name="language" />
     </x-ui.field>
     <x-ui.field>
         <x-ui.label>Width</x-ui.label>
-        <x-ui.input wire:model.defer="{{ $this->adminFieldStatePath($statePath ?? null, 'width') }}" name="{{ $this->adminFieldName($statePath ?? null, 'width') }}" type="number" min="1" :value="old('width', $mediaAsset->width)" />
+        <x-ui.input wire:model.defer="{{ $fieldStatePath($statePath, 'width') }}" name="{{ $fieldName($statePath, 'width') }}" type="number" min="1" :value="old('width', $mediaAsset->width)" />
         <x-ui.error name="width" />
     </x-ui.field>
     <x-ui.field>
         <x-ui.label>Height</x-ui.label>
-        <x-ui.input wire:model.defer="{{ $this->adminFieldStatePath($statePath ?? null, 'height') }}" name="{{ $this->adminFieldName($statePath ?? null, 'height') }}" type="number" min="1" :value="old('height', $mediaAsset->height)" />
+        <x-ui.input wire:model.defer="{{ $fieldStatePath($statePath, 'height') }}" name="{{ $fieldName($statePath, 'height') }}" type="number" min="1" :value="old('height', $mediaAsset->height)" />
         <x-ui.error name="height" />
     </x-ui.field>
     <x-ui.field>
         <x-ui.label>Duration (seconds)</x-ui.label>
-        <x-ui.input wire:model.defer="{{ $this->adminFieldStatePath($statePath ?? null, 'duration_seconds') }}" name="{{ $this->adminFieldName($statePath ?? null, 'duration_seconds') }}" type="number" min="1" :value="old('duration_seconds', $mediaAsset->duration_seconds)" />
-        @if ($this->adminMediaKindIsImage(old('kind', $mediaAsset->kind?->value)))
+        <x-ui.input wire:model.defer="{{ $fieldStatePath($statePath, 'duration_seconds') }}" name="{{ $fieldName($statePath, 'duration_seconds') }}" type="number" min="1" :value="old('duration_seconds', $mediaAsset->duration_seconds)" />
+        @if ($selectedKindIsImage)
             <x-ui.text class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
                 Leave empty for still images. Video kinds keep using remote metadata.
             </x-ui.text>
@@ -157,28 +173,28 @@
     </x-ui.field>
     <x-ui.field>
         <x-ui.label>Position</x-ui.label>
-        <x-ui.input wire:model.defer="{{ $this->adminFieldStatePath($statePath ?? null, 'position') }}" name="{{ $this->adminFieldName($statePath ?? null, 'position') }}" type="number" min="0" :value="old('position', $mediaAsset->position)" />
+        <x-ui.input wire:model.defer="{{ $fieldStatePath($statePath, 'position') }}" name="{{ $fieldName($statePath, 'position') }}" type="number" min="0" :value="old('position', $mediaAsset->position)" />
         <x-ui.error name="position" />
     </x-ui.field>
     <x-ui.field>
         <x-ui.label>Published at</x-ui.label>
-        <x-ui.input wire:model.defer="{{ $this->adminFieldStatePath($statePath ?? null, 'published_at') }}" name="{{ $this->adminFieldName($statePath ?? null, 'published_at') }}" type="datetime-local" :value="old('published_at', $mediaAsset->published_at?->format('Y-m-d\\TH:i'))" />
+        <x-ui.input wire:model.defer="{{ $fieldStatePath($statePath, 'published_at') }}" name="{{ $fieldName($statePath, 'published_at') }}" type="datetime-local" :value="old('published_at', $mediaAsset->published_at?->format('Y-m-d\\TH:i'))" />
         <x-ui.error name="published_at" />
     </x-ui.field>
     <div class="flex items-center gap-2 text-sm lg:self-end">
-        <x-ui.checkbox wire:model="{{ $this->adminFieldStatePath($statePath ?? null, 'is_primary') }}" name="{{ $this->adminFieldName($statePath ?? null, 'is_primary') }}" value="1" label="Primary asset" />
+        <x-ui.checkbox wire:model="{{ $fieldStatePath($statePath, 'is_primary') }}" name="{{ $fieldName($statePath, 'is_primary') }}" value="1" label="Primary asset" />
     </div>
 </div>
 
 <x-ui.field>
     <x-ui.label>Caption</x-ui.label>
-    <x-ui.textarea wire:model.defer="{{ $this->adminFieldStatePath($statePath ?? null, 'caption') }}" name="{{ $this->adminFieldName($statePath ?? null, 'caption') }}" rows="3">{{ old('caption', $mediaAsset->caption) }}</x-ui.textarea>
+    <x-ui.textarea wire:model.defer="{{ $fieldStatePath($statePath, 'caption') }}" name="{{ $fieldName($statePath, 'caption') }}" rows="3">{{ old('caption', $mediaAsset->caption) }}</x-ui.textarea>
     <x-ui.error name="caption" />
 </x-ui.field>
 
 <x-ui.field>
     <x-ui.label>Metadata JSON</x-ui.label>
-    <x-ui.textarea wire:model.defer="{{ $this->adminFieldStatePath($statePath ?? null, 'metadata') }}" name="{{ $this->adminFieldName($statePath ?? null, 'metadata') }}" rows="5">{{ old('metadata', $mediaAsset->metadata ? json_encode($mediaAsset->metadata, JSON_PRETTY_PRINT) : null) }}</x-ui.textarea>
+    <x-ui.textarea wire:model.defer="{{ $fieldStatePath($statePath, 'metadata') }}" name="{{ $fieldName($statePath, 'metadata') }}" rows="5">{{ old('metadata', $mediaAsset->metadata ? json_encode($mediaAsset->metadata, JSON_PRETTY_PRINT) : null) }}</x-ui.textarea>
     <x-ui.text class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
         Upload-backed assets automatically persist storage metadata here. Custom metadata is merged rather than discarded.
     </x-ui.text>

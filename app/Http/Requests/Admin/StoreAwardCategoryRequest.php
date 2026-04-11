@@ -27,7 +27,9 @@ class StoreAwardCategoryRequest extends FormRequest
     private function validationTable(): string
     {
         $awardCategory = new AwardCategory;
+        $connection = $awardCategory->getConnectionName();
+        $table = $awardCategory->getTable();
 
-        return sprintf('%s.%s', $awardCategory->getConnectionName(), $awardCategory->getTable());
+        return filled($connection) ? sprintf('%s.%s', $connection, $table) : $table;
     }
 }

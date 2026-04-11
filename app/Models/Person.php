@@ -487,6 +487,11 @@ class Person extends Model
         return $this->morphMany(MediaAsset::class, 'mediable')->ordered();
     }
 
+    public function contributions(): MorphMany
+    {
+        return $this->morphMany(Contribution::class, 'contributable')->latest('created_at');
+    }
+
     public function awardNominations(): Relation
     {
         if (static::usesCatalogOnlySchema()) {

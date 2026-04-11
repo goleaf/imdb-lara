@@ -6,7 +6,7 @@ Hey! Here is what changed today in this project:
 The admin area can now manage imported AKA attributes, AKA types, and award categories through dedicated Livewire pages instead of leaving those lookup tables hidden behind the import pipeline. The title detail page also gained a much more useful AKA types section that explains what each type means and shows which alternate titles actually use it. On the import side, IMDb AKA payloads can now create both lookup rows and bridge rows for AKA types, so the catalog carries more of the source data all the way through to the public UI. The demo seeder was also expanded so local installs have a fuller mix of titles, seasons, episodes, awards, contributions, watchlist activity, and notifications to browse.
 
 ### What Was Improved
-Catalog-only mode is much better aligned with the remote IMDb-style schema now. Titles, people, credits, professions, ratings, awards, and media helpers all understand the remote column names more directly, which means fewer translation gaps between local app code and imported catalog data. Search suggestions, people filter options, hero spotlight credits, and title/person detail loaders were also tightened so they reuse the new catalog-aware projections instead of assuming the local schema. The global search shell now leans harder on shared UI buttons and empty-state components, which gives the overlay a cleaner structure and a steadier contract for future styling or behavior changes. Several Livewire components also now lock their route-bound models and move more render payload building into computed state, which should make UI behavior more predictable.
+Catalog-only mode is much better aligned with the remote IMDb-style schema now. Titles, people, credits, professions, ratings, awards, and media helpers all understand the remote column names more directly, which means fewer translation gaps between local app code and imported catalog data. Award events, categories, and nominations can also move more cleanly between the imported catalog schema and the local app schema now, so admin tooling and title detail pages do not have to guess which keys or tables are in play. Search suggestions, people filter options, hero spotlight credits, and title/person detail loaders were also tightened so they reuse the new catalog-aware projections instead of assuming the local schema. The global search shell now leans harder on shared UI buttons and empty-state components, which gives the overlay a cleaner structure and a steadier contract for future styling or behavior changes. Several Livewire components also now lock their route-bound models and move more render payload building into computed state, which should make UI behavior more predictable.
 
 ### What Was Removed or Cleaned Up
 The old controller-based admin mutation endpoints were removed from the admin route surface because the write flows now live on Livewire pages. Several embedded Livewire Blade views also dropped their island wrappers, which simplifies rendering and shifts the tests toward direct component behavior. A stale changelog entry that described a different refactor was replaced with this one so the project history actually matches the current tree.
@@ -38,10 +38,10 @@ The old controller-based admin mutation endpoints were removed from the admin ro
 - `app/Http/Controllers/Admin/ModerationAdminController.php` — removed the old controller-based moderation mutation endpoints.
 - `app/Http/Requests/Admin/StoreAkaAttributeRequest.php` — added create validation and authorization for AKA attribute pages.
 - `app/Http/Requests/Admin/StoreAkaTypeRequest.php` — added create validation and authorization for AKA type pages.
-- `app/Http/Requests/Admin/StoreAwardCategoryRequest.php` — added create validation and authorization for award category pages.
+- `app/Http/Requests/Admin/StoreAwardCategoryRequest.php` — added create validation and authorization for award category pages, including local-vs-catalog table resolution for validation rules.
 - `app/Http/Requests/Admin/UpdateAkaAttributeRequest.php` — added update validation and authorization for AKA attribute pages.
 - `app/Http/Requests/Admin/UpdateAkaTypeRequest.php` — added update validation and authorization for AKA type pages.
-- `app/Http/Requests/Admin/UpdateAwardCategoryRequest.php` — added update validation and authorization for award category pages.
+- `app/Http/Requests/Admin/UpdateAwardCategoryRequest.php` — made award category update validation resolve the right table name in both local and catalog-backed environments.
 - `app/Livewire/Pages/Admin/AkaAttributeCreatePage.php` — added the Livewire create page wrapper for AKA attributes.
 - `app/Livewire/Pages/Admin/AkaAttributeEditPage.php` — added the Livewire edit page wrapper for AKA attributes.
 - `app/Livewire/Pages/Admin/AkaAttributesIndexPage.php` — added the Livewire index page wrapper for AKA attributes.
@@ -76,8 +76,9 @@ The old controller-based admin mutation endpoints were removed from the admin ro
 - `app/Livewire/Titles/WatchlistToggle.php` — locked the bound title record in the watchlist toggle.
 - `app/Models/AkaAttribute.php` — added admin listing scopes, lookup row helpers, and usage-count helpers for AKA attributes.
 - `app/Models/AkaType.php` — added admin listing scopes, lookup row helpers, usage counts, and presentation helpers for AKA types.
-- `app/Models/AwardCategory.php` — added admin listing scopes, lookup row helpers, usage counts, and presentation helpers for award categories.
-- `app/Models/AwardNomination.php` — added title-detail query scopes for remote award nominations.
+- `app/Models/AwardCategory.php` — made award categories dual-schema aware with factories, award relations, ordered nomination usage counts, and safer admin lookup helpers.
+- `app/Models/AwardEvent.php` — made award events work against either local ids or remote IMDb ids, including safer slug and route-binding behavior.
+- `app/Models/AwardNomination.php` — made award nominations switch cleanly between imported movie-award rows and local award nominations, including relations, ordering, and key accessors.
 - `app/Models/Credit.php` — expanded credit mapping so catalog-only reads and writes work against remote name credit columns and character bridges.
 - `app/Models/Genre.php` — made genre-to-title relations and description fallback logic safer in catalog-only mode.
 - `app/Models/MovieAka.php` — added scopes and relations for filtering, loading, and ordering AKA records plus their types.
@@ -85,7 +86,7 @@ The old controller-based admin mutation endpoints were removed from the admin ro
 - `app/Models/MovieAkaType.php` — added the new bridge model for movie AKA type assignments.
 - `app/Models/Person.php` — expanded remote person mapping, profession relations, award access, and save normalization for catalog-only mode.
 - `app/Models/PersonProfession.php` — expanded profession mapping so remote profession bridges can be read, sorted, and persisted cleanly.
-- `app/Models/Title.php` — greatly expanded catalog-only title mapping, remote persistence normalization, resolved helper collections, and media/AKA/award relations.
+- `app/Models/Title.php` — greatly expanded catalog-only title mapping, remote persistence normalization, resolved helper collections, and media/AKA/award relations, including the correct award nomination foreign key per schema.
 - `app/Models/TitleStatistic.php` — mapped title statistics cleanly onto remote movie rating columns and save behavior.
 - `app/Policies/AkaAttributePolicy.php` — added catalog management authorization for AKA attribute pages.
 - `app/Policies/AkaTypePolicy.php` — added catalog management authorization for AKA type pages.
@@ -126,9 +127,10 @@ The old controller-based admin mutation endpoints were removed from the admin ro
 - `tests/Concerns/BuildsCatalogTitleFixtures.php` — expanded catalog title and poster fixtures with the fields needed by the richer title mapping.
 - `tests/Feature/ExampleTest.php` — updated the homepage smoke test to match the current home page content.
 - `tests/Feature/Feature/Account/WatchlistBrowserTest.php` — updated watchlist browser tests for direct Livewire rendering without island loading.
+- `tests/Feature/Feature/Account/WatchlistInteractionTest.php` — updated the watchlist page assertion so the browser shell and the Livewire list contents are both verified.
 - `tests/Feature/Feature/Admin/AdminAkaAttributeCrudTest.php` — added CRUD coverage for the new AKA attribute Livewire admin pages.
 - `tests/Feature/Feature/Admin/AdminAkaTypeCrudTest.php` — added CRUD coverage for the new AKA type Livewire admin pages.
-- `tests/Feature/Feature/Admin/AdminAwardCategoryCrudTest.php` — added CRUD coverage for the new award category Livewire admin pages.
+- `tests/Feature/Feature/Admin/AdminAwardCategoryCrudTest.php` — now boots the catalog-only application mode so the award category CRUD flow is exercised against the remote-style setup too.
 - `tests/Feature/Feature/Admin/AdminCatalogCrudTest.php` — updated route assertions to prove the legacy admin mutation routes are gone.
 - `tests/Feature/Feature/Admin/AdminCatalogReadonlyPagesTest.php` — added catalog-only read-only coverage for the new admin lookup pages.
 - `tests/Feature/Feature/Admin/MediaAssetUploadTest.php` — updated route assertions to prove media and moderation controller routes are gone.
@@ -153,6 +155,6 @@ The old controller-based admin mutation endpoints were removed from the admin ro
 - `changelog/changelog-2026-04-11.md` — replaced a stale changelog entry with one that matches the current repo state.
 
 ### Why This Matters
-This update makes the project easier to operate and harder to break. Admin users can now manage key imported lookup data through the same Livewire admin surface the rest of the tool uses, the public title experience exposes richer imported metadata instead of raw rows, and catalog-only mode is much more faithful to the remote schema it depends on. That combination reduces hidden gaps between import data, admin tools, and what visitors actually see.
+This update makes the project easier to operate and harder to break. Admin users can now manage key imported lookup data through the same Livewire admin surface the rest of the tool uses, the public title experience exposes richer imported metadata instead of raw rows, and catalog-only mode is much more faithful to the remote schema it depends on. That includes the award stack now, which reduces the chances of local admin flows and imported title detail data drifting apart.
 
 ---

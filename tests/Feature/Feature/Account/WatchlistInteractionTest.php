@@ -3,6 +3,7 @@
 namespace Tests\Feature\Feature\Account;
 
 use App\Enums\WatchState;
+use App\Livewire\Account\WatchlistBrowser;
 use App\Livewire\Titles\RatingPanel;
 use App\Livewire\Titles\ReviewComposer;
 use App\Livewire\Titles\WatchlistToggle;
@@ -34,6 +35,10 @@ class WatchlistInteractionTest extends TestCase
             ->get(route('account.watchlist'))
             ->assertOk()
             ->assertSee('Your Watchlist')
+            ->assertSee('Loading your private tracking queue and filters.');
+
+        Livewire::actingAs($member)
+            ->test(WatchlistBrowser::class)
             ->assertSee($savedTitle->name);
     }
 

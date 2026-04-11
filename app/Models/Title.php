@@ -959,6 +959,25 @@ class Title extends Model
         return $this->morphMany(MediaAsset::class, 'mediable')->ordered();
     }
 
+    public function contributions(): MorphMany
+    {
+        return $this->morphMany(Contribution::class, 'contributable')->latest('created_at');
+    }
+
+    public function outgoingRelationships(): HasMany
+    {
+        return $this->hasMany(TitleRelationship::class, 'from_title_id')
+            ->orderBy('relationship_type')
+            ->orderBy('id');
+    }
+
+    public function incomingRelationships(): HasMany
+    {
+        return $this->hasMany(TitleRelationship::class, 'to_title_id')
+            ->orderBy('relationship_type')
+            ->orderBy('id');
+    }
+
     public function reviews(): HasMany
     {
         return $this->hasMany(Review::class);
@@ -968,7 +987,7 @@ class Title extends Model
     {
         return $this->hasMany(
             AwardNomination::class,
-            'movie_id',
+            static::usesCatalogOnlySchema() ? 'movie_id' : 'title_id',
             'id',
         )->ordered();
     }
@@ -976,6 +995,11 @@ class Title extends Model
     public function titleTranslations(): HasMany
     {
         return $this->hasMany(TitleTranslation::class);
+    }
+
+    public function translations(): HasMany
+    {
+        return $this->titleTranslations();
     }
 
     public function typeLabel(): string

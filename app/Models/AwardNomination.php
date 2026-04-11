@@ -2,24 +2,29 @@
 
 namespace App\Models;
 
+use Database\Factories\AwardNominationFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class AwardNomination extends Model
 {
-    protected $connection = 'imdb_mysql';
+    /** @use HasFactory<AwardNominationFactory> */
+    use HasFactory;
 
-    protected $table = 'movie_award_nominations';
-
-    public $timestamps = false;
-
-    /**
-     * @var list<string>
-     */
     protected $fillable = [
+        'award_event_id',
+        'title_id',
+        'person_id',
+        'company_id',
+        'episode_id',
+        'credited_name',
+        'details',
+        'sort_order',
         'movie_id',
         'event_imdb_id',
         'award_category_id',
@@ -34,6 +39,12 @@ class AwardNomination extends Model
     {
         return [
             'id' => 'integer',
+            'award_event_id' => 'integer',
+            'title_id' => 'integer',
+            'person_id' => 'integer',
+            'company_id' => 'integer',
+            'episode_id' => 'integer',
+            'sort_order' => 'integer',
             'movie_id' => 'integer',
             'award_category_id' => 'integer',
             'award_year' => 'integer',
@@ -43,40 +54,89 @@ class AwardNomination extends Model
         ];
     }
 
+    protected static function usesCatalogOnlySchema(): bool
+    {
+        return Title::usesCatalogOnlySchema();
+    }
+
+    public function getTable(): string
+    {
+        return static::usesCatalogOnlySchema() ? 'movie_award_nominations' : 'award_nominations';
+    }
+
+    public function getConnectionName(): ?string
+    {
+        return static::usesCatalogOnlySchema() ? 'imdb_mysql' : null;
+    }
+
+    public function usesTimestamps(): bool
+    {
+        return static::usesCatalogOnlySchema() ? false : parent::usesTimestamps();
+    }
+
     public function scopeForTitle(Builder $query, Title|int $title): Builder
     {
         $titleId = $title instanceof Title
             ? (int) $title->getKey()
             : $title;
 
-        return $query->where('movie_id', $titleId);
+        return $query->where(static::usesCatalogOnlySchema() ? 'movie_id' : 'title_id', $titleId);
     }
 
     public function scopeSelectTitleDetailColumns(Builder $query): Builder
     {
+        if (static::usesCatalogOnlySchema()) {
+            return $query->select([
+                'id',
+                'movie_id',
+                'event_imdb_id',
+                'award_category_id',
+                'award_year',
+                'text',
+                'is_winner',
+                'winner_rank',
+                'position',
+            ]);
+        }
+
         return $query->select([
             'id',
-            'movie_id',
-            'event_imdb_id',
+            'award_event_id',
             'award_category_id',
-            'award_year',
-            'text',
+            'title_id',
+            'person_id',
+            'company_id',
+            'episode_id',
+            'credited_name',
+            'details',
             'is_winner',
-            'winner_rank',
-            'position',
+            'sort_order',
         ]);
     }
 
     public function scopeWithTitleDetailRelations(Builder $query): Builder
     {
+        if (static::usesCatalogOnlySchema()) {
+            return $query->with([
+                'awardEvent:imdb_id,name',
+                'awardCategory:id,name',
+            ]);
+        }
+
         return $query->with([
-            'awardEvent:imdb_id,name',
-            'awardCategory:id,name',
+            'awardEvent:id,name,slug,award_id,year,edition,event_date,location',
+            'awardCategory:id,name,slug,award_id,recipient_scope',
         ]);
     }
 
     public function scopeOrdered(Builder $query): Builder
     {
+        if (! static::usesCatalogOnlySchema()) {
+            return $query
+                ->orderBy('sort_order')
+                ->orderBy('id');
+        }
+
         return $query
             ->orderBy('position')
             ->orderBy('id');
@@ -103,6 +163,12 @@ class AwardNomination extends Model
 
     public function scopeForAwardCohort(Builder $query, self $awardNomination): Builder
     {
+        if (! static::usesCatalogOnlySchema()) {
+            return $query
+                ->where('award_event_id', $awardNomination->award_event_id)
+                ->where('award_category_id', $awardNomination->award_category_id);
+        }
+
         return $query
             ->where('event_imdb_id', $awardNomination->event_imdb_id)
             ->where('award_category_id', $awardNomination->award_category_id)
@@ -115,7 +181,11 @@ class AwardNomination extends Model
 
     public function awardEvent(): BelongsTo
     {
-        return $this->belongsTo(AwardEvent::class, 'event_imdb_id', 'imdb_id');
+        return $this->belongsTo(
+            AwardEvent::class,
+            static::usesCatalogOnlySchema() ? 'event_imdb_id' : 'award_event_id',
+            static::usesCatalogOnlySchema() ? 'imdb_id' : 'id',
+        );
     }
 
     public function awardCategory(): BelongsTo
@@ -125,11 +195,26 @@ class AwardNomination extends Model
 
     public function title(): BelongsTo
     {
-        return $this->belongsTo(Title::class, 'movie_id', 'id');
+        return $this->belongsTo(
+            Title::class,
+            static::usesCatalogOnlySchema() ? 'movie_id' : 'title_id',
+            'id',
+        );
     }
 
-    public function people(): BelongsToMany
+    public function people(): Relation
     {
+        if (! static::usesCatalogOnlySchema()) {
+            return $this->belongsToMany(
+                Person::class,
+                'award_nominations',
+                'id',
+                'person_id',
+                'id',
+                'id',
+            );
+        }
+
         return $this->belongsToMany(Person::class, 'movie_award_nomination_nominees', 'movie_award_nomination_id', 'name_basic_id', 'id', 'id');
     }
 
@@ -152,6 +237,26 @@ class AwardNomination extends Model
         }
 
         return $this->people->first();
+    }
+
+    public function getTitleIdAttribute(?int $value): ?int
+    {
+        return $value ?? (isset($this->attributes['movie_id']) ? (int) $this->attributes['movie_id'] : null);
+    }
+
+    public function getMovieIdAttribute(?int $value): ?int
+    {
+        return $value ?? (isset($this->attributes['title_id']) ? (int) $this->attributes['title_id'] : null);
+    }
+
+    public function getSortOrderAttribute(?int $value): ?int
+    {
+        return $value ?? (isset($this->attributes['position']) ? (int) $this->attributes['position'] : null);
+    }
+
+    public function getPositionAttribute(?int $value): ?int
+    {
+        return $value ?? (isset($this->attributes['sort_order']) ? (int) $this->attributes['sort_order'] : null);
     }
 
     public function getSlugAttribute(): string

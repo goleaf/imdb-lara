@@ -10,12 +10,14 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 use Tests\Concerns\BootstrapsImdbMysqlSqlite;
+use Tests\Concerns\UsesCatalogOnlyApplication;
 use Tests\TestCase;
 
 class AdminAwardCategoryCrudTest extends TestCase
 {
     use BootstrapsImdbMysqlSqlite;
     use RefreshDatabase;
+    use UsesCatalogOnlyApplication;
 
     protected function setUp(): void
     {
