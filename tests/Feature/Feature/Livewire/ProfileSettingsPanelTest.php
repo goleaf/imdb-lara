@@ -26,6 +26,9 @@ class ProfileSettingsPanelTest extends TestCase
 
         Livewire::actingAs($user)
             ->test('account.profile-settings-panel')
+            ->assertSeeHtml('data-slot="checkbox-wrapper"')
+            ->assertSee('Show ratings on your public profile')
+            ->assertSee('Reviews, lists, and watchlist visibility continue to follow their own privacy rules.')
             ->assertSet('watchlistVisibility', ListVisibility::Public->value)
             ->set('name', 'Updated Curator')
             ->set('bio', 'Obsessed with conspiracy thrillers and prestige miniseries.')

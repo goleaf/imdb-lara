@@ -23,21 +23,32 @@
             </x-ui.button>
         </div>
 
-        <x-ui.card class="!max-w-none">
-            <form method="POST" action="{{ route('admin.titles.store') }}" class="space-y-6">
-                @csrf
+        @if ($catalogOnly)
+            <x-admin.catalog-write-disabled-panel
+                :back-href="route('admin.titles.index')"
+                back-label="Back to titles"
+                heading="Title Writes Paused"
+                description="Local title creation is paused while Screenbase is operating in catalog-only mode."
+            >
+                Add new movies, series, documentaries, and specials through the upstream catalog sync pipeline instead of the local admin form.
+            </x-admin.catalog-write-disabled-panel>
+        @else
+            <x-ui.card class="!max-w-none">
+                <form method="POST" action="{{ route('admin.titles.store') }}" class="space-y-6">
+                    @csrf
 
-                @include('admin.titles._form')
+                    @include('admin.titles._form')
 
-                <div class="flex justify-end gap-3">
-                    <x-ui.button as="a" :href="route('admin.titles.index')" variant="ghost" icon="arrow-left">
-                        Cancel
-                    </x-ui.button>
-                    <x-ui.button type="submit" icon="plus">
-                        Create title
-                    </x-ui.button>
-                </div>
-            </form>
-        </x-ui.card>
+                    <div class="flex justify-end gap-3">
+                        <x-ui.button as="a" :href="route('admin.titles.index')" variant="ghost" icon="arrow-left">
+                            Cancel
+                        </x-ui.button>
+                        <x-ui.button type="submit" icon="plus">
+                            Create title
+                        </x-ui.button>
+                    </div>
+                </form>
+            </x-ui.card>
+        @endif
     </section>
 @endsection

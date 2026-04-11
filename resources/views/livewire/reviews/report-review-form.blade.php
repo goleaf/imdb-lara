@@ -44,7 +44,7 @@
 
             <x-ui.field>
                 <x-ui.label>Details</x-ui.label>
-                <x-ui.textarea wire:model.live="form.details" name="details" rows="5" placeholder="Optional context for the moderation team." />
+                <x-ui.textarea wire:model.live.blur="form.details" name="details" rows="5" placeholder="Optional context for the moderation team." />
                 <x-ui.error name="form.details" />
             </x-ui.field>
         </form>
@@ -53,7 +53,7 @@
             <x-ui.button variant="ghost" icon="x-mark" x-on:click="$modal.close('{{ $modalId }}')">
                 Cancel
             </x-ui.button>
-            <x-ui.button type="submit" form="review-report-form-{{ $review->id }}" icon="flag">
+            <x-ui.button type="submit" form="review-report-form-{{ $review->id }}" icon="flag" wire:target="save">
                 Submit report
             </x-ui.button>
         </x-slot:footer>

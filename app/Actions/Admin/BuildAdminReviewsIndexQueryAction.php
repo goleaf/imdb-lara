@@ -32,10 +32,7 @@ class BuildAdminReviewsIndexQueryAction
                 'moderated_at',
                 'created_at',
             ])
-            ->with([
-                'author:id,name,username',
-                'title:id,name,slug',
-            ])
+            ->with(Review::adminQueueRelations())
             ->withModerationMetrics();
 
         if ($status !== 'all') {

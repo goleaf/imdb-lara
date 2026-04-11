@@ -11,7 +11,6 @@ use App\Models\Report;
 use App\Models\Review;
 use App\Models\User;
 use App\Models\UserList;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class UpdateReportStatusAction
 {
@@ -20,14 +19,7 @@ class UpdateReportStatusAction
      */
     public function handle(User $moderator, Report $report, array $attributes): Report
     {
-        $report->loadMissing([
-            'reportable' => function (MorphTo $morphTo): void {
-                $morphTo->morphWith([
-                    Review::class => ['author:id,name,username,role,status', 'title:id,name,slug'],
-                    UserList::class => ['user:id,name,username,role,status'],
-                ]);
-            },
-        ]);
+        $report->loadMissing(Report::adminQueueRelations());
 
         $status = ReportStatus::from($attributes['status']);
         $contentAction = $attributes['content_action'] ?? 'none';

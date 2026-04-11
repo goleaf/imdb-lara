@@ -37,7 +37,7 @@
             <x-ui.field>
                 <x-ui.label>Score</x-ui.label>
                 <x-ui.input
-                    wire:model.live="form.score"
+                    wire:model.live.blur="form.score"
                     name="score"
                     type="number"
                     min="1"

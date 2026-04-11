@@ -13,9 +13,14 @@ trait RendersPageView
      */
     protected function renderPageView(string $view, array $data = []): View
     {
-        $sections = view($view, $data)->renderSections();
         $isAdminView = str_starts_with($view, 'admin.');
         $isAccountView = str_starts_with($view, 'account.');
+
+        if ($isAdminView && ! array_key_exists('catalogOnly', $data)) {
+            $data['catalogOnly'] = $this->isCatalogOnlyApplication();
+        }
+
+        $sections = view($view, $data)->renderSections();
         $navbarView = match (true) {
             $isAdminView => 'layouts.partials.admin-navbar',
             $isAccountView => 'layouts.partials.account-navbar',
@@ -80,5 +85,10 @@ trait RendersPageView
         ])->layout('layouts.app', [
             'shell' => app(ResolvePageShellViewDataAction::class)->forLivewireLayout($layoutData),
         ]);
+    }
+
+    protected function isCatalogOnlyApplication(): bool
+    {
+        return (bool) config('screenbase.catalog_only', false);
     }
 }

@@ -102,7 +102,7 @@
                         <x-ui.field class="sm:col-span-2">
                             <x-ui.label>Name</x-ui.label>
                             <x-ui.input
-                                wire:model.live="createListForm.name"
+                                wire:model.live.blur="createListForm.name"
                                 name="create_list_name"
                                 placeholder="Friday Night Picks"
                                 x-on:keydown.enter.prevent="$wire.createList()"
@@ -112,7 +112,7 @@
 
                         <x-ui.field class="sm:col-span-2">
                             <x-ui.label>Description</x-ui.label>
-                            <x-ui.textarea wire:model.live="createListForm.description" name="create_list_description" rows="3" placeholder="What ties these titles together?" />
+                            <x-ui.textarea wire:model.live.blur="createListForm.description" name="create_list_description" rows="3" placeholder="What ties these titles together?" />
                             <x-ui.error name="createListForm.description" />
                         </x-ui.field>
 
@@ -142,7 +142,7 @@
                         <x-ui.button type="button" variant="ghost" icon="x-mark" wire:click="cancelCreatingList">
                             Cancel
                         </x-ui.button>
-                        <x-ui.button type="button" icon="plus" wire:click="createList">
+                        <x-ui.button type="button" icon="plus" wire:click="createList" wire:target="createList">
                             Create list
                         </x-ui.button>
                     </div>

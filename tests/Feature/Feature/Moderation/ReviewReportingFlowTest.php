@@ -98,4 +98,13 @@ class ReviewReportingFlowTest extends TestCase
         $this->assertNull($report->reviewed_at);
         $this->assertNull($report->resolution_notes);
     }
+
+    public function test_report_review_form_validates_details_during_field_updates(): void
+    {
+        $review = Review::factory()->published()->create();
+
+        Livewire::test(ReportReviewForm::class, ['review' => $review])
+            ->set('form.details', str_repeat('a', 1001))
+            ->assertHasErrors(['form.details' => ['max']]);
+    }
 }

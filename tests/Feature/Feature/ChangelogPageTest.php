@@ -15,12 +15,12 @@ class ChangelogPageTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertDontSee('Portal Changes')
-            ->assertDontSee('Screenbase Changelog')
             ->assertSee('What Was Improved')
             ->assertSee('Files That Changed')
-            ->assertDontSee('Reading note')
-            ->assertDontSee('Markdown stays the source of truth')
+            ->assertDontSee('Release Log')
+            ->assertDontSee('Recent Drops')
+            ->assertDontSee('Publishing Flow')
+            ->assertDontSeeHtml('sb-changelog-hero')
             ->assertSeeHtml('data-slot="changes-page-shell"')
             ->assertSeeHtml('data-slot="changes-entry"');
     }

@@ -27,14 +27,17 @@ class BuildPublicListsIndexQueryAction
             ])
             ->custom()
             ->where('visibility', ListVisibility::Public)
-            ->whereHas('items')
+            ->whereHas('items', fn (Builder $itemQuery) => $itemQuery
+                ->whereHas('title', fn (Builder $titleQuery) => $titleQuery->publishedCatalog()))
             ->withCount([
-                'items as published_items_count',
+                'items as published_items_count' => fn (Builder $itemQuery) => $itemQuery
+                    ->whereHas('title', fn (Builder $titleQuery) => $titleQuery->publishedCatalog()),
             ])
             ->with([
                 'user:id,name,username',
                 'items' => fn ($itemQuery) => $itemQuery
                     ->select(['id', 'user_list_id', 'title_id', 'position'])
+                    ->whereHas('title', fn (Builder $titleQuery) => $titleQuery->publishedCatalog())
                     ->orderBy('position')
                     ->with([
                         'title' => fn ($titleQuery) => $titleQuery

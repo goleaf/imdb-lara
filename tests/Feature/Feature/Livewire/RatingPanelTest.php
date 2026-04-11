@@ -134,6 +134,17 @@ class RatingPanelTest extends TestCase
         ]);
     }
 
+    public function test_rating_panel_validates_score_during_field_updates(): void
+    {
+        $user = User::factory()->create();
+        $title = Title::factory()->create();
+
+        Livewire::actingAs($user)
+            ->test(RatingPanel::class, ['title' => $title])
+            ->set('form.score', 11)
+            ->assertHasErrors(['form.score' => ['between']]);
+    }
+
     public function test_authenticated_user_can_rate_episode_titles_without_affecting_the_parent_series(): void
     {
         $user = User::factory()->create();

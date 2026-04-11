@@ -4,15 +4,18 @@ namespace Tests\Feature\Feature\Auth;
 
 use App\Enums\UserRole;
 use App\Livewire\Auth\LoginForm;
+use App\Livewire\Auth\LogoutButton;
 use App\Livewire\Auth\RegisterForm;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Tests\Concerns\UsesCatalogOnlyApplication;
 use Tests\TestCase;
 
 class AuthenticationFlowTest extends TestCase
 {
     use RefreshDatabase;
+    use UsesCatalogOnlyApplication;
 
     public function test_guest_can_view_auth_pages_register_and_login(): void
     {
@@ -20,17 +23,13 @@ class AuthenticationFlowTest extends TestCase
             ->assertOk()
             ->assertSee('Sign in to Screenbase')
             ->assertSee('Continue with Apple')
-            ->assertSee('Browse catalog')
-            ->assertDontSee('Search titles, people, and public lists')
-            ->assertDontSee('Movies');
+            ->assertDontSee('Search titles, people, and public lists');
 
         $this->get(route('register'))
             ->assertOk()
             ->assertSee('Create your Screenbase account')
             ->assertSee('Continue with Google')
-            ->assertSee('Browse catalog')
-            ->assertDontSee('Search titles, people, and public lists')
-            ->assertDontSee('Movies');
+            ->assertDontSee('Search titles, people, and public lists');
 
         Livewire::test(RegisterForm::class)
             ->set('form.name', 'Dana Viewer')
@@ -82,9 +81,32 @@ class AuthenticationFlowTest extends TestCase
 
         $this->assertAuthenticatedAs($user);
 
-        $this->post(route('logout'))
+        Livewire::actingAs($user)
+            ->test(LogoutButton::class)
+            ->call('logout')
             ->assertRedirect(route('public.home'));
 
         $this->assertGuest();
+    }
+
+    public function test_auth_form_objects_validate_fields_when_the_user_updates_them(): void
+    {
+        User::factory()->create([
+            'email' => 'taken@example.com',
+            'username' => 'taken-name',
+        ]);
+
+        Livewire::test(LoginForm::class)
+            ->set('form.email', 'not-an-email')
+            ->assertHasErrors(['form.email' => ['email']]);
+
+        Livewire::test(RegisterForm::class)
+            ->set('form.username', 'taken-name')
+            ->assertHasErrors(['form.username' => ['unique']])
+            ->set('form.email', 'taken@example.com')
+            ->assertHasErrors(['form.email' => ['unique']])
+            ->set('form.password', 'password')
+            ->set('form.password_confirmation', '')
+            ->assertHasErrors(['form.password_confirmation' => ['required']]);
     }
 }

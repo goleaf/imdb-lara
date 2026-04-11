@@ -3,21 +3,30 @@
 namespace Tests\Feature\Feature\Feature\Admin;
 
 use App\Enums\ReportReason;
+use App\Enums\ReviewStatus;
 use App\Models\Report;
 use App\Models\Review;
+use App\Models\Title;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Tests\Concerns\InteractsWithRemoteCatalog;
+use Tests\Concerns\UsesCatalogOnlyApplication;
 use Tests\TestCase;
 
 class AdminReviewModerationQueueTest extends TestCase
 {
+    use InteractsWithRemoteCatalog;
     use RefreshDatabase;
+    use UsesCatalogOnlyApplication;
 
     public function test_review_and_reports_queues_are_limited_to_moderation_roles(): void
     {
         $moderator = User::factory()->moderator()->create();
         $editor = User::factory()->editor()->create();
-        $review = Review::factory()->create();
+        $review = $this->createReview([
+            'status' => ReviewStatus::Pending->value,
+        ]);
 
         $this->actingAs($moderator)
             ->get(route('admin.reviews.index'))
@@ -42,11 +51,15 @@ class AdminReviewModerationQueueTest extends TestCase
     public function test_moderator_can_filter_the_review_queue_to_flagged_reviews_only(): void
     {
         $moderator = User::factory()->moderator()->create();
-        $flaggedReview = Review::factory()->published()->create([
+        $flaggedReview = $this->createReview([
             'headline' => 'Flagged review',
+            'status' => ReviewStatus::Published->value,
+            'published_at' => now(),
         ]);
-        $cleanReview = Review::factory()->published()->create([
+        $cleanReview = $this->createReview([
             'headline' => 'Clean review',
+            'status' => ReviewStatus::Published->value,
+            'published_at' => now(),
         ]);
 
         Report::factory()
@@ -66,5 +79,57 @@ class AdminReviewModerationQueueTest extends TestCase
             ->assertSee('Flagged review')
             ->assertDontSee('Clean review')
             ->assertSee('1 open reports');
+    }
+
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
+    private function createReview(array $attributes = []): Review
+    {
+        $author = User::factory()->create();
+        $title = $this->sampleTitle();
+        $this->seedLocalTitleRecord($title);
+
+        return Review::withoutEvents(fn (): Review => Review::query()->create(array_merge([
+            'user_id' => $author->id,
+            'title_id' => $title->getKey(),
+            'headline' => 'Moderation queue review',
+            'body' => 'Review body for the moderation queue.',
+            'contains_spoilers' => false,
+            'status' => ReviewStatus::Pending->value,
+            'moderated_by' => null,
+            'moderated_at' => null,
+            'published_at' => null,
+            'edited_at' => null,
+        ], $attributes)));
+    }
+
+    private function seedLocalTitleRecord(Title $title): void
+    {
+        $attributes = $title->getAttributes();
+
+        DB::table('titles')->updateOrInsert(
+            ['id' => $title->getKey()],
+            [
+                'name' => (string) ($attributes['primarytitle'] ?? 'Catalog Title '.$title->getKey()),
+                'original_name' => $attributes['originaltitle'] ?? null,
+                'slug' => 'catalog-title-'.$title->getKey(),
+                'title_type' => 'movie',
+                'release_year' => $attributes['startyear'] ?? null,
+                'end_year' => $attributes['endyear'] ?? null,
+                'release_date' => null,
+                'runtime_minutes' => $attributes['runtimeminutes'] ?? null,
+                'age_rating' => null,
+                'plot_outline' => null,
+                'synopsis' => null,
+                'tagline' => null,
+                'origin_country' => null,
+                'original_language' => null,
+                'popularity_rank' => null,
+                'is_published' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        );
     }
 }

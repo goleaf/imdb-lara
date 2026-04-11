@@ -150,4 +150,14 @@ class CustomListFlowTest extends TestCase
             ->call('createList')
             ->assertForbidden();
     }
+
+    public function test_create_list_form_validates_name_during_field_updates(): void
+    {
+        $user = User::factory()->create();
+
+        Livewire::actingAs($user)
+            ->test(CreateListForm::class)
+            ->set('form.name', str_repeat('L', 121))
+            ->assertHasErrors(['form.name' => ['max']]);
+    }
 }

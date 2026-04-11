@@ -48,4 +48,14 @@ class ListReportingFlowTest extends TestCase
             ->call('save')
             ->assertForbidden();
     }
+
+    public function test_list_report_form_validates_details_during_field_updates(): void
+    {
+        $owner = User::factory()->create();
+        $list = UserList::factory()->public()->for($owner)->create();
+
+        Livewire::test(ReportListForm::class, ['list' => $list])
+            ->set('form.details', str_repeat('b', 1001))
+            ->assertHasErrors(['form.details' => ['max']]);
+    }
 }

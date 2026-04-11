@@ -42,6 +42,25 @@ class Report extends Model
         ];
     }
 
+    /**
+     * @return array<int|string, mixed>
+     */
+    public static function adminQueueRelations(): array
+    {
+        return [
+            'reporter:id,name,username',
+            'reviewer:id,name,username',
+            'reportable' => function (MorphTo $morphTo): void {
+                $morphTo->morphWith([
+                    Review::class => Review::adminReportableRelations(),
+                    UserList::class => ['user:id,name,username,role,status'],
+                ])->morphWithCount([
+                    UserList::class => ['items'],
+                ]);
+            },
+        ];
+    }
+
     public function reporter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');

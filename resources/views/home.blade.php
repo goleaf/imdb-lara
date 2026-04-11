@@ -19,15 +19,15 @@
                 @endif
 
                 <div class="relative grid gap-6 p-6 xl:grid-cols-[15rem_minmax(0,1fr)]">
-                    <div class="overflow-hidden rounded-[1.4rem] border border-black/5 bg-neutral-100 shadow-sm dark:border-white/10 dark:bg-neutral-800">
+                    <div class="sb-home-hero-media overflow-hidden rounded-[1.4rem] border border-black/5 bg-neutral-100 shadow-sm dark:border-white/10 dark:bg-neutral-800">
                         @if ($heroPoster)
                             <img
                                 src="{{ $heroPoster->url }}"
                                 alt="{{ $heroPoster->alt_text ?: ($heroSpotlight?->name ?? 'Screenbase spotlight') }}"
-                                class="aspect-[2/3] w-full object-cover"
+                                class="sb-home-hero-media-asset"
                             >
                         @else
-                            <div class="flex aspect-[2/3] items-center justify-center text-neutral-500 dark:text-neutral-400">
+                            <div class="sb-home-hero-media-placeholder text-neutral-500 dark:text-neutral-400">
                                 <x-ui.icon name="film" class="size-14" />
                             </div>
                         @endif

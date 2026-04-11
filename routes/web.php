@@ -1,6 +1,5 @@
 <?php
 
-use App\Actions\Content\LoadChangelogPageAction;
 use App\Actions\Seo\GetSitemapDataAction;
 use App\Enums\TitleMediaArchiveKind;
 use App\Livewire\Pages\Public\AkaAttributePage;
@@ -10,6 +9,7 @@ use App\Livewire\Pages\Public\BrowseTitlesPage;
 use App\Livewire\Pages\Public\CatalogExplorerPage;
 use App\Livewire\Pages\Public\CertificateAttributePage;
 use App\Livewire\Pages\Public\CertificateRatingPage;
+use App\Livewire\Pages\Public\ChangesPage;
 use App\Livewire\Pages\Public\CompanyCreditAttributePage;
 use App\Livewire\Pages\Public\CompanyPage;
 use App\Livewire\Pages\Public\DiscoverPage;
@@ -87,9 +87,7 @@ Route::name('public.')->group(function (): void {
     Route::livewire('/top-rated/series', BrowseTitlesPage::class)->name('rankings.series');
     Route::livewire('/trending', BrowseTitlesPage::class)->name('trending');
     Route::livewire('/search', SearchPage::class)->name('search');
-    Route::get('/changes', function (LoadChangelogPageAction $loadChangelogPageAction) {
-        return view('changes.index', $loadChangelogPageAction->handle());
-    })->name('changes');
+    Route::livewire('/changes', ChangesPage::class)->name('changes');
 
     Route::withoutScopedBindings()->group(function (): void {
         Route::livewire('/series/{series:slug}/seasons/{season:slug}', SeasonShowPage::class)->name('seasons.show');

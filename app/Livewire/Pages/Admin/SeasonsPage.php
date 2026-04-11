@@ -4,6 +4,7 @@ namespace App\Livewire\Pages\Admin;
 
 use App\Livewire\Pages\Concerns\RendersPageView;
 use App\Models\Season;
+use App\Models\Title;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
@@ -22,9 +23,17 @@ class SeasonsPage extends Component
     {
         abort_unless($this->season instanceof Season, 404);
 
+        if ($this->isCatalogOnlyApplication()) {
+            return $this->renderPageView('admin.seasons.edit', [
+                'season' => $this->season->load([
+                    'series' => fn ($seriesQuery) => $seriesQuery->select(Title::catalogCardColumns()),
+                ]),
+            ]);
+        }
+
         return $this->renderPageView('admin.seasons.edit', [
             'season' => $this->season->load([
-                'series:id,name,slug',
+                'series' => fn ($seriesQuery) => $seriesQuery->select(Title::catalogCardColumns()),
                 'episodes' => fn ($episodeQuery) => $episodeQuery
                     ->select([
                         'id',

@@ -19,7 +19,7 @@
         </div>
 
         <section class="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
-            <livewire:account.profile-settings-panel />
+            <livewire:account.profile-settings-panel defer />
 
             <div class="space-y-4">
                 <x-ui.card class="!max-w-none">

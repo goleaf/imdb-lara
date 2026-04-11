@@ -83,12 +83,7 @@
                     <x-ui.dropdown.item :href="route('account.settings')" icon="cog-6-tooth">Settings</x-ui.dropdown.item>
                     <x-ui.dropdown.item :href="route('public.home')" icon="arrow-up-right">Public site</x-ui.dropdown.item>
                     <x-ui.dropdown.separator />
-                    <form method="POST" action="{{ route('logout') }}" class="contents">
-                        @csrf
-                        <x-ui.dropdown.item as="button" type="submit" icon="arrow-right-start-on-rectangle" variant="danger">
-                            Sign out
-                        </x-ui.dropdown.item>
-                    </form>
+                    <livewire:auth.logout-button presentation="dropdown-item" :key="'account-sidebar-logout'" />
                 </x-slot:menu>
             </x-ui.dropdown>
         </div>

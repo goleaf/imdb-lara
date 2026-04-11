@@ -26,6 +26,15 @@ class CreditsPage extends Component
     public function render(): View
     {
         if (request()->routeIs('admin.credits.create')) {
+            if ($this->isCatalogOnlyApplication()) {
+                return $this->renderPageView('admin.credits.create', [
+                    'credit' => new Credit([
+                        'title_id' => request()->integer('title'),
+                        'person_id' => request()->integer('person'),
+                    ]),
+                ]);
+            }
+
             return $this->renderPageView('admin.credits.create', [
                 'credit' => new Credit([
                     'title_id' => request()->integer('title'),
@@ -36,6 +45,12 @@ class CreditsPage extends Component
         }
 
         abort_unless($this->credit instanceof Credit, 404);
+
+        if ($this->isCatalogOnlyApplication()) {
+            return $this->renderPageView('admin.credits.edit', [
+                'credit' => $this->credit,
+            ]);
+        }
 
         return $this->renderPageView('admin.credits.edit', [
             'credit' => $this->credit->load(['title', 'person', 'profession', 'episode.title']),

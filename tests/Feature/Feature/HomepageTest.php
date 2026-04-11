@@ -21,6 +21,7 @@ use App\Models\TitleStatistic;
 use App\Models\TitleVideo;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Support\Str;
 use Mockery;
 use Tests\Concerns\BootstrapsImdbMysqlSqlite;
 use Tests\Concerns\UsesCatalogOnlyApplication;
@@ -67,7 +68,9 @@ class HomepageTest extends TestCase
             ->assertSee('Science Fiction')
             ->assertSee('Keanu Reeves')
             ->assertSee('View title page')
-            ->assertSee('Watch trailer');
+            ->assertSee('Watch trailer')
+            ->assertSeeHtml('sb-home-hero-media')
+            ->assertSeeHtml('sb-home-hero-media-asset');
     }
 
     public function test_home_page_renders_the_empty_spotlight_fallback_when_no_hero_title_is_available(): void
@@ -78,7 +81,9 @@ class HomepageTest extends TestCase
             ->assertOk()
             ->assertSee('Imported catalog, adapted to the current app.')
             ->assertSee('Start discovering')
-            ->assertSee('Search the catalog');
+            ->assertSee('Search the catalog')
+            ->assertSeeHtml('sb-home-hero-media')
+            ->assertSeeHtml('sb-home-hero-media-placeholder');
     }
 
     private function mockHomePageDependencies(?Title $heroSpotlight = null): void
@@ -301,6 +306,7 @@ class HomepageTest extends TestCase
     private function makeGenre(array $attributes): Genre
     {
         $model = new Genre;
+        $attributes['slug'] ??= Str::slug((string) ($attributes['name'] ?? 'genre'));
         $model->forceFill($attributes);
         $model->exists = true;
 

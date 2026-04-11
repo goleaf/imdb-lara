@@ -6,6 +6,7 @@ use App\Actions\Admin\BuildAdminContributionsIndexQueryAction;
 use App\Enums\ContributionStatus;
 use App\Livewire\Pages\Concerns\RendersPageView;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -13,6 +14,12 @@ class ContributionsPage extends Component
 {
     use RendersPageView;
     use WithPagination;
+
+    #[On('moderation-queue-updated')]
+    public function refreshQueue(): void
+    {
+        // Re-render the queue after a review changes contribution ordering.
+    }
 
     public function render(BuildAdminContributionsIndexQueryAction $buildAdminContributionsIndexQuery): View
     {

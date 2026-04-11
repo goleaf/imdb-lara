@@ -289,6 +289,51 @@ class ListManagementTest extends TestCase
             ]);
     }
 
+    public function test_public_lists_index_preview_and_counts_ignore_unpublished_titles(): void
+    {
+        $user = User::factory()->create([
+            'username' => 'mixed-curator',
+        ]);
+
+        $list = UserList::factory()->public()->for($user)->create([
+            'name' => 'Mixed Visibility Queue',
+            'slug' => 'mixed-visibility-queue',
+        ]);
+
+        foreach (range(1, 3) as $position) {
+            $hiddenTitle = Title::factory()->create([
+                'name' => 'Hidden Queue Entry '.$position,
+                'is_published' => false,
+            ]);
+
+            ListItem::factory()
+                ->for($list, 'userList')
+                ->for($hiddenTitle, 'title')
+                ->create([
+                    'position' => $position,
+                ]);
+        }
+
+        $visibleTitle = Title::factory()->create([
+            'name' => 'Visible Queue Entry',
+            'is_published' => true,
+        ]);
+
+        ListItem::factory()
+            ->for($list, 'userList')
+            ->for($visibleTitle, 'title')
+            ->create([
+                'position' => 4,
+            ]);
+
+        $this->get(route('public.lists.index'))
+            ->assertOk()
+            ->assertSee('Mixed Visibility Queue')
+            ->assertSee('Visible Queue Entry')
+            ->assertDontSee('4 titles')
+            ->assertSee('1 titles');
+    }
+
     public function test_unlisted_lists_are_directly_viewable_but_not_shown_on_public_profile(): void
     {
         $user = User::factory()->create([
@@ -376,5 +421,50 @@ class ListManagementTest extends TestCase
             ->assertSee('Queue Entry 19')
             ->assertSee('Queue Entry 20')
             ->assertDontSee('Queue Entry 01');
+    }
+
+    public function test_public_list_page_paginates_and_counts_only_published_titles(): void
+    {
+        $user = User::factory()->create([
+            'username' => 'published-only-curator',
+        ]);
+
+        $list = UserList::factory()->public()->for($user)->create([
+            'name' => 'Published Only Queue',
+            'slug' => 'published-only-queue',
+        ]);
+
+        foreach (range(1, 18) as $position) {
+            $hiddenTitle = Title::factory()->create([
+                'name' => sprintf('Hidden Queue Entry %02d', $position),
+                'is_published' => false,
+            ]);
+
+            ListItem::factory()
+                ->for($list, 'userList')
+                ->for($hiddenTitle, 'title')
+                ->create([
+                    'position' => $position,
+                ]);
+        }
+
+        $visibleTitle = Title::factory()->create([
+            'name' => 'Published Queue Entry',
+            'is_published' => true,
+        ]);
+
+        ListItem::factory()
+            ->for($list, 'userList')
+            ->for($visibleTitle, 'title')
+            ->create([
+                'position' => 19,
+            ]);
+
+        $this->get(route('public.lists.show', [$user, $list]))
+            ->assertOk()
+            ->assertSee('Published Queue Entry')
+            ->assertDontSee('This list does not have any published titles yet.')
+            ->assertDontSee('19 titles')
+            ->assertSee('1 titles');
     }
 }

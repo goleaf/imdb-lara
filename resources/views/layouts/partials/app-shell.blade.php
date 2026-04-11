@@ -150,12 +150,7 @@
                                                 @endif
                                                 <x-ui.dropdown.item :href="route('public.home')" icon="arrow-up-right">Public site</x-ui.dropdown.item>
                                                 <x-ui.dropdown.separator />
-                                                <form method="POST" action="{{ route('logout') }}" class="contents">
-                                                    @csrf
-                                                    <x-ui.dropdown.item as="button" type="submit" icon="arrow-right-start-on-rectangle" variant="danger">
-                                                        Sign out
-                                                    </x-ui.dropdown.item>
-                                                </form>
+                                                <livewire:auth.logout-button presentation="dropdown-item" :key="'portal-shell-dropdown-logout'" />
                                             </x-slot:menu>
                                         </x-ui.dropdown>
                                     @endauth
@@ -250,18 +245,12 @@
                                         @endif
 
                                         @if ($shell['shouldRenderSignOutShortcut'])
-                                            <form method="POST" action="{{ route('logout') }}" class="sb-shell-topnav-utility-form">
-                                                @csrf
-                                                <x-ui.button
-                                                    type="submit"
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    icon="arrow-right-start-on-rectangle"
-                                                    class="sb-shell-topnav-utility-button"
-                                                >
-                                                    Sign out
-                                                </x-ui.button>
-                                            </form>
+                                            <livewire:auth.logout-button
+                                                variant="ghost"
+                                                size="sm"
+                                                button-class="sb-shell-topnav-utility-button"
+                                                :key="'portal-shell-topnav-logout'"
+                                            />
                                         @endif
 
                                         @if ($shell['shouldRenderGuestAuthShortcuts'])

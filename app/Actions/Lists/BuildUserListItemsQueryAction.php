@@ -22,6 +22,7 @@ class BuildUserListItemsQueryAction
                 'updated_at',
             ])
             ->where('user_list_id', $list->id)
+            ->whereHas('title', fn (Builder $titleQuery) => $titleQuery->publishedCatalog())
             ->with([
                 'title' => fn ($titleQuery) => $titleQuery
                     ->select(Title::catalogCardColumns())

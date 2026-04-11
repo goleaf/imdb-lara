@@ -40,6 +40,12 @@ class PeoplePage extends Component
 
         abort_unless($this->person instanceof Person, 404);
 
+        if ($this->isCatalogOnlyApplication()) {
+            return $this->renderPageView('admin.people.edit', [
+                'person' => $this->person,
+            ]);
+        }
+
         return $this->renderPageView('admin.people.edit', [
             'person' => $this->person->load([
                 'professions' => fn ($professionQuery) => $professionQuery->select([

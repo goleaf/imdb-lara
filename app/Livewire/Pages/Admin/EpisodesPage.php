@@ -4,6 +4,7 @@ namespace App\Livewire\Pages\Admin;
 
 use App\Livewire\Pages\Concerns\RendersPageView;
 use App\Models\Episode;
+use App\Models\Title;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
@@ -22,10 +23,35 @@ class EpisodesPage extends Component
     {
         abort_unless($this->episode instanceof Episode, 404);
 
+        if ($this->isCatalogOnlyApplication()) {
+            return $this->renderPageView('admin.episodes.edit', [
+                'episode' => $this->episode->load([
+                    'title' => fn ($titleQuery) => $titleQuery->select(Title::catalogCardColumns()),
+                    'seasonRecord' => fn ($seasonQuery) => $seasonQuery
+                        ->select([
+                            'movie_seasons.movie_id',
+                            'movie_seasons.season',
+                            'movie_seasons.episode_count',
+                        ])
+                        ->with([
+                            'series' => fn ($seriesQuery) => $seriesQuery->select(Title::catalogCardColumns()),
+                        ]),
+                ]),
+            ]);
+        }
+
         return $this->renderPageView('admin.episodes.edit', [
             'episode' => $this->episode->load([
-                'title',
-                'season.series',
+                'title' => fn ($titleQuery) => $titleQuery->select(Title::catalogCardColumns()),
+                'seasonRecord' => fn ($seasonQuery) => $seasonQuery
+                    ->select([
+                        'movie_seasons.movie_id',
+                        'movie_seasons.season',
+                        'movie_seasons.episode_count',
+                    ])
+                    ->with([
+                        'series' => fn ($seriesQuery) => $seriesQuery->select(Title::catalogCardColumns()),
+                    ]),
                 'credits' => fn ($creditQuery) => $creditQuery
                     ->select([
                         'id',

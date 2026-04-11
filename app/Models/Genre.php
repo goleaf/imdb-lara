@@ -2,20 +2,25 @@
 
 namespace App\Models;
 
+use Database\Factories\GenreFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Number;
 use Illuminate\Support\Str;
 
-class Genre extends ImdbModel
+class Genre extends Model
 {
-    protected $table = 'genres';
+    /** @use HasFactory<GenreFactory> */
+    use HasFactory;
 
     /**
      * @var list<string>
      */
     protected $fillable = [
         'name',
+        'slug',
+        'description',
     ];
 
     protected function casts(): array
@@ -37,27 +42,20 @@ class Genre extends ImdbModel
 
     public function resolveRouteBindingQuery($query, $value, $field = null)
     {
-        if (preg_match('/-g(?P<id>\d+)$/', (string) $value, $matches) === 1) {
-            return $query->where('id', (int) $matches['id']);
-        }
+        return $query->where(function ($genreQuery) use ($value): void {
+            $genreQuery->where('slug', (string) $value);
 
-        return $query->where('id', (int) $value);
+            if (is_numeric($value)) {
+                $genreQuery->orWhereKey((int) $value);
+            }
+        });
     }
 
     public function titles(): BelongsToMany
     {
-        return $this->belongsToMany(Title::class, 'movie_genres', 'genre_id', 'movie_id', 'id', 'id')
-            ->orderBy('primarytitle');
-    }
-
-    public function movies(): BelongsToMany
-    {
-        return $this->belongsToMany(Movie::class, 'movie_genres', 'genre_id', 'movie_id', 'id', 'id');
-    }
-
-    public function movieGenres(): HasMany
-    {
-        return $this->hasMany(MovieGenre::class, 'genre_id', 'id');
+        return $this->belongsToMany(Title::class)
+            ->withTimestamps()
+            ->orderBy('titles.name');
     }
 
     public function publishedTitleCount(): int
@@ -74,16 +72,6 @@ class Genre extends ImdbModel
 
     public function descriptionText(): string
     {
-        return 'Browse '.$this->name.' titles from the imported catalog.';
-    }
-
-    public function getSlugAttribute(): string
-    {
-        return Str::slug((string) $this->name).'-g'.$this->id;
-    }
-
-    public function getDescriptionAttribute(): ?string
-    {
-        return $this->descriptionText();
+        return $this->description ?: 'Browse '.$this->name.' titles from the curated catalog.';
     }
 }

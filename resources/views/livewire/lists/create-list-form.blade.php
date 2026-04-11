@@ -16,13 +16,13 @@
         <div class="grid gap-4 sm:grid-cols-2">
             <x-ui.field class="sm:col-span-2">
                 <x-ui.label>Name</x-ui.label>
-                <x-ui.input wire:model.live="form.name" name="name" placeholder="Friday Night Picks" left-icon="queue-list" />
+                <x-ui.input wire:model.live.blur="form.name" name="name" placeholder="Friday Night Picks" left-icon="queue-list" />
                 <x-ui.error name="form.name" />
             </x-ui.field>
 
             <x-ui.field class="sm:col-span-2">
                 <x-ui.label>Description</x-ui.label>
-                <x-ui.textarea wire:model.live="form.description" name="description" rows="4" placeholder="What ties these titles together?" />
+                <x-ui.textarea wire:model.live.blur="form.description" name="description" rows="4" placeholder="What ties these titles together?" />
                 <x-ui.error name="form.description" />
             </x-ui.field>
 

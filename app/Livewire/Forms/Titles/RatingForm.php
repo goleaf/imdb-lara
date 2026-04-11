@@ -2,18 +2,13 @@
 
 namespace App\Livewire\Forms\Titles;
 
+use Livewire\Attributes\Validate;
 use Livewire\Form;
 
 class RatingForm extends Form
 {
+    #[Validate('required|integer|between:1,10')]
     public ?int $score = null;
-
-    protected function rules(): array
-    {
-        return [
-            'score' => ['required', 'integer', 'between:1,10'],
-        ];
-    }
 
     public function validatedScore(): int
     {

@@ -54,10 +54,11 @@
             <x-ui.error name="form.body" />
         </x-ui.field>
 
-        <label class="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-300">
-            <input wire:model.live="form.containsSpoilers" type="checkbox" class="rounded border-black/20 dark:border-white/20">
-            <span>This review contains spoilers.</span>
-        </label>
+        <x-ui.checkbox
+            wire:model.live="form.containsSpoilers"
+            label="This review contains spoilers."
+            description="Use this when discussing reveals, endings, or twists that change how someone experiences the title."
+        />
 
         <div class="flex flex-wrap justify-between gap-3">
             <div class="flex flex-wrap gap-2">

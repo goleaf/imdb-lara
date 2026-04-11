@@ -3,7 +3,7 @@
         <x-ui.field>
             <x-ui.label class="sb-auth-label">Name</x-ui.label>
             <x-ui.input
-                wire:model.live="form.name"
+                wire:model.live.blur="form.name"
                 name="name"
                 autocomplete="name"
                 left-icon="user"
@@ -15,7 +15,7 @@
         <x-ui.field>
             <x-ui.label class="sb-auth-label">Username</x-ui.label>
             <x-ui.input
-                wire:model.live="form.username"
+                wire:model.live.blur="form.username"
                 name="username"
                 autocomplete="username"
                 left-icon="at-symbol"
@@ -28,7 +28,7 @@
     <x-ui.field>
         <x-ui.label class="sb-auth-label">Email</x-ui.label>
         <x-ui.input
-            wire:model.live="form.email"
+            wire:model.live.blur="form.email"
             name="email"
             type="email"
             autocomplete="email"
@@ -42,7 +42,7 @@
         <x-ui.field>
             <x-ui.label class="sb-auth-label">Password</x-ui.label>
             <x-ui.input
-                wire:model.live="form.password"
+                wire:model.live.blur="form.password"
                 name="password"
                 type="password"
                 autocomplete="new-password"
@@ -56,7 +56,7 @@
         <x-ui.field>
             <x-ui.label class="sb-auth-label">Confirm password</x-ui.label>
             <x-ui.input
-                wire:model.live="form.password_confirmation"
+                wire:model.live.blur="form.password_confirmation"
                 name="password_confirmation"
                 type="password"
                 autocomplete="new-password"

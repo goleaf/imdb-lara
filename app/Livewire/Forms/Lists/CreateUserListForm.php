@@ -4,14 +4,18 @@ namespace App\Livewire\Forms\Lists;
 
 use App\Enums\ListVisibility;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Validate;
 use Livewire\Form;
 
 class CreateUserListForm extends Form
 {
+    #[Validate]
     public string $name = '';
 
+    #[Validate]
     public string $description = '';
 
+    #[Validate]
     public string $visibility = 'private';
 
     protected function rules(): array

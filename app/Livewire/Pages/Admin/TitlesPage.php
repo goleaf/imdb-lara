@@ -36,6 +36,12 @@ class TitlesPage extends Component
         }
 
         if (request()->routeIs('admin.titles.create')) {
+            if ($this->isCatalogOnlyApplication()) {
+                return $this->renderPageView('admin.titles.create', [
+                    'title' => new Title(['is_published' => true]),
+                ]);
+            }
+
             return $this->renderPageView('admin.titles.create', [
                 'title' => new Title(['is_published' => true]),
                 ...$this->formOptions(),
@@ -43,6 +49,12 @@ class TitlesPage extends Component
         }
 
         abort_unless($this->title instanceof Title, 404);
+
+        if ($this->isCatalogOnlyApplication()) {
+            return $this->renderPageView('admin.titles.edit', [
+                'title' => $this->title,
+            ]);
+        }
 
         return $this->renderPageView('admin.titles.edit', [
             'title' => $this->title->load([

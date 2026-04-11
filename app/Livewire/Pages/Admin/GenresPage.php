@@ -40,6 +40,12 @@ class GenresPage extends Component
 
         abort_unless($this->genre instanceof Genre, 404);
 
+        if ($this->isCatalogOnlyApplication()) {
+            return $this->renderPageView('admin.genres.edit', [
+                'genre' => $this->genre,
+            ]);
+        }
+
         return $this->renderPageView('admin.genres.edit', [
             'genre' => $this->genre->loadCount('titles'),
         ]);

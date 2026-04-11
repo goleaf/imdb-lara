@@ -22,6 +22,12 @@ class ReviewComposerTest extends TestCase
 
         Livewire::actingAs($user)
             ->test(ReviewComposer::class, ['title' => $title])
+            ->assertSeeHtml('data-slot="checkbox-wrapper"')
+            ->assertSee('This review contains spoilers.')
+            ->assertSee('Use this when discussing reveals, endings, or twists that change how someone experiences the title.');
+
+        Livewire::actingAs($user)
+            ->test(ReviewComposer::class, ['title' => $title])
             ->set('form.headline', 'Draft thoughts')
             ->set('form.body', 'A short draft review body.')
             ->set('form.containsSpoilers', true)

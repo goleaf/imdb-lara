@@ -19,21 +19,32 @@
             </div>
         </div>
 
-        <x-ui.card class="!max-w-none">
-            <form method="POST" action="{{ route('admin.genres.store') }}" class="space-y-6">
-                @csrf
+        @if ($catalogOnly)
+            <x-admin.catalog-write-disabled-panel
+                :back-href="route('admin.genres.index')"
+                back-label="Back to genres"
+                heading="Genre Writes Paused"
+                description="Genre creation is disabled while Screenbase is running in catalog-only mode."
+            >
+                Add or reconcile taxonomy entries through the remote catalog sync instead of local admin forms.
+            </x-admin.catalog-write-disabled-panel>
+        @else
+            <x-ui.card class="!max-w-none">
+                <form method="POST" action="{{ route('admin.genres.store') }}" class="space-y-6">
+                    @csrf
 
-                @include('admin.genres._form')
+                    @include('admin.genres._form')
 
-                <div class="flex justify-end gap-3">
-                    <x-ui.button as="a" :href="route('admin.genres.index')" variant="ghost" icon="arrow-left">
-                        Cancel
-                    </x-ui.button>
-                    <x-ui.button type="submit" icon="plus">
-                        Create genre
-                    </x-ui.button>
-                </div>
-            </form>
-        </x-ui.card>
+                    <div class="flex justify-end gap-3">
+                        <x-ui.button as="a" :href="route('admin.genres.index')" variant="ghost" icon="arrow-left">
+                            Cancel
+                        </x-ui.button>
+                        <x-ui.button type="submit" icon="plus">
+                            Create genre
+                        </x-ui.button>
+                    </div>
+                </form>
+            </x-ui.card>
+        @endif
     </section>
 @endsection

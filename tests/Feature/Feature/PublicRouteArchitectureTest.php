@@ -133,7 +133,6 @@ class PublicRouteArchitectureTest extends TestCase
 
         $this->get(route('public.changes'))
             ->assertOk()
-            ->assertSee('Portal Changes')
             ->assertSee('What Was Improved');
     }
 

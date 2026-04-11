@@ -43,13 +43,16 @@ class LivewireLoadingStateConventionTest extends TestCase
         $watchlistPage = file_get_contents(resource_path('views/account/watchlist.blade.php'));
         $listsIndexPage = file_get_contents(resource_path('views/account/lists/index.blade.php'));
         $manageListPage = file_get_contents(resource_path('views/account/lists/show.blade.php'));
+        $settingsPage = file_get_contents(resource_path('views/account/settings.blade.php'));
 
         $this->assertNotFalse($watchlistPage);
         $this->assertNotFalse($listsIndexPage);
         $this->assertNotFalse($manageListPage);
+        $this->assertNotFalse($settingsPage);
         $this->assertMatchesRegularExpression('/<livewire:account\\.watchlist-browser[\\s\\S]*?\\sdefer\\s*\\/>/', $watchlistPage);
         $this->assertMatchesRegularExpression('/<livewire:lists\\.create-list-form[\\s\\S]*?\\sdefer\\s*\\/>/', $listsIndexPage);
         $this->assertMatchesRegularExpression('/<livewire:lists\\.manage-list[\\s\\S]*?\\sdefer\\s*\\/>/', $manageListPage);
+        $this->assertMatchesRegularExpression('/<livewire:account\\.profile-settings-panel[\\s\\S]*?\\sdefer\\s*\\/>/', $settingsPage);
     }
 
     public function test_deferred_account_components_define_placeholder_methods(): void
@@ -66,6 +69,32 @@ class LivewireLoadingStateConventionTest extends TestCase
             $this->assertNotFalse($contents);
             $this->assertStringContainsString('function placeholder()', $contents, $classPath);
         }
+    }
+
+    public function test_profile_settings_panel_defines_a_lazy_placeholder_and_scoped_submit_loading_state(): void
+    {
+        $contents = file_get_contents(resource_path('views/components/account/⚡profile-settings-panel.blade.php'));
+
+        $this->assertNotFalse($contents);
+        $this->assertStringContainsString('@placeholder', $contents);
+        $this->assertStringContainsString('wire:target="save"', $contents);
+    }
+
+    public function test_embedded_livewire_actions_scope_button_loading_states(): void
+    {
+        $reviewReportContents = file_get_contents(resource_path('views/livewire/reviews/report-review-form.blade.php'));
+        $listReportContents = file_get_contents(resource_path('views/livewire/lists/report-list-form.blade.php'));
+        $customListPickerContents = file_get_contents(resource_path('views/livewire/titles/custom-list-picker.blade.php'));
+
+        $this->assertNotFalse($reviewReportContents);
+        $this->assertNotFalse($listReportContents);
+        $this->assertNotFalse($customListPickerContents);
+        $this->assertStringContainsString('form="review-report-form-', $reviewReportContents);
+        $this->assertStringContainsString('wire:target="save"', $reviewReportContents);
+        $this->assertStringContainsString('form="list-report-form-', $listReportContents);
+        $this->assertStringContainsString('wire:target="save"', $listReportContents);
+        $this->assertStringContainsString('wire:click="createList"', $customListPickerContents);
+        $this->assertStringContainsString('wire:target="createList"', $customListPickerContents);
     }
 
     public function test_title_review_list_uses_tailwind_has_data_loading_variant(): void

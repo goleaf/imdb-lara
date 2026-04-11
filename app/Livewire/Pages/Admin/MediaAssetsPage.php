@@ -34,6 +34,12 @@ class MediaAssetsPage extends Component
 
         abort_unless($this->mediaAsset instanceof MediaAsset, 404);
 
+        if ($this->isCatalogOnlyApplication()) {
+            return $this->renderPageView('admin.media-assets.edit', [
+                'mediaAsset' => $this->mediaAsset,
+            ]);
+        }
+
         return $this->renderPageView('admin.media-assets.edit', [
             'mediaAsset' => $this->mediaAsset->load('mediable'),
         ]);

@@ -4,12 +4,15 @@ namespace App\Livewire\Forms\Reviews;
 
 use App\Enums\ReportReason;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Validate;
 use Livewire\Form;
 
 class ReportReviewForm extends Form
 {
+    #[Validate]
     public string $reason = 'spoiler';
 
+    #[Validate]
     public string $details = '';
 
     protected function rules(): array

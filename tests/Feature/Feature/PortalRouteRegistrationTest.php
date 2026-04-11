@@ -14,7 +14,7 @@ class PortalRouteRegistrationTest extends TestCase
     {
         $this->assertTrue(Route::has('login'));
         $this->assertTrue(Route::has('register'));
-        $this->assertTrue(Route::has('logout'));
+        $this->assertFalse(Route::has('logout'));
         $this->assertTrue(Route::has('account.dashboard'));
         $this->assertTrue(Route::has('account.watchlist'));
         $this->assertTrue(Route::has('account.lists.index'));
@@ -26,6 +26,10 @@ class PortalRouteRegistrationTest extends TestCase
         $this->assertTrue(Route::has('admin.reviews.index'));
         $this->assertTrue(Route::has('admin.reports.index'));
         $this->assertTrue(Route::has('admin.contributions.index'));
+        $this->assertFalse(Route::has('admin.titles.store'));
+        $this->assertFalse(Route::has('admin.reviews.update'));
+        $this->assertFalse(Route::has('admin.reports.update'));
+        $this->assertFalse(Route::has('admin.contributions.update'));
         $this->assertTrue(Route::has('public.lists.index'));
         $this->assertTrue(Route::has('public.lists.show'));
         $this->assertTrue(Route::has('public.users.show'));

@@ -6,6 +6,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use SplFileInfo;
 
 class LoadChangelogPageAction
 {
@@ -19,17 +20,22 @@ class LoadChangelogPageAction
      *         title: string
      *     }>,
      *     entryCount: int,
+     *     entryNavigation: list<array{
+     *         date: Carbon,
+     *         id: string,
+     *         title: string
+     *     }>,
      *     estimatedReadMinutes: int,
      *     heroHeadline: string,
      *     heroSummary: string,
+     *     releaseYears: list<string>,
      *     updatedAt: Carbon,
      *     wordCount: int
      * }
      */
     public function handle(): array
     {
-        [$sourcePath, $markdown] = $this->resolveSource();
-        $entries = $this->parseEntries($markdown);
+        $entries = $this->loadEntries();
         $newestEntry = $entries->first();
         $plainText = Str::of(
             $entries
@@ -41,14 +47,25 @@ class LoadChangelogPageAction
         return [
             'entries' => $entries->all(),
             'entryCount' => $entries->count(),
+            'entryNavigation' => $entries
+                ->take(8)
+                ->map(fn (array $entry): array => [
+                    'date' => $entry['date'],
+                    'id' => $entry['id'],
+                    'title' => $entry['title'],
+                ])
+                ->values()
+                ->all(),
             'estimatedReadMinutes' => max(1, (int) ceil(max($wordCount, 1) / 220)),
-            'heroHeadline' => 'Screenbase Changelog',
+            'heroHeadline' => 'Portal Changes',
             'heroSummary' => $newestEntry['excerpt']
-                ?? 'Release notes are rendered from the repository changelog and published as a newest-first editorial stream.',
-            'updatedAt' => $newestEntry['date']
-                ?? ($sourcePath !== null
-                    ? Carbon::createFromTimestamp(File::lastModified($sourcePath))
-                    : now()),
+                ?? 'Release notes are published from markdown files inside the changelog folder and rendered newest first.',
+            'releaseYears' => $entries
+                ->map(fn (array $entry): string => $entry['date']->format('Y'))
+                ->unique()
+                ->values()
+                ->all(),
+            'updatedAt' => $newestEntry['date'] ?? now(),
             'wordCount' => $wordCount,
         ];
     }
@@ -95,18 +112,7 @@ class LoadChangelogPageAction
         }
 
         if ($entries === []) {
-            $bodyMarkdown = trim($markdown);
-            $html = $this->injectHeadingAnchors(
-                Str::markdown($bodyMarkdown, $this->markdownOptions())
-            );
-
-            return collect([[
-                'date' => now(),
-                'excerpt' => $this->extractLeadParagraph($bodyMarkdown),
-                'html' => $html,
-                'id' => 'release-notes',
-                'title' => $this->extractFirstHeading($markdown, 1) ?? 'Release notes',
-            ]]);
+            return collect([$this->buildStandaloneEntry(trim($markdown))]);
         }
 
         return collect($entries)
@@ -115,9 +121,110 @@ class LoadChangelogPageAction
     }
 
     /**
+     * @return Collection<int, array{
+     *     date: Carbon,
+     *     excerpt: string|null,
+     *     html: string,
+     *     id: string,
+     *     title: string
+     * }>
+     */
+    private function loadEntries(): Collection
+    {
+        $directoryEntries = $this->loadDirectoryEntries(base_path('changelog'));
+
+        if ($directoryEntries->isNotEmpty()) {
+            return $directoryEntries;
+        }
+
+        [, $markdown] = $this->resolveLegacySource();
+
+        return $this->parseEntries($markdown);
+    }
+
+    /**
+     * @return Collection<int, array{
+     *     date: Carbon,
+     *     excerpt: string|null,
+     *     html: string,
+     *     id: string,
+     *     title: string
+     * }>
+     */
+    private function loadDirectoryEntries(string $directory): Collection
+    {
+        if (! File::isDirectory($directory)) {
+            return collect();
+        }
+
+        $entries = collect(File::files($directory))
+            ->filter(fn (SplFileInfo $file): bool => $this->isChangelogFile($file))
+            ->map(fn (SplFileInfo $file): array => [
+                'entry' => $this->buildFileEntry($file->getPathname()),
+                'sort_key' => $file->getFilename(),
+            ])
+            ->values()
+            ->all();
+
+        usort($entries, function (array $left, array $right): int {
+            $dateComparison = $right['entry']['date']->getTimestamp() <=> $left['entry']['date']->getTimestamp();
+
+            if ($dateComparison !== 0) {
+                return $dateComparison;
+            }
+
+            return strcmp($right['sort_key'], $left['sort_key']);
+        });
+
+        return collect($entries)
+            ->map(fn (array $entry): array => $entry['entry'])
+            ->values();
+    }
+
+    private function isChangelogFile(SplFileInfo $file): bool
+    {
+        if (Str::lower($file->getExtension()) !== 'md') {
+            return false;
+        }
+
+        return preg_match('/^changelog-\d{4}-\d{2}-\d{2}(?:[-_].+)?\.md$/i', $file->getFilename()) === 1;
+    }
+
+    /**
+     * @return array{
+     *     date: Carbon,
+     *     excerpt: string|null,
+     *     html: string,
+     *     id: string,
+     *     title: string
+     * }
+     */
+    private function buildFileEntry(string $path): array
+    {
+        $markdown = trim(File::get($path));
+        $fileDate = $this->resolveDateFromPath($path)
+            ?? Carbon::createFromTimestamp(File::lastModified($path))->startOfDay();
+        $fallbackTitle = $this->resolveTitleFromPath($path);
+        $firstHeading = $this->extractPrimaryHeading($markdown);
+        $headingData = $firstHeading !== null
+            ? $this->parseEntryHeadingText($firstHeading['text'])
+            : null;
+        $title = $headingData['title']
+            ?? $firstHeading['text']
+            ?? $fallbackTitle
+            ?? 'Release update';
+        $date = $headingData['date'] ?? $fileDate;
+        $bodyMarkdown = $firstHeading !== null
+            ? $this->removeFirstHeading($markdown)
+            : $markdown;
+
+        return $this->buildStandaloneEntry($bodyMarkdown, $date, $title);
+    }
+
+    /**
      * @return array{0: string|null, 1: string}
      */
-    private function resolveSource(): array
+    private function resolveLegacySource(): array
     {
         foreach (['changelog.md', 'CHANGELOG.md'] as $candidate) {
             $path = base_path($candidate);
@@ -130,21 +237,62 @@ class LoadChangelogPageAction
         return [
             null,
             implode("\n\n", [
-                '## Release notes are not available yet',
-                'Create `changelog.md` in the project root to publish the first Screenbase update entry.',
+                '# Release notes are not available yet',
+                'Create markdown files like `changelog/changelog-2026-04-11.md` to publish the first Screenbase update entry.',
             ]),
         ];
     }
 
-    private function extractFirstHeading(string $markdown, int $level): ?string
+    private function resolveDateFromPath(string $path): ?Carbon
     {
-        preg_match('/^'.preg_quote(str_repeat('#', $level), '/').'\s+(.+)$/m', $markdown, $matches);
-
-        if (! isset($matches[1])) {
+        if (! preg_match('/changelog-(\d{4}-\d{2}-\d{2})/i', basename($path), $matches)) {
             return null;
         }
 
-        return trim($matches[1]);
+        $date = Carbon::createFromFormat('Y-m-d', (string) $matches[1]);
+
+        if ($date === false) {
+            return null;
+        }
+
+        return $date->startOfDay();
+    }
+
+    private function resolveTitleFromPath(string $path): ?string
+    {
+        $filename = pathinfo($path, PATHINFO_FILENAME);
+        $slug = preg_replace('/^changelog-\d{4}-\d{2}-\d{2}(?:[-_])?/i', '', $filename);
+        $normalizedSlug = trim(str_replace('_', '-', (string) $slug), '-');
+
+        if ($normalizedSlug === '') {
+            return null;
+        }
+
+        return Str::headline(str_replace('-', ' ', $normalizedSlug));
+    }
+
+    /**
+     * @return array{line: string, text: string}|null
+     */
+    private function extractPrimaryHeading(string $markdown): ?array
+    {
+        preg_match('/^(#{1,2})\s+(.+)$/m', $markdown, $matches);
+
+        if (! isset($matches[0], $matches[2])) {
+            return null;
+        }
+
+        return [
+            'line' => trim((string) $matches[0]),
+            'text' => trim((string) $matches[2]),
+        ];
+    }
+
+    private function removeFirstHeading(string $markdown): string
+    {
+        $updatedMarkdown = preg_replace('/^(#{1,2})\s+(.+)(?:\r\n|\n|\r)?/m', '', $markdown, 1);
+
+        return trim($updatedMarkdown ?? $markdown);
     }
 
     private function extractLeadParagraph(string $markdown): ?string
@@ -248,14 +396,49 @@ class LoadChangelogPageAction
         $bodyMarkdown = trim(implode("\n", $entry['lines']));
         $bodyMarkdown = preg_replace('/(?:\n|\A)---\s*$/', '', $bodyMarkdown) ?? $bodyMarkdown;
         $bodyMarkdown = trim($bodyMarkdown);
-        $html = $this->injectHeadingAnchors(Str::markdown($bodyMarkdown, $this->markdownOptions()));
+
+        return $this->buildStandaloneEntry($bodyMarkdown, $entry['date'], $entry['title']);
+    }
+
+    /**
+     * @return array{
+     *     date: Carbon,
+     *     excerpt: string|null,
+     *     html: string,
+     *     id: string,
+     *     title: string
+     * }
+     */
+    private function buildStandaloneEntry(string $markdown, ?Carbon $date = null, ?string $title = null): array
+    {
+        $bodyMarkdown = trim($markdown);
+        $firstHeading = $this->extractPrimaryHeading($bodyMarkdown);
+
+        if ($title === null && $firstHeading !== null) {
+            $title = $firstHeading['text'];
+            $bodyMarkdown = $this->removeFirstHeading($bodyMarkdown);
+        }
+
+        $bodyMarkdown = preg_replace('/(?:\n|\A)---\s*$/', '', $bodyMarkdown) ?? $bodyMarkdown;
+        $bodyMarkdown = trim($bodyMarkdown);
+        $resolvedDate = $date ?? now()->startOfDay();
+        $resolvedTitle = $title
+            ?? 'Release notes';
+        $html = $this->injectHeadingAnchors(
+            Str::markdown(
+                $bodyMarkdown !== ''
+                    ? $bodyMarkdown
+                    : 'Release notes for this entry have not been written yet.',
+                $this->markdownOptions(),
+            )
+        );
 
         return [
-            'date' => $entry['date'],
+            'date' => $resolvedDate,
             'excerpt' => $this->extractLeadParagraph($bodyMarkdown),
             'html' => $html,
-            'id' => Str::slug($entry['date']->toDateString().'-'.$entry['title']),
-            'title' => $entry['title'],
+            'id' => Str::slug($resolvedDate->toDateString().'-'.$resolvedTitle),
+            'title' => $resolvedTitle,
         ];
     }
 
@@ -270,8 +453,14 @@ class LoadChangelogPageAction
             return null;
         }
 
-        $headingText = trim(Str::after($normalizedLine, '## '));
+        return $this->parseEntryHeadingText(trim(Str::after($normalizedLine, '## ')));
+    }
 
+    /**
+     * @return array{date: Carbon, title: string}|null
+     */
+    private function parseEntryHeadingText(string $headingText): ?array
+    {
         if (! preg_match('/^(?:.*?)(?<date>\d{4}-\d{2}-\d{2})(?:\s*[—–-]\s*(?<title>.+))?$/u', $headingText, $matches)) {
             return null;
         }

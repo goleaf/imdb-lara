@@ -23,21 +23,32 @@
             </x-ui.button>
         </div>
 
-        <x-ui.card class="!max-w-none">
-            <form method="POST" action="{{ route('admin.people.store') }}" class="space-y-6">
-                @csrf
+        @if ($catalogOnly)
+            <x-admin.catalog-write-disabled-panel
+                :back-href="route('admin.people.index')"
+                back-label="Back to people"
+                heading="People Writes Paused"
+                description="Local person creation is paused while Screenbase is reading people data from the remote catalog."
+            >
+                New cast and crew profiles should enter the system through the upstream catalog synchronization workflow.
+            </x-admin.catalog-write-disabled-panel>
+        @else
+            <x-ui.card class="!max-w-none">
+                <form method="POST" action="{{ route('admin.people.store') }}" class="space-y-6">
+                    @csrf
 
-                @include('admin.people._form')
+                    @include('admin.people._form')
 
-                <div class="flex justify-end gap-3">
-                    <x-ui.button as="a" :href="route('admin.people.index')" variant="ghost" icon="arrow-left">
-                        Cancel
-                    </x-ui.button>
-                    <x-ui.button type="submit" icon="plus">
-                        Create person
-                    </x-ui.button>
-                </div>
-            </form>
-        </x-ui.card>
+                    <div class="flex justify-end gap-3">
+                        <x-ui.button as="a" :href="route('admin.people.index')" variant="ghost" icon="arrow-left">
+                            Cancel
+                        </x-ui.button>
+                        <x-ui.button type="submit" icon="plus">
+                            Create person
+                        </x-ui.button>
+                    </div>
+                </form>
+            </x-ui.card>
+        @endif
     </section>
 @endsection

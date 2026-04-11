@@ -2,7 +2,7 @@
     <x-ui.field>
         <x-ui.label class="sb-auth-label">Email</x-ui.label>
         <x-ui.input
-            wire:model.live="form.email"
+            wire:model.live.blur="form.email"
             name="email"
             type="email"
             autocomplete="email"
@@ -15,7 +15,7 @@
     <x-ui.field>
         <x-ui.label class="sb-auth-label">Password</x-ui.label>
         <x-ui.input
-            wire:model.live="form.password"
+            wire:model.live.blur="form.password"
             name="password"
             type="password"
             autocomplete="current-password"

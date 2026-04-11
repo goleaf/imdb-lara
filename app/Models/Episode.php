@@ -2,97 +2,69 @@
 
 namespace App\Models;
 
-use Carbon\CarbonImmutable;
+use Database\Factories\EpisodeFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Episode extends Model
 {
-    protected $connection = 'imdb_mysql';
+    /** @use HasFactory<EpisodeFactory> */
+    use HasFactory;
 
-    protected $table = 'movie_episodes';
-
-    protected $primaryKey = 'episode_movie_id';
-
-    public $incrementing = false;
-
-    public $timestamps = false;
+    use SoftDeletes;
 
     /**
      * @var list<string>
      */
     protected $fillable = [
-        'episode_movie_id',
-        'movie_id',
-        'season',
+        'title_id',
+        'series_id',
+        'season_id',
+        'season_number',
         'episode_number',
-        'release_year',
-        'release_month',
-        'release_day',
+        'absolute_number',
+        'production_code',
+        'aired_at',
     ];
 
     protected function casts(): array
     {
         return [
-            'episode_movie_id' => 'integer',
-            'movie_id' => 'integer',
-            'season' => 'integer',
+            'title_id' => 'integer',
+            'series_id' => 'integer',
+            'season_id' => 'integer',
+            'season_number' => 'integer',
             'episode_number' => 'integer',
-            'release_year' => 'integer',
-            'release_month' => 'integer',
-            'release_day' => 'integer',
+            'absolute_number' => 'integer',
+            'aired_at' => 'date',
         ];
     }
 
     public function title(): BelongsTo
     {
-        return $this->belongsTo(Title::class, 'episode_movie_id', 'id');
+        return $this->belongsTo(Title::class);
     }
 
     public function series(): BelongsTo
     {
-        return $this->belongsTo(Title::class, 'movie_id', 'id');
+        return $this->belongsTo(Title::class, 'series_id');
     }
 
-    public function getTitleIdAttribute(): int
+    public function season(): BelongsTo
     {
-        return (int) $this->episode_movie_id;
+        return $this->belongsTo(Season::class);
     }
 
-    public function getSeriesIdAttribute(): int
+    public function seasonRecord(): BelongsTo
     {
-        return (int) $this->movie_id;
+        return $this->season();
     }
 
-    public function getSeasonIdAttribute(): string
+    public function credits(): HasMany
     {
-        return $this->movie_id.':'.$this->season;
-    }
-
-    public function getSeasonNumberAttribute(): int
-    {
-        return (int) ($this->season ?? 0);
-    }
-
-    public function getAbsoluteNumberAttribute(): ?int
-    {
-        return null;
-    }
-
-    public function getProductionCodeAttribute(): ?string
-    {
-        return null;
-    }
-
-    public function getAiredAtAttribute(): ?CarbonImmutable
-    {
-        if (! $this->release_year) {
-            return null;
-        }
-
-        $month = $this->release_month ?: 1;
-        $day = $this->release_day ?: 1;
-
-        return CarbonImmutable::create((int) $this->release_year, (int) $month, (int) $day);
+        return $this->hasMany(Credit::class)->orderBy('billing_order')->orderBy('id');
     }
 }

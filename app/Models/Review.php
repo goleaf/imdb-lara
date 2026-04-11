@@ -87,6 +87,28 @@ class Review extends Model
         ]);
     }
 
+    /**
+     * @return array<int|string, mixed>
+     */
+    public static function adminQueueRelations(): array
+    {
+        return [
+            'author:id,name,username',
+            'title' => fn ($titleQuery) => $titleQuery->select(Title::catalogCardColumns()),
+        ];
+    }
+
+    /**
+     * @return array<int|string, mixed>
+     */
+    public static function adminReportableRelations(): array
+    {
+        return [
+            'author:id,name,username,role,status',
+            'title' => fn ($titleQuery) => $titleQuery->select(Title::catalogCardColumns()),
+        ];
+    }
+
     public function scopeOrderForPublic(Builder $query, string $sort = 'newest'): Builder
     {
         return match ($sort) {
