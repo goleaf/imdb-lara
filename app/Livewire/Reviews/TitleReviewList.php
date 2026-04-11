@@ -6,8 +6,10 @@ use App\Actions\Catalog\BuildTitleReviewsQueryAction;
 use App\Actions\Titles\ToggleReviewHelpfulVoteAction;
 use App\Models\Review;
 use App\Models\Title;
+use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Collection;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -74,20 +76,70 @@ class TitleReviewList extends Component
 
     public function render(BuildTitleReviewsQueryAction $buildTitleReviewsQuery): View
     {
+        $viewer = auth()->user();
         $reviews = $buildTitleReviewsQuery
-            ->handle($this->title, $this->sort, auth()->user())
+            ->handle($this->title, $this->sort, $viewer)
             ->paginate(10, pageName: 'reviewsPage')
             ->withQueryString();
+        $reviewCollection = $reviews->getCollection();
 
         return view('livewire.reviews.title-review-list', [
-            'helpfulVoteStates' => $reviews->getCollection()
-                ->mapWithKeys(fn (Review $review): array => [$review->id => (int) ($review->current_user_helpful_votes_count ?? 0) > 0])
-                ->all(),
+            'helpfulButtons' => $this->helpfulButtons($reviewCollection),
+            'reviewPermissions' => $this->reviewPermissions($reviewCollection, $viewer),
             'reviews' => $reviews,
-            'sortOptions' => [
-                ['value' => 'newest', 'label' => 'Newest'],
-                ['value' => 'helpful', 'label' => 'Most helpful'],
-            ],
+            'sortOptions' => $this->sortOptions(),
         ]);
+    }
+
+    /**
+     * @return list<array{color: string, label: string, value: string, variant: string}>
+     */
+    private function sortOptions(): array
+    {
+        return collect([
+            ['value' => 'newest', 'label' => 'Newest'],
+            ['value' => 'helpful', 'label' => 'Most helpful'],
+        ])->map(fn (array $sortOption): array => [
+            ...$sortOption,
+            'color' => $this->sort === $sortOption['value'] ? 'amber' : 'neutral',
+            'variant' => $this->sort === $sortOption['value'] ? 'primary' : 'outline',
+        ])->all();
+    }
+
+    /**
+     * @param  Collection<int, Review>  $reviews
+     * @return array<int, array{color: string, label: string, variant: string}>
+     */
+    private function helpfulButtons(Collection $reviews): array
+    {
+        return $reviews
+            ->mapWithKeys(function (Review $review): array {
+                $hasHelpfulVote = (int) ($review->current_user_helpful_votes_count ?? 0) > 0;
+
+                return [
+                    $review->id => [
+                        'color' => $hasHelpfulVote ? 'amber' : 'neutral',
+                        'label' => $hasHelpfulVote ? 'Helpful saved' : 'Mark helpful',
+                        'variant' => $hasHelpfulVote ? 'primary' : 'outline',
+                    ],
+                ];
+            })
+            ->all();
+    }
+
+    /**
+     * @param  Collection<int, Review>  $reviews
+     * @return array<int, array{canReport: bool, canVoteHelpful: bool}>
+     */
+    private function reviewPermissions(Collection $reviews, ?User $viewer): array
+    {
+        return $reviews
+            ->mapWithKeys(fn (Review $review): array => [
+                $review->id => [
+                    'canReport' => $viewer === null || $viewer->can('report', $review),
+                    'canVoteHelpful' => $viewer?->can('voteHelpful', $review) ?? false,
+                ],
+            ])
+            ->all();
     }
 }

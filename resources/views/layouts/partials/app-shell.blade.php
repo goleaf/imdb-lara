@@ -82,13 +82,14 @@
                                 </span>
                             </a>
 
-                            <a
-                                href="{{ route('public.discover') }}"
-                                class="sb-auth-header-link inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/4 px-4 py-2 text-sm font-medium"
+                            <x-ui.button.light-outline
+                                :href="route('public.discover')"
+                                size="sm"
+                                icon="chevron-left"
+                                class="sb-auth-header-link !rounded-full !px-4 !py-2 !text-sm"
                             >
-                                <x-ui.icon name="chevron-left" variant="mini" class="size-4" />
-                                <span>Browse catalog</span>
-                            </a>
+                                Browse catalog
+                            </x-ui.button.light-outline>
                         </div>
                     </header>
 
@@ -124,6 +125,30 @@
                                 @endif
 
                                 <div class="ml-auto flex items-center gap-2">
+                                    @if ($shell['shouldRenderAdminShortcut'])
+                                        <x-ui.button
+                                            as="a"
+                                            :href="route('admin.dashboard')"
+                                            variant="outline"
+                                            size="sm"
+                                            icon="shield-check"
+                                        >
+                                            Admin
+                                        </x-ui.button>
+                                    @endif
+
+                                    @if ($shell['shouldRenderWatchlistShortcut'])
+                                        <x-ui.button
+                                            as="a"
+                                            :href="route('account.watchlist')"
+                                            variant="outline"
+                                            size="sm"
+                                            icon="bookmark"
+                                        >
+                                            Watchlist
+                                        </x-ui.button>
+                                    @endif
+
                                     <x-ui.theme-switcher variant="inline" />
 
                                     @auth

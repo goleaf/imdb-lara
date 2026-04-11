@@ -4,34 +4,28 @@ namespace Tests\Feature\Feature;
 
 use App\Actions\Catalog\LoadTitleDetailsAction;
 use App\Actions\Seo\PageSeoData;
+use App\Livewire\Pages\Public\TitlePage;
 use App\Models\Title;
+use Livewire\Livewire;
 use Mockery;
-use Tests\Concerns\BootstrapsImdbMysqlSqlite;
+use Tests\Concerns\BuildsCatalogTitleFixtures;
 use Tests\Concerns\UsesCatalogOnlyApplication;
 use Tests\TestCase;
 
 class TitlePagePayloadFallbackTest extends TestCase
 {
-    use BootstrapsImdbMysqlSqlite;
+    use BuildsCatalogTitleFixtures;
     use UsesCatalogOnlyApplication;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->setUpImdbMysqlSqliteDatabase();
-    }
 
     public function test_title_page_renders_when_optional_report_collections_are_missing_from_loader_payload(): void
     {
-        $title = Title::query()->create([
-            'tconst' => 'tt0133093',
+        $title = $this->makeCatalogTitle(attributes: [
+            'id' => 1,
             'imdb_id' => 'tt0133093',
-            'titletype' => 'movie',
-            'primarytitle' => 'The Matrix',
-            'originaltitle' => 'The Matrix',
-            'isadult' => 0,
-            'startyear' => 1999,
+            'name' => 'The Matrix',
+            'original_name' => 'The Matrix',
+            'slug' => 'the-matrix-tt0133093',
+            'release_year' => 1999,
         ]);
 
         $payload = $this->titleDetailPayload($title);
@@ -51,8 +45,7 @@ class TitlePagePayloadFallbackTest extends TestCase
 
         $this->app->instance(LoadTitleDetailsAction::class, $loadTitleDetails);
 
-        $this->get(route('public.titles.show', $title))
-            ->assertOk()
+        Livewire::test(TitlePage::class, ['title' => $title])
             ->assertSee('The Matrix')
             ->assertSee('Overview');
     }

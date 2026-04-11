@@ -24,8 +24,21 @@
                         Back to season
                     </x-ui.button>
                 @endif
-                @if ($episode->series && $episode->season)
-                    <x-ui.button as="a" :href="route('public.episodes.show', ['series' => $episode->series, 'season' => $episode->season, 'episode' => $episode])" variant="outline" icon="arrow-top-right-on-square">
+                @if (
+                    $episode->series?->getRouteKey()
+                    && $episode->season?->getRouteKey()
+                    && $episode->title?->getRouteKey()
+                )
+                    <x-ui.button
+                        as="a"
+                        :href="route('public.episodes.show', [
+                            'series' => $episode->series->getRouteKey(),
+                            'season' => $episode->season->getRouteKey(),
+                            'episode' => $episode->title->getRouteKey(),
+                        ])"
+                        variant="outline"
+                        icon="arrow-top-right-on-square"
+                    >
                         View public page
                     </x-ui.button>
                 @endif
@@ -49,10 +62,7 @@
             </x-admin.catalog-write-disabled-panel>
         @else
             <x-ui.card class="!max-w-none">
-                <form method="POST" action="{{ route('admin.episodes.update', $episode) }}" class="space-y-6">
-                    @csrf
-                    @method('PATCH')
-
+                <form wire:submit="saveEpisode" class="space-y-6">
                     @include('admin.episodes._form')
 
                     <div class="flex justify-end">
@@ -64,13 +74,9 @@
             </x-ui.card>
 
             <div class="flex justify-end">
-                <form method="POST" action="{{ route('admin.episodes.destroy', $episode) }}">
-                    @csrf
-                    @method('DELETE')
-                    <x-ui.button type="submit" variant="outline" color="red" icon="trash">
-                        Delete episode
-                    </x-ui.button>
-                </form>
+                <x-ui.button type="button" wire:click="deleteEpisode" variant="outline" color="red" icon="trash">
+                    Delete episode
+                </x-ui.button>
             </div>
         @endif
     </section>

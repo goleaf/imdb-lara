@@ -34,9 +34,7 @@
             </x-admin.catalog-write-disabled-panel>
         @else
             <x-ui.card class="!max-w-none">
-                <form method="POST" action="{{ route('admin.people.store') }}" class="space-y-6">
-                    @csrf
-
+                <form wire:submit="savePerson" class="space-y-6">
                     @include('admin.people._form')
 
                     <div class="flex justify-end">

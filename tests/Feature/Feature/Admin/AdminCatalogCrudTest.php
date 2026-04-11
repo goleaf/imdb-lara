@@ -333,7 +333,7 @@ class AdminCatalogCrudTest extends TestCase
                 'meta_title' => 'Season One',
                 'meta_description' => 'Updated season overview.',
             ])
-            ->assertRedirect(route('admin.seasons.edit', $season));
+            ->assertRedirect(route('admin.seasons.edit', $season->fresh()));
 
         $season->refresh();
         $this->assertSame('Season One', $season->name);

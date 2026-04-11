@@ -2,92 +2,73 @@
 
 namespace Tests\Feature\Feature;
 
-use App\Models\MoviePlot;
-use App\Models\MoviePrimaryImage;
-use App\Models\Title;
-use App\Models\TitleStatistic;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-use Tests\Concerns\BootstrapsImdbMysqlSqlite;
+use App\Actions\Catalog\LoadPublicTitleBrowserPageAction;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Pagination\Paginator;
+use Mockery;
+use Tests\Concerns\BuildsCatalogTitleFixtures;
 use Tests\Concerns\UsesCatalogOnlyApplication;
 use Tests\TestCase;
 
 class BrowseTopRatedSeriesPageLocalRenderTest extends TestCase
 {
-    use BootstrapsImdbMysqlSqlite;
+    use BuildsCatalogTitleFixtures;
     use UsesCatalogOnlyApplication;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->setUpImdbMysqlSqliteDatabase();
-        $this->setUpCatalogCardLookupTables();
-    }
 
     public function test_top_rated_series_page_renders_lowercase_imdb_series_types(): void
     {
-        $series = Title::query()->create([
-            'tconst' => 'tt1122334',
-            'imdb_id' => 'tt1122334',
-            'titletype' => 'tvseries',
-            'primarytitle' => 'Severance',
-            'originaltitle' => 'Severance',
-            'isadult' => 0,
-            'startyear' => 2022,
-            'runtimeminutes' => 50,
-            'runtimeSeconds' => 3000,
-        ]);
+        $series = $this->makeCatalogTitle(
+            attributes: [
+                'id' => 1,
+                'imdb_id' => 'tt1122334',
+                'name' => 'Severance',
+                'original_name' => 'Severance',
+                'title_type' => 'tvseries',
+                'release_year' => 2022,
+                'runtime_minutes' => 50,
+                'runtime_seconds' => 3000,
+                'plot_outline' => 'A fractured workplace thriller where memory is divided between office life and the outside world.',
+            ],
+            statistic: $this->makeCatalogStatistic(1, 8.7, 845123),
+            mediaAssets: [$this->makeCatalogPoster(1, 'https://images.test/severance-poster.jpg')],
+        );
 
-        $miniSeries = Title::query()->create([
-            'tconst' => 'tt2233445',
-            'imdb_id' => 'tt2233445',
-            'titletype' => 'tvminiseries',
-            'primarytitle' => 'Chernobyl',
-            'originaltitle' => 'Chernobyl',
-            'isadult' => 0,
-            'startyear' => 2019,
-            'runtimeminutes' => 60,
-            'runtimeSeconds' => 3600,
-        ]);
+        $miniSeries = $this->makeCatalogTitle(
+            attributes: [
+                'id' => 2,
+                'imdb_id' => 'tt2233445',
+                'name' => 'Chernobyl',
+                'original_name' => 'Chernobyl',
+                'title_type' => 'tvminiseries',
+                'release_year' => 2019,
+                'runtime_minutes' => 60,
+                'runtime_seconds' => 3600,
+                'plot_outline' => 'A historical disaster drama about the Chernobyl nuclear accident and the people forced to contain it.',
+            ],
+            statistic: $this->makeCatalogStatistic(2, 9.3, 910234),
+            mediaAssets: [$this->makeCatalogPoster(2, 'https://images.test/chernobyl-poster.jpg')],
+        );
 
-        MoviePrimaryImage::query()->create([
-            'movie_id' => $series->id,
-            'url' => 'https://images.test/severance-poster.jpg',
-            'width' => 1000,
-            'height' => 1500,
-            'type' => 'poster',
-        ]);
+        $action = Mockery::mock(LoadPublicTitleBrowserPageAction::class);
+        $action
+            ->shouldReceive('handleSafely')
+            ->once()
+            ->with($this->expectedSeriesFilters(), 12, 'top-rated-series')
+            ->andReturn([
+                'titles' => new Paginator(
+                    items: new EloquentCollection([$miniSeries, $series]),
+                    perPage: 12,
+                    currentPage: 1,
+                    options: [
+                        'path' => route('public.rankings.series'),
+                        'pageName' => 'top-rated-series',
+                    ],
+                ),
+                'usingStaleCache' => false,
+                'isUnavailable' => false,
+            ]);
 
-        MoviePrimaryImage::query()->create([
-            'movie_id' => $miniSeries->id,
-            'url' => 'https://images.test/chernobyl-poster.jpg',
-            'width' => 1000,
-            'height' => 1500,
-            'type' => 'poster',
-        ]);
-
-        TitleStatistic::query()->create([
-            'movie_id' => $series->id,
-            'aggregate_rating' => 8.7,
-            'vote_count' => 845123,
-        ]);
-
-        TitleStatistic::query()->create([
-            'movie_id' => $miniSeries->id,
-            'aggregate_rating' => 9.3,
-            'vote_count' => 910234,
-        ]);
-
-        MoviePlot::query()->create([
-            'movie_id' => $series->id,
-            'plot' => 'A fractured workplace thriller where memory is divided between office life and the outside world.',
-        ]);
-
-        MoviePlot::query()->create([
-            'movie_id' => $miniSeries->id,
-            'plot' => 'A historical disaster drama about the Chernobyl nuclear accident and the people forced to contain it.',
-        ]);
+        $this->app->instance(LoadPublicTitleBrowserPageAction::class, $action);
 
         $response = $this->get(route('public.rankings.series'))
             ->assertOk()
@@ -101,28 +82,27 @@ class BrowseTopRatedSeriesPageLocalRenderTest extends TestCase
         $this->assertSame(1, substr_count($response->getContent(), '910,234 votes'));
     }
 
-    private function setUpCatalogCardLookupTables(): void
+    /**
+     * @return array{
+     *     types: list<string>,
+     *     genre: null,
+     *     theme: null,
+     *     year: null,
+     *     country: null,
+     *     sort: string,
+     *     excludeEpisodes: bool
+     * }
+     */
+    private function expectedSeriesFilters(): array
     {
-        Schema::connection('imdb_mysql')->create('countries', function (Blueprint $table): void {
-            $table->string('code')->primary();
-            $table->string('name')->nullable();
-        });
-
-        Schema::connection('imdb_mysql')->create('languages', function (Blueprint $table): void {
-            $table->string('code')->primary();
-            $table->string('name')->nullable();
-        });
-
-        Schema::connection('imdb_mysql')->create('movie_origin_countries', function (Blueprint $table): void {
-            $table->unsignedInteger('movie_id');
-            $table->string('country_code');
-            $table->unsignedSmallInteger('position')->nullable();
-        });
-
-        Schema::connection('imdb_mysql')->create('movie_spoken_languages', function (Blueprint $table): void {
-            $table->unsignedInteger('movie_id');
-            $table->string('language_code');
-            $table->unsignedSmallInteger('position')->nullable();
-        });
+        return [
+            'types' => ['series', 'mini-series'],
+            'genre' => null,
+            'theme' => null,
+            'year' => null,
+            'country' => null,
+            'sort' => 'rating',
+            'excludeEpisodes' => true,
+        ];
     }
 }

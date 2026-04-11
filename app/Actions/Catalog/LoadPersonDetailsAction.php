@@ -72,7 +72,7 @@ class LoadPersonDetailsAction
             $knownForTitles = $creditedTitles
                 ->sortByDesc(fn (Title $title): string => sprintf(
                     '%01d-%05.2f-%09d-%05d',
-                    $person->credits->where('movie_id', $title->id)->contains(fn (Credit $credit) => $credit->is_principal) ? 1 : 0,
+                    $person->credits->where('title_id', $title->id)->contains(fn (Credit $credit) => $credit->is_principal) ? 1 : 0,
                     (float) ($title->statistic?->average_rating ?? 0),
                     (int) ($title->statistic?->rating_count ?? 0),
                     (int) ($title->release_year ?? 0),

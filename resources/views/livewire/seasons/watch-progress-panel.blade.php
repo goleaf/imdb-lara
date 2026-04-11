@@ -11,10 +11,10 @@
             <x-ui.button
                 wire:click="markSeasonWatched"
                 wire:target="markSeasonWatched"
-                :variant="$remainingEpisodes === 0 && $totalEpisodes > 0 ? 'outline' : 'primary'"
+                :variant="$markButton['variant']"
                 icon="check-circle"
             >
-                {{ $remainingEpisodes === 0 && $totalEpisodes > 0 ? 'Season watched' : 'Mark season watched' }}
+                {{ $markButton['label'] }}
             </x-ui.button>
         </div>
 
@@ -26,10 +26,10 @@
                 </x-ui.alerts.description>
             </x-ui.alerts>
         @else
-            @if ($statusMessage)
+            @if ($statusMessage && $statusAlert)
                 <x-ui.alerts
-                    :variant="str_contains(strtolower($statusMessage), 'no published episodes') ? 'info' : 'success'"
-                    :icon="str_contains(strtolower($statusMessage), 'no published episodes') ? 'information-circle' : 'check-circle'"
+                    :variant="$statusAlert['variant']"
+                    :icon="$statusAlert['icon']"
                 >
                     <x-ui.alerts.description>{{ $statusMessage }}</x-ui.alerts.description>
                 </x-ui.alerts>
@@ -52,7 +52,7 @@
 
             <div class="space-y-2">
                 <div class="flex items-center justify-between gap-3 text-sm text-neutral-500 dark:text-neutral-400">
-                    <span>{{ number_format($watchedEpisodes) }} of {{ number_format($totalEpisodes) }} episodes tracked</span>
+                    <span>{{ $progressSummary }}</span>
                     <span>{{ $percentage }}%</span>
                 </div>
 

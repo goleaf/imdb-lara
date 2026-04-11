@@ -56,37 +56,37 @@
             </div>
         </x-ui.card>
 
-        <x-ui.card class="!max-w-none">
-            <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
-                <x-ui.field>
-                    <x-ui.label>Search public lists</x-ui.label>
-                    <x-ui.input
-                        wire:model.live.debounce.300ms="search"
-                        name="q"
-                        placeholder="Search list names, descriptions, or curators"
-                        left-icon="magnifying-glass"
-                    />
-                </x-ui.field>
+        <div class="space-y-4 has-data-loading:[&_[data-slot=public-lists-skeletons]]:grid has-data-loading:[&_[data-slot=public-lists-results]]:hidden">
+            <x-ui.card class="!max-w-none">
+                <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
+                    <x-ui.field>
+                        <x-ui.label>Search public lists</x-ui.label>
+                        <x-ui.input
+                            wire:model.live.debounce.300ms="search"
+                            name="q"
+                            placeholder="Search list names, descriptions, or curators"
+                            left-icon="magnifying-glass"
+                        />
+                    </x-ui.field>
 
-                <x-ui.field>
-                    <x-ui.label>Sort</x-ui.label>
-                    <x-ui.combobox wire:model.live="sort" class="w-full" placeholder="Choose order">
-                        @foreach ($sortOptions as $sortOption)
-                            <x-ui.combobox.option
-                                wire:key="public-lists-sort-{{ $sortOption['value'] }}"
-                                value="{{ $sortOption['value'] }}"
-                                :icon="$sortOption['icon']"
-                            >
-                                {{ $sortOption['label'] }}
-                            </x-ui.combobox.option>
-                        @endforeach
-                    </x-ui.combobox>
-                </x-ui.field>
-            </div>
-        </x-ui.card>
+                    <x-ui.field>
+                        <x-ui.label>Sort</x-ui.label>
+                        <x-ui.combobox wire:model.live="sort" class="w-full" placeholder="Choose order">
+                            @foreach ($sortOptions as $sortOption)
+                                <x-ui.combobox.option
+                                    wire:key="public-lists-sort-{{ $sortOption['value'] }}"
+                                    value="{{ $sortOption['value'] }}"
+                                    :icon="$sortOption['icon']"
+                                >
+                                    {{ $sortOption['label'] }}
+                                </x-ui.combobox.option>
+                            @endforeach
+                        </x-ui.combobox>
+                    </x-ui.field>
+                </div>
+            </x-ui.card>
 
-        <div wire:loading.delay.attr="data-loading" wire:target="search,sort" class="space-y-4">
-            <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3 not-data-loading:hidden">
+            <div data-slot="public-lists-skeletons" class="hidden gap-4 md:grid-cols-2 xl:grid-cols-3">
                 @foreach (range(1, 6) as $index)
                     <x-ui.card class="!max-w-none h-full" wire:key="public-list-placeholder-{{ $index }}">
                         <div class="space-y-4">
@@ -106,7 +106,7 @@
                 @endforeach
             </div>
 
-            <div class="space-y-4 in-data-loading:hidden" data-slot="public-lists-grid">
+            <div class="space-y-4" data-slot="public-lists-results">
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <x-ui.text class="text-sm text-neutral-600 dark:text-neutral-300">
                         @if (filled(trim($search)))
@@ -123,7 +123,7 @@
                     @endif
                 </div>
 
-                <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3" data-slot="public-lists-grid">
                     @forelse ($lists as $list)
                         <x-ui.card class="!max-w-none h-full" wire:key="public-list-card-{{ $list->id }}">
                             <div class="flex h-full flex-col gap-4">

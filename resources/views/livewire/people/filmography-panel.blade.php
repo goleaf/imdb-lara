@@ -1,6 +1,9 @@
 <div>
 @island(name: 'person-filmography-panel')
-<div data-slot="person-filmography-island">
+<div
+    class="has-data-loading:[&_[data-slot=person-filmography-skeletons]]:block has-data-loading:[&_[data-slot=person-filmography-results]]:hidden"
+    data-slot="person-filmography-island"
+>
 <div id="person-filmography" data-slot="person-filmography-panel" class="space-y-4">
     <x-ui.card class="sb-detail-section sb-person-filmography-shell !max-w-none">
         <div class="space-y-4">
@@ -13,7 +16,7 @@
                 </div>
 
                 <x-ui.badge variant="outline" color="neutral" icon="film">
-                    {{ number_format($groups->sum(fn (array $group): int => $group['rows']->count())) }} titles
+                    {{ $summaryBadgeLabel }}
                 </x-ui.badge>
             </div>
 
@@ -29,11 +32,11 @@
                     >
                         @foreach ($professionOptions as $professionOption)
                             <x-ui.combobox.option
-                                wire:key="filmography-profession-{{ str($professionOption)->slug()->value() }}"
-                                value="{{ $professionOption }}"
+                                wire:key="filmography-profession-{{ $professionOption['key'] }}"
+                                value="{{ $professionOption['value'] }}"
                                 icon="briefcase"
                             >
-                                {{ $professionOption }}
+                                {{ $professionOption['label'] }}
                             </x-ui.combobox.option>
                         @endforeach
                     </x-ui.combobox>
@@ -62,8 +65,8 @@
         </div>
     </x-ui.card>
 
-    <div wire:loading.delay.attr="data-loading" class="space-y-4">
-        <div class="space-y-4 not-data-loading:hidden">
+    <div class="space-y-4">
+        <div data-slot="person-filmography-skeletons" class="hidden space-y-4">
             @foreach (range(1, 2) as $groupIndex)
                 <x-ui.card class="sb-detail-section sb-person-filmography-group !max-w-none" wire:key="filmography-skeleton-group-{{ $groupIndex }}">
                     <div class="space-y-4">
@@ -89,7 +92,7 @@
             @endforeach
         </div>
 
-        <div class="space-y-4 in-data-loading:hidden">
+        <div class="space-y-4" data-slot="person-filmography-results">
             @forelse ($groups as $group)
                 <x-ui.card class="sb-detail-section sb-person-filmography-group !max-w-none">
                     <div class="space-y-4">
@@ -97,10 +100,10 @@
                             <div>
                                 <x-ui.heading level="h3" size="md">{{ $group['label'] }}</x-ui.heading>
                                 <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                    {{ number_format($group['rows']->count()) }} title{{ $group['rows']->count() === 1 ? '' : 's' }} in this credit grouping.
+                                    {{ $group['description'] }}
                                 </x-ui.text>
                             </div>
-                            <x-ui.badge variant="outline" color="neutral" icon="film">{{ number_format($group['rows']->count()) }} titles</x-ui.badge>
+                            <x-ui.badge variant="outline" color="neutral" icon="film">{{ $group['titleCountLabel'] }}</x-ui.badge>
                         </div>
 
                         <div class="grid gap-3">
@@ -158,7 +161,7 @@
 
                                     <div class="sb-person-filmography-side">
                                         <x-ui.badge variant="outline" color="neutral" icon="identification">
-                                            {{ number_format($row['creditCount']) }} credit{{ $row['creditCount'] === 1 ? '' : 's' }}
+                                            {{ $row['creditCountLabel'] }}
                                         </x-ui.badge>
                                     </div>
                                 </div>

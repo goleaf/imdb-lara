@@ -19,8 +19,8 @@
 ])
 
 @php
-    
-    $invalid ??= $name && $errors->has($name);
+    $errorBag = $errors ?? session('errors') ?? new \Illuminate\Support\ViewErrorBag;
+    $invalid ??= $name && $errorBag->has($name);
 
     $classes = [
         // isolate stacking context to prevent z-index and shadow bleed from parent

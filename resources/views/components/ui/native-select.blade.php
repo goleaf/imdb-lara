@@ -5,7 +5,8 @@
 
 @php
     $resolvedName = $name ?? $attributes->get('name');
-    $invalid ??= $resolvedName && $errors->has($resolvedName);
+    $errorBag = $errors ?? session('errors') ?? new \Illuminate\Support\ViewErrorBag;
+    $invalid ??= $resolvedName && $errorBag->has($resolvedName);
 
     $classes = [
         'min-h-10 w-full rounded-box border bg-white px-3 text-sm text-neutral-800 shadow-xs transition',

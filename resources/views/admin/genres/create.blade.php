@@ -30,9 +30,7 @@
             </x-admin.catalog-write-disabled-panel>
         @else
             <x-ui.card class="!max-w-none">
-                <form method="POST" action="{{ route('admin.genres.store') }}" class="space-y-6">
-                    @csrf
-
+                <form wire:submit="saveGenre" class="space-y-6">
                     @include('admin.genres._form')
 
                     <div class="flex justify-end">

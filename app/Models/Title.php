@@ -934,6 +934,70 @@ class Title extends Model
     }
 
     /**
+     * @return SupportCollection<int, mixed>
+     */
+    public function resolvedCertificateAttributes(): SupportCollection
+    {
+        return collect();
+    }
+
+    /**
+     * @return SupportCollection<int, mixed>
+     */
+    public function resolvedCertificateRatings(): SupportCollection
+    {
+        return collect();
+    }
+
+    /**
+     * @return SupportCollection<int, mixed>
+     */
+    public function resolvedCompanies(): SupportCollection
+    {
+        return collect();
+    }
+
+    /**
+     * @return SupportCollection<int, mixed>
+     */
+    public function resolvedCompanyCreditAttributes(): SupportCollection
+    {
+        return collect();
+    }
+
+    /**
+     * @return SupportCollection<int, mixed>
+     */
+    public function resolvedCompanyCreditCategories(): SupportCollection
+    {
+        return collect();
+    }
+
+    /**
+     * @return SupportCollection<int, mixed>
+     */
+    public function resolvedMovieBoxOfficeRows(): SupportCollection
+    {
+        return collect();
+    }
+
+    /**
+     * @return SupportCollection<int, mixed>
+     */
+    public function resolvedCurrencies(): SupportCollection
+    {
+        return collect();
+    }
+
+    /**
+     * @return SupportCollection<int, mixed>
+     */
+    public function resolvedInterests(): SupportCollection
+    {
+        return collect();
+    }
+
+    /**
      * @return SupportCollection<int, array{code: string, label: string}>
      */
     public function resolvedCountryItems(): SupportCollection

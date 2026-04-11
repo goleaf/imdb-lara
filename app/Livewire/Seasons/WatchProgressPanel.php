@@ -7,6 +7,7 @@ use App\Actions\Titles\MarkSeasonEpisodesWatchedAction;
 use App\Models\Season;
 use App\Models\Title;
 use App\Models\User;
+use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
 class WatchProgressPanel extends Component
@@ -55,9 +56,13 @@ class WatchProgressPanel extends Component
             : 'No published episodes were available to update yet.';
     }
 
-    public function render()
+    public function render(): View
     {
-        return view('livewire.seasons.watch-progress-panel');
+        return view('livewire.seasons.watch-progress-panel', [
+            'markButton' => $this->markButton(),
+            'progressSummary' => $this->progressSummary(),
+            'statusAlert' => $this->statusAlert(),
+        ]);
     }
 
     private function fillProgress(User $user, GetSeasonWatchProgressAction $getSeasonWatchProgress): void
@@ -68,5 +73,40 @@ class WatchProgressPanel extends Component
         $this->watchedEpisodes = $progress['watched'];
         $this->remainingEpisodes = $progress['remaining'];
         $this->percentage = $progress['percentage'];
+    }
+
+    /**
+     * @return array{label: string, variant: string}
+     */
+    private function markButton(): array
+    {
+        $seasonIsComplete = $this->remainingEpisodes === 0 && $this->totalEpisodes > 0;
+
+        return [
+            'label' => $seasonIsComplete ? 'Season watched' : 'Mark season watched',
+            'variant' => $seasonIsComplete ? 'outline' : 'primary',
+        ];
+    }
+
+    private function progressSummary(): string
+    {
+        return number_format($this->watchedEpisodes).' of '.number_format($this->totalEpisodes).' episodes tracked';
+    }
+
+    /**
+     * @return array{icon: string, variant: string}|null
+     */
+    private function statusAlert(): ?array
+    {
+        if (! filled($this->statusMessage)) {
+            return null;
+        }
+
+        $hasNoPublishedEpisodes = str_contains(strtolower($this->statusMessage), 'no published episodes');
+
+        return [
+            'icon' => $hasNoPublishedEpisodes ? 'information-circle' : 'check-circle',
+            'variant' => $hasNoPublishedEpisodes ? 'info' : 'success',
+        ];
     }
 }

@@ -42,10 +42,7 @@
             </x-admin.catalog-write-disabled-panel>
         @else
             <x-ui.card class="!max-w-none">
-                <form method="POST" action="{{ route('admin.media-assets.update', $mediaAsset) }}" enctype="multipart/form-data" class="space-y-6">
-                    @csrf
-                    @method('PATCH')
-
+                <form wire:submit="saveMediaAsset" enctype="multipart/form-data" class="space-y-6">
                     @include('admin.media-assets._form')
 
                     <div class="flex justify-end">
@@ -57,13 +54,9 @@
             </x-ui.card>
 
             <div class="flex justify-end">
-                <form method="POST" action="{{ route('admin.media-assets.destroy', $mediaAsset) }}">
-                    @csrf
-                    @method('DELETE')
-                    <x-ui.button type="submit" variant="outline" color="red" icon="trash">
-                        Delete media asset
-                    </x-ui.button>
-                </form>
+                <x-ui.button type="button" wire:click="deleteMediaAsset" variant="outline" color="red" icon="trash">
+                    Delete media asset
+                </x-ui.button>
             </div>
         @endif
     </section>

@@ -27,13 +27,11 @@
             </x-admin.catalog-write-disabled-panel>
         @else
             <x-ui.card class="!max-w-none">
-                <form method="POST" action="{{ route('admin.credits.store') }}" class="space-y-6">
-                    @csrf
-
+                <form wire:submit="saveCredit" class="space-y-6">
                     @include('admin.credits._form')
 
                     <x-ui.text class="text-sm text-neutral-500 dark:text-neutral-400">
-                        Change the selected title or person and resubmit if you need refreshed episode or profession options.
+                        Episode and profession options refresh live when you change the selected title or person.
                     </x-ui.text>
 
                     <div class="flex justify-end">

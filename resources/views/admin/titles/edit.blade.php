@@ -46,10 +46,7 @@
         @else
             <div class="space-y-4">
                 <x-ui.card class="!max-w-none">
-                    <form method="POST" action="{{ route('admin.titles.update', $title) }}" class="space-y-6">
-                        @csrf
-                        @method('PATCH')
-
+                    <form wire:submit="saveTitle" class="space-y-6">
                         @include('admin.titles._form')
 
                         <div class="flex justify-end">
@@ -96,11 +93,15 @@
                                         </div>
                                     </a>
                                 @empty
-                                    <x-ui.empty-state
-                                        title="No credits linked"
-                                        description="Add cast or crew records to enrich the public title detail page."
-                                        icon="users"
-                                    />
+                                    <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                        <x-ui.empty.media>
+                                            <x-ui.icon name="users" class="size-8 text-neutral-400" />
+                                        </x-ui.empty.media>
+                                        <x-ui.heading level="h3" size="sm">No credits linked</x-ui.heading>
+                                        <x-ui.text class="text-sm text-neutral-600 dark:text-neutral-300">
+                                            Add cast or crew records to enrich the public title detail page.
+                                        </x-ui.text>
+                                    </x-ui.empty>
                                 @endforelse
                             </div>
                         </div>
@@ -135,18 +136,20 @@
                                         </div>
                                     </a>
                                 @empty
-                                    <x-ui.empty-state
-                                        title="No media assets"
-                                        description="Add artwork or video metadata so the public title page has editorial media."
-                                        icon="photo"
-                                    />
+                                    <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                        <x-ui.empty.media>
+                                            <x-ui.icon name="photo" class="size-8 text-neutral-400" />
+                                        </x-ui.empty.media>
+                                        <x-ui.heading level="h3" size="sm">No media assets</x-ui.heading>
+                                        <x-ui.text class="text-sm text-neutral-600 dark:text-neutral-300">
+                                            Add artwork or video metadata so the public title page has editorial media.
+                                        </x-ui.text>
+                                    </x-ui.empty>
                                 @endforelse
                             </div>
 
-                            <form method="POST" action="{{ route('admin.titles.media-assets.store', $title) }}" enctype="multipart/form-data" class="space-y-4 rounded-box border border-dashed border-black/10 p-4 dark:border-white/10">
-                                @csrf
-
-                                @include('admin.media-assets._form', ['mediaAsset' => $draftMediaAsset])
+                            <form wire:submit="saveDraftMediaAsset" enctype="multipart/form-data" class="space-y-4 rounded-box border border-dashed border-black/10 p-4 dark:border-white/10">
+                                @include('admin.media-assets._form', ['mediaAsset' => $draftMediaAsset, 'statePath' => 'draftMediaAsset'])
 
                                 <div class="flex justify-end">
                                     <x-ui.button type="submit" size="sm" icon="plus">
@@ -184,17 +187,19 @@
                                         <x-ui.badge variant="outline" icon="arrow-right">Edit</x-ui.badge>
                                     </a>
                                 @empty
-                                    <x-ui.empty-state
-                                        title="No seasons yet"
-                                        description="Add the first season to unlock episode editing and public TV hierarchy."
-                                        icon="tv"
-                                    />
+                                    <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                        <x-ui.empty.media>
+                                            <x-ui.icon name="tv" class="size-8 text-neutral-400" />
+                                        </x-ui.empty.media>
+                                        <x-ui.heading level="h3" size="sm">No seasons yet</x-ui.heading>
+                                        <x-ui.text class="text-sm text-neutral-600 dark:text-neutral-300">
+                                            Add the first season to unlock episode editing and public TV hierarchy.
+                                        </x-ui.text>
+                                    </x-ui.empty>
                                 @endforelse
                             </div>
 
-                            <form method="POST" action="{{ route('admin.titles.seasons.store', $title) }}" class="space-y-6 rounded-box border border-dashed border-black/10 p-4 dark:border-white/10">
-                                @csrf
-
+                            <form wire:submit="saveSeason" class="space-y-6 rounded-box border border-dashed border-black/10 p-4 dark:border-white/10">
                                 @include('admin.seasons._form', ['season' => $draftSeason, 'fieldPrefix' => 'season'])
 
                                 <div class="flex justify-end">
@@ -208,13 +213,9 @@
                 @endif
 
                 <div class="flex justify-end">
-                    <form method="POST" action="{{ route('admin.titles.destroy', $title) }}">
-                        @csrf
-                        @method('DELETE')
-                        <x-ui.button type="submit" variant="outline" color="red" icon="trash">
-                            Delete title
-                        </x-ui.button>
-                    </form>
+                    <x-ui.button type="button" wire:click="deleteTitle" variant="outline" color="red" icon="trash">
+                        Delete title
+                    </x-ui.button>
                 </div>
             </div>
         @endif

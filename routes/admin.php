@@ -7,13 +7,20 @@ use App\Livewire\Pages\Admin\ContributionsPage;
 use App\Livewire\Pages\Admin\CreditsPage;
 use App\Livewire\Pages\Admin\DashboardPage;
 use App\Livewire\Pages\Admin\EpisodesPage;
-use App\Livewire\Pages\Admin\GenresPage;
-use App\Livewire\Pages\Admin\MediaAssetsPage;
-use App\Livewire\Pages\Admin\PeoplePage;
+use App\Livewire\Pages\Admin\GenreCreatePage;
+use App\Livewire\Pages\Admin\GenreEditPage;
+use App\Livewire\Pages\Admin\GenresIndexPage;
+use App\Livewire\Pages\Admin\MediaAssetEditPage;
+use App\Livewire\Pages\Admin\MediaAssetsIndexPage;
+use App\Livewire\Pages\Admin\PeopleIndexPage;
+use App\Livewire\Pages\Admin\PersonCreatePage;
+use App\Livewire\Pages\Admin\PersonEditPage;
 use App\Livewire\Pages\Admin\ReportsPage;
 use App\Livewire\Pages\Admin\ReviewsPage;
 use App\Livewire\Pages\Admin\SeasonsPage;
-use App\Livewire\Pages\Admin\TitlesPage;
+use App\Livewire\Pages\Admin\TitleCreatePage;
+use App\Livewire\Pages\Admin\TitleEditPage;
+use App\Livewire\Pages\Admin\TitlesIndexPage;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'active', 'admin'])
@@ -23,17 +30,17 @@ Route::middleware(['auth', 'active', 'admin'])
         Route::livewire('/', DashboardPage::class)->name('dashboard');
 
         Route::middleware('can:manage-catalog')->group(function (): void {
-            Route::livewire('/titles', TitlesPage::class)->name('titles.index');
-            Route::livewire('/titles/create', TitlesPage::class)->name('titles.create');
-            Route::livewire('/titles/{title}/edit', TitlesPage::class)->name('titles.edit');
+            Route::livewire('/titles', TitlesIndexPage::class)->name('titles.index');
+            Route::livewire('/titles/create', TitleCreatePage::class)->name('titles.create');
+            Route::livewire('/titles/{title}/edit', TitleEditPage::class)->name('titles.edit');
             Route::post('/titles', [CatalogAdminController::class, 'storeTitle'])->name('titles.store');
             Route::patch('/titles/{title}', [CatalogAdminController::class, 'updateTitle'])->name('titles.update');
             Route::delete('/titles/{title}', [CatalogAdminController::class, 'destroyTitle'])->name('titles.destroy');
             Route::post('/titles/{title}/seasons', [CatalogAdminController::class, 'storeSeason'])->name('titles.seasons.store');
 
-            Route::livewire('/people', PeoplePage::class)->name('people.index');
-            Route::livewire('/people/create', PeoplePage::class)->name('people.create');
-            Route::livewire('/people/{person}/edit', PeoplePage::class)->name('people.edit');
+            Route::livewire('/people', PeopleIndexPage::class)->name('people.index');
+            Route::livewire('/people/create', PersonCreatePage::class)->name('people.create');
+            Route::livewire('/people/{person}/edit', PersonEditPage::class)->name('people.edit');
             Route::post('/people', [CatalogAdminController::class, 'storePerson'])->name('people.store');
             Route::patch('/people/{person}', [CatalogAdminController::class, 'updatePerson'])->name('people.update');
             Route::delete('/people/{person}', [CatalogAdminController::class, 'destroyPerson'])->name('people.destroy');
@@ -47,9 +54,9 @@ Route::middleware(['auth', 'active', 'admin'])
             Route::patch('/credits/{credit}', [CatalogAdminController::class, 'updateCredit'])->name('credits.update');
             Route::delete('/credits/{credit}', [CatalogAdminController::class, 'destroyCredit'])->name('credits.destroy');
 
-            Route::livewire('/genres', GenresPage::class)->name('genres.index');
-            Route::livewire('/genres/create', GenresPage::class)->name('genres.create');
-            Route::livewire('/genres/{genre}/edit', GenresPage::class)->name('genres.edit');
+            Route::livewire('/genres', GenresIndexPage::class)->name('genres.index');
+            Route::livewire('/genres/create', GenreCreatePage::class)->name('genres.create');
+            Route::livewire('/genres/{genre}/edit', GenreEditPage::class)->name('genres.edit');
             Route::post('/genres', [CatalogAdminController::class, 'storeGenre'])->name('genres.store');
             Route::patch('/genres/{genre}', [CatalogAdminController::class, 'updateGenre'])->name('genres.update');
             Route::delete('/genres/{genre}', [CatalogAdminController::class, 'destroyGenre'])->name('genres.destroy');
@@ -65,8 +72,8 @@ Route::middleware(['auth', 'active', 'admin'])
         });
 
         Route::middleware('can:manage-media')->group(function (): void {
-            Route::livewire('/media-assets', MediaAssetsPage::class)->name('media-assets.index');
-            Route::livewire('/media-assets/{mediaAsset}/edit', MediaAssetsPage::class)->name('media-assets.edit');
+            Route::livewire('/media-assets', MediaAssetsIndexPage::class)->name('media-assets.index');
+            Route::livewire('/media-assets/{mediaAsset}/edit', MediaAssetEditPage::class)->name('media-assets.edit');
             Route::post('/titles/{title}/media-assets', [MediaAssetAdminController::class, 'storeTitleMediaAsset'])->name('titles.media-assets.store');
             Route::post('/people/{person}/media-assets', [MediaAssetAdminController::class, 'storePersonMediaAsset'])->name('people.media-assets.store');
             Route::patch('/media-assets/{mediaAsset}', [MediaAssetAdminController::class, 'update'])->name('media-assets.update');

@@ -48,14 +48,11 @@
             </x-admin.catalog-write-disabled-panel>
         @else
             <x-ui.card class="!max-w-none">
-                <form method="POST" action="{{ route('admin.credits.update', $credit) }}" class="space-y-6">
-                    @csrf
-                    @method('PATCH')
-
+                <form wire:submit="saveCredit" class="space-y-6">
                     @include('admin.credits._form')
 
                     <x-ui.text class="text-sm text-neutral-500 dark:text-neutral-400">
-                        If you change the selected title or person, resubmit to refresh scoped episode and profession options.
+                        Episode and profession options refresh live when you change the selected title or person.
                     </x-ui.text>
 
                     <div class="flex justify-end">
@@ -67,13 +64,9 @@
             </x-ui.card>
 
             <div class="flex justify-end">
-                <form method="POST" action="{{ route('admin.credits.destroy', $credit) }}">
-                    @csrf
-                    @method('DELETE')
-                    <x-ui.button type="submit" variant="outline" color="red" icon="trash">
-                        Delete credit
-                    </x-ui.button>
-                </form>
+                <x-ui.button type="button" wire:click="deleteCredit" variant="outline" color="red" icon="trash">
+                    Delete credit
+                </x-ui.button>
             </div>
         @endif
     </section>

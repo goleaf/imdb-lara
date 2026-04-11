@@ -2,75 +2,98 @@
 
 namespace Tests\Feature\Feature;
 
-use App\Models\MovieBoxOffice;
+use App\Actions\Catalog\LoadTitleBoxOfficeAction;
+use App\Actions\Seo\PageSeoData;
+use App\Livewire\Pages\Public\TitleBoxOfficePage;
 use App\Models\Title;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-use Tests\Concerns\BootstrapsImdbMysqlSqlite;
+use Livewire\Livewire;
+use Mockery;
+use Tests\Concerns\BuildsCatalogTitleFixtures;
 use Tests\Concerns\UsesCatalogOnlyApplication;
 use Tests\TestCase;
 
 class TitleBoxOfficePageLocalRenderTest extends TestCase
 {
-    use BootstrapsImdbMysqlSqlite;
+    use BuildsCatalogTitleFixtures;
     use UsesCatalogOnlyApplication;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->setUpImdbMysqlSqliteDatabase();
-
-        Schema::connection('imdb_mysql')->create('movie_box_office', function (Blueprint $table): void {
-            $table->unsignedInteger('movie_id')->primary();
-            $table->decimal('domestic_gross_amount', 15, 2)->nullable();
-            $table->string('domestic_gross_currency_code')->nullable();
-            $table->decimal('worldwide_gross_amount', 15, 2)->nullable();
-            $table->string('worldwide_gross_currency_code')->nullable();
-            $table->decimal('opening_weekend_gross_amount', 15, 2)->nullable();
-            $table->string('opening_weekend_gross_currency_code')->nullable();
-            $table->unsignedSmallInteger('opening_weekend_end_year')->nullable();
-            $table->unsignedTinyInteger('opening_weekend_end_month')->nullable();
-            $table->unsignedTinyInteger('opening_weekend_end_day')->nullable();
-            $table->decimal('production_budget_amount', 15, 2)->nullable();
-            $table->string('production_budget_currency_code')->nullable();
-        });
-    }
 
     public function test_local_box_office_page_renders_reporting_footprint_without_runtime_errors(): void
     {
-        $title = Title::query()->create([
-            'tconst' => 'tt0133093',
+        $title = $this->makeCatalogTitle(attributes: [
+            'id' => 1,
             'imdb_id' => 'tt0133093',
-            'titletype' => 'movie',
-            'primarytitle' => 'The Matrix',
-            'originaltitle' => 'The Matrix',
-            'isadult' => 0,
-            'startyear' => 1999,
+            'name' => 'The Matrix',
+            'original_name' => 'The Matrix',
+            'slug' => 'the-matrix-tt0133093',
+            'release_year' => 1999,
         ]);
 
-        MovieBoxOffice::query()->create([
-            'movie_id' => $title->id,
-            'domestic_gross_amount' => '171479930.00',
-            'domestic_gross_currency_code' => 'USD',
-            'worldwide_gross_amount' => '467222728.00',
-            'worldwide_gross_currency_code' => 'USD',
-            'opening_weekend_gross_amount' => '27788331.00',
-            'opening_weekend_gross_currency_code' => 'USD',
-            'opening_weekend_end_year' => 1999,
-            'opening_weekend_end_month' => 4,
-            'opening_weekend_end_day' => 4,
-            'production_budget_amount' => '63000000.00',
-            'production_budget_currency_code' => 'USD',
-        ]);
+        $loadTitleBoxOffice = Mockery::mock(LoadTitleBoxOfficeAction::class);
+        $loadTitleBoxOffice
+            ->shouldReceive('handle')
+            ->once()
+            ->withArgs(fn (Title $resolvedTitle): bool => $resolvedTitle->is($title))
+            ->andReturn($this->boxOfficePayload($title));
 
-        $this->get(route('public.titles.box-office', $title))
-            ->assertOk()
+        $this->app->instance(LoadTitleBoxOfficeAction::class, $loadTitleBoxOffice);
+
+        Livewire::test(TitleBoxOfficePage::class, ['title' => $title])
             ->assertSee('Reporting Footprint')
             ->assertSee('The imported box office record currently carries these commercial fields, currencies, and date details for The Matrix.')
             ->assertSee('Lifetime gross reporting')
             ->assertSee('USD 467,222,728')
             ->assertDontSee('movie_box_office')
             ->assertDontSee('Call to a member function getKey() on string');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function boxOfficePayload(Title $title): array
+    {
+        return [
+            'title' => $title,
+            'poster' => null,
+            'backdrop' => null,
+            'summaryCards' => collect([
+                [
+                    'key' => 'lifetimeGross',
+                    'label' => 'Lifetime Gross',
+                    'value' => 'USD 467,222,728',
+                    'copy' => 'Worldwide theatrical total carried by the current import.',
+                ],
+            ]),
+            'rankCards' => collect(),
+            'comparisonCards' => collect(),
+            'heroContextCards' => collect([
+                [
+                    'key' => 'reportedFields',
+                    'label' => 'Imported Fields',
+                    'value' => '4',
+                    'copy' => 'Commercial details currently attached to the imported box office record.',
+                ],
+            ]),
+            'reportingRows' => collect([
+                [
+                    'key' => 'lifetimeGross',
+                    'label' => 'Lifetime gross reporting',
+                    'badge' => 'Worldwide gross',
+                    'copy' => 'Structured worldwide gross values are attached to this imported box office record.',
+                ],
+            ]),
+            'reportedFigureCount' => 1,
+            'reportedCoverageCount' => 1,
+            'spotlightMetric' => [
+                'key' => 'lifetimeGross',
+                'label' => 'Lifetime Gross',
+                'value' => 'USD 467,222,728',
+                'copy' => 'Worldwide theatrical total carried by the current import.',
+            ],
+            'seo' => new PageSeoData(
+                title: $title->name.' Box Office Report',
+                description: 'Review opening weekend, lifetime gross, budget, and reporting footprint for '.$title->name.'.',
+                canonical: route('public.titles.box-office', $title),
+            ),
+        ];
     }
 }

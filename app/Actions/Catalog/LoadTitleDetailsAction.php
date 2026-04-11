@@ -236,30 +236,6 @@ class LoadTitleDetailsAction
         $movieGenreRows = $title->resolvedMovieGenres();
         $movieImageSummaryRows = $title->resolvedMovieImageSummaries();
 
-        if ($movieCompanyCreditSummaryRows->isEmpty()) {
-            $title->load([
-                'companyCreditSummary:movie_id,total_count,next_page_token',
-            ]);
-
-            $movieCompanyCreditSummaryRows = $title->resolvedMovieCompanyCreditSummaries();
-        }
-
-        if ($movieEpisodeSummaryRows->isEmpty()) {
-            $title->load([
-                'episodeSummary:movie_id,total_count,next_page_token',
-            ]);
-
-            $movieEpisodeSummaryRows = $title->resolvedMovieEpisodeSummaries();
-        }
-
-        if ($movieImageSummaryRows->isEmpty()) {
-            $title->load([
-                'imageSummary:movie_id,total_count,next_page_token',
-            ]);
-
-            $movieImageSummaryRows = $title->resolvedMovieImageSummaries();
-        }
-
         $certificateAttributeRows = $title->resolvedCertificateAttributes();
         $certificateRatingRows = $title->resolvedCertificateRatings();
         $certificateAttributeEntries = $this->buildCertificateAttributeEntries(
@@ -925,7 +901,17 @@ class LoadTitleDetailsAction
             : null;
 
         return $movieGenreRows
-            ->map(fn (MovieGenre $movieGenre): ?Genre => $movieGenre->genre)
+            ->map(function (mixed $genreRow): ?Genre {
+                if ($genreRow instanceof Genre) {
+                    return $genreRow;
+                }
+
+                if ($genreRow instanceof MovieGenre) {
+                    return $genreRow->genre;
+                }
+
+                return null;
+            })
             ->filter(fn (mixed $genre): bool => $genre instanceof Genre && filled($genre->name))
             ->unique('id')
             ->values()

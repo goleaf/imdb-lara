@@ -27,10 +27,7 @@
             </x-admin.catalog-write-disabled-panel>
         @else
             <x-ui.card class="!max-w-none">
-                <form method="POST" action="{{ route('admin.genres.update', $genre) }}" class="space-y-6">
-                    @csrf
-                    @method('PATCH')
-
+                <form wire:submit="saveGenre" class="space-y-6">
                     @include('admin.genres._form')
 
                     <div class="flex justify-end">
@@ -42,13 +39,9 @@
             </x-ui.card>
 
             <div class="flex justify-end">
-                <form method="POST" action="{{ route('admin.genres.destroy', $genre) }}">
-                    @csrf
-                    @method('DELETE')
-                    <x-ui.button type="submit" variant="outline" color="red" icon="trash">
-                        Delete genre
-                    </x-ui.button>
-                </form>
+                <x-ui.button type="button" wire:click="deleteGenre" variant="outline" color="red" icon="trash">
+                    Delete genre
+                </x-ui.button>
             </div>
         @endif
     </section>

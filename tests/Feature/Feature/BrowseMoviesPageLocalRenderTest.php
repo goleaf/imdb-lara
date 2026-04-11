@@ -5,74 +5,39 @@ namespace Tests\Feature\Feature;
 use App\Actions\Catalog\CatalogBackendUnavailable;
 use App\Actions\Catalog\GetFeaturedInterestCategoriesAction;
 use App\Actions\Catalog\LoadPublicTitleBrowserPageAction;
-use App\Models\Genre;
 use App\Models\InterestCategory;
-use App\Models\MoviePlot;
-use App\Models\MoviePrimaryImage;
 use App\Models\Title;
-use App\Models\TitleStatistic;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Facades\DB;
 use Mockery;
 use RuntimeException;
-use Tests\Concerns\BootstrapsImdbMysqlSqlite;
+use Tests\Concerns\BuildsCatalogTitleFixtures;
 use Tests\Concerns\UsesCatalogOnlyApplication;
 use Tests\TestCase;
 
 class BrowseMoviesPageLocalRenderTest extends TestCase
 {
-    use BootstrapsImdbMysqlSqlite;
+    use BuildsCatalogTitleFixtures;
     use UsesCatalogOnlyApplication;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->setUpImdbMysqlSqliteDatabase();
-    }
 
     public function test_movies_page_renders_local_catalog_cards_and_theme_lanes_without_remote_queries(): void
     {
-        $title = Title::query()->create([
-            'tconst' => 'tt0133093',
-            'imdb_id' => 'tt0133093',
-            'titletype' => 'movie',
-            'primarytitle' => 'The Matrix',
-            'originaltitle' => 'The Matrix',
-            'isadult' => 0,
-            'startyear' => 1999,
-            'runtimeminutes' => 136,
-            'runtimeSeconds' => 8160,
-        ]);
-
-        $genre = Genre::query()->create([
-            'name' => 'Science Fiction',
-        ]);
-
-        DB::connection('imdb_mysql')->table('movie_genres')->insert([
-            'movie_id' => $title->id,
-            'genre_id' => $genre->id,
-        ]);
-
-        MoviePrimaryImage::query()->create([
-            'movie_id' => $title->id,
-            'url' => 'https://images.test/the-matrix-poster.jpg',
-            'width' => 1000,
-            'height' => 1500,
-            'type' => 'poster',
-        ]);
-
-        MoviePlot::query()->create([
-            'movie_id' => $title->id,
-            'plot' => 'A hacker learns the world is a simulation and joins the resistance.',
-        ]);
-
-        TitleStatistic::query()->create([
-            'movie_id' => $title->id,
-            'aggregate_rating' => 8.7,
-            'vote_count' => 2100000,
-        ]);
+        $title = $this->makeCatalogTitle(
+            attributes: [
+                'id' => 1,
+                'imdb_id' => 'tt0133093',
+                'name' => 'The Matrix',
+                'original_name' => 'The Matrix',
+                'title_type' => 'movie',
+                'release_year' => 1999,
+                'runtime_minutes' => 136,
+                'runtime_seconds' => 8160,
+                'plot_outline' => 'A hacker learns the world is a simulation and joins the resistance.',
+            ],
+            genres: [$this->makeCatalogGenre(1, 'Science Fiction')],
+            statistic: $this->makeCatalogStatistic(1, 8.7, 2100000),
+            mediaAssets: [$this->makeCatalogPoster(1, 'https://images.test/the-matrix-poster.jpg')],
+        );
 
         $themeLane = new InterestCategory;
         $themeLane->setRawAttributes([
@@ -142,14 +107,13 @@ class BrowseMoviesPageLocalRenderTest extends TestCase
 
     public function test_movies_page_keeps_rendering_when_theme_lanes_are_unavailable(): void
     {
-        $title = Title::query()->create([
-            'tconst' => 'tt0133093',
+        $title = $this->makeCatalogTitle([
+            'id' => 1,
             'imdb_id' => 'tt0133093',
-            'titletype' => 'movie',
-            'primarytitle' => 'The Matrix',
-            'originaltitle' => 'The Matrix',
-            'isadult' => 0,
-            'startyear' => 1999,
+            'name' => 'The Matrix',
+            'original_name' => 'The Matrix',
+            'title_type' => 'movie',
+            'release_year' => 1999,
         ]);
 
         $loadPublicTitleBrowserPage = Mockery::mock(LoadPublicTitleBrowserPageAction::class);
@@ -188,20 +152,9 @@ class BrowseMoviesPageLocalRenderTest extends TestCase
      */
     private function movieBrowserPageData(Title $title, bool $isUnavailable = false, bool $usingStaleCache = false): array
     {
-        $titles = Title::query()
-            ->selectCatalogCardColumns()
-            ->with([
-                'genres:id,name',
-                'statistic:movie_id,aggregate_rating,vote_count',
-                'primaryImageRecord:movie_id,url,width,height,type',
-                'plotRecord:movie_id,plot',
-            ])
-            ->whereKey($title->id)
-            ->get();
-
         return [
             'titles' => new Paginator(
-                items: $titles,
+                items: new EloquentCollection([$title]),
                 perPage: 12,
                 currentPage: 1,
                 options: [
@@ -225,7 +178,7 @@ class BrowseMoviesPageLocalRenderTest extends TestCase
     {
         return [
             'titles' => new Paginator(
-                items: collect(),
+                items: new EloquentCollection,
                 perPage: 12,
                 currentPage: 1,
                 options: [

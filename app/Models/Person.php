@@ -161,10 +161,6 @@ class Person extends Model
                         ->with(Title::catalogCardRelations()),
                     'profession:id,person_id,department,profession,is_primary,sort_order',
                 ]),
-            'awardNominations:id,title_id,person_id,award_event_id,award_category_id,details,credited_name,is_winner,sort_order',
-            'awardNominations.title:id,name,slug,title_type,release_year',
-            'awardNominations.awardCategory:id,name',
-            'awardNominations.awardEvent:id,name,year',
         ];
     }
 
@@ -303,18 +299,19 @@ class Person extends Model
      */
     public function resolvedAlternateNames(): array
     {
-        $alternateNames = $this->alternate_names;
+        $resolvedNames = $this->normalizeAlternateNamesValue($this->getAttributeFromArray('alternate_names'));
 
-        if (! is_string($alternateNames) || trim($alternateNames) === '') {
-            return [];
+        if ($resolvedNames !== []) {
+            return $resolvedNames;
         }
 
-        return collect(preg_split('/\s*[|,]\s*/', trim($alternateNames), -1, PREG_SPLIT_NO_EMPTY) ?: [])
-            ->map(fn (string $value): string => trim($value))
-            ->filter()
-            ->unique()
-            ->values()
-            ->all();
+        $resolvedNames = $this->normalizeAlternateNamesValue($this->getAttributeFromArray('imdb_alternative_names'));
+
+        if ($resolvedNames !== []) {
+            return $resolvedNames;
+        }
+
+        return $this->normalizeAlternateNamesValue($this->getAttributeFromArray('alternativeNames'));
     }
 
     public function preferredHeadshot(): ?CatalogMediaAsset
@@ -433,8 +430,10 @@ class Person extends Model
      */
     public function getImdbAlternativeNamesAttribute(mixed $value): array
     {
-        if (is_array($value)) {
-            return $value;
+        $resolvedNames = $this->normalizeAlternateNamesValue($value);
+
+        if ($resolvedNames !== []) {
+            return $resolvedNames;
         }
 
         return $this->resolvedAlternateNames();
@@ -445,14 +444,13 @@ class Person extends Model
      */
     public function getImdbPrimaryProfessionsAttribute(mixed $value): array
     {
-        if (is_array($value)) {
-            return $value;
+        $resolvedProfessions = $this->normalizeAlternateNamesValue($value);
+
+        if ($resolvedProfessions !== []) {
+            return $resolvedProfessions;
         }
 
-        return collect($this->attributes['primaryProfessions'] ?? null)
-            ->filter(fn (mixed $item): bool => is_string($item) && $item !== '')
-            ->values()
-            ->all();
+        return $this->normalizeAlternateNamesValue($this->getAttributeFromArray('primaryProfessions'));
     }
 
     public function getKnownForDepartmentAttribute(?string $value): ?string
@@ -557,6 +555,44 @@ class Person extends Model
     public function getDisplayNameAttribute(): string
     {
         return $this->name;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function normalizeAlternateNamesValue(mixed $value): array
+    {
+        if (is_string($value)) {
+            try {
+                $decoded = json_decode($value, true, 512, JSON_THROW_ON_ERROR);
+
+                if (is_array($decoded)) {
+                    $value = $decoded;
+                }
+            } catch (\JsonException) {
+                // Fall back to pipe/comma-delimited parsing for legacy strings.
+            }
+        }
+
+        if (is_array($value)) {
+            return collect($value)
+                ->filter(fn (mixed $item): bool => is_string($item) && trim($item) !== '')
+                ->map(fn (string $item): string => trim($item))
+                ->unique()
+                ->values()
+                ->all();
+        }
+
+        if (! is_string($value) || trim($value) === '') {
+            return [];
+        }
+
+        return collect(preg_split('/\s*[|,]\s*/', trim($value), -1, PREG_SPLIT_NO_EMPTY) ?: [])
+            ->map(fn (string $item): string => trim($item))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
     }
 
     private function resolvedKnownForDepartment(): ?string

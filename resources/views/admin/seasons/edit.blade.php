@@ -47,10 +47,7 @@
             <div class="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
                 <div class="space-y-4">
                     <x-ui.card class="!max-w-none">
-                        <form method="POST" action="{{ route('admin.seasons.update', $season) }}" class="space-y-6">
-                            @csrf
-                            @method('PATCH')
-
+                        <form wire:submit="saveSeason" class="space-y-6">
                             @include('admin.seasons._form')
 
                             <div class="flex justify-end">
@@ -62,13 +59,9 @@
                     </x-ui.card>
 
                     <div class="flex justify-end">
-                        <form method="POST" action="{{ route('admin.seasons.destroy', $season) }}">
-                            @csrf
-                            @method('DELETE')
-                            <x-ui.button type="submit" variant="outline" color="red" icon="trash">
-                                Delete season
-                            </x-ui.button>
-                        </form>
+                        <x-ui.button type="button" wire:click="deleteSeason" variant="outline" color="red" icon="trash">
+                            Delete season
+                        </x-ui.button>
                     </div>
                 </div>
 
@@ -105,20 +98,22 @@
                                         </div>
                                     </a>
                                 @empty
-                                    <x-ui.empty-state
-                                        title="No episodes yet"
-                                        description="Add the first episode to establish numbering and public season detail records."
-                                        icon="play"
-                                    />
+                                    <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                        <x-ui.empty.media>
+                                            <x-ui.icon name="play" class="size-8 text-neutral-400" />
+                                        </x-ui.empty.media>
+                                        <x-ui.heading level="h3" size="sm">No episodes yet</x-ui.heading>
+                                        <x-ui.text class="text-sm text-neutral-600 dark:text-neutral-300">
+                                            Add the first episode to establish numbering and public season detail records.
+                                        </x-ui.text>
+                                    </x-ui.empty>
                                 @endforelse
                             </div>
                         </div>
                     </x-ui.card>
 
                     <x-ui.card class="!max-w-none">
-                        <form method="POST" action="{{ route('admin.seasons.episodes.store', $season) }}" class="space-y-6">
-                            @csrf
-
+                        <form wire:submit="saveEpisode" class="space-y-6">
                             @include('admin.episodes._form', ['episode' => $draftEpisode, 'fieldPrefix' => 'episode'])
 
                             <div class="flex justify-end">

@@ -1,6 +1,9 @@
 <div>
 @island(name: 'discover-results-page')
-    <div class="sb-discovery-layout grid gap-6 xl:grid-cols-[19.5rem_minmax(0,1fr)]" data-slot="discover-filters-island">
+    <div
+        class="sb-discovery-layout grid gap-6 xl:grid-cols-[19.5rem_minmax(0,1fr)] has-data-loading:[&_[data-slot=discover-skeletons]]:grid has-data-loading:[&_[data-slot=discover-results]]:hidden"
+        data-slot="discover-filters-island"
+    >
     <aside class="self-start xl:sticky xl:top-24">
         <x-ui.card class="sb-filter-shell sb-discovery-sidebar !max-w-none rounded-[1.6rem] p-4 sm:p-5" data-slot="discover-advanced-filters">
             <div class="space-y-5">
@@ -375,8 +378,8 @@
             @endif
         </x-ui.card>
 
-        <div wire:loading.delay.attr="data-loading" wire:target="{{ $this->viewData['loadingTargets'] }}" class="space-y-4">
-            <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3 not-data-loading:hidden">
+        <div class="space-y-4">
+            <div data-slot="discover-skeletons" class="hidden gap-4 md:grid-cols-2 xl:grid-cols-3">
                 @foreach (range(1, 6) as $index)
                     <x-ui.card class="sb-poster-card !max-w-none h-full overflow-hidden rounded-[1.4rem]" wire:key="discover-skeleton-{{ $index }}">
                         <div class="space-y-4">
@@ -389,7 +392,7 @@
                 @endforeach
             </div>
 
-            <div class="sb-results-shell space-y-4 rounded-[1.6rem] p-4 sm:p-5 in-data-loading:hidden">
+            <div class="sb-results-shell space-y-4 rounded-[1.6rem] p-4 sm:p-5" data-slot="discover-results">
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <div class="space-y-1">
                         <div class="sb-discovery-section-title">Discovery results</div>

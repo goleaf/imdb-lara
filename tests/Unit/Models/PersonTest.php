@@ -38,4 +38,15 @@ class PersonTest extends TestCase
 
         $this->assertSame('A concise profile.', $person->summaryText());
     }
+
+    public function test_alternate_names_fall_back_to_imdb_payload_without_recursing(): void
+    {
+        $person = new Person;
+        $person->setRawAttributes([
+            'imdb_alternative_names' => json_encode(['A. Stone', 'Ava Marie Stone'], JSON_THROW_ON_ERROR),
+        ], sync: true);
+
+        $this->assertSame(['A. Stone', 'Ava Marie Stone'], $person->resolvedAlternateNames());
+        $this->assertSame('A. Stone | Ava Marie Stone', $person->alternate_names);
+    }
 }

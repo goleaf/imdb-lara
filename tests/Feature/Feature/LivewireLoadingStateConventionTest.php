@@ -9,16 +9,10 @@ class LivewireLoadingStateConventionTest extends TestCase
 {
     use UsesCatalogOnlyApplication;
 
-    public function test_interactive_livewire_views_use_data_loading_wrappers(): void
+    public function test_manage_list_keeps_scoped_loading_wrappers_for_multiple_independent_regions(): void
     {
         $viewPaths = [
-            resource_path('views/livewire/account/watchlist-browser.blade.php'),
-            resource_path('views/livewire/catalog/interest-category-browser.blade.php'),
-            resource_path('views/livewire/catalog/people-browser.blade.php'),
             resource_path('views/livewire/lists/manage-list.blade.php'),
-            resource_path('views/livewire/people/filmography-panel.blade.php'),
-            resource_path('views/livewire/search/discovery-filters.blade.php'),
-            resource_path('views/livewire/search/search-results.blade.php'),
         ];
 
         foreach ($viewPaths as $viewPath) {
@@ -128,20 +122,51 @@ class LivewireLoadingStateConventionTest extends TestCase
         $contents = file_get_contents(resource_path('views/lists/index.blade.php'));
 
         $this->assertNotFalse($contents);
-        $this->assertStringContainsString('wire:loading.delay.attr="data-loading"', $contents);
-        $this->assertStringContainsString('not-data-loading:hidden', $contents);
-        $this->assertStringContainsString('in-data-loading:hidden', $contents);
-        $this->assertStringNotContainsString('wire:loading.remove', $contents);
+        $this->assertStringContainsString('has-data-loading:[&_[data-slot=public-lists-skeletons]]:grid', $contents);
+        $this->assertStringContainsString('data-slot="public-lists-results"', $contents);
+        $this->assertStringContainsString('data-slot="public-lists-grid"', $contents);
+        $this->assertStringNotContainsString('wire:loading.delay.attr="data-loading"', $contents);
     }
 
-    public function test_watchlist_browser_limits_loading_state_to_results_interactions(): void
+    public function test_browse_surfaces_use_livewire_four_has_data_loading_shells(): void
     {
-        $contents = file_get_contents(resource_path('views/livewire/account/watchlist-browser.blade.php'));
+        $viewExpectations = [
+            resource_path('views/livewire/account/watchlist-browser.blade.php') => [
+                'has-data-loading:[&_[data-slot=watchlist-browser-skeletons]]:grid',
+                'data-slot="watchlist-browser-results"',
+            ],
+            resource_path('views/livewire/catalog/people-browser.blade.php') => [
+                'has-data-loading:[&_[data-slot=people-browser-skeletons]]:grid',
+                'data-slot="people-browser-results"',
+            ],
+            resource_path('views/livewire/catalog/interest-category-browser.blade.php') => [
+                'has-data-loading:[&_[data-slot=interest-category-browser-skeletons]]:grid',
+                'data-slot="interest-category-browser-results"',
+            ],
+            resource_path('views/livewire/people/filmography-panel.blade.php') => [
+                'has-data-loading:[&_[data-slot=person-filmography-skeletons]]:block',
+                'data-slot="person-filmography-results"',
+            ],
+            resource_path('views/livewire/search/discovery-filters.blade.php') => [
+                'has-data-loading:[&_[data-slot=discover-skeletons]]:grid',
+                'data-slot="discover-results"',
+            ],
+            resource_path('views/livewire/search/search-results.blade.php') => [
+                'has-data-loading:[&_[data-slot=search-results-loading]]:block',
+                'data-slot="search-results-results"',
+            ],
+        ];
 
-        $this->assertNotFalse($contents);
-        $this->assertStringContainsString(
-            'wire:target="genre,sort,state,type,year,clearFilters,toggleWatched,removeFromWatchlist,gotoPage,nextPage,previousPage,setPage"',
-            $contents,
-        );
+        foreach ($viewExpectations as $viewPath => $expectedStrings) {
+            $contents = file_get_contents($viewPath);
+
+            $this->assertNotFalse($contents);
+
+            foreach ($expectedStrings as $expectedString) {
+                $this->assertStringContainsString($expectedString, $contents, $viewPath);
+            }
+
+            $this->assertStringNotContainsString('wire:loading.delay.attr="data-loading"', $contents, $viewPath);
+        }
     }
 }

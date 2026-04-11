@@ -6,7 +6,7 @@ use App\Livewire\Pages\Concerns\RendersPageView;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
-class AuthPage extends Component
+abstract class AuthPage extends Component
 {
     use RendersPageView;
 

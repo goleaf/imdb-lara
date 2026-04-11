@@ -16,14 +16,16 @@
             </x-ui.text>
         </div>
 
-        <x-admin.catalog-write-disabled-panel
-            :back-href="route('admin.dashboard')"
-            back-label="Back to admin"
-            heading="Media Asset Mutations Paused"
-            description="Asset browsing stays available, but edit, upload, and delete mutations are paused while Screenbase is in catalog-only mode."
-        >
-            Open an asset to inspect its metadata, then use the upstream catalog synchronization workflow to make any changes.
-        </x-admin.catalog-write-disabled-panel>
+        @if ($catalogOnly)
+            <x-admin.catalog-write-disabled-panel
+                :back-href="route('admin.dashboard')"
+                back-label="Back to admin"
+                heading="Media Asset Mutations Paused"
+                description="Asset browsing stays available, but edit, upload, and delete mutations are paused while Screenbase is in catalog-only mode."
+            >
+                Open an asset to inspect its metadata, then use the upstream catalog synchronization workflow to make any changes.
+            </x-admin.catalog-write-disabled-panel>
+        @endif
 
         <div class="grid gap-4">
             @forelse ($mediaAssets as $mediaAsset)
@@ -82,11 +84,13 @@
 
                         <div class="flex gap-2">
                             <x-ui.button as="a" :href="route('admin.media-assets.edit', $mediaAsset)" size="sm" variant="outline" icon="pencil-square">
-                                Inspect
+                                {{ $catalogOnly ? 'Inspect' : 'Edit' }}
                             </x-ui.button>
-                            <x-ui.badge variant="outline" color="neutral" icon="eye">
-                                Read only
-                            </x-ui.badge>
+                            @if ($catalogOnly)
+                                <x-ui.badge variant="outline" color="neutral" icon="eye">
+                                    Read only
+                                </x-ui.badge>
+                            @endif
                         </div>
                     </div>
                 </x-ui.card>

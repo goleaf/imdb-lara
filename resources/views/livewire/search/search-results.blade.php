@@ -1,6 +1,9 @@
 <div>
 @island(name: 'search-results-page')
-<div class="space-y-6" data-slot="search-results-island">
+<div
+    class="space-y-6 has-data-loading:[&_[data-slot=search-results-loading]]:block has-data-loading:[&_[data-slot=search-results-results]]:hidden"
+    data-slot="search-results-island"
+>
     <x-ui.card class="sb-search-page-hero !max-w-none p-6 sm:p-7">
         <div class="space-y-5">
             <div class="space-y-3">
@@ -183,8 +186,8 @@
         </div>
     </x-ui.card>
 
-    <div wire:loading.delay.attr="data-loading" wire:target="{{ $this->viewData['searchLoadingTargets'] }}" class="space-y-6">
-        <div class="not-data-loading:hidden">
+    <div class="space-y-6">
+        <div data-slot="search-results-loading" class="hidden">
             <x-ui.card class="!max-w-none rounded-[1.6rem] p-5">
                 <div class="flex items-center gap-3">
                     <x-ui.icon name="magnifying-glass" class="size-5 text-neutral-400 dark:text-neutral-500" />
@@ -195,7 +198,7 @@
             </x-ui.card>
         </div>
 
-        <div class="space-y-6 in-data-loading:hidden">
+        <div class="space-y-6" data-slot="search-results-results">
         @if ($this->viewData['topMatch']['record'])
             <x-ui.card class="sb-results-shell !max-w-none rounded-[1.6rem] p-5">
                 <div class="space-y-4">

@@ -5,8 +5,8 @@
                 <x-ui.button
                     type="button"
                     size="sm"
-                    :variant="$sort === $sortOption['value'] ? 'primary' : 'outline'"
-                    :color="$sort === $sortOption['value'] ? 'amber' : 'neutral'"
+                    :variant="$sortOption['variant']"
+                    :color="$sortOption['color']"
                     wire:key="title-review-sort-{{ $sortOption['value'] }}"
                     wire:click="setSort('{{ $sortOption['value'] }}')"
                     wire:target="setSort"
@@ -71,24 +71,22 @@
 
                     <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
                         <div class="flex flex-wrap items-center gap-2">
-                            @auth
-                                @can('voteHelpful', $review)
-                                    <x-ui.button
-                                        type="button"
-                                        size="sm"
-                                        :variant="$helpfulVoteStates[$review->id] ?? false ? 'primary' : 'outline'"
-                                        :color="$helpfulVoteStates[$review->id] ?? false ? 'amber' : 'neutral'"
-                                        icon="hand-thumb-up"
-                                        wire:click="toggleHelpful({{ $review->id }})"
-                                        wire:target="toggleHelpful"
-                                    >
-                                        {{ ($helpfulVoteStates[$review->id] ?? false) ? 'Helpful saved' : 'Mark helpful' }}
-                                    </x-ui.button>
-                                @endcan
-                            @endauth
+                            @if ($reviewPermissions[$review->id]['canVoteHelpful'] ?? false)
+                                <x-ui.button
+                                    type="button"
+                                    size="sm"
+                                    :variant="$helpfulButtons[$review->id]['variant'] ?? 'outline'"
+                                    :color="$helpfulButtons[$review->id]['color'] ?? 'neutral'"
+                                    icon="hand-thumb-up"
+                                    wire:click="toggleHelpful({{ $review->id }})"
+                                    wire:target="toggleHelpful"
+                                >
+                                    {{ $helpfulButtons[$review->id]['label'] ?? 'Mark helpful' }}
+                                </x-ui.button>
+                            @endif
                         </div>
 
-                        @if (! auth()->check() || auth()->user()->can('report', $review))
+                        @if ($reviewPermissions[$review->id]['canReport'] ?? true)
                             <div class="w-full sm:w-auto">
                                 <livewire:reviews.report-review-form :review="$review" :key="'report-'.$review->id" />
                             </div>
