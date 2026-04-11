@@ -87,6 +87,7 @@ Several raw-data table sections on title pages were replaced with cards, archive
 - `tests/Feature/Feature/Admin/AdminAccessTest.php` — asserted that admin pages render inside the new portal shell.
 - `tests/Feature/Feature/AkaAttributePageTest.php` — covered the new AKA attribute archive page.
 - `tests/Feature/Feature/ButtonComponentTest.php` — covered shared button loading-state behavior.
+- `tests/Feature/Feature/CompanyCreditAttributePageTest.php` — covered the new company credit attribute archive page.
 - `tests/Feature/Feature/Feature/Livewire/TitleReviewListTest.php` — asserted the review-list loading slot markup.
 - `tests/Feature/Feature/FlagComponentTest.php` — verified flag rendering, invalid-code suppression, and scoped SVG IDs.
 - `tests/Feature/Feature/Import/ImportImdbCatalogTitlePayloadActionTest.php` — covered duplicate company-credit bridge-row protection.
