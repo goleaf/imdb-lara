@@ -6,7 +6,7 @@ Hey! Here is what changed today in this project:
 The catalog-only MySQL path now understands more of the remote IMDb-style data it is already receiving. People pages can surface known-for titles from the dedicated bridge table, popularity ranking data is available on person records, and trailer listings can fall back to catalog video relations when local media assets are not the source of truth. Demo data also got a friendlier face, with named sample records and real poster and headshot media so local browsing feels closer to the real product.
 
 ### What Was Improved
-Discovery and browse coverage now leans on action output and rendered page contracts instead of brittle Livewire internals, which should make the test suite far less noisy during UI refactors. Title, person, credit, genre, Livewire filmography option formatting, and media helpers were tightened so catalog-only mode keeps important metadata like provider keys, publish dates, rating formats, and route binding behavior intact. Interest category sorting and matched-interest counts also now read from real catalog-aware columns instead of placeholders, so the public catalog should rank content more honestly.
+Discovery and browse coverage now leans on action output and rendered page contracts instead of brittle Livewire internals, which should make the test suite far less noisy during UI refactors. Title, person, credit, genre, Livewire filmography option formatting, and media helpers were tightened so catalog-only mode keeps important metadata like provider keys, publish dates, rating formats, and route binding behavior intact. Interest category sorting and matched-interest counts also now read from real catalog-aware columns instead of placeholders, so the public catalog should rank content more honestly. Pagination rendering also has direct regression coverage now, which should make shared button markup changes safer.
 
 ### What Was Removed or Cleaned Up
 A large amount of test-only mocking and fragile DOM-coupled assertions was removed from the discovery and public browse tests. The result is a slimmer test surface that checks user-visible behavior and action payloads without overfitting to Livewire markup that is expected to evolve.
@@ -29,6 +29,7 @@ A large amount of test-only mocking and fragile DOM-coupled assertions was remov
 - `tests/Feature/Feature/Lists/CustomListFlowTest.php` — tightened the public profile link assertion so it only counts actual links.
 - `tests/Feature/Feature/Livewire/DiscoveryFiltersTest.php` — rewrote discovery coverage around action payloads and lazy-shell contracts instead of fragile component markup.
 - `tests/Feature/Feature/PublicBrowsePagesTest.php` — split the big browse smoke test into smaller focused checks and updated lazy-loading expectations.
+- `tests/Feature/Feature/Ui/PaginationRenderingTest.php` — added regression coverage for shared pagination links and Livewire island pagination buttons.
 - `tests/TestCase.php` — now skips legacy import feature tests automatically when the legacy import pipeline is disabled.
 - `tests/Unit/Models/PersonTest.php` — added coverage for partially loaded person media assets still producing a usable preferred headshot.
 - `tests/Unit/Models/TitleTest.php` — added coverage for partially loaded title media assets still producing a usable preferred poster.
