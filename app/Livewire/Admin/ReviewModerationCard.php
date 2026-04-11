@@ -26,13 +26,9 @@ class ReviewModerationCard extends Component
     {
         $this->authorize('moderate', $review);
 
-        $this->review = $review
-            ->loadMissing(Review::adminQueueRelations())
-            ->loadCount([
-                'votes as helpful_votes_count' => fn ($voteQuery) => $voteQuery->where('is_helpful', true),
-                'reports as open_reports_count' => fn ($reportQuery) => $reportQuery->where('status', ReportStatus::Open),
-            ]);
-        $this->status = $review->status->value;
+        $this->review = $review;
+        $this->refreshReviewState();
+        $this->status = $this->review->status->value;
     }
 
     public function save(ModerateReviewAction $moderateReview): void
@@ -50,13 +46,9 @@ class ReviewModerationCard extends Component
                 $this->review,
                 ReviewStatus::from($validated['status']),
                 $validated['moderationNotes'],
-            )
-            ->load(Review::adminQueueRelations())
-            ->loadCount([
-                'votes as helpful_votes_count' => fn ($voteQuery) => $voteQuery->where('is_helpful', true),
-                'reports as open_reports_count' => fn ($reportQuery) => $reportQuery->where('status', ReportStatus::Open),
-            ]);
+            );
 
+        $this->refreshReviewState();
         $this->status = $this->review->status->value;
         $this->moderationNotes = null;
         $this->statusMessage = 'Review moderation saved.';
@@ -66,8 +58,20 @@ class ReviewModerationCard extends Component
 
     public function render()
     {
+        $this->refreshReviewState();
+
         return view('livewire.admin.review-moderation-card', [
             'reviewStatuses' => ReviewStatus::cases(),
         ]);
+    }
+
+    private function refreshReviewState(): void
+    {
+        $this->review = $this->review
+            ->loadMissing(Review::adminQueueRelations())
+            ->loadCount([
+                'votes as helpful_votes_count' => fn ($voteQuery) => $voteQuery->where('is_helpful', true),
+                'reports as open_reports_count' => fn ($reportQuery) => $reportQuery->where('status', ReportStatus::Open),
+            ]);
     }
 }

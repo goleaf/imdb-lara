@@ -10,8 +10,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Number;
 use Illuminate\Support\Str;
@@ -77,11 +79,76 @@ class Person extends Model
         });
     }
 
+    public function newQuery(): Builder
+    {
+        $query = parent::newQuery();
+
+        if (static::usesCatalogOnlySchema()) {
+            $query->withoutGlobalScope(SoftDeletingScope::class);
+        }
+
+        return $query;
+    }
+
+    public function getTable(): string
+    {
+        return static::usesCatalogOnlySchema() ? 'name_basics' : parent::getTable();
+    }
+
+    public function getConnectionName(): ?string
+    {
+        return static::usesCatalogOnlySchema() ? 'imdb_mysql' : parent::getConnectionName();
+    }
+
+    public static function usesCatalogOnlySchema(): bool
+    {
+        return (bool) config('screenbase.catalog_only', false);
+    }
+
+    public static function catalogColumn(string $localColumn): string
+    {
+        if (! static::usesCatalogOnlySchema()) {
+            return 'people.'.$localColumn;
+        }
+
+        return match ($localColumn) {
+            'name' => 'name_basics.primaryname',
+            'alternate_names' => 'name_basics.alternativeNames',
+            'biography', 'short_biography' => 'name_basics.biography',
+            'known_for_department' => 'name_basics.primaryprofession',
+            'birth_place' => 'name_basics.birthLocation',
+            'death_place' => 'name_basics.deathLocation',
+            'imdb_id' => 'name_basics.imdb_id',
+            default => 'name_basics.'.$localColumn,
+        };
+    }
+
     /**
      * @return list<string>
      */
     public static function directoryColumns(): array
     {
+        if (static::usesCatalogOnlySchema()) {
+            return [
+                'name_basics.id',
+                'name_basics.nconst',
+                'name_basics.imdb_id',
+                'name_basics.primaryname',
+                'name_basics.displayName',
+                'name_basics.alternativeNames',
+                'name_basics.biography',
+                'name_basics.primaryprofession',
+                'name_basics.birthyear',
+                'name_basics.deathyear',
+                'name_basics.birthLocation',
+                'name_basics.deathLocation',
+                'name_basics.primaryImage_url',
+                'name_basics.primaryImage_width',
+                'name_basics.primaryImage_height',
+                'name_basics.primaryProfessions',
+            ];
+        }
+
         return [
             'people.id',
             'people.imdb_id',
@@ -109,6 +176,12 @@ class Person extends Model
      */
     public static function directoryRelations(): array
     {
+        if (static::usesCatalogOnlySchema()) {
+            return [
+                'personImages:name_basic_id,position,url,width,height,type',
+            ];
+        }
+
         return [
             'mediaAssets' => fn ($query) => $query
                 ->select([
@@ -176,6 +249,28 @@ class Person extends Model
 
     public function resolveRouteBindingQuery($query, $value, $field = null)
     {
+        if (static::usesCatalogOnlySchema() && $field === null) {
+            return $query->where(function (Builder $personQuery) use ($value): void {
+                if (is_numeric($value)) {
+                    $personQuery->whereKey((int) $value);
+                }
+
+                if (is_string($value) && $value !== '') {
+                    $personQuery
+                        ->orWhere('imdb_id', $value)
+                        ->orWhere('nconst', $value);
+
+                    if (preg_match('/(?P<imdb_id>nm\d+)$/i', $value, $matches) === 1) {
+                        $imdbId = Str::lower((string) $matches['imdb_id']);
+
+                        $personQuery
+                            ->orWhere('imdb_id', $imdbId)
+                            ->orWhere('nconst', $imdbId);
+                    }
+                }
+            });
+        }
+
         if ($field !== null) {
             return $query->where($field, $value);
         }
@@ -184,7 +279,7 @@ class Person extends Model
             $personQuery->where('slug', (string) $value);
 
             if (is_numeric($value)) {
-                $personQuery->orWhereKey((int) $value);
+                $personQuery->orWhere($this->qualifyColumn($this->getKeyName()), (int) $value);
             }
 
             if (is_string($value) && $value !== '') {
@@ -197,6 +292,10 @@ class Person extends Model
 
     public function scopePublished(Builder $query): Builder
     {
+        if (static::usesCatalogOnlySchema()) {
+            return $query->whereNotNull('name_basics.primaryname');
+        }
+
         return $query->where('people.is_published', true);
     }
 
@@ -209,7 +308,19 @@ class Person extends Model
         }
 
         if (preg_match('/^nm\d+$/i', $search) === 1) {
-            return $query->where('people.imdb_id', $search);
+            return $query->where(static::catalogColumn('imdb_id'), Str::lower($search));
+        }
+
+        if (static::usesCatalogOnlySchema()) {
+            return $query->where(function (Builder $personQuery) use ($search): void {
+                $personQuery
+                    ->where('name_basics.primaryname', 'like', '%'.$search.'%')
+                    ->orWhere('name_basics.displayName', 'like', '%'.$search.'%')
+                    ->orWhere('name_basics.alternativeNames', 'like', '%'.$search.'%')
+                    ->orWhere('name_basics.biography', 'like', '%'.$search.'%')
+                    ->orWhere('name_basics.imdb_id', 'like', '%'.$search.'%')
+                    ->orWhere('name_basics.nconst', 'like', '%'.$search.'%');
+            });
         }
 
         return $query->where(function (Builder $personQuery) use ($search): void {
@@ -234,6 +345,19 @@ class Person extends Model
 
     public function scopeWithDirectoryMetrics(Builder $query): Builder
     {
+        if (static::usesCatalogOnlySchema()) {
+            return $query->addSelect([
+                'credits_count' => NameCreditSummary::query()
+                    ->select('total_count')
+                    ->whereColumn('name_credit_summaries.name_basic_id', 'name_basics.id')
+                    ->limit(1),
+                'popularity_rank' => NameBasicMeterRanking::query()
+                    ->select('current_rank')
+                    ->whereColumn('name_basic_meter_rankings.name_basic_id', 'name_basics.id')
+                    ->limit(1),
+            ]);
+        }
+
         return $query
             ->withCount(['credits'])
             ->addSelect(['award_nominations_count' => 0]);
@@ -254,7 +378,10 @@ class Person extends Model
 
     public function credits(): HasMany
     {
-        return $this->hasMany(Credit::class)->ordered();
+        return $this->hasMany(
+            Credit::class,
+            static::usesCatalogOnlySchema() ? 'name_basic_id' : 'person_id',
+        )->ordered();
     }
 
     public function professions(): HasMany
@@ -265,6 +392,16 @@ class Person extends Model
     public function professionTerms(): HasMany
     {
         return $this->professions();
+    }
+
+    public function meterRanking(): HasOne
+    {
+        return $this->hasOne(NameBasicMeterRanking::class, 'name_basic_id', 'id');
+    }
+
+    public function personImages(): HasMany
+    {
+        return $this->hasMany(PersonImage::class, 'name_basic_id', 'id');
     }
 
     public function knownForTitles(): BelongsToMany
@@ -425,6 +562,17 @@ class Person extends Model
         return $names !== [] ? implode(' | ', $names) : null;
     }
 
+    public function getShortBiographyAttribute(?string $value): ?string
+    {
+        if (filled($value)) {
+            return (string) $value;
+        }
+
+        $biography = $this->attributes['biography'] ?? null;
+
+        return filled($biography) ? (string) $biography : null;
+    }
+
     /**
      * @return list<string>
      */
@@ -456,6 +604,33 @@ class Person extends Model
     public function getKnownForDepartmentAttribute(?string $value): ?string
     {
         return filled($value) ? (string) $value : $this->resolvedKnownForDepartment();
+    }
+
+    public function getBirthPlaceAttribute(?string $value): ?string
+    {
+        if (filled($value)) {
+            return (string) $value;
+        }
+
+        $birthLocation = $this->attributes['birthLocation'] ?? null;
+
+        return filled($birthLocation) ? (string) $birthLocation : null;
+    }
+
+    public function getDeathPlaceAttribute(?string $value): ?string
+    {
+        if (filled($value)) {
+            return (string) $value;
+        }
+
+        $deathLocation = $this->attributes['deathLocation'] ?? null;
+
+        return filled($deathLocation) ? (string) $deathLocation : null;
+    }
+
+    public function getNationalityAttribute(?string $value): ?string
+    {
+        return filled($value) ? (string) $value : null;
     }
 
     public function creditsCount(): int
@@ -643,26 +818,62 @@ class Person extends Model
      */
     private function allMediaAssets(): SupportCollection
     {
-        if (! $this->relationLoaded('mediaAssets')) {
-            return collect();
+        $assets = collect();
+
+        if ($this->relationLoaded('mediaAssets')) {
+            $assets = $assets->merge(
+                $this->mediaAssets
+                    ->filter(fn (mixed $asset): bool => $asset instanceof MediaAsset)
+                    ->map(function (MediaAsset $mediaAsset): CatalogMediaAsset {
+                        return CatalogMediaAsset::fromCatalog([
+                            'kind' => $mediaAsset->kind,
+                            'url' => $mediaAsset->url,
+                            'alt_text' => $mediaAsset->alt_text,
+                            'caption' => $mediaAsset->caption,
+                            'width' => $mediaAsset->width,
+                            'height' => $mediaAsset->height,
+                            'duration_seconds' => $mediaAsset->duration_seconds,
+                            'is_primary' => $mediaAsset->is_primary,
+                            'position' => $mediaAsset->position,
+                            'metadata' => $mediaAsset->metadata,
+                        ]);
+                    }),
+            );
         }
 
-        return $this->mediaAssets
-            ->filter(fn (mixed $asset): bool => $asset instanceof MediaAsset)
-            ->map(function (MediaAsset $mediaAsset): CatalogMediaAsset {
-                return CatalogMediaAsset::fromCatalog([
-                    'kind' => $mediaAsset->kind,
-                    'url' => $mediaAsset->url,
-                    'alt_text' => $mediaAsset->alt_text,
-                    'caption' => $mediaAsset->caption,
-                    'width' => $mediaAsset->width,
-                    'height' => $mediaAsset->height,
-                    'duration_seconds' => $mediaAsset->duration_seconds,
-                    'is_primary' => $mediaAsset->is_primary,
-                    'position' => $mediaAsset->position,
-                    'metadata' => $mediaAsset->metadata,
-                ]);
-            })
+        if (filled($this->attributes['primaryImage_url'] ?? null)) {
+            $assets->push(CatalogMediaAsset::fromCatalog([
+                'kind' => MediaKind::Headshot,
+                'url' => $this->attributes['primaryImage_url'],
+                'alt_text' => $this->name,
+                'width' => $this->attributes['primaryImage_width'] ?? null,
+                'height' => $this->attributes['primaryImage_height'] ?? null,
+                'is_primary' => true,
+                'position' => 0,
+            ]));
+        }
+
+        if ($this->relationLoaded('personImages')) {
+            $assets = $assets->merge(
+                $this->personImages
+                    ->filter(fn (mixed $image): bool => $image instanceof PersonImage && filled($image->url))
+                    ->map(function (PersonImage $personImage): CatalogMediaAsset {
+                        return CatalogMediaAsset::fromCatalog([
+                            'kind' => $personImage->kind,
+                            'url' => $personImage->url,
+                            'alt_text' => $this->name,
+                            'width' => $personImage->width,
+                            'height' => $personImage->height,
+                            'is_primary' => $personImage->is_primary,
+                            'position' => $personImage->position,
+                        ]);
+                    }),
+            );
+        }
+
+        return $assets
+            ->filter(fn (mixed $asset): bool => $asset instanceof CatalogMediaAsset)
+            ->unique('url')
             ->values();
     }
 }

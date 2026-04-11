@@ -35,7 +35,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         RedirectIfAuthenticated::redirectUsing(static fn () => route('public.discover'));
-        Model::preventLazyLoading(! $this->app->isProduction());
+        Model::shouldBeStrict(! $this->app->isProduction());
 
         Gate::before(static fn (User $user, string $ability): ?bool => $user->isActive() && $user->isSuperAdmin() ? true : null);
 

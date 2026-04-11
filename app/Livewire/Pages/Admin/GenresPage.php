@@ -96,7 +96,9 @@ class GenresPage extends Component
     {
         $this->name = (string) $genre->name;
         $this->slug = (string) $genre->slug;
-        $this->description = $genre->description;
+        $this->description = array_key_exists('description', $genre->getAttributes())
+            ? $genre->getAttributeValue('description')
+            : null;
     }
 
     /**

@@ -30,15 +30,29 @@ class BuildPublicPeopleIndexQueryAction
             $query->inProfession($profession);
         }
 
+        $nameColumn = Person::catalogColumn('name');
+
+        if (Person::usesCatalogOnlySchema()) {
+            return match ($sort) {
+                'name' => $query->orderBy($nameColumn),
+                'credits' => $query->orderByDesc('credits_count')->orderBy($nameColumn),
+                'awards' => $query->orderByDesc('credits_count')->orderBy($nameColumn),
+                default => $query
+                    ->orderBy('popularity_rank')
+                    ->orderByDesc('credits_count')
+                    ->orderBy($nameColumn),
+            };
+        }
+
         return match ($sort) {
-            'name' => $query->orderBy('people.name'),
-            'credits' => $query->orderByDesc('credits_count')->orderBy('people.name'),
-            'awards' => $query->orderByDesc('award_nominations_count')->orderByDesc('credits_count')->orderBy('people.name'),
+            'name' => $query->orderBy($nameColumn),
+            'credits' => $query->orderByDesc('credits_count')->orderBy($nameColumn),
+            'awards' => $query->orderByDesc('award_nominations_count')->orderByDesc('credits_count')->orderBy($nameColumn),
             default => $query
-                ->orderBy('people.popularity_rank')
+                ->orderBy('popularity_rank')
                 ->orderByDesc('award_nominations_count')
                 ->orderByDesc('credits_count')
-                ->orderBy('people.name'),
+                ->orderBy($nameColumn),
         };
     }
 }

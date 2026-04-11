@@ -83,17 +83,13 @@
 
 <x-ui.field>
     <x-ui.label>Genres</x-ui.label>
-    @php
-        $selectedGenreIds = collect(old('genre_ids', $title->genres?->modelKeys() ?? []))
-            ->map(fn ($genreId) => (int) $genreId);
-    @endphp
     <div class="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
         @foreach ($genres as $genre)
             <x-ui.checkbox
                 wire:model="genre_ids"
                 name="genre_ids[]"
                 :value="$genre->id"
-                :checked="$selectedGenreIds->contains($genre->id)"
+                :checked="in_array($genre->id, $selectedGenreIds, true)"
                 :label="$genre->name"
                 class="rounded-box border border-black/10 px-3 py-2 text-sm dark:border-white/10"
             />

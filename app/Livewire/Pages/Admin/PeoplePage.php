@@ -10,17 +10,20 @@ use App\Enums\MediaKind;
 use App\Http\Requests\Admin\StoreMediaAssetRequest;
 use App\Http\Requests\Admin\StorePersonRequest;
 use App\Http\Requests\Admin\UpdatePersonRequest;
+use App\Livewire\Pages\Admin\Concerns\InteractsWithCatalogPersonState;
 use App\Livewire\Pages\Admin\Concerns\ValidatesFormRequests;
 use App\Livewire\Pages\Concerns\RendersPageView;
 use App\Models\MediaAsset;
 use App\Models\Person;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Arr;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
 class PeoplePage extends Component
 {
+    use InteractsWithCatalogPersonState;
     use RendersPageView;
     use ValidatesFormRequests;
     use WithFileUploads;
@@ -92,6 +95,12 @@ class PeoplePage extends Component
     {
         abort_unless($this->person instanceof Person, 404);
 
+        if ($this->isCatalogOnlyApplication()) {
+            return $this->renderPageView('admin.people.edit', [
+                'person' => tap($this->person)->fill($this->personPayload()),
+            ]);
+        }
+
         $loadedPerson = $this->person->load([
             'professions' => fn ($professionQuery) => $professionQuery->select([
                 'id',
@@ -135,17 +144,11 @@ class PeoplePage extends Component
         ]);
         $loadedPerson->fill($this->personPayload());
 
-        if ($this->isCatalogOnlyApplication()) {
-            return $this->renderPageView('admin.people.edit', [
-                'person' => $loadedPerson,
-            ]);
-        }
-
         return $this->renderPageView('admin.people.edit', [
             'person' => $loadedPerson,
             'defaultProfessionSortOrder' => (($loadedPerson->getRelation('professions')?->max('sort_order') ?? 0) + 1),
             'draftMediaAsset' => tap(
-                new MediaAsset($this->draftMediaAssetPayload()),
+                new MediaAsset(Arr::except($this->draftMediaAssetPayload(), ['file'])),
                 fn (MediaAsset $mediaAsset) => $mediaAsset->setRelation('mediable', $loadedPerson),
             ),
         ]);
@@ -217,18 +220,18 @@ class PeoplePage extends Component
         $this->slug = (string) $person->slug;
         $this->alternate_names = $person->alternate_names;
         $this->known_for_department = $person->known_for_department;
-        $this->popularity_rank = $person->popularity_rank;
-        $this->birth_date = $person->birth_date?->toDateString();
-        $this->death_date = $person->death_date?->toDateString();
-        $this->birth_place = $person->birth_place;
-        $this->death_place = $person->death_place;
-        $this->nationality = $person->nationality;
-        $this->is_published = (bool) $person->is_published;
-        $this->short_biography = $person->short_biography;
-        $this->biography = $person->biography;
-        $this->meta_title = $person->meta_title;
-        $this->search_keywords = $person->search_keywords;
-        $this->meta_description = $person->meta_description;
+        $this->popularity_rank = $this->optionalPersonAttribute($person, 'popularity_rank');
+        $this->birth_date = $this->optionalPersonDateString($person, 'birth_date');
+        $this->death_date = $this->optionalPersonDateString($person, 'death_date');
+        $this->birth_place = $this->optionalPersonAttribute($person, 'birth_place');
+        $this->death_place = $this->optionalPersonAttribute($person, 'death_place');
+        $this->nationality = $this->optionalPersonAttribute($person, 'nationality');
+        $this->is_published = (bool) $this->optionalPersonAttribute($person, 'is_published', true);
+        $this->short_biography = $this->optionalPersonAttribute($person, 'short_biography');
+        $this->biography = $this->optionalPersonAttribute($person, 'biography');
+        $this->meta_title = $this->optionalPersonAttribute($person, 'meta_title');
+        $this->search_keywords = $this->optionalPersonAttribute($person, 'search_keywords');
+        $this->meta_description = $this->optionalPersonAttribute($person, 'meta_description');
     }
 
     private function initializeDraftMediaAsset(): void

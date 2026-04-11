@@ -36,8 +36,10 @@ trait ValidatesFormRequests
             $request->attributes(),
         );
 
-        foreach ($request->after() as $afterValidationHook) {
-            $validator->after($afterValidationHook);
+        if (method_exists($request, 'after')) {
+            foreach ($request->after() as $afterValidationHook) {
+                $validator->after($afterValidationHook);
+            }
         }
 
         /** @var array<string, mixed> */
@@ -61,8 +63,9 @@ trait ValidatesFormRequests
         $request->setContainer(app());
         $request->setRedirector(app('redirect'));
         $request->setUserResolver(fn () => auth()->user());
-        $request->setRouteResolver(function () use ($routeParameters): RoutingRoute {
+        $request->setRouteResolver(function () use ($request, $routeParameters): RoutingRoute {
             $route = new RoutingRoute('POST', '/', []);
+            $route->bind($request);
 
             foreach ($routeParameters as $parameter => $value) {
                 $route->setParameter($parameter, $value);

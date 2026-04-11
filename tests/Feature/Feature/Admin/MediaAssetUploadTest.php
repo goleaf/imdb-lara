@@ -6,6 +6,12 @@ use App\Enums\ContributionStatus;
 use App\Enums\ReportStatus;
 use App\Enums\ReviewStatus;
 use App\Enums\UserStatus;
+use App\Livewire\Admin\ContributionModerationCard;
+use App\Livewire\Admin\ReportModerationCard;
+use App\Livewire\Admin\ReviewModerationCard;
+use App\Livewire\Pages\Admin\MediaAssetEditPage;
+use App\Livewire\Pages\Admin\PersonEditPage;
+use App\Livewire\Pages\Admin\TitleEditPage;
 use App\Models\Contribution;
 use App\Models\MediaAsset;
 use App\Models\Person;
@@ -18,6 +24,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class MediaAssetUploadTest extends TestCase
@@ -37,7 +44,7 @@ class MediaAssetUploadTest extends TestCase
         ];
 
         foreach ($routeNames as $routeName) {
-            $this->assertTrue(Route::has($routeName), $routeName.' should be registered.');
+            $this->assertTrue(Route::has($routeName), $routeName.' should stay available on the admin route surface.');
         }
     }
 
@@ -49,25 +56,18 @@ class MediaAssetUploadTest extends TestCase
         $title = Title::factory()->create();
         $existingPrimaryPoster = MediaAsset::factory()->poster()->for($title, 'mediable')->create();
 
-        $this->actingAs($editor)
-            ->post(route('admin.titles.media-assets.store', $title), [
-                'kind' => 'poster',
-                'file' => UploadedFile::fake()->image('poster-one.jpg', 600, 900),
-                'url' => null,
-                'alt_text' => 'Poster one',
-                'caption' => 'Primary poster',
-                'width' => null,
-                'height' => null,
-                'provider' => null,
-                'provider_key' => null,
-                'language' => 'en',
-                'duration_seconds' => null,
-                'metadata' => null,
-                'is_primary' => '1',
-                'position' => 0,
-                'published_at' => now()->toDateTimeString(),
-            ])
-            ->assertRedirect(route('admin.titles.edit', $title));
+        $this->actingAs($editor);
+
+        Livewire::test(TitleEditPage::class, ['title' => $title])
+            ->set('draftMediaAsset.kind', 'poster')
+            ->set('draftMediaAsset.file', UploadedFile::fake()->image('poster-one.jpg', 600, 900))
+            ->set('draftMediaAsset.alt_text', 'Poster one')
+            ->set('draftMediaAsset.caption', 'Primary poster')
+            ->set('draftMediaAsset.language', 'en')
+            ->set('draftMediaAsset.is_primary', true)
+            ->set('draftMediaAsset.position', 0)
+            ->set('draftMediaAsset.published_at', now()->format('Y-m-d\\TH:i'))
+            ->call('saveDraftMediaAsset');
 
         $uploadedPoster = MediaAsset::query()
             ->where('mediable_type', Title::class)
@@ -89,41 +89,33 @@ class MediaAssetUploadTest extends TestCase
 
         $previousUploadPath = $uploadedPoster->storagePath();
 
-        $this->actingAs($editor)
-            ->patch(route('admin.media-assets.update', $uploadedPoster), [
-                'kind' => 'poster',
-                'file' => UploadedFile::fake()->image('poster-two.jpg', 800, 1200),
-                'url' => null,
-                'alt_text' => 'Poster two',
-                'caption' => 'Updated poster',
-                'width' => null,
-                'height' => null,
-                'provider' => null,
-                'provider_key' => null,
-                'language' => 'en',
-                'duration_seconds' => null,
-                'metadata' => null,
-                'is_primary' => '1',
-                'position' => 1,
-                'published_at' => now()->toDateTimeString(),
-            ])
-            ->assertRedirect(route('admin.media-assets.edit', $uploadedPoster));
+        $editMediaPage = Livewire::test(MediaAssetEditPage::class, ['mediaAsset' => $uploadedPoster])
+            ->set('kind', 'poster')
+            ->set('file', UploadedFile::fake()->image('poster-two.jpg', 800, 1200))
+            ->set('alt_text', 'Poster two')
+            ->set('caption', 'Updated poster')
+            ->set('language', 'en')
+            ->set('is_primary', true)
+            ->set('position', 1)
+            ->set('published_at', now()->format('Y-m-d\\TH:i'))
+            ->call('saveMediaAsset');
 
         $uploadedPoster->refresh();
 
+        $editMediaPage->assertRedirect(route('admin.media-assets.edit', $uploadedPoster));
         $this->assertNotSame($previousUploadPath, $uploadedPoster->storagePath());
         Storage::disk('public')->assertMissing($previousUploadPath);
         Storage::disk('public')->assertExists($uploadedPoster->storagePath());
 
-        $this->actingAs($editor)
-            ->delete(route('admin.media-assets.destroy', $uploadedPoster))
+        Livewire::test(MediaAssetEditPage::class, ['mediaAsset' => $uploadedPoster])
+            ->call('deleteMediaAsset')
             ->assertRedirect(route('admin.titles.edit', $title));
 
         $this->assertSoftDeleted('media_assets', ['id' => $uploadedPoster->id]);
         Storage::disk('public')->assertMissing($uploadedPoster->storagePath());
     }
 
-    public function test_editor_can_upload_person_headshots_and_validation_rejects_invalid_media_sources_or_kinds(): void
+    public function test_editor_can_upload_person_headshots_and_validation_reject_invalid_media_sources_or_kinds(): void
     {
         Storage::fake('public');
 
@@ -131,25 +123,17 @@ class MediaAssetUploadTest extends TestCase
         $person = Person::factory()->create();
         $title = Title::factory()->create();
 
-        $this->actingAs($editor)
-            ->post(route('admin.people.media-assets.store', $person), [
-                'kind' => 'headshot',
-                'file' => UploadedFile::fake()->image('headshot.jpg', 500, 700),
-                'url' => null,
-                'alt_text' => 'Ava Mercer headshot',
-                'caption' => 'Portrait',
-                'width' => null,
-                'height' => null,
-                'provider' => null,
-                'provider_key' => null,
-                'language' => 'en',
-                'duration_seconds' => null,
-                'metadata' => null,
-                'is_primary' => '1',
-                'position' => 0,
-                'published_at' => now()->toDateTimeString(),
-            ])
-            ->assertRedirect(route('admin.people.edit', $person));
+        $this->actingAs($editor);
+
+        Livewire::test(PersonEditPage::class, ['person' => $person])
+            ->set('draftMediaAsset.kind', 'headshot')
+            ->set('draftMediaAsset.file', UploadedFile::fake()->image('headshot.jpg', 500, 700))
+            ->set('draftMediaAsset.alt_text', 'Ava Mercer headshot')
+            ->set('draftMediaAsset.caption', 'Portrait')
+            ->set('draftMediaAsset.language', 'en')
+            ->set('draftMediaAsset.is_primary', true)
+            ->set('draftMediaAsset.position', 0)
+            ->call('saveDraftMediaAsset');
 
         $headshot = MediaAsset::query()
             ->where('mediable_type', Person::class)
@@ -164,52 +148,26 @@ class MediaAssetUploadTest extends TestCase
             ->assertOk()
             ->assertSee($headshot->url, false);
 
-        $this->actingAs($editor)
-            ->from(route('admin.titles.edit', $title))
-            ->post(route('admin.titles.media-assets.store', $title), [
-                'kind' => 'trailer',
-                'file' => UploadedFile::fake()->image('not-a-video.jpg'),
-                'url' => null,
-                'alt_text' => null,
-                'caption' => null,
-                'width' => null,
-                'height' => null,
-                'provider' => null,
-                'provider_key' => null,
-                'language' => null,
-                'duration_seconds' => null,
-                'metadata' => null,
-                'is_primary' => '0',
-                'position' => 0,
-                'published_at' => null,
-            ])
-            ->assertRedirect(route('admin.titles.edit', $title))
-            ->assertSessionHasErrors(['file', 'url']);
+        Livewire::test(TitleEditPage::class, ['title' => $title])
+            ->set('draftMediaAsset.kind', 'trailer')
+            ->set('draftMediaAsset.file', UploadedFile::fake()->image('not-a-video.jpg'))
+            ->set('draftMediaAsset.is_primary', false)
+            ->set('draftMediaAsset.position', 0)
+            ->call('saveDraftMediaAsset')
+            ->assertHasErrors(['file', 'url']);
 
-        $this->actingAs($editor)
-            ->from(route('admin.people.edit', $person))
-            ->post(route('admin.people.media-assets.store', $person), [
-                'kind' => 'poster',
-                'file' => null,
-                'url' => 'https://videos.example.test/person-poster',
-                'alt_text' => null,
-                'caption' => null,
-                'width' => null,
-                'height' => null,
-                'provider' => 'external',
-                'provider_key' => 'person-poster',
-                'language' => null,
-                'duration_seconds' => null,
-                'metadata' => null,
-                'is_primary' => '0',
-                'position' => 0,
-                'published_at' => null,
-            ])
-            ->assertRedirect(route('admin.people.edit', $person))
-            ->assertSessionHasErrors(['kind']);
+        Livewire::test(PersonEditPage::class, ['person' => $person])
+            ->set('draftMediaAsset.kind', 'poster')
+            ->set('draftMediaAsset.url', 'https://videos.example.test/person-poster')
+            ->set('draftMediaAsset.provider', 'external')
+            ->set('draftMediaAsset.provider_key', 'person-poster')
+            ->set('draftMediaAsset.is_primary', false)
+            ->set('draftMediaAsset.position', 0)
+            ->call('saveDraftMediaAsset')
+            ->assertHasErrors(['kind']);
     }
 
-    public function test_staff_can_update_moderation_routes_over_http(): void
+    public function test_staff_can_update_moderation_cards_over_livewire(): void
     {
         $moderator = User::factory()->moderator()->create();
         $editor = User::factory()->editor()->create();
@@ -223,28 +181,26 @@ class MediaAssetUploadTest extends TestCase
         $list = UserList::factory()->for($author)->public()->create();
         $listContribution = Contribution::factory()->for($reporter)->for($list, 'contributable')->create();
 
-        $this->actingAs($moderator)
-            ->patch(route('admin.reviews.update', $review), [
-                'status' => ReviewStatus::Rejected->value,
-                'moderation_notes' => 'Rejected from HTTP moderation route.',
-            ])
-            ->assertRedirect(route('admin.reviews.index'));
+        $this->actingAs($moderator);
 
-        $this->actingAs($moderator)
-            ->patch(route('admin.reports.update', $report), [
-                'status' => ReportStatus::Resolved->value,
-                'content_action' => 'hide_content',
-                'resolution_notes' => 'Resolved from HTTP moderation route.',
-                'suspend_owner' => '1',
-            ])
-            ->assertRedirect(route('admin.reports.index'));
+        Livewire::test(ReviewModerationCard::class, ['review' => $review])
+            ->set('status', ReviewStatus::Rejected->value)
+            ->set('moderationNotes', 'Rejected from Livewire moderation card.')
+            ->call('save');
 
-        $this->actingAs($editor)
-            ->patch(route('admin.contributions.update', $listContribution), [
-                'status' => ContributionStatus::Approved->value,
-                'notes' => 'Approved from HTTP route.',
-            ])
-            ->assertRedirect(route('admin.contributions.index'));
+        Livewire::test(ReportModerationCard::class, ['report' => $report])
+            ->set('status', ReportStatus::Resolved->value)
+            ->set('contentAction', 'hide_content')
+            ->set('resolutionNotes', 'Resolved from Livewire moderation card.')
+            ->set('suspendOwner', true)
+            ->call('save');
+
+        $this->actingAs($editor);
+
+        Livewire::test(ContributionModerationCard::class, ['contribution' => $listContribution])
+            ->set('status', ContributionStatus::Approved->value)
+            ->set('notes', 'Approved from Livewire moderation card.')
+            ->call('save');
 
         $review->refresh();
         $report->refresh();

@@ -70,17 +70,20 @@
                 <div class="relative flex min-h-screen flex-col">
                     <header class="sticky top-0 z-40 border-b border-white/8 bg-black/30 backdrop-blur-xl">
                         <div class="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
-                            <a href="{{ route('public.home') }}" class="group inline-flex items-center gap-3 text-decoration-none">
-                                <span class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#d6b574]/25 bg-white/4 text-[0.72rem] font-semibold uppercase tracking-[0.3em] text-[#d6b574]">
-                                    SB
-                                </span>
-                                <span class="min-w-0">
-                                    <span class="sb-auth-kicker block">Premium Entertainment Database</span>
-                                    <span class="block text-base font-semibold text-[#f7f1e8] transition-opacity group-hover:opacity-80">
-                                        Screenbase
+                            <x-ui.brand
+                                :href="route('public.home')"
+                                name="Screenbase"
+                                description="Premium Entertainment Database"
+                                nameClass="text-base font-semibold text-[#f7f1e8]"
+                                descriptionClass="sb-auth-kicker block"
+                                class="justify-start text-[#f7f1e8]"
+                            >
+                                <x-slot:logo>
+                                    <span class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#d6b574]/25 bg-white/4 text-[0.72rem] font-semibold uppercase tracking-[0.3em] text-[#d6b574]">
+                                        SB
                                     </span>
-                                </span>
-                            </a>
+                                </x-slot:logo>
+                            </x-ui.brand>
 
                             <x-ui.button.light-outline
                                 :href="route('public.discover')"
@@ -218,17 +221,20 @@
                     <header class="sticky top-0 z-40 border-b border-white/8 bg-[linear-gradient(180deg,rgba(8,8,8,0.98),rgba(17,15,13,0.94))] shadow-[0_22px_60px_rgba(0,0,0,0.32)] backdrop-blur-xl">
                         <div class="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-4 md:px-6">
                             <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-                                <a href="{{ route('public.home') }}" class="group inline-flex items-center gap-3 text-decoration-none xl:pr-4">
-                                    <span class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#d6b574]/25 bg-white/4 text-[0.72rem] font-semibold uppercase tracking-[0.3em] text-[#d6b574]">
-                                        SB
-                                    </span>
-                                    <span class="min-w-0">
-                                        <span class="sb-shell-kicker block">Entertainment Database</span>
-                                        <span class="sb-shell-brand-name block text-[#f7f1e8] transition-opacity group-hover:opacity-80">
-                                            Screenbase
+                                <x-ui.brand
+                                    :href="route('public.home')"
+                                    name="Screenbase"
+                                    description="Entertainment Database"
+                                    nameClass="sb-shell-brand-name text-[#f7f1e8]"
+                                    descriptionClass="sb-shell-kicker block"
+                                    class="justify-start text-[#f7f1e8] xl:pr-4"
+                                >
+                                    <x-slot:logo>
+                                        <span class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#d6b574]/25 bg-white/4 text-[0.72rem] font-semibold uppercase tracking-[0.3em] text-[#d6b574]">
+                                            SB
                                         </span>
-                                    </span>
-                                </a>
+                                    </x-slot:logo>
+                                </x-ui.brand>
 
                                 @unless (request()->routeIs('admin.*'))
                                     <div class="hidden min-w-0 max-w-[54rem] flex-1 xl:block">

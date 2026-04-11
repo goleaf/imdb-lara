@@ -4,17 +4,20 @@
 >
     <x-slot:brand>
         <div class="px-1">
-            <x-ui.brand :href="route('account.dashboard')" name="Screenbase" class="justify-start">
+            <x-ui.brand
+                :href="route('account.dashboard')"
+                name="Screenbase"
+                description="Member workspace"
+                nameClass="text-base font-semibold"
+                descriptionClass="text-sm text-neutral-500 dark:text-neutral-400 [:has([data-collapsed]_&)_&]:hidden"
+                class="justify-start"
+            >
                 <x-slot:logo>
                     <span class="inline-flex size-10 items-center justify-center rounded-2xl bg-linear-to-br from-amber-300 via-amber-200 to-orange-400 text-sm font-bold tracking-[0.16em] text-stone-950 shadow-sm ring-1 ring-black/5">
                         SB
                     </span>
                 </x-slot:logo>
             </x-ui.brand>
-
-            <x-ui.text size="sm" class="pl-[3.25rem] text-neutral-500 dark:text-neutral-400 [:has([data-collapsed]_&)_&]:hidden">
-                Member workspace
-            </x-ui.text>
         </div>
     </x-slot:brand>
 

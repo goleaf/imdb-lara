@@ -5,15 +5,18 @@ namespace App\Livewire\Pages\Admin;
 use App\Actions\Admin\DeleteEpisodeAction;
 use App\Actions\Admin\SaveEpisodeAction;
 use App\Http\Requests\Admin\UpdateEpisodeRequest;
+use App\Livewire\Pages\Admin\Concerns\InteractsWithCatalogTitleState;
 use App\Livewire\Pages\Admin\Concerns\ValidatesFormRequests;
 use App\Livewire\Pages\Concerns\RendersPageView;
 use App\Models\Episode;
 use App\Models\Title;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Arr;
 use Livewire\Component;
 
 class EpisodesPage extends Component
 {
+    use InteractsWithCatalogTitleState;
     use RendersPageView;
     use ValidatesFormRequests;
 
@@ -73,12 +76,46 @@ class EpisodesPage extends Component
     {
         abort_unless($this->episode instanceof Episode, 404);
 
+        if ($this->isCatalogOnlyApplication()) {
+            $loadedEpisode = $this->episode->load([
+                'title' => fn ($titleQuery) => $titleQuery->select(Title::catalogCardColumns()),
+                'season:id,series_id,name,slug,season_number',
+                'series' => fn ($seriesQuery) => $seriesQuery->select(Title::catalogCardColumns()),
+            ]);
+            $loadedEpisode->fill(Arr::only($this->episodePayload(), (new Episode)->getFillable()));
+            $loadedEpisode->setRelation('title', tap(
+                $loadedEpisode->title ?? new Title,
+                fn (Title $title) => $title->fill([
+                    'name' => $this->name,
+                    'original_name' => $this->original_name,
+                    'slug' => $this->slug,
+                    'release_year' => $this->release_year,
+                    'release_date' => $this->release_date,
+                    'runtime_minutes' => $this->runtime_minutes,
+                    'age_rating' => $this->age_rating,
+                    'origin_country' => $this->origin_country,
+                    'original_language' => $this->original_language,
+                    'plot_outline' => $this->plot_outline,
+                    'synopsis' => $this->synopsis,
+                    'tagline' => $this->tagline,
+                    'meta_title' => $this->meta_title,
+                    'meta_description' => $this->meta_description,
+                    'search_keywords' => $this->search_keywords,
+                    'is_published' => $this->is_published,
+                ]),
+            ));
+
+            return $this->renderPageView('admin.episodes.edit', [
+                'episode' => $loadedEpisode,
+            ]);
+        }
+
         $loadedEpisode = $this->episode->load([
             'title' => fn ($titleQuery) => $titleQuery->select(Title::catalogCardColumns()),
             'season:id,series_id,name,slug,season_number',
             'series:id,name,slug,title_type,is_published',
         ]);
-        $loadedEpisode->fill($this->episodePayload());
+        $loadedEpisode->fill(Arr::only($this->episodePayload(), (new Episode)->getFillable()));
         $loadedEpisode->setRelation('title', tap(
             $loadedEpisode->title ?? new Title,
             fn (Title $title) => $title->fill([
@@ -141,19 +178,19 @@ class EpisodesPage extends Component
         $this->name = (string) ($episode->title?->name ?? '');
         $this->original_name = $episode->title?->original_name;
         $this->slug = (string) ($episode->title?->slug ?? '');
-        $this->plot_outline = $episode->title?->plot_outline;
-        $this->synopsis = $episode->title?->synopsis;
+        $this->plot_outline = $this->optionalTitleAttribute($episode->title, 'plot_outline');
+        $this->synopsis = $this->optionalTitleAttribute($episode->title, 'synopsis');
         $this->release_year = $episode->title?->release_year;
-        $this->release_date = $episode->title?->release_date?->toDateString();
+        $this->release_date = $this->optionalTitleDateString($episode->title, 'release_date');
         $this->runtime_minutes = $episode->title?->runtime_minutes;
-        $this->age_rating = $episode->title?->age_rating;
-        $this->origin_country = $episode->title?->origin_country;
-        $this->original_language = $episode->title?->original_language;
-        $this->tagline = $episode->title?->tagline;
-        $this->meta_title = $episode->title?->meta_title;
-        $this->meta_description = $episode->title?->meta_description;
-        $this->search_keywords = $episode->title?->search_keywords;
-        $this->is_published = (bool) ($episode->title?->is_published ?? true);
+        $this->age_rating = $this->optionalTitleAttribute($episode->title, 'age_rating');
+        $this->origin_country = $this->optionalTitleAttribute($episode->title, 'origin_country');
+        $this->original_language = $this->optionalTitleAttribute($episode->title, 'original_language');
+        $this->tagline = $this->optionalTitleAttribute($episode->title, 'tagline');
+        $this->meta_title = $this->optionalTitleAttribute($episode->title, 'meta_title');
+        $this->meta_description = $this->optionalTitleAttribute($episode->title, 'meta_description');
+        $this->search_keywords = $this->optionalTitleAttribute($episode->title, 'search_keywords');
+        $this->is_published = (bool) $this->optionalTitleAttribute($episode->title, 'is_published', true);
         $this->season_number = $episode->season_number;
         $this->episode_number = $episode->episode_number;
         $this->absolute_number = $episode->absolute_number;

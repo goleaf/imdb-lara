@@ -50,11 +50,30 @@ class CreditsPage extends Component
     public function mount(?Credit $credit = null): void
     {
         $this->credit = $credit;
-        $this->fillCreditForm($credit);
+
+        if (! $this->isCatalogOnlyApplication()) {
+            $this->fillCreditForm($credit);
+        }
     }
 
     public function render(): View
     {
+        if ($this->isCatalogOnlyApplication()) {
+            $credit = $this->credit instanceof Credit
+                ? $this->credit->load([
+                    'title' => fn ($titleQuery) => $titleQuery->select(Title::catalogCardColumns()),
+                    'person' => fn ($personQuery) => $personQuery->select(Person::directoryColumns()),
+                ])->fill($this->creditPayload())
+                : new Credit($this->creditPayload());
+
+            return $this->renderPageView(
+                $this->credit instanceof Credit ? 'admin.credits.edit' : 'admin.credits.create',
+                [
+                    'credit' => $credit,
+                ],
+            );
+        }
+
         $credit = $this->credit instanceof Credit
             ? $this->credit->load([
                 'title:id,name,slug',

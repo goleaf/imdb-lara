@@ -9,7 +9,7 @@
 
             <x-ui.field>
                 <x-ui.label>Profession</x-ui.label>
-                <x-ui.input wire:model.defer="profession" name="profession" />
+                <x-ui.input wire:model.defer="professionName" name="profession" />
                 <x-ui.error name="profession" />
             </x-ui.field>
 
@@ -25,13 +25,13 @@
         </div>
 
         <div class="flex flex-wrap justify-end gap-2">
-            <x-ui.button type="submit" size="sm" :icon="$professionRecord ? 'check' : 'plus'">
-                {{ $professionRecord ? 'Save profession' : 'Add profession' }}
+            <x-ui.button type="submit" size="sm" :icon="$professionRecord?->exists ? 'check' : 'plus'">
+                {{ $professionRecord?->exists ? 'Save profession' : 'Add profession' }}
             </x-ui.button>
         </div>
     </form>
 
-    @if ($professionRecord)
+    @if ($professionRecord?->exists)
         <div class="mt-3 flex justify-end">
             <x-ui.button type="button" wire:click="delete" variant="outline" color="red" size="sm" icon="trash">
                 Delete

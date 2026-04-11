@@ -59,7 +59,19 @@ class CatalogMediaAsset extends Model
     public static function fromCatalog(array $attributes): self
     {
         $asset = new self;
-        $asset->forceFill($attributes);
+        $asset->forceFill([
+            'kind' => null,
+            'url' => null,
+            'alt_text' => null,
+            'caption' => null,
+            'width' => null,
+            'height' => null,
+            'duration_seconds' => null,
+            'is_primary' => false,
+            'position' => 0,
+            'metadata' => null,
+            ...$attributes,
+        ]);
         $asset->exists = true;
 
         return $asset;

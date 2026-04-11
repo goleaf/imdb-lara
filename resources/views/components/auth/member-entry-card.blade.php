@@ -17,16 +17,20 @@
     <div class="sb-auth-card rounded-[1.75rem] px-5 py-6 sm:px-7 sm:py-8">
         <div class="space-y-7">
             <div class="space-y-5">
-                <div class="inline-flex items-center gap-3">
-                    <span class="inline-flex h-12 w-12 items-center justify-center rounded-full border border-[#d6b574]/25 bg-white/4 text-[0.72rem] font-semibold uppercase tracking-[0.3em] text-[#d6b574]">
-                        SB
-                    </span>
-
-                    <div class="min-w-0">
-                        <div class="sb-auth-kicker">{{ $kicker }}</div>
-                        <div class="sb-auth-section-title">{{ $sectionTitle }}</div>
-                    </div>
-                </div>
+                <x-ui.brand
+                    :href="route('public.home')"
+                    :name="$sectionTitle"
+                    :description="$kicker"
+                    nameClass="sb-auth-section-title"
+                    descriptionClass="sb-auth-kicker"
+                    class="justify-start text-[#f7f1e8]"
+                >
+                    <x-slot:logo>
+                        <span class="inline-flex h-12 w-12 items-center justify-center rounded-full border border-[#d6b574]/25 bg-white/4 text-[0.72rem] font-semibold uppercase tracking-[0.3em] text-[#d6b574]">
+                            SB
+                        </span>
+                    </x-slot:logo>
+                </x-ui.brand>
 
                 <div class="space-y-3">
                     <h1 class="sb-auth-title">{{ $title }}</h1>

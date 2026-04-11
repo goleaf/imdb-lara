@@ -21,7 +21,7 @@ class PersonProfessionEditor extends Component
 
     public string $department = '';
 
-    public string $profession = '';
+    public string $professionName = '';
 
     public ?int $sort_order = null;
 
@@ -31,18 +31,18 @@ class PersonProfessionEditor extends Component
 
     public function mount(
         Person $person,
-        ?PersonProfession $profession = null,
+        ?PersonProfession $professionRecord = null,
         ?int $defaultSortOrder = null,
     ): void {
         $this->person = $person;
-        $this->professionRecord = $profession;
+        $this->professionRecord = $professionRecord;
         $this->defaultSortOrder = $defaultSortOrder;
 
-        if ($profession instanceof PersonProfession) {
-            $this->department = (string) $profession->department;
-            $this->profession = (string) $profession->profession;
-            $this->sort_order = $profession->sort_order;
-            $this->is_primary = (bool) $profession->is_primary;
+        if ($professionRecord?->exists) {
+            $this->department = (string) $professionRecord->department;
+            $this->professionName = (string) $professionRecord->profession;
+            $this->sort_order = $professionRecord->sort_order;
+            $this->is_primary = (bool) $professionRecord->is_primary;
 
             return;
         }
@@ -52,7 +52,7 @@ class PersonProfessionEditor extends Component
 
     public function save(SavePersonProfessionAction $savePersonProfession): void
     {
-        $validated = $this->professionRecord instanceof PersonProfession
+        $validated = $this->hasExistingProfessionRecord()
             ? $this->validateWithFormRequest(UpdatePersonProfessionRequest::class, $this->payload(), [
                 'profession' => $this->professionRecord,
             ])
@@ -61,14 +61,14 @@ class PersonProfessionEditor extends Component
             ]);
 
         $profession = $savePersonProfession->handle(
-            $this->professionRecord ?? new PersonProfession,
+            $this->hasExistingProfessionRecord() ? $this->professionRecord : new PersonProfession,
             $this->person,
             $validated,
         );
 
         $this->professionRecord = $profession;
         $this->department = (string) $profession->department;
-        $this->profession = (string) $profession->profession;
+        $this->professionName = (string) $profession->profession;
         $this->sort_order = $profession->sort_order;
         $this->is_primary = (bool) $profession->is_primary;
 
@@ -78,7 +78,7 @@ class PersonProfessionEditor extends Component
 
     public function delete(): void
     {
-        abort_unless($this->professionRecord instanceof PersonProfession, 404);
+        abort_unless($this->hasExistingProfessionRecord(), 404);
 
         $this->authorize('update', $this->person);
         $this->professionRecord->delete();
@@ -99,9 +99,14 @@ class PersonProfessionEditor extends Component
     {
         return [
             'department' => $this->department,
-            'profession' => $this->profession,
+            'profession' => $this->professionName,
             'sort_order' => $this->sort_order,
             'is_primary' => $this->is_primary,
         ];
+    }
+
+    private function hasExistingProfessionRecord(): bool
+    {
+        return $this->professionRecord?->exists ?? false;
     }
 }

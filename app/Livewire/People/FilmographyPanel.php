@@ -8,11 +8,16 @@ use App\Models\Title;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
 class FilmographyPanel extends Component
 {
+    protected BuildPersonFilmographyQueryAction $buildPersonFilmographyQuery;
+
+    #[Locked]
     public Person $person;
 
     #[Url(as: 'job')]
@@ -26,15 +31,21 @@ class FilmographyPanel extends Component
         $this->person = $person;
     }
 
-    public function render(BuildPersonFilmographyQueryAction $buildPersonFilmographyQuery): View
+    public function boot(BuildPersonFilmographyQueryAction $buildPersonFilmographyQuery): void
     {
-        $filmography = $buildPersonFilmographyQuery->handle($this->person, [
+        $this->buildPersonFilmographyQuery = $buildPersonFilmographyQuery;
+    }
+
+    #[Computed]
+    public function viewData(): array
+    {
+        $filmography = $this->buildPersonFilmographyQuery->handle($this->person, [
             'profession' => $this->profession,
             'sort' => $this->sort,
         ]);
         $groups = $this->formatGroups($filmography['groups']);
 
-        return view('livewire.people.filmography-panel', [
+        return [
             'groups' => $groups,
             'professionOptions' => $this->formatProfessionOptions($filmography['professionOptions']),
             'sortOptions' => [
@@ -46,7 +57,12 @@ class FilmographyPanel extends Component
                 $groups->sum(fn (array $group): int => $group['titleCount']),
                 'title',
             ),
-        ]);
+        ];
+    }
+
+    public function render(): View
+    {
+        return view('livewire.people.filmography-panel', $this->viewData);
     }
 
     public function placeholder(array $params = []): View

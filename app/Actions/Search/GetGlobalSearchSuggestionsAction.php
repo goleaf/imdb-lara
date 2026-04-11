@@ -8,6 +8,7 @@ use App\Models\InterestCategory;
 use App\Models\Person;
 use App\Models\Title;
 use Illuminate\Database\Eloquent\Collection;
+use Throwable;
 
 class GetGlobalSearchSuggestionsAction
 {
@@ -24,7 +25,7 @@ class GetGlobalSearchSuggestionsAction
      *     titles: Collection<int, Title>
      * }
      */
-    public function handle(?string $query, int $perGroup = 4): array
+    public function handle(?string $query, int $perGroup = 4, array $titleFilters = []): array
     {
         $query = trim((string) $query);
 
@@ -48,20 +49,44 @@ class GetGlobalSearchSuggestionsAction
                     ->limit($limit)
                     ->get()
                 : new Collection,
-            'people' => $this->buildPublicPeopleIndexQuery
-                ->handle([
-                    'search' => $query,
-                    'sort' => 'popular',
-                ])
-                ->limit($limit)
-                ->get(),
-            'titles' => $this->buildSearchTitleResultsQuery
-                ->handle([
-                    'search' => $query,
-                    'sort' => 'popular',
-                ])
-                ->limit($limit)
-                ->get(),
+            'people' => $this->resolvePeopleSuggestions($query, $limit),
+            'titles' => $this->resolveTitleSuggestions($query, $limit, $titleFilters),
         ];
+    }
+
+    /**
+     * @return Collection<int, Person>
+     */
+    private function resolvePeopleSuggestions(string $query, int $limit): Collection
+    {
+        try {
+            return $this->buildPublicPeopleIndexQuery
+                ->handle([
+                    'search' => $query,
+                    'sort' => 'popular',
+                ])
+                ->limit($limit)
+                ->get();
+        } catch (Throwable $throwable) {
+            report($throwable);
+
+            return new Collection;
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $titleFilters
+     * @return Collection<int, Title>
+     */
+    private function resolveTitleSuggestions(string $query, int $limit, array $titleFilters): Collection
+    {
+        return $this->buildSearchTitleResultsQuery
+            ->handle([
+                ...$titleFilters,
+                'search' => $query,
+                'sort' => $titleFilters['sort'] ?? 'popular',
+            ])
+            ->limit($limit)
+            ->get();
     }
 }

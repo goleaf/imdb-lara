@@ -17,6 +17,7 @@ use App\Models\UserList;
 use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -195,7 +196,8 @@ class WatchlistBrowser extends Component
         $this->visibilityMessage = 'Watchlist visibility updated.';
     }
 
-    public function render(): View
+    #[Computed]
+    public function viewData(): array
     {
         $user = auth()->user();
         $watchlist = $this->ensureWatchlist->handle($user);
@@ -229,7 +231,7 @@ class WatchlistBrowser extends Component
         );
         $items->withQueryString();
 
-        return view('livewire.account.watchlist-browser', [
+        return [
             'emptyState' => $this->emptyState($watchlist),
             'filterOptions' => $filterOptions,
             'hasActiveFilters' => $this->hasActiveFilters(),
@@ -238,7 +240,12 @@ class WatchlistBrowser extends Component
             'publicWatchlistUrl' => $this->publicWatchlistUrl($watchlist),
             'summaryBadges' => $this->summaryBadges($watchlist),
             'visibilityOptions' => $this->visibilityOptions(),
-        ]);
+        ];
+    }
+
+    public function render(): View
+    {
+        return view('livewire.account.watchlist-browser', $this->viewData);
     }
 
     public function placeholder(): View

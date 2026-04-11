@@ -14,6 +14,7 @@ use App\Http\Requests\Admin\StoreMediaAssetRequest;
 use App\Http\Requests\Admin\StoreSeasonRequest;
 use App\Http\Requests\Admin\StoreTitleRequest;
 use App\Http\Requests\Admin\UpdateTitleRequest;
+use App\Livewire\Pages\Admin\Concerns\InteractsWithCatalogTitleState;
 use App\Livewire\Pages\Admin\Concerns\ValidatesFormRequests;
 use App\Livewire\Pages\Concerns\RendersPageView;
 use App\Models\Genre;
@@ -22,11 +23,13 @@ use App\Models\Season;
 use App\Models\Title;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Arr;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
 class TitlesPage extends Component
 {
+    use InteractsWithCatalogTitleState;
     use RendersPageView;
     use ValidatesFormRequests;
     use WithFileUploads;
@@ -106,12 +109,13 @@ class TitlesPage extends Component
     {
         if ($this->isCatalogOnlyApplication()) {
             return $this->renderPageView('admin.titles.create', [
-                'title' => new Title($this->titlePayload()),
+                'title' => new Title($this->titlePreviewPayload()),
             ]);
         }
 
         return $this->renderPageView('admin.titles.create', [
-            'title' => new Title($this->titlePayload()),
+            'title' => new Title($this->titlePreviewPayload()),
+            'selectedGenreIds' => $this->selectedGenreIds(),
             ...$this->formOptions(),
         ]);
     }
@@ -119,6 +123,12 @@ class TitlesPage extends Component
     protected function renderTitleEditPage(): View
     {
         abort_unless($this->title instanceof Title, 404);
+
+        if ($this->isCatalogOnlyApplication()) {
+            return $this->renderPageView('admin.titles.edit', [
+                'title' => tap($this->title)->fill($this->titlePreviewPayload()),
+            ]);
+        }
 
         $loadedTitle = $this->title->load([
             'genres:id,name',
@@ -161,21 +171,16 @@ class TitlesPage extends Component
                 'published_at',
             ]),
         ]);
-        $loadedTitle->fill($this->titlePayload());
-
-        if ($this->isCatalogOnlyApplication()) {
-            return $this->renderPageView('admin.titles.edit', [
-                'title' => $loadedTitle,
-            ]);
-        }
+        $loadedTitle->fill($this->titlePreviewPayload());
 
         return $this->renderPageView('admin.titles.edit', [
             'title' => $loadedTitle,
             'draftSeason' => new Season($this->season),
             'draftMediaAsset' => tap(
-                new MediaAsset($this->draftMediaAssetPayload()),
+                new MediaAsset(Arr::except($this->draftMediaAssetPayload(), ['file'])),
                 fn (MediaAsset $mediaAsset) => $mediaAsset->setRelation('mediable', $loadedTitle),
             ),
+            'selectedGenreIds' => $this->selectedGenreIds(),
             ...$this->formOptions(),
         ]);
     }
@@ -274,28 +279,28 @@ class TitlesPage extends Component
         $this->title_type = (string) ($title->title_type?->value ?? $title->title_type ?? TitleType::Movie->value);
         $this->release_year = $title->release_year;
         $this->end_year = $title->end_year;
-        $this->release_date = $title->release_date?->toDateString();
+        $this->release_date = $this->optionalTitleDateString($title, 'release_date');
         $this->runtime_minutes = $title->runtime_minutes;
-        $this->age_rating = $title->age_rating;
-        $this->origin_country = $title->origin_country;
-        $this->original_language = $title->original_language;
-        $this->is_published = (bool) $title->is_published;
+        $this->age_rating = $this->optionalTitleAttribute($title, 'age_rating');
+        $this->origin_country = $this->optionalTitleAttribute($title, 'origin_country');
+        $this->original_language = $this->optionalTitleAttribute($title, 'original_language');
+        $this->is_published = (bool) $this->optionalTitleAttribute($title, 'is_published', true);
         $this->genre_ids = $title->exists
             ? $title->genres()->pluck('genres.id')->map(fn (int $genreId): int => $genreId)->all()
             : [];
-        $this->plot_outline = $title->plot_outline;
-        $this->synopsis = $title->synopsis;
-        $this->tagline = $title->tagline;
-        $this->meta_title = $title->meta_title;
-        $this->meta_description = $title->meta_description;
-        $this->search_keywords = $title->search_keywords;
+        $this->plot_outline = $this->optionalTitleAttribute($title, 'plot_outline');
+        $this->synopsis = $this->optionalTitleAttribute($title, 'synopsis');
+        $this->tagline = $this->optionalTitleAttribute($title, 'tagline');
+        $this->meta_title = $this->optionalTitleAttribute($title, 'meta_title');
+        $this->meta_description = $this->optionalTitleAttribute($title, 'meta_description');
+        $this->search_keywords = $this->optionalTitleAttribute($title, 'search_keywords');
     }
 
     private function initializeDraftSeason(): void
     {
         $nextSeasonNumber = 1;
 
-        if ($this->title instanceof Title) {
+        if (! $this->isCatalogOnlyApplication() && $this->title instanceof Title) {
             $nextSeasonNumber = ((int) ($this->title->seasons()->max('season_number') ?? 0)) + 1;
         }
 
@@ -358,6 +363,26 @@ class TitlesPage extends Component
             'meta_description' => $this->meta_description,
             'search_keywords' => $this->search_keywords,
         ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function titlePreviewPayload(): array
+    {
+        return Arr::only($this->titlePayload(), (new Title)->getFillable());
+    }
+
+    /**
+     * @return list<int>
+     */
+    private function selectedGenreIds(): array
+    {
+        return collect(old('genre_ids', $this->genre_ids))
+            ->map(fn (mixed $genreId): int => (int) $genreId)
+            ->filter(fn (int $genreId): bool => $genreId > 0)
+            ->values()
+            ->all();
     }
 
     /**

@@ -1,5 +1,9 @@
 <div>
-@island(name: 'watchlist-browser-panel')
+@island(name: 'watchlist-browser-panel', defer: true)
+    @placeholder
+        @include('livewire.placeholders.account-watchlist-browser')
+    @endplaceholder
+
 <div class="space-y-4" data-slot="watchlist-browser-island">
     <x-ui.card class="!max-w-none">
         <div class="grid gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">

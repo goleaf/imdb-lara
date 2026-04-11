@@ -1,5 +1,9 @@
 <div>
-@island(name: 'person-filmography-panel')
+@island(name: 'person-filmography-panel', lazy: true)
+    @placeholder
+        @include('livewire.placeholders.filmography-panel')
+    @endplaceholder
+
 <div
     class="has-data-loading:[&_[data-slot=person-filmography-skeletons]]:block has-data-loading:[&_[data-slot=person-filmography-results]]:hidden"
     data-slot="person-filmography-island"

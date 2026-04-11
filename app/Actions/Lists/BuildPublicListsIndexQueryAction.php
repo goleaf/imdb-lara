@@ -6,6 +6,7 @@ use App\Enums\ListVisibility;
 use App\Models\Title;
 use App\Models\UserList;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Schema;
 
 class BuildPublicListsIndexQueryAction
 {
@@ -26,7 +27,13 @@ class BuildPublicListsIndexQueryAction
                 'created_at',
             ])
             ->custom()
-            ->where('visibility', ListVisibility::Public)
+            ->where('visibility', ListVisibility::Public);
+
+        if (! $this->catalogTitlesAreQueryable()) {
+            return $query->whereKey([]);
+        }
+
+        $query
             ->whereHas('items', fn (Builder $itemQuery) => $itemQuery
                 ->whereHas('title', fn (Builder $titleQuery) => $titleQuery->publishedCatalog()))
             ->withCount([
@@ -76,5 +83,18 @@ class BuildPublicListsIndexQueryAction
                 ->orderByDesc('updated_at')
                 ->orderByDesc('id'),
         };
+    }
+
+    private function catalogTitlesAreQueryable(): bool
+    {
+        if (! Title::usesCatalogOnlySchema()) {
+            return true;
+        }
+
+        $listConnection = (new UserList)->getConnectionName();
+        $title = new Title;
+
+        return $listConnection === $title->getConnectionName()
+            && Schema::connection($listConnection)->hasTable($title->getTable());
     }
 }

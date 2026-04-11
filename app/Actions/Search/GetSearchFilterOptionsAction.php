@@ -5,8 +5,10 @@ namespace App\Actions\Search;
 use App\Enums\CountryCode;
 use App\Enums\LanguageCode;
 use App\Enums\TitleType;
+use App\Models\Country;
 use App\Models\Genre;
 use App\Models\InterestCategory;
+use App\Models\Language;
 use App\Models\Title;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -34,34 +36,76 @@ class GetSearchFilterOptionsAction
             now()->addMinutes(10),
             function (): array {
                 $publishedTitles = Title::query()->published();
-                $minimumYear = (clone $publishedTitles)->whereNotNull('release_year')->min('release_year');
-                $maximumYear = (clone $publishedTitles)->whereNotNull('release_year')->max('release_year');
-                $countries = (clone $publishedTitles)
-                    ->whereNotNull('origin_country')
-                    ->pluck('origin_country')
-                    ->map(fn (string $countryCode): string => strtoupper(trim(strtok($countryCode, ','))))
-                    ->filter()
-                    ->unique()
-                    ->sort()
-                    ->map(fn (string $countryCode): array => [
-                        'value' => $countryCode,
-                        'label' => CountryCode::labelFor($countryCode) ?? $countryCode,
-                    ])
-                    ->values()
-                    ->all();
-                $languages = (clone $publishedTitles)
-                    ->whereNotNull('original_language')
-                    ->pluck('original_language')
-                    ->map(fn (string $languageCode): string => strtolower(trim($languageCode)))
-                    ->filter()
-                    ->unique()
-                    ->sort()
-                    ->map(fn (string $languageCode): array => [
-                        'value' => $languageCode,
-                        'label' => LanguageCode::labelFor($languageCode) ?? strtoupper($languageCode),
-                    ])
-                    ->values()
-                    ->all();
+
+                if (Title::usesCatalogOnlySchema()) {
+                    $minimumYear = (clone $publishedTitles)->whereNotNull('movies.startyear')->min('movies.startyear');
+                    $maximumYear = (clone $publishedTitles)->whereNotNull('movies.startyear')->max('movies.startyear');
+                    $countries = Country::query()
+                        ->whereHas('movies', function ($movieQuery): void {
+                            $movieQuery
+                                ->whereNotNull('movies.primarytitle')
+                                ->whereNotIn('movies.titletype', Title::remoteTypesForCatalogType(TitleType::Episode));
+                        })
+                        ->orderBy('name')
+                        ->get()
+                        ->map(fn (Country $country): array => [
+                            'value' => strtoupper((string) $country->code),
+                            'label' => $country->resolvedLabel(),
+                        ])
+                        ->unique('value')
+                        ->values()
+                        ->all();
+                    $languages = Language::query()
+                        ->whereHas('movies', function ($movieQuery): void {
+                            $movieQuery
+                                ->whereNotNull('movies.primarytitle')
+                                ->whereNotIn('movies.titletype', Title::remoteTypesForCatalogType(TitleType::Episode));
+                        })
+                        ->orderBy('name')
+                        ->get()
+                        ->map(fn (Language $language): array => [
+                            'value' => strtolower((string) $language->code),
+                            'label' => LanguageCode::labelFor((string) $language->code) ?? strtoupper((string) $language->code),
+                        ])
+                        ->unique('value')
+                        ->values()
+                        ->all();
+                    $interestCategories = InterestCategory::query()
+                        ->selectDirectoryColumns()
+                        ->withDirectoryMetrics()
+                        ->orderBy('interest_categories.name')
+                        ->get();
+                } else {
+                    $minimumYear = (clone $publishedTitles)->whereNotNull('release_year')->min('release_year');
+                    $maximumYear = (clone $publishedTitles)->whereNotNull('release_year')->max('release_year');
+                    $countries = (clone $publishedTitles)
+                        ->whereNotNull('origin_country')
+                        ->pluck('origin_country')
+                        ->map(fn (string $countryCode): string => strtoupper(trim(strtok($countryCode, ','))))
+                        ->filter()
+                        ->unique()
+                        ->sort()
+                        ->map(fn (string $countryCode): array => [
+                            'value' => $countryCode,
+                            'label' => CountryCode::labelFor($countryCode) ?? $countryCode,
+                        ])
+                        ->values()
+                        ->all();
+                    $languages = (clone $publishedTitles)
+                        ->whereNotNull('original_language')
+                        ->pluck('original_language')
+                        ->map(fn (string $languageCode): string => strtolower(trim($languageCode)))
+                        ->filter()
+                        ->unique()
+                        ->sort()
+                        ->map(fn (string $languageCode): array => [
+                            'value' => $languageCode,
+                            'label' => LanguageCode::labelFor($languageCode) ?? strtoupper($languageCode),
+                        ])
+                        ->values()
+                        ->all();
+                    $interestCategories = new Collection;
+                }
 
                 return [
                     'countries' => $countries,
@@ -69,7 +113,7 @@ class GetSearchFilterOptionsAction
                         ->select(['id', 'name'])
                         ->orderBy('name')
                         ->get(),
-                    'interestCategories' => new Collection,
+                    'interestCategories' => $interestCategories,
                     'languages' => $languages,
                     'runtimeOptions' => [
                         ['value' => 'under-30', 'label' => 'Under 30 min'],

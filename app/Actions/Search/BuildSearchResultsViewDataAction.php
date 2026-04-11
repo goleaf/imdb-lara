@@ -6,6 +6,7 @@ use App\Actions\Catalog\BuildPublicInterestCategoryIndexQueryAction;
 use App\Actions\Catalog\BuildPublicPeopleIndexQueryAction;
 use App\Models\Person;
 use App\Models\Title;
+use Throwable;
 
 class BuildSearchResultsViewDataAction
 {
@@ -66,12 +67,18 @@ class BuildSearchResultsViewDataAction
             ->withQueryString();
         $titleResults = collect($titles->items());
 
-        $people = mb_strlen($searchQuery) >= 2
-            ? $this->buildPublicPeopleIndexQuery->handle([
-                'search' => $searchQuery,
-                'sort' => 'popular',
-            ])->limit($resultsPerLane)->get()
-            : collect();
+        $people = collect();
+
+        if (mb_strlen($searchQuery) >= 2) {
+            try {
+                $people = $this->buildPublicPeopleIndexQuery->handle([
+                    'search' => $searchQuery,
+                    'sort' => 'popular',
+                ])->limit($resultsPerLane)->get();
+            } catch (Throwable $throwable) {
+                report($throwable);
+            }
+        }
         $interestCategories = mb_strlen($searchQuery) >= 2 && config('screenbase.catalog_only', false)
             ? $this->buildPublicInterestCategoryIndexQuery->handle([
                 'search' => $searchQuery,

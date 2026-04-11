@@ -71,7 +71,7 @@
 
                             <div class="space-y-3">
                                 @forelse ($person->professions as $profession)
-                                    <livewire:admin.person-profession-editor :person="$person" :profession="$profession" :key="'person-profession-'.$profession->id" />
+                                    <livewire:admin.person-profession-editor :person="$person" :profession-record="$profession" :key="'person-profession-'.$profession->id" />
                                 @empty
                                     <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
                                         <x-ui.empty.media>

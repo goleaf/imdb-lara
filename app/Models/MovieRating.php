@@ -39,4 +39,14 @@ class MovieRating extends ImdbModel
     {
         return $this->belongsTo(Title::class, 'movie_id', 'id');
     }
+
+    public function getAverageRatingAttribute(): ?float
+    {
+        return $this->aggregate_rating !== null ? (float) $this->aggregate_rating : null;
+    }
+
+    public function getRatingCountAttribute(): int
+    {
+        return (int) ($this->vote_count ?? 0);
+    }
 }

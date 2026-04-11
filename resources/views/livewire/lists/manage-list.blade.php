@@ -1,5 +1,9 @@
 <div>
-@island(name: 'manage-list-panel')
+@island(name: 'manage-list-panel', defer: true)
+    @placeholder
+        @include('livewire.placeholders.manage-list')
+    @endplaceholder
+
 <div class="space-y-4" data-slot="manage-list-island">
     <x-ui.card class="!max-w-none">
         <div class="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
@@ -178,8 +182,8 @@
         </x-ui.card>
     </div>
 
-    <div wire:loading.delay.attr="data-loading" wire:target="addTitle,moveItemUp,moveItemDown,removeTitle,sortItems" class="space-y-4">
-        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3 not-data-loading:hidden">
+    <div class="space-y-4 has-data-loading:[&_[data-slot=manage-list-items-skeletons]]:grid has-data-loading:[&_[data-slot=manage-list-items-results]]:hidden">
+        <div data-slot="manage-list-items-skeletons" class="hidden gap-4 md:grid-cols-2 xl:grid-cols-3">
             @foreach (range(1, 6) as $index)
                 <x-ui.card class="!max-w-none h-full overflow-hidden" wire:key="manage-list-skeleton-{{ $index }}">
                     <div class="space-y-4">
@@ -192,7 +196,7 @@
             @endforeach
         </div>
 
-        <div class="space-y-4 in-data-loading:hidden">
+        <div class="space-y-4" data-slot="manage-list-items-results">
             <div class="flex items-center justify-between gap-4">
                 <div class="space-y-1">
                     <x-ui.heading level="h2" size="lg">List items</x-ui.heading>

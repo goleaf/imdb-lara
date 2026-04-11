@@ -122,6 +122,7 @@ class SaveMediaAssetAction
         $attributes['provider'] = 'upload';
         $attributes['provider_key'] = $path;
         $attributes['metadata'] = $this->mergeMetadata(
+            $attributes['metadata'],
             [
                 'storage' => [
                     'disk' => $disk,
@@ -133,15 +134,13 @@ class SaveMediaAssetAction
                     'extension' => Str::lower($uploadedFile->getClientOriginalExtension()),
                 ],
             ],
-            $attributes['metadata'],
         );
 
-        $realPath = $uploadedFile->getRealPath();
-        $dimensions = $realPath ? getimagesize($realPath) : false;
+        $imageDimensions = $this->imageDimensions($disk, $path, $uploadedFile->getClientMimeType());
 
-        if (is_array($dimensions)) {
-            $attributes['width'] = (int) ($dimensions[0] ?? $attributes['width'] ?? 0);
-            $attributes['height'] = (int) ($dimensions[1] ?? $attributes['height'] ?? 0);
+        if (is_array($imageDimensions)) {
+            $attributes['width'] = (int) ($imageDimensions[0] ?? $attributes['width'] ?? 0);
+            $attributes['height'] = (int) ($imageDimensions[1] ?? $attributes['height'] ?? 0);
         }
 
         return $attributes;
@@ -156,8 +155,10 @@ class SaveMediaAssetAction
         MediaKind $kind,
     ): array {
         $disk = 'public';
-        $path = $uploadedFile->storePublicly(
+        $extension = Str::lower($uploadedFile->getClientOriginalExtension() ?: $uploadedFile->extension() ?: 'bin');
+        $path = $uploadedFile->storePubliclyAs(
             $this->storageDirectory($mediable, $kind),
+            (string) Str::ulid().'.'.$extension,
             $disk,
         );
 
@@ -178,6 +179,28 @@ class SaveMediaAssetAction
         }
 
         return sprintf('media/%s/%s/%s', $mediableSegment, $identifier, $kind->value);
+    }
+
+    /**
+     * @return array<int, int>|null
+     */
+    private function imageDimensions(string $disk, string $path, ?string $mimeType): ?array
+    {
+        if (! is_string($mimeType) || ! str_starts_with($mimeType, 'image/')) {
+            return null;
+        }
+
+        $contents = Storage::disk($disk)->get($path);
+        $dimensions = $contents !== '' ? getimagesizefromstring($contents) : false;
+
+        if (! is_array($dimensions)) {
+            return null;
+        }
+
+        return [
+            (int) ($dimensions[0] ?? 0),
+            (int) ($dimensions[1] ?? 0),
+        ];
     }
 
     /**

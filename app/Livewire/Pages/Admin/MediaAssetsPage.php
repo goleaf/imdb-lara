@@ -10,6 +10,7 @@ use App\Livewire\Pages\Admin\Concerns\ValidatesFormRequests;
 use App\Livewire\Pages\Concerns\RendersPageView;
 use App\Models\MediaAsset;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Arr;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -74,7 +75,7 @@ class MediaAssetsPage extends Component
         abort_unless($this->mediaAsset instanceof MediaAsset, 404);
 
         $loadedMediaAsset = $this->mediaAsset->load('mediable');
-        $loadedMediaAsset->fill($this->mediaAssetPayload());
+        $loadedMediaAsset->fill(Arr::except($this->mediaAssetPayload(), ['file']));
 
         if ($this->isCatalogOnlyApplication()) {
             return $this->renderPageView('admin.media-assets.edit', [
@@ -125,7 +126,7 @@ class MediaAssetsPage extends Component
     {
         $this->kind = (string) ($mediaAsset->kind?->value ?? 'poster');
         $this->file = null;
-        $this->url = $mediaAsset->url;
+        $this->url = $mediaAsset->isUploadBacked() ? null : $mediaAsset->url;
         $this->alt_text = $mediaAsset->alt_text;
         $this->caption = $mediaAsset->caption;
         $this->width = $mediaAsset->width;

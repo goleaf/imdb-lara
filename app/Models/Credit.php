@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Str;
 
 class Credit extends Model
@@ -53,6 +54,8 @@ class Credit extends Model
         return [
             'title_id' => 'integer',
             'person_id' => 'integer',
+            'name_basic_id' => 'integer',
+            'movie_id' => 'integer',
             'billing_order' => 'integer',
             'is_principal' => 'boolean',
             'person_profession_id' => 'integer',
@@ -61,14 +64,35 @@ class Credit extends Model
         ];
     }
 
+    public function newQuery(): Builder
+    {
+        $query = parent::newQuery();
+
+        if (Person::usesCatalogOnlySchema()) {
+            $query->withoutGlobalScope(SoftDeletingScope::class);
+        }
+
+        return $query;
+    }
+
+    public function getTable(): string
+    {
+        return Person::usesCatalogOnlySchema() ? 'name_credits' : parent::getTable();
+    }
+
+    public function getConnectionName(): ?string
+    {
+        return Person::usesCatalogOnlySchema() ? 'imdb_mysql' : parent::getConnectionName();
+    }
+
     public function title(): BelongsTo
     {
-        return $this->belongsTo(Title::class);
+        return $this->belongsTo(Title::class, Person::usesCatalogOnlySchema() ? 'movie_id' : 'title_id');
     }
 
     public function person(): BelongsTo
     {
-        return $this->belongsTo(Person::class);
+        return $this->belongsTo(Person::class, Person::usesCatalogOnlySchema() ? 'name_basic_id' : 'person_id');
     }
 
     public function profession(): BelongsTo
@@ -83,6 +107,12 @@ class Credit extends Model
 
     public function scopeOrdered(Builder $query): Builder
     {
+        if (Person::usesCatalogOnlySchema()) {
+            return $query
+                ->orderBy('name_credits.position')
+                ->orderBy('name_credits.id');
+        }
+
         return $query
             ->orderBy('credits.billing_order')
             ->orderBy('credits.id');
@@ -90,11 +120,19 @@ class Credit extends Model
 
     public function scopeCast(Builder $query): Builder
     {
+        if (Person::usesCatalogOnlySchema()) {
+            return $query->whereIn('name_credits.category', self::CAST_CATEGORIES);
+        }
+
         return $query->where('credits.department', 'Cast');
     }
 
     public function scopeCrew(Builder $query): Builder
     {
+        if (Person::usesCatalogOnlySchema()) {
+            return $query->whereNotIn('name_credits.category', self::CAST_CATEGORIES);
+        }
+
         return $query->where('credits.department', '!=', 'Cast');
     }
 
@@ -110,16 +148,20 @@ class Credit extends Model
 
     public function getMovieIdAttribute(): int
     {
-        return (int) $this->title_id;
+        return (int) ($this->attributes['movie_id'] ?? $this->attributes['title_id'] ?? 0);
     }
 
     public function getNameBasicIdAttribute(): int
     {
-        return (int) $this->person_id;
+        return (int) ($this->attributes['name_basic_id'] ?? $this->attributes['person_id'] ?? 0);
     }
 
     public function getCategoryAttribute(): string
     {
+        if (filled($this->attributes['category'] ?? null)) {
+            return (string) $this->attributes['category'];
+        }
+
         if (filled($this->imdb_source_group)) {
             return (string) $this->imdb_source_group;
         }

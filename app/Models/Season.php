@@ -66,7 +66,7 @@ class Season extends Model
             $seasonQuery->where('slug', (string) $value);
 
             if (is_numeric($value)) {
-                $seasonQuery->orWhereKey((int) $value);
+                $seasonQuery->orWhere($this->qualifyColumn($this->getKeyName()), (int) $value);
             }
         });
     }

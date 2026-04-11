@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Str;
 
@@ -106,11 +107,78 @@ class Title extends Model
         });
     }
 
+    public function newQuery(): Builder
+    {
+        $query = parent::newQuery();
+
+        if (static::usesCatalogOnlySchema()) {
+            $query->withoutGlobalScope(SoftDeletingScope::class);
+        }
+
+        return $query;
+    }
+
+    public function getTable(): string
+    {
+        return static::usesCatalogOnlySchema() ? 'movies' : parent::getTable();
+    }
+
+    public function getConnectionName(): ?string
+    {
+        return static::usesCatalogOnlySchema() ? 'imdb_mysql' : parent::getConnectionName();
+    }
+
+    public static function usesCatalogOnlySchema(): bool
+    {
+        return (bool) config('screenbase.catalog_only', false);
+    }
+
+    public static function catalogTable(): string
+    {
+        return static::usesCatalogOnlySchema() ? 'movies' : 'titles';
+    }
+
+    public static function catalogColumn(string $localColumn): string
+    {
+        if (! static::usesCatalogOnlySchema()) {
+            return 'titles.'.$localColumn;
+        }
+
+        return match ($localColumn) {
+            'name' => 'movies.primarytitle',
+            'original_name' => 'movies.originaltitle',
+            'title_type' => 'movies.titletype',
+            'release_year' => 'movies.startyear',
+            'end_year' => 'movies.endyear',
+            'runtime_minutes' => 'movies.runtimeminutes',
+            'runtime_seconds' => 'movies.runtimeSeconds',
+            'sort_title' => 'movies.primarytitle',
+            default => 'movies.'.$localColumn,
+        };
+    }
+
     /**
      * @return list<string>
      */
     public static function catalogCardColumns(): array
     {
+        if (static::usesCatalogOnlySchema()) {
+            return [
+                'movies.id',
+                'movies.tconst',
+                'movies.imdb_id',
+                'movies.primarytitle',
+                'movies.originaltitle',
+                'movies.titletype',
+                'movies.isadult',
+                'movies.startyear',
+                'movies.endyear',
+                'movies.runtimeminutes',
+                'movies.title_type_id',
+                'movies.runtimeSeconds',
+            ];
+        }
+
         return [
             'titles.id',
             'titles.imdb_id',
@@ -138,6 +206,14 @@ class Title extends Model
      */
     public static function catalogHeroRelations(): array
     {
+        if (static::usesCatalogOnlySchema()) {
+            return [
+                'statistic:movie_id,aggregate_rating,vote_count',
+                'moviePrimaryImage:movie_id,url,width,height,type',
+                'plotRecord:movie_id,plot',
+            ];
+        }
+
         return [
             'statistic:id,title_id,rating_count,average_rating,review_count,watchlist_count,episodes_count,awards_nominated_count,awards_won_count,metacritic_score,metacritic_review_count',
             'mediaAssets' => fn ($query) => $query
@@ -169,6 +245,13 @@ class Title extends Model
      */
     public static function catalogCardRelations(): array
     {
+        if (static::usesCatalogOnlySchema()) {
+            return [
+                ...self::catalogHeroRelations(),
+                'genres:id,name',
+            ];
+        }
+
         return [
             ...self::catalogHeroRelations(),
             'genres:id,name,slug',
@@ -188,6 +271,13 @@ class Title extends Model
      */
     public static function catalogMediaRelations(): array
     {
+        if (static::usesCatalogOnlySchema()) {
+            return [
+                ...self::catalogCardRelations(),
+                'movieImages:id,movie_id,position,url,width,height,type',
+            ];
+        }
+
         return self::catalogCardRelations();
     }
 
@@ -298,11 +388,35 @@ class Title extends Model
             return $query->where($field, $value);
         }
 
+        if (static::usesCatalogOnlySchema()) {
+            return $query->where(function (Builder $titleQuery) use ($value): void {
+                if (is_numeric($value)) {
+                    $titleQuery->orWhere($this->qualifyColumn($this->getKeyName()), (int) $value);
+                }
+
+                if (! is_string($value) || $value === '') {
+                    return;
+                }
+
+                $titleQuery
+                    ->orWhere('imdb_id', $value)
+                    ->orWhere('tconst', $value);
+
+                if (preg_match('/(?P<imdb_id>tt\d+)$/i', $value, $matches) === 1) {
+                    $imdbId = Str::lower((string) $matches['imdb_id']);
+
+                    $titleQuery
+                        ->orWhere('imdb_id', $imdbId)
+                        ->orWhere('tconst', $imdbId);
+                }
+            });
+        }
+
         return $query->where(function (Builder $titleQuery) use ($value): void {
             $titleQuery->where('slug', (string) $value);
 
             if (is_numeric($value)) {
-                $titleQuery->orWhereKey((int) $value);
+                $titleQuery->orWhere($this->qualifyColumn($this->getKeyName()), (int) $value);
             }
 
             if (is_string($value) && $value !== '') {
@@ -315,11 +429,22 @@ class Title extends Model
 
     public function scopePublished(Builder $query): Builder
     {
+        if (static::usesCatalogOnlySchema()) {
+            return $query->whereNotNull('movies.primarytitle');
+        }
+
         return $query->where('titles.is_published', true);
     }
 
     public function scopeWithoutEpisodes(Builder $query): Builder
     {
+        if (static::usesCatalogOnlySchema()) {
+            return $query->whereNotIn(
+                'movies.titletype',
+                self::remoteTypesForCatalogType(TitleType::Episode),
+            );
+        }
+
         return $query->where('titles.title_type', '!=', TitleType::Episode->value);
     }
 
@@ -337,7 +462,17 @@ class Title extends Model
         }
 
         if (preg_match('/^tt\d+$/i', $search) === 1) {
-            return $query->where('titles.imdb_id', $search);
+            return $query->where(static::catalogColumn('imdb_id'), Str::lower($search));
+        }
+
+        if (static::usesCatalogOnlySchema()) {
+            return $query->where(function (Builder $titleQuery) use ($search): void {
+                $titleQuery
+                    ->where('movies.primarytitle', 'like', '%'.$search.'%')
+                    ->orWhere('movies.originaltitle', 'like', '%'.$search.'%')
+                    ->orWhere('movies.imdb_id', 'like', '%'.$search.'%')
+                    ->orWhere('movies.tconst', 'like', '%'.$search.'%');
+            });
         }
 
         return $query->where(function (Builder $titleQuery) use ($search): void {
@@ -361,10 +496,20 @@ class Title extends Model
         }
 
         if (preg_match('/^tt\d+$/i', $search) === 1) {
-            return $query->where('titles.imdb_id', $search);
+            return $query->where(static::catalogColumn('imdb_id'), Str::lower($search));
         }
 
         $prefixSearch = $search.'%';
+
+        if (static::usesCatalogOnlySchema()) {
+            return $query->where(function (Builder $titleQuery) use ($search, $prefixSearch): void {
+                $titleQuery
+                    ->where('movies.primarytitle', $search)
+                    ->orWhere('movies.originaltitle', $search)
+                    ->orWhere('movies.primarytitle', 'like', $prefixSearch)
+                    ->orWhere('movies.originaltitle', 'like', $prefixSearch);
+            });
+        }
 
         return $query->where(function (Builder $titleQuery) use ($search, $prefixSearch): void {
             $titleQuery
@@ -377,6 +522,10 @@ class Title extends Model
 
     public function scopeForType(Builder $query, TitleType $type): Builder
     {
+        if (static::usesCatalogOnlySchema()) {
+            return $query->whereIn('movies.titletype', self::remoteTypesForCatalogType($type));
+        }
+
         return $query->where('titles.title_type', $type->value);
     }
 
@@ -384,12 +533,34 @@ class Title extends Model
     {
         return $query->whereHas(
             'statistic',
-            fn (Builder $statisticQuery) => $statisticQuery->where('rating_count', '>=', $minimumVotes),
+            fn (Builder $statisticQuery) => $statisticQuery->where(
+                static::usesCatalogOnlySchema() ? 'vote_count' : 'rating_count',
+                '>=',
+                $minimumVotes,
+            ),
         );
     }
 
     public function scopeOrderByTopRated(Builder $query, int $minimumVotes = 1): Builder
     {
+        if (static::usesCatalogOnlySchema()) {
+            return $query
+                ->ratedAtLeast($minimumVotes)
+                ->addSelect([
+                    'average_rating_sort' => MovieRating::query()
+                        ->select('aggregate_rating')
+                        ->whereColumn('movie_ratings.movie_id', 'movies.id')
+                        ->limit(1),
+                    'rating_count_sort' => MovieRating::query()
+                        ->select('vote_count')
+                        ->whereColumn('movie_ratings.movie_id', 'movies.id')
+                        ->limit(1),
+                ])
+                ->orderByDesc('average_rating_sort')
+                ->orderByDesc('rating_count_sort')
+                ->orderBy('movies.primarytitle');
+        }
+
         return $query
             ->ratedAtLeast($minimumVotes)
             ->addSelect([
@@ -410,6 +581,19 @@ class Title extends Model
 
     public function scopeOrderByTrending(Builder $query): Builder
     {
+        if (static::usesCatalogOnlySchema()) {
+            return $query
+                ->addSelect([
+                    'rating_count_sort' => MovieRating::query()
+                        ->select('vote_count')
+                        ->whereColumn('movie_ratings.movie_id', 'movies.id')
+                        ->limit(1),
+                ])
+                ->orderByDesc('rating_count_sort')
+                ->orderByDesc('movies.startyear')
+                ->orderBy('movies.primarytitle');
+        }
+
         return $query
             ->addSelect([
                 'rating_count_sort' => TitleStatistic::query()
@@ -478,11 +662,11 @@ class Title extends Model
     public function scopeReleasedBetweenYears(Builder $query, ?int $yearFrom = null, ?int $yearTo = null): Builder
     {
         if ($yearFrom !== null) {
-            $query->where('titles.release_year', '>=', $yearFrom);
+            $query->where(static::catalogColumn('release_year'), '>=', $yearFrom);
         }
 
         if ($yearTo !== null) {
-            $query->where('titles.release_year', '<=', $yearTo);
+            $query->where(static::catalogColumn('release_year'), '<=', $yearTo);
         }
 
         return $query;
@@ -491,6 +675,13 @@ class Title extends Model
     public function scopeProducedInCountry(Builder $query, string $countryCode): Builder
     {
         $countryCode = strtoupper($countryCode);
+
+        if (static::usesCatalogOnlySchema()) {
+            return $query->whereHas(
+                'countries',
+                fn (Builder $countryQuery) => $countryQuery->where('countries.code', $countryCode),
+            );
+        }
 
         return $query->where(function (Builder $countryQuery) use ($countryCode): void {
             $countryQuery
@@ -504,6 +695,12 @@ class Title extends Model
         $normalizedCode = Str::lower($languageCode);
         $upperCode = Str::upper($languageCode);
 
+        if (static::usesCatalogOnlySchema()) {
+            return $query->whereHas('languages', function (Builder $languageQuery) use ($normalizedCode, $upperCode): void {
+                $languageQuery->whereIn('languages.code', [$normalizedCode, $upperCode]);
+            });
+        }
+
         return $query->where(function (Builder $languageQuery) use ($normalizedCode, $upperCode): void {
             $languageQuery
                 ->where('titles.original_language', $normalizedCode)
@@ -514,18 +711,30 @@ class Title extends Model
 
     public function scopeWithinRuntimeBucket(Builder $query, string $runtime): Builder
     {
+        $runtimeColumn = static::catalogColumn('runtime_minutes');
+
         return match ($runtime) {
-            'under-30' => $query->whereNotNull('titles.runtime_minutes')->where('titles.runtime_minutes', '<', 30),
-            '30-60' => $query->whereBetween('titles.runtime_minutes', [30, 60]),
-            '60-90' => $query->whereBetween('titles.runtime_minutes', [60, 90]),
-            '90-120' => $query->whereBetween('titles.runtime_minutes', [90, 120]),
-            '120-plus' => $query->where('titles.runtime_minutes', '>=', 120),
+            'under-30' => $query->whereNotNull($runtimeColumn)->where($runtimeColumn, '<', 30),
+            '30-60' => $query->whereBetween($runtimeColumn, [30, 60]),
+            '60-90' => $query->whereBetween($runtimeColumn, [60, 90]),
+            '90-120' => $query->whereBetween($runtimeColumn, [90, 120]),
+            '120-plus' => $query->where($runtimeColumn, '>=', 120),
             default => $query,
         };
     }
 
     public function scopeForInterestCategory(Builder $query, InterestCategory|int $interestCategory): Builder
     {
+        if (static::usesCatalogOnlySchema()) {
+            $interestCategoryId = $interestCategory instanceof InterestCategory
+                ? (int) $interestCategory->getKey()
+                : $interestCategory;
+
+            return $query->whereHas('interests.interestCategories', function (Builder $interestCategoryQuery) use ($interestCategoryId): void {
+                $interestCategoryQuery->where('interest_categories.id', $interestCategoryId);
+            });
+        }
+
         return $query;
     }
 
@@ -541,6 +750,11 @@ class Title extends Model
 
     public function genres(): BelongsToMany
     {
+        if (static::usesCatalogOnlySchema()) {
+            return $this->belongsToMany(Genre::class, 'movie_genres', 'movie_id', 'genre_id', 'id', 'id')
+                ->orderBy('genres.name');
+        }
+
         return $this->belongsToMany(Genre::class)
             ->withTimestamps()
             ->orderBy('genres.name');
@@ -548,7 +762,43 @@ class Title extends Model
 
     public function statistic(): HasOne
     {
+        if (static::usesCatalogOnlySchema()) {
+            return $this->hasOne(MovieRating::class, 'movie_id', 'id');
+        }
+
         return $this->hasOne(TitleStatistic::class);
+    }
+
+    public function plotRecord(): HasOne
+    {
+        return $this->hasOne(MoviePlot::class, 'movie_id', 'id');
+    }
+
+    public function moviePrimaryImage(): HasOne
+    {
+        return $this->hasOne(MoviePrimaryImage::class, 'movie_id', 'id');
+    }
+
+    public function movieImages(): HasMany
+    {
+        return $this->hasMany(MovieImage::class, 'movie_id', 'id')
+            ->orderBy('position')
+            ->orderBy('id');
+    }
+
+    public function interests(): BelongsToMany
+    {
+        return $this->belongsToMany(Interest::class, 'movie_interests', 'movie_id', 'interest_imdb_id', 'id', 'imdb_id');
+    }
+
+    public function countries(): BelongsToMany
+    {
+        return $this->belongsToMany(Country::class, 'movie_origin_countries', 'movie_id', 'country_code', 'id', 'code');
+    }
+
+    public function languages(): BelongsToMany
+    {
+        return $this->belongsToMany(Language::class, 'movie_spoken_languages', 'movie_id', 'language_code', 'id', 'code');
     }
 
     public function credits(): HasMany
@@ -683,8 +933,10 @@ class Title extends Model
             return null;
         }
 
-        return $this->statistic?->average_rating !== null
-            ? (float) $this->statistic->average_rating
+        $rating = $this->statistic?->average_rating ?? $this->statistic?->aggregate_rating;
+
+        return $rating !== null
+            ? (float) $rating
             : null;
     }
 
@@ -694,7 +946,7 @@ class Title extends Model
             return 0;
         }
 
-        return (int) ($this->statistic?->rating_count ?? 0);
+        return (int) ($this->statistic?->rating_count ?? $this->statistic?->vote_count ?? 0);
     }
 
     public function displayReviewCount(): int
@@ -708,11 +960,13 @@ class Title extends Model
 
     public function originCountryCode(): ?string
     {
-        if (! filled($this->origin_country)) {
+        $originCountry = $this->attributes['origin_country'] ?? null;
+
+        if (! filled($originCountry)) {
             return null;
         }
 
-        return Str::of((string) $this->origin_country)
+        return Str::of((string) $originCountry)
             ->before(',')
             ->trim()
             ->upper()
@@ -726,12 +980,26 @@ class Title extends Model
 
     public function originalLanguageLabel(): ?string
     {
-        return LanguageCode::labelFor($this->original_language);
+        $language = $this->attributes['original_language'] ?? null;
+
+        return filled($language) ? LanguageCode::labelFor((string) $language) : null;
     }
 
     public function summaryText(): ?string
     {
-        $summary = $this->tagline ?: $this->synopsis ?: $this->plot_outline;
+        $summary = $this->attributes['tagline'] ?? null;
+
+        if (! filled($summary)) {
+            $summary = $this->attributes['synopsis'] ?? null;
+        }
+
+        if (! filled($summary)) {
+            $summary = $this->attributes['plot_outline'] ?? null;
+        }
+
+        if (! filled($summary) && $this->relationLoaded('plotRecord')) {
+            $summary = $this->plotRecord?->plot;
+        }
 
         return filled($summary) ? (string) $summary : null;
     }
@@ -1277,13 +1545,60 @@ class Title extends Model
      */
     private function allMediaAssets(): SupportCollection
     {
-        if (! $this->relationLoaded('mediaAssets')) {
-            return collect();
+        $assets = collect();
+
+        if ($this->relationLoaded('mediaAssets')) {
+            $assets = $assets->merge($this->mediaAssets
+                ->filter(fn (mixed $asset): bool => $asset instanceof MediaAsset)
+                ->map(function (MediaAsset $mediaAsset): CatalogMediaAsset {
+                    return CatalogMediaAsset::fromCatalog([
+                        'kind' => $mediaAsset->kind,
+                        'url' => $mediaAsset->url,
+                        'alt_text' => $mediaAsset->alt_text,
+                        'caption' => $mediaAsset->caption,
+                        'width' => $mediaAsset->width,
+                        'height' => $mediaAsset->height,
+                        'duration_seconds' => $mediaAsset->duration_seconds,
+                        'is_primary' => $mediaAsset->is_primary,
+                        'position' => $mediaAsset->position,
+                        'metadata' => $mediaAsset->metadata,
+                    ]);
+                }));
         }
 
-        return $this->mediaAssets
-            ->filter(fn (mixed $asset): bool => $asset instanceof MediaAsset)
-            ->map(function (MediaAsset $mediaAsset): CatalogMediaAsset {
+        if ($this->relationLoaded('moviePrimaryImage') && $this->moviePrimaryImage instanceof MoviePrimaryImage && filled($this->moviePrimaryImage->url)) {
+            $assets->push(CatalogMediaAsset::fromCatalog([
+                'kind' => MediaKind::tryFrom((string) $this->moviePrimaryImage->type) ?? MediaKind::Poster,
+                'url' => $this->moviePrimaryImage->url,
+                'alt_text' => $this->name,
+                'width' => $this->moviePrimaryImage->width,
+                'height' => $this->moviePrimaryImage->height,
+                'is_primary' => true,
+                'position' => 0,
+            ]));
+        }
+
+        if ($this->relationLoaded('movieImages')) {
+            $assets = $assets->merge($this->movieImages
+                ->filter(fn (mixed $image): bool => $image instanceof MovieImage && filled($image->url))
+                ->map(function (MovieImage $movieImage): CatalogMediaAsset {
+                    return CatalogMediaAsset::fromCatalog([
+                        'kind' => MediaKind::tryFrom((string) $movieImage->type) ?? MediaKind::Gallery,
+                        'url' => $movieImage->url,
+                        'alt_text' => $this->name,
+                        'width' => $movieImage->width,
+                        'height' => $movieImage->height,
+                        'is_primary' => false,
+                        'position' => $movieImage->position,
+                    ]);
+                }));
+        }
+
+        return $assets
+            ->filter(fn (mixed $asset): bool => $asset instanceof CatalogMediaAsset)
+            ->unique('url')
+            ->values()
+            ->map(function (CatalogMediaAsset $mediaAsset): CatalogMediaAsset {
                 return CatalogMediaAsset::fromCatalog([
                     'kind' => $mediaAsset->kind,
                     'url' => $mediaAsset->url,

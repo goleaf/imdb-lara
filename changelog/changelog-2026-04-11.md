@@ -1,435 +1,71 @@
-## 🗓️ 2026-04-11 — Livewire Page Split and Catalog Cleanup
+## 🗓️ 2026-04-11 — Catalog-Only Admin and Search Tightening
 
 Hey! Here is what changed today in this project:
 
 ### What's New
-The admin browser now has dedicated Livewire page classes for title, person, genre, media asset, season, episode, login, register, and public browse surfaces instead of funneling everything through a few shared route targets. That makes each URL easier to reason about, and it gives the project room to grow page-specific behavior without overloading one giant component. The auth pages also picked up a reusable member entry card so sign-in and sign-up share the same shell without duplicating markup.
+The admin write flows now lean fully on Livewire pages and cards instead of a parallel set of POST, PATCH, and DELETE controller endpoints. That means titles, people, credits, seasons, episodes, media assets, and moderation actions all behave through the same page components the team is already using in the browser. Search also became more context-aware, so global suggestions can now inherit the filters a visitor is already using on the discovery screen. The shared Screenbase brand block also became more reusable, which lets auth pages and shell layouts share the same branded header structure instead of duplicating markup.
 
 ### What Was Improved
-The admin editing flows now keep much more of their form state inside Livewire components, while still reusing Laravel form requests for validation and authorization. Title and person detail loaders were hardened so optional imported metadata can disappear without taking the page down, and the person filmography panel now sends cleaner labels and counts to the view. The test suite was also reshaped around lightweight catalog fixtures and mocked loaders, which cuts down on test setup noise and makes the route and page contracts much clearer.
+The catalog-only mode is much safer now because the title, person, credit, genre, and filter queries understand the remote IMDb-shaped tables directly instead of assuming the local app schema is always present. Media uploads now keep cleaner metadata, get stable ULID-based filenames, and read image dimensions back from the stored file instead of the temp upload. Several heavier Livewire components were also reshaped around computed view data, which keeps rendering logic more predictable and easier to test.
 
 ### What Was Removed or Cleaned Up
-A very large batch of checked-in manual IMDb import snapshots was removed from `storage/framework/manual-imdb-import`, along with the stale testing placeholder file in `storage/framework/testing`. That cleanup trims a lot of bulky generated data out of version control and keeps the repository focused on source code and intentional fixtures instead of one-off import artifacts.
+The old admin mutation controllers and their companion HTTP mutation routes were removed, because they were duplicating behavior that now lives inside Livewire pages and moderation cards. The test suite was cleaned up around that same shift, so route assertions now explicitly prove those browser-facing mutation routes are gone. A few catalog-only preview paths were also cleaned up to avoid trying to hydrate missing optional attributes from remote records.
 
 ### Files That Changed
-- `app/Actions/Catalog/LoadPersonDetailsAction.php` — fixed principal-credit ranking to look up a person's credits by title_id instead of the wrong movie_id field
-- `app/Actions/Catalog/LoadTitleDetailsAction.php` — made title detail payload building more defensive so missing optional archive rows no longer break genre or detail rendering
-- `app/Livewire/Admin/PersonProfessionEditor.php` — added a dedicated Livewire editor for creating, updating, and deleting person professions inside the admin people screen
-- `app/Livewire/Pages/Admin/Concerns/ValidatesFormRequests.php` — added a reusable helper that lets Livewire admin pages run existing Laravel form requests for validation and authorization
-- `app/Livewire/Pages/Admin/CreditsPage.php` — moved credit create, update, and delete flows into Livewire state with form-request validation and URL-driven title and person preselection
-- `app/Livewire/Pages/Admin/EpisodesPage.php` — moved episode editing and deletion into Livewire state so season data and public links stay in sync without separate controller posts
-- `app/Livewire/Pages/Admin/GenreCreatePage.php` — added a dedicated Livewire page class so this route has its own focused component instead of sharing one overloaded page
-- `app/Livewire/Pages/Admin/GenreEditPage.php` — added a dedicated Livewire page class so this route has its own focused component instead of sharing one overloaded page
-- `app/Livewire/Pages/Admin/GenresIndexPage.php` — added a dedicated Livewire page class so this route has its own focused component instead of sharing one overloaded page
-- `app/Livewire/Pages/Admin/GenresPage.php` — moved genre create, update, and delete behavior into the Livewire page and kept the form state inside the component
-- `app/Livewire/Pages/Admin/MediaAssetEditPage.php` — added a dedicated Livewire page class so this route has its own focused component instead of sharing one overloaded page
-- `app/Livewire/Pages/Admin/MediaAssetsIndexPage.php` — added a dedicated Livewire page class so this route has its own focused component instead of sharing one overloaded page
-- `app/Livewire/Pages/Admin/MediaAssetsPage.php` — moved media asset update and delete behavior into Livewire with typed form state instead of separate controller requests
-- `app/Livewire/Pages/Admin/PeopleIndexPage.php` — added a dedicated Livewire page class so this route has its own focused component instead of sharing one overloaded page
-- `app/Livewire/Pages/Admin/PeoplePage.php` — moved person editing, deletion, and draft media uploads into Livewire and refreshed profession lists after inline edits
-- `app/Livewire/Pages/Admin/PersonCreatePage.php` — added a dedicated Livewire page class so this route has its own focused component instead of sharing one overloaded page
-- `app/Livewire/Pages/Admin/PersonEditPage.php` — added a dedicated Livewire page class so this route has its own focused component instead of sharing one overloaded page
-- `app/Livewire/Pages/Admin/SeasonsPage.php` — moved season editing, season deletion, and draft episode creation into Livewire so TV hierarchy changes stay on one screen
-- `app/Livewire/Pages/Admin/TitleCreatePage.php` — added a dedicated Livewire page class so this route has its own focused component instead of sharing one overloaded page
-- `app/Livewire/Pages/Admin/TitleEditPage.php` — added a dedicated Livewire page class so this route has its own focused component instead of sharing one overloaded page
-- `app/Livewire/Pages/Admin/TitlesIndexPage.php` — added a dedicated Livewire page class so this route has its own focused component instead of sharing one overloaded page
-- `app/Livewire/Pages/Admin/TitlesPage.php` — moved title editing, deletion, draft season creation, and draft media uploads into Livewire with component-backed form state
-- `app/Livewire/Pages/Auth/AuthPage.php` — turned the shared auth page into an abstract base class for dedicated login and register screens
-- `app/Livewire/Pages/Auth/LoginPage.php` — added a dedicated auth page component so login and registration each render from their own Livewire route target
-- `app/Livewire/Pages/Auth/RegisterPage.php` — added a dedicated auth page component so login and registration each render from their own Livewire route target
-- `app/Livewire/Pages/Public/GenreBrowsePage.php` — added a dedicated public browse page class so each catalog URL resolves to a specific Livewire surface
-- `app/Livewire/Pages/Public/MoviesBrowsePage.php` — added a dedicated public browse page class so each catalog URL resolves to a specific Livewire surface
-- `app/Livewire/Pages/Public/SeriesBrowsePage.php` — added a dedicated public browse page class so each catalog URL resolves to a specific Livewire surface
-- `app/Livewire/Pages/Public/TitlesBrowsePage.php` — added a dedicated public browse page class so each catalog URL resolves to a specific Livewire surface
-- `app/Livewire/Pages/Public/TopRatedMoviesPage.php` — added a dedicated public browse page class so each catalog URL resolves to a specific Livewire surface
-- `app/Livewire/Pages/Public/TopRatedSeriesPage.php` — added a dedicated public browse page class so each catalog URL resolves to a specific Livewire surface
-- `app/Livewire/Pages/Public/TrendingPage.php` — added a dedicated public browse page class so each catalog URL resolves to a specific Livewire surface
-- `app/Livewire/Pages/Public/YearBrowsePage.php` — added a dedicated public browse page class so each catalog URL resolves to a specific Livewire surface
-- `app/Livewire/People/FilmographyPanel.php` — reworked the filmography panel data so counts, group summaries, and combobox options arrive preformatted for the view
-- `app/Livewire/Reviews/TitleReviewList.php` — updated this file as part of the Livewire route split, UI cleanup, test rewrite, or repository cleanup in this change set
-- `app/Livewire/Seasons/WatchProgressPanel.php` — updated this file as part of the Livewire route split, UI cleanup, test rewrite, or repository cleanup in this change set
-- `app/Models/Person.php` — stopped eager-loading award nomination data in the person detail relation bundle to keep payloads leaner
-- `app/Models/Title.php` — added safe fallback collection resolvers for optional imported title metadata so pages can render even when archive tables are empty
-- `config/database.php` — made imdb_mysql the default database connection and pointed the app at the real catalog source first
-- `config/screenbase.php` — enabled the shell shortcut toggles by default so admin, auth, and watchlist links appear in the shared portal header
-- `resources/views/admin/credits/_form.blade.php` — bound the credit form inputs to Livewire state so inline validation and saves run through the page component
-- `resources/views/admin/credits/create.blade.php` — switched the credit screen from traditional form posts to Livewire actions for save and delete behavior
-- `resources/views/admin/credits/edit.blade.php` — switched the credit screen from traditional form posts to Livewire actions for save and delete behavior
-- `resources/views/admin/episodes/_form.blade.php` — bound nested episode fields to Livewire state so season-side draft episode creation and episode editing share one form partial
-- `resources/views/admin/episodes/edit.blade.php` — switched episode editing and deletion to Livewire actions and hardened the public page link generation
-- `resources/views/admin/genres/_form.blade.php` — bound the genre form to Livewire state so validation errors and saves stay on the same page
-- `resources/views/admin/genres/create.blade.php` — switched genre create and edit screens from posted forms to Livewire actions
-- `resources/views/admin/genres/edit.blade.php` — switched genre create and edit screens from posted forms to Livewire actions
-- `resources/views/admin/media-assets/_form.blade.php` — bound the media asset form to Livewire state so uploads and metadata changes can be handled inside the page component
-- `resources/views/admin/media-assets/edit.blade.php` — updated the media asset admin screens to work with the new Livewire-driven edit flow
-- `resources/views/admin/media-assets/index.blade.php` — updated the media asset admin screens to work with the new Livewire-driven edit flow
-- `resources/views/admin/people/_form.blade.php` — bound the person form fields to Livewire state so saves, validation, and draft changes stay in the component
-- `resources/views/admin/people/create.blade.php` — switched person create and edit screens from controller posts to Livewire actions and inline profession management
-- `resources/views/admin/people/edit.blade.php` — switched person create and edit screens from controller posts to Livewire actions and inline profession management
-- `resources/views/admin/seasons/_form.blade.php` — bound the season form to Livewire state so season edits and draft episode creation share the same component data
-- `resources/views/admin/seasons/edit.blade.php` — switched season edits, episode creation, and season deletion to Livewire actions
-- `resources/views/admin/titles/_form.blade.php` — bound the title form fields and genre checkboxes to Livewire state so large title edits no longer rely on full-page posts
-- `resources/views/admin/titles/create.blade.php` — switched title create and edit screens from controller posts to Livewire actions and refreshed the empty states
-- `resources/views/admin/titles/edit.blade.php` — switched title create and edit screens from controller posts to Livewire actions and refreshed the empty states
-- `resources/views/auth/login.blade.php` — collapsed the repeated auth page shell into a reusable member entry component and kept the page copy focused
-- `resources/views/auth/register.blade.php` — collapsed the repeated auth page shell into a reusable member entry component and kept the page copy focused
-- `resources/views/components/auth/member-entry-card.blade.php` — added a reusable auth card component that holds the shared sign-in and sign-up shell layout
-- `resources/views/components/ui/error.blade.php` — updated this file as part of the Livewire route split, UI cleanup, test rewrite, or repository cleanup in this change set
-- `resources/views/components/ui/input/index.blade.php` — updated this file as part of the Livewire route split, UI cleanup, test rewrite, or repository cleanup in this change set
-- `resources/views/components/ui/native-select.blade.php` — updated this file as part of the Livewire route split, UI cleanup, test rewrite, or repository cleanup in this change set
-- `resources/views/layouts/partials/app-shell.blade.php` — added quick header shortcuts for the admin dashboard and watchlist when the shell flags allow them
-- `resources/views/lists/index.blade.php` — updated this file as part of the Livewire route split, UI cleanup, test rewrite, or repository cleanup in this change set
-- `resources/views/livewire/account/watchlist-browser.blade.php` — updated this file as part of the Livewire route split, UI cleanup, test rewrite, or repository cleanup in this change set
-- `resources/views/livewire/admin/person-profession-editor.blade.php` — added the Blade view for the inline person profession editor used on the admin people screen
-- `resources/views/livewire/catalog/interest-category-browser.blade.php` — updated this file as part of the Livewire route split, UI cleanup, test rewrite, or repository cleanup in this change set
-- `resources/views/livewire/catalog/people-browser.blade.php` — updated this file as part of the Livewire route split, UI cleanup, test rewrite, or repository cleanup in this change set
-- `resources/views/livewire/people/filmography-panel.blade.php` — updated the filmography panel UI to use the new preformatted labels for totals, profession options, and credit counts
-- `resources/views/livewire/reviews/title-review-list.blade.php` — updated this file as part of the Livewire route split, UI cleanup, test rewrite, or repository cleanup in this change set
-- `resources/views/livewire/search/discovery-filters.blade.php` — updated this file as part of the Livewire route split, UI cleanup, test rewrite, or repository cleanup in this change set
-- `resources/views/livewire/search/search-results.blade.php` — updated this file as part of the Livewire route split, UI cleanup, test rewrite, or repository cleanup in this change set
-- `resources/views/livewire/seasons/watch-progress-panel.blade.php` — updated this file as part of the Livewire route split, UI cleanup, test rewrite, or repository cleanup in this change set
-- `routes/admin.php` — split admin page routes onto dedicated Livewire components while keeping the classic mutation endpoints registered for compatibility
-- `routes/auth.php` — repointed login and register routes at dedicated Livewire page classes
-- `routes/web.php` — repointed public browse URLs at dedicated Livewire page classes for movies, series, titles, genres, years, rankings, and trending
-- `storage/framework/manual-imdb-import/interests/in0000160.json` — removed a checked-in manual IMDb interest import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/interests/in0000160/interest.json` — removed a checked-in manual IMDb interest import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/interests/in0000160/manifest.json` — removed a checked-in manual IMDb interest import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/interests/in0000162.json` — removed a checked-in manual IMDb interest import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/interests/in0000162/interest.json` — removed a checked-in manual IMDb interest import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/interests/in0000162/manifest.json` — removed a checked-in manual IMDb interest import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/interests/in0000164.json` — removed a checked-in manual IMDb interest import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/interests/in0000164/interest.json` — removed a checked-in manual IMDb interest import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/interests/in0000164/manifest.json` — removed a checked-in manual IMDb interest import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0000658.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0000658/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0000658/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0000658/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0000658/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0000658/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0000658/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0315567.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0315567/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0315567/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0315567/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0315567/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0315567/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0315567/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0331516.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0331516/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0331516/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0331516/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0331516/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0331516/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0331516/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0404497.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0404497/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0404497/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0404497/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0404497/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0404497/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0404497/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0504962.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0504962/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0504962/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0504962/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0504962/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0504962/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0504962/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0520488.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0520488/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0520488/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0520488/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0520488/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0520488/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0520488/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0588087.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0588087/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0588087/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0588087/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0588087/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0588087/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0588087/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0692255.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0692255/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0692255/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0692255/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0692255/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0692255/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0692255/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0778353.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0778353/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0778353/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0778353/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0778353/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0778353/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0778353/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0815420.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0815420/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0815420/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0815420/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0815420/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0815420/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0815420/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0995902.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0995902/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0995902/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0995902/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0995902/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0995902/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm0995902/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm10072799.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm10072799/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm10072799/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm10072799/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm10072799/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm10072799/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm10072799/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm1083982.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm1083982/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm1083982/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm1083982/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm1083982/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm1083982/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm1083982/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm11627168.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm11627168/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm11627168/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm11627168/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm11627168/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm11627168/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm11627168/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm1197689.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm1197689/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm1197689/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm1197689/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm1197689/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm1197689/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm1197689/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm1206844.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm1206844/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm1206844/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm1206844/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm1206844/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm1206844/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm1206844/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm1208035.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm1208035/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm1208035/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm1208035/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm1208035/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm1208035/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm1208035/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm13067986.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm13067986/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm13067986/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm13067986/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm13067986/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm13067986/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm13067986/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm13802387.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm13802387/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm13802387/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm13802387/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm13802387/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm13802387/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm13802387/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm15724785.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm15724785/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm15724785/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm15724785/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm15724785/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm15724785/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm15724785/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm1599765.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm1599765/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm1599765/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm1599765/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm1599765/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm1599765/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm1599765/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm16165407.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm16165407/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm16165407/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm16165407/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm16165407/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm16165407/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm16165407/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm17942099.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm17942099/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm17942099/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm17942099/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm17942099/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm17942099/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm17942099/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm17952175.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm17952175/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm17952175/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm17952175/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm17952175/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm17952175/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm17952175/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm18073277.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm18073277/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm18073277/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm18073277/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm18073277/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm18073277/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm18073277/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm18315694.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm18315694/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm18315694/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm18315694/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm18315694/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm18315694/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm18315694/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm18332965.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm18332965/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm18332965/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm18332965/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm18332965/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm18332965/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm18332965/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm2168927.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm2168927/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm2168927/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm2168927/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm2168927/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm2168927/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm2168927/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm3142672.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm3142672/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm3142672/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm3142672/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm3142672/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm3142672/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm3142672/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm3382412.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm3382412/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm3382412/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm3382412/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm3382412/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm3382412/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm3382412/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm3904821.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm3904821/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm3904821/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm3904821/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm3904821/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm3904821/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm3904821/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm4013922.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm4013922/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm4013922/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm4013922/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm4013922/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm4013922/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm4013922/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm4093657.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm4093657/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm4093657/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm4093657/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm4093657/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm4093657/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm4093657/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm4101349.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm4101349/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm4101349/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm4101349/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm4101349/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm4101349/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm4101349/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm4364362.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm4364362/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm4364362/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm4364362/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm4364362/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm4364362/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm4364362/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm5152633.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm5152633/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm5152633/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm5152633/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm5152633/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm5152633/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm5152633/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm7284697.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm7284697/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm7284697/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm7284697/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm7284697/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm7284697/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm7284697/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm7635404.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm7635404/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm7635404/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm7635404/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm7635404/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm7635404/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm7635404/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm8352984.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm8352984/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm8352984/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm8352984/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm8352984/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm8352984/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm8352984/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm8751303.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm8751303/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm8751303/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm8751303/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm8751303/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm8751303/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm8751303/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm8966445.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm8966445/details.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm8966445/filmography.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm8966445/images.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm8966445/manifest.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm8966445/relationships.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/names/nm8966445/trivia.json` — removed a checked-in manual IMDb person import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/reports/catalog-import-20260411-034447.json` — removed a generated manual IMDb import report from version control
-- `storage/framework/manual-imdb-import/titles/tt12042730.json` — removed a checked-in manual IMDb title import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/titles/tt12042730/akas.json` — removed a checked-in manual IMDb title import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/titles/tt12042730/award-nominations.json` — removed a checked-in manual IMDb title import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/titles/tt12042730/box-office.json` — removed a checked-in manual IMDb title import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/titles/tt12042730/certificates.json` — removed a checked-in manual IMDb title import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/titles/tt12042730/company-credits.json` — removed a checked-in manual IMDb title import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/titles/tt12042730/credits.json` — removed a checked-in manual IMDb title import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/titles/tt12042730/images.json` — removed a checked-in manual IMDb title import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/titles/tt12042730/manifest.json` — removed a checked-in manual IMDb title import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/titles/tt12042730/parents-guide.json` — removed a checked-in manual IMDb title import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/titles/tt12042730/release-dates.json` — removed a checked-in manual IMDb title import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/titles/tt12042730/title.json` — removed a checked-in manual IMDb title import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/titles/tt12042730/videos.json` — removed a checked-in manual IMDb title import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/tt12042730.json` — removed a checked-in manual IMDb title import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/tt12042730/akas.json` — removed a checked-in manual IMDb title import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/tt12042730/award-nominations.json` — removed a checked-in manual IMDb title import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/tt12042730/box-office.json` — removed a checked-in manual IMDb title import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/tt12042730/certificates.json` — removed a checked-in manual IMDb title import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/tt12042730/company-credits.json` — removed a checked-in manual IMDb title import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/tt12042730/credits.json` — removed a checked-in manual IMDb title import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/tt12042730/images.json` — removed a checked-in manual IMDb title import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/tt12042730/manifest.json` — removed a checked-in manual IMDb title import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/tt12042730/parents-guide.json` — removed a checked-in manual IMDb title import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/tt12042730/release-dates.json` — removed a checked-in manual IMDb title import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/tt12042730/title.json` — removed a checked-in manual IMDb title import snapshot that no longer belongs in version control
-- `storage/framework/manual-imdb-import/tt12042730/videos.json` — removed a checked-in manual IMDb title import snapshot that no longer belongs in version control
-- `storage/framework/testing/.gitignore` — removed the testing framework placeholder file during the storage cleanup
-- `tests/Concerns/BuildsCatalogTitleFixtures.php` — added lightweight catalog object builders so view and Livewire tests can run without bootstrapping the full IMDb schema
-- `tests/Feature/Feature/Admin/AdminCatalogCrudTest.php` — rewrote the admin CRUD coverage to keep the mutation routes covered while the edit screens move into dedicated Livewire pages
-- `tests/Feature/Feature/Admin/MediaAssetUploadTest.php` — expanded admin media coverage around Livewire edit pages, uploads, and moderation card flows
-- `tests/Feature/Feature/BrowseMoviesPageLocalRenderTest.php` — rewrote the movies browse render test to use lightweight fixtures and mocked loaders instead of a temporary IMDb database
-- `tests/Feature/Feature/BrowseTopRatedSeriesPageLocalRenderTest.php` — rewrote the top-rated series render test to use lightweight fixtures and verify the new dedicated page contract
-- `tests/Feature/Feature/DiscoverPageTest.php` — rewired discover-page assertions around the consolidated view-data builder instead of lower-level database query setup
-- `tests/Feature/Feature/Livewire/TitleBrowserChartViewDataTest.php` — rewrote the chart-view Livewire test to use lightweight title fixtures instead of schema bootstrapping
-- `tests/Feature/Feature/LivewireLoadingStateConventionTest.php` — updated this file as part of the Livewire route split, UI cleanup, test rewrite, or repository cleanup in this change set
-- `tests/Feature/Feature/PortalRouteRegistrationTest.php` — expanded route coverage to assert both the new page components and the still-registered admin mutation endpoints
-- `tests/Feature/Feature/TitleBoxOfficePageLocalRenderTest.php` — rewrote the box office page test to mock the loader payload directly and verify the Livewire page stays stable
-- `tests/Feature/Feature/TitlePagePayloadFallbackTest.php` — rewrote the title page fallback test to use a mocked detail payload and verify missing optional collections are handled safely
-- `tests/Unit/Models/PersonTest.php` — updated this file as part of the Livewire route split, UI cleanup, test rewrite, or repository cleanup in this change set
-- `changelog/changelog-2026-04-11.md` — records this update in plain English so the project history explains both the refactor and the cleanup
+- `.env.example` — changed the example default database connection from `sqlite` to `imdb_mysql` so local setup matches the catalog-first app mode.
+- `app/Actions/Admin/SaveMediaAssetAction.php` — fixed metadata merge order, switched upload naming to ULID-based filenames, and measured image dimensions from the stored file contents.
+- `app/Actions/Catalog/BuildPublicPeopleIndexQueryAction.php` — taught people sorting to use the catalog-only schema cleanly, including safer fallback ordering for popularity, name, credits, and awards.
+- `app/Actions/Catalog/BuildPublicTitleIndexQueryAction.php` — remapped title discovery filters and sort logic to the remote `movies` and `movie_ratings` tables when catalog-only mode is enabled.
+- `app/Actions/Lists/BuildPublicListsIndexQueryAction.php` — added a guard that returns no public list results when catalog-only titles cannot be queried from the same connection.
+- `app/Actions/Search/BuildGlobalSearchViewDataAction.php` — added optional title filters so global search suggestions can stay in sync with the current discovery context.
+- `app/Actions/Search/BuildSearchResultsViewDataAction.php` — wrapped the people results lane in exception handling so a bad catalog lookup does not take down the whole search page.
+- `app/Actions/Search/GetGlobalSearchSuggestionsAction.php` — split people and title suggestion loading, passed through contextual filters, and made people suggestions fail soft with reporting.
+- `app/Actions/Search/GetSearchFilterOptionsAction.php` — sourced years, countries, languages, and interest categories from catalog-only lookup tables when local titles are not the source of truth.
+- `app/Actions/Titles/RefreshTitleStatisticsAction.php` — rebuilt title statistics from ratings, reviews, watchlists, and episode counts while preserving existing award and Metacritic fields.
+- `app/Http/Controllers/Admin/CatalogAdminController.php` — removed the old admin mutation controller because create, update, and delete flows now live in Livewire pages.
+- `app/Http/Controllers/Admin/MediaAssetAdminController.php` — removed the old HTTP media asset mutation controller in favor of Livewire-driven media editing.
+- `app/Http/Controllers/Admin/ModerationAdminController.php` — removed the old moderation mutation controller because the moderation cards now own those writes.
+- `app/Livewire/Account/WatchlistBrowser.php` — moved the heavy watchlist render payload into a computed `viewData()` method.
+- `app/Livewire/Admin/PersonProfessionEditor.php` — renamed the editable profession field to `professionName` and tightened the checks for whether a profession record already exists.
+- `app/Livewire/Admin/ReviewModerationCard.php` — centralized review refresh logic so counts and relations reload consistently before and after moderation changes.
+- `app/Livewire/Pages/Admin/Concerns/ValidatesFormRequests.php` — made Livewire form-request validation respect optional `after()` hooks and bind a synthetic route to the request instance.
+- `app/Livewire/Pages/Admin/Concerns/InteractsWithCatalogPersonState.php` — added shared helpers for safely reading optional person attributes and dates from catalog-only records.
+- `app/Livewire/Pages/Admin/Concerns/InteractsWithCatalogTitleState.php` — added shared helpers for safely reading optional title attributes and dates from catalog-only records.
+- `app/Livewire/Pages/Admin/CreditsPage.php` — made the credit editor render safely in catalog-only mode without assuming the local relational shape is always available.
+- `app/Livewire/Pages/Admin/EpisodesPage.php` — switched episode editing to the new catalog-title helper and safer preview filling for catalog-only records.
+- `app/Livewire/Pages/Admin/GenresPage.php` — made genre form state safe for catalog-only rows that do not actually carry a `description` attribute.
+- `app/Livewire/Pages/Admin/MediaAssetsPage.php` — stopped preview models from carrying uploaded file objects and hid direct URLs when an asset is backed by a stored upload.
+- `app/Livewire/Pages/Admin/PeoplePage.php` — used the new catalog-person helper and safer preview payloads so people edits still render when remote-only fields are missing.
+- `app/Livewire/Pages/Admin/SeasonsPage.php` — made season edit previews work in catalog-only mode and trimmed draft episode previews down to fillable attributes.
+- `app/Livewire/Pages/Admin/TitlesPage.php` — added catalog-only-safe preview payloads, safer draft media previews, and helper-driven optional title field access.
+- `app/Livewire/People/FilmographyPanel.php` — moved filmography view assembly into locked and computed Livewire state instead of rebuilding everything inline in `render()`.
+- `app/Livewire/Search/GlobalSearch.php` — captured the current discovery filters and passed them into global search suggestions.
+- `app/Models/CatalogMediaAsset.php` — started from sensible default catalog media values before overlaying remote attributes.
+- `app/Models/Credit.php` — mapped credits onto the catalog-only `name_credits` table, foreign keys, ordering, and category behavior when remote data is in charge.
+- `app/Models/Genre.php` — added catalog-only connection support, safer numeric route binding, and a fallback slug when a remote genre row does not provide one.
+- `app/Models/MovieRating.php` — exposed `average_rating` and `rating_count` style accessors over the catalog vote fields.
+- `app/Models/Person.php` — mapped the model to remote catalog tables and columns, added catalog-only bindings and searches, and merged remote image data into person media fallbacks.
+- `app/Models/Season.php` — tightened numeric route binding by qualifying the key column explicitly.
+- `app/Models/Title.php` — added broad catalog-only mapping for remote movie columns, relations, search, sorting, ratings, countries, languages, summaries, and media fallbacks.
+- `app/Providers/AppServiceProvider.php` — turned on full Eloquent strict mode outside production instead of only preventing lazy loading.
+- `config/queue.php` — aligned queue batching and failed-job database defaults with `imdb_mysql`.
+- `resources/views/admin/people/edit.blade.php` — updated the embedded profession editor usage to pass the renamed `professionRecord` prop.
+- `resources/views/components/auth/member-entry-card.blade.php` — swapped the auth card heading over to the shared brand component instead of hand-written logo and copy markup.
+- `resources/views/components/ui/brand/index.blade.php` — expanded the shared brand component to support optional descriptions, copy wrappers, and slot-based logo detection.
+- `resources/views/layouts/partials/account-sidebar.blade.php` — moved the member sidebar heading onto the richer shared brand component.
+- `resources/views/layouts/partials/admin-sidebar.blade.php` — moved the admin sidebar heading onto the richer shared brand component.
+- `resources/views/layouts/partials/app-shell.blade.php` — replaced repeated top-level brand markup with the shared brand component in both shell header variants.
+- `resources/views/livewire/admin/person-profession-editor.blade.php` — bound the form to `professionName` and switched the button and delete checks to persisted-record detection.
+- `routes/admin.php` — removed the browser-exposed HTTP mutation routes so the admin surface now exposes page routes only.
+- `tests/Feature/Feature/Admin/AdminCatalogCrudTest.php` — rewrote the admin CRUD coverage around Livewire page actions and profession editors instead of removed HTTP mutation routes.
+- `tests/Feature/Feature/Admin/AdminCatalogReadonlyPagesTest.php` — added explicit catalog-only fixture seeding and verified the read-only admin pages against remote-style IDs and relations.
+- `tests/Feature/Feature/Admin/MediaAssetUploadTest.php` — rewrote media upload and moderation coverage around Livewire page actions and moderation cards instead of old HTTP routes.
+- `tests/Feature/Feature/LivewireLoadingStateConventionTest.php` — added assertions that the heavier Livewire components now expose computed view-data methods.
+- `tests/Feature/Feature/PortalRouteRegistrationTest.php` — flipped the route assertions to prove the old admin mutation routes are gone while the page routes still exist.
+- `tests/Unit/Actions/Search/BuildSearchTitleResultsQueryActionTest.php` — added a focused regression test that checks catalog-only title search targets the remote movies schema.
+- `changelog/changelog-2026-04-11.md` — refreshed the daily changelog entry so it documents this current admin, search, and catalog-only refactor accurately.
 
 ### Why This Matters
-This update makes the app easier to maintain in two directions at once: the UI layer is more explicit because routes now point at purpose-built Livewire pages, and the backend stays safer because the existing mutation endpoints and form requests still provide a stable write path. At the same time, the tests are lighter and the repository is less cluttered, so future work should be faster to build, easier to verify, and less weighed down by generated import data.
+This update makes the project more coherent. The admin panel now writes through the same Livewire surfaces it renders, the catalog-only mode is much less brittle when it needs to read from remote IMDb-shaped tables, and search keeps more of a visitor’s context instead of dropping them into generic suggestions. That combination reduces duplicated paths, makes remote-data mode safer, and gives the tests a much clearer contract to enforce.
 
 ---

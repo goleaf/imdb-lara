@@ -15,6 +15,8 @@ use App\Models\UserList;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -40,6 +42,7 @@ class ManageList extends Component
 
     protected UpdateUserListAction $updateUserList;
 
+    #[Locked]
     public UserList $list;
 
     public string $name = '';
@@ -161,7 +164,8 @@ class ManageList extends Component
         $this->redirectRoute('account.lists.index');
     }
 
-    public function render(): View
+    #[Computed]
+    public function viewData(): array
     {
         $list = $this->list->fresh(['user:id,name,username']);
 
@@ -170,13 +174,11 @@ class ManageList extends Component
         $list->loadCount('items');
         $this->list = $list;
 
-        $items = $this->buildUserListItemsQuery
-            ->handle($list)
-            ->simplePaginate(self::ITEMS_PER_PAGE, pageName: 'items')
-            ->withQueryString();
-
-        return view('livewire.lists.manage-list', [
-            'items' => $items,
+        return [
+            'items' => $this->buildUserListItemsQuery
+                ->handle($list)
+                ->simplePaginate(self::ITEMS_PER_PAGE, pageName: 'items')
+                ->withQueryString(),
             'list' => $list,
             'titleSuggestions' => $this->getListTitleSuggestions->handle($list, $this->titleQuery),
             'visibilityOptions' => [
@@ -184,7 +186,12 @@ class ManageList extends Component
                 ['value' => ListVisibility::Unlisted->value, 'label' => 'Unlisted'],
                 ['value' => ListVisibility::Public->value, 'label' => 'Public'],
             ],
-        ]);
+        ];
+    }
+
+    public function render(): View
+    {
+        return view('livewire.lists.manage-list', $this->viewData);
     }
 
     public function placeholder(): View

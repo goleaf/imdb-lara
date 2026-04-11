@@ -40,10 +40,10 @@ class BuildGlobalSearchViewDataAction
      *     trimmedQuery: string
      * }
      */
-    public function handle(?string $query, int $perGroup = 4): array
+    public function handle(?string $query, int $perGroup = 4, array $titleFilters = []): array
     {
         $trimmedQuery = trim((string) $query);
-        $suggestions = $this->getGlobalSearchSuggestions->handle($trimmedQuery, $perGroup + 1);
+        $suggestions = $this->getGlobalSearchSuggestions->handle($trimmedQuery, $perGroup + 1, $titleFilters);
         $topSuggestion = $this->resolveSearchTopMatch->handle(
             $trimmedQuery,
             $suggestions['titles']->first(),

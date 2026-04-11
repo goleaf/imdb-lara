@@ -11,6 +11,11 @@ class GlobalSearch extends Component
 
     public string $searchRoute = '';
 
+    /**
+     * @var array<string, mixed>
+     */
+    public array $contextFilters = [];
+
     protected BuildGlobalSearchViewDataAction $buildGlobalSearchViewData;
 
     public function boot(
@@ -23,6 +28,25 @@ class GlobalSearch extends Component
     {
         $this->query = trim((string) request('q'));
         $this->searchRoute = route('public.search');
+        $this->contextFilters = request()->routeIs('public.search')
+            ? collect(request()->only([
+                'type',
+                'genre',
+                'theme',
+                'yearFrom',
+                'yearTo',
+                'ratingMin',
+                'ratingMax',
+                'votesMin',
+                'language',
+                'country',
+                'runtime',
+                'status',
+                'sort',
+            ]))
+                ->filter(fn (mixed $value): bool => $value !== null && $value !== '')
+                ->all()
+            : [];
     }
 
     public function submitSearch(): void
@@ -42,7 +66,7 @@ class GlobalSearch extends Component
     {
         return view('livewire.search.global-search', [
             'searchRoute' => $this->searchRoute,
-            ...$this->buildGlobalSearchViewData->handle($this->query),
+            ...$this->buildGlobalSearchViewData->handle($this->query, titleFilters: $this->contextFilters),
         ]);
     }
 }

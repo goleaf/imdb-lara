@@ -4,17 +4,20 @@
 >
     <x-slot:brand>
         <div class="px-1">
-            <x-ui.brand :href="route('admin.dashboard')" name="Screenbase" class="justify-start">
+            <x-ui.brand
+                :href="route('admin.dashboard')"
+                name="Screenbase"
+                description="Catalog control"
+                nameClass="text-base font-semibold"
+                descriptionClass="text-sm text-neutral-500 dark:text-neutral-400 [:has([data-collapsed]_&)_&]:hidden"
+                class="justify-start"
+            >
                 <x-slot:logo>
                     <span class="inline-flex size-10 items-center justify-center rounded-2xl bg-linear-to-br from-sky-400 via-blue-300 to-indigo-500 text-sm font-bold tracking-[0.16em] text-slate-950 shadow-sm ring-1 ring-black/5">
                         SB
                     </span>
                 </x-slot:logo>
             </x-ui.brand>
-
-            <x-ui.text size="sm" class="pl-[3.25rem] text-neutral-500 dark:text-neutral-400 [:has([data-collapsed]_&)_&]:hidden">
-                Catalog control
-            </x-ui.text>
         </div>
     </x-slot:brand>
 

@@ -30,6 +30,11 @@ class Genre extends Model
         ];
     }
 
+    public function getConnectionName(): ?string
+    {
+        return Title::usesCatalogOnlySchema() ? 'imdb_mysql' : parent::getConnectionName();
+    }
+
     public function getRouteKeyName(): string
     {
         return 'slug';
@@ -46,9 +51,18 @@ class Genre extends Model
             $genreQuery->where('slug', (string) $value);
 
             if (is_numeric($value)) {
-                $genreQuery->orWhereKey((int) $value);
+                $genreQuery->orWhere($this->qualifyColumn($this->getKeyName()), (int) $value);
             }
         });
+    }
+
+    public function getSlugAttribute(?string $value): string
+    {
+        if (filled($value)) {
+            return (string) $value;
+        }
+
+        return Str::slug((string) $this->name).'-g'.$this->id;
     }
 
     public function titles(): BelongsToMany

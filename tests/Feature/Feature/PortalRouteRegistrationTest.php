@@ -28,7 +28,7 @@ use Tests\TestCase;
 
 class PortalRouteRegistrationTest extends TestCase
 {
-    public function test_portal_route_names_are_registered_for_livewire_surfaces_and_admin_mutations(): void
+    public function test_portal_route_names_are_registered_for_the_full_portal_surface(): void
     {
         $this->assertTrue(Route::has('login'));
         $this->assertTrue(Route::has('register'));

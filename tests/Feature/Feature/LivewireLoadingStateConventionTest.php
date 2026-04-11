@@ -9,7 +9,7 @@ class LivewireLoadingStateConventionTest extends TestCase
 {
     use UsesCatalogOnlyApplication;
 
-    public function test_manage_list_keeps_scoped_loading_wrappers_for_multiple_independent_regions(): void
+    public function test_manage_list_uses_livewire_four_loading_shells_for_item_mutations_without_losing_targeted_search_loading(): void
     {
         $viewPaths = [
             resource_path('views/livewire/lists/manage-list.blade.php'),
@@ -19,8 +19,10 @@ class LivewireLoadingStateConventionTest extends TestCase
             $contents = file_get_contents($viewPath);
 
             $this->assertNotFalse($contents, 'Expected to read '.$viewPath);
-            $this->assertMatchesRegularExpression('/wire:loading(?:\\.delay)?\\.attr="data-loading"/', $contents, $viewPath);
-            $this->assertStringNotContainsString('wire:loading.remove', $contents, $viewPath);
+            $this->assertStringContainsString('wire:loading.delay.attr="data-loading" wire:target="titleQuery"', $contents, $viewPath);
+            $this->assertStringContainsString('has-data-loading:[&_[data-slot=manage-list-items-skeletons]]:grid', $contents, $viewPath);
+            $this->assertStringContainsString('data-slot="manage-list-items-results"', $contents, $viewPath);
+            $this->assertStringNotContainsString('wire:loading.delay.attr="data-loading" wire:target="addTitle,moveItemUp,moveItemDown,removeTitle,sortItems"', $contents, $viewPath);
         }
     }
 
@@ -167,6 +169,33 @@ class LivewireLoadingStateConventionTest extends TestCase
             }
 
             $this->assertStringNotContainsString('wire:loading.delay.attr="data-loading"', $contents, $viewPath);
+        }
+    }
+
+    public function test_heavier_livewire_components_shift_view_assembly_into_computed_properties(): void
+    {
+        $classExpectations = [
+            app_path('Livewire/Account/WatchlistBrowser.php') => [
+                '#[Computed]',
+                'public function viewData(): array',
+                "return view('livewire.account.watchlist-browser', \$this->viewData);",
+            ],
+            app_path('Livewire/People/FilmographyPanel.php') => [
+                '#[Computed]',
+                '#[Locked]',
+                'public function viewData(): array',
+                "return view('livewire.people.filmography-panel', \$this->viewData);",
+            ],
+        ];
+
+        foreach ($classExpectations as $classPath => $expectedStrings) {
+            $contents = file_get_contents($classPath);
+
+            $this->assertNotFalse($contents);
+
+            foreach ($expectedStrings as $expectedString) {
+                $this->assertStringContainsString($expectedString, $contents, $classPath);
+            }
         }
     }
 }

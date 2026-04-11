@@ -13,6 +13,7 @@ use App\Models\Episode;
 use App\Models\Season;
 use App\Models\Title;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Arr;
 use Livewire\Component;
 
 class SeasonsPage extends Component
@@ -54,6 +55,14 @@ class SeasonsPage extends Component
     {
         abort_unless($this->season instanceof Season, 404);
 
+        if ($this->isCatalogOnlyApplication()) {
+            return $this->renderPageView('admin.seasons.edit', [
+                'season' => $this->season->load([
+                    'series' => fn ($seriesQuery) => $seriesQuery->select(Title::catalogCardColumns()),
+                ])->fill($this->seasonPayload()),
+            ]);
+        }
+
         $loadedSeason = $this->season->load([
             'series' => fn ($seriesQuery) => $seriesQuery->select(Title::catalogCardColumns()),
             'episodes' => fn ($episodeQuery) => $episodeQuery
@@ -71,16 +80,10 @@ class SeasonsPage extends Component
         ]);
         $loadedSeason->fill($this->seasonPayload());
 
-        if ($this->isCatalogOnlyApplication()) {
-            return $this->renderPageView('admin.seasons.edit', [
-                'season' => $loadedSeason,
-            ]);
-        }
-
         return $this->renderPageView('admin.seasons.edit', [
             'season' => $loadedSeason,
             'draftEpisode' => tap(
-                new Episode($this->episode),
+                new Episode(Arr::only($this->episode, (new Episode)->getFillable())),
                 function (Episode $episode): void {
                     $episode->setRelation('title', new Title([
                         'name' => $this->episode['name'] ?? null,
