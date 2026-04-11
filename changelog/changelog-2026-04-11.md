@@ -6,7 +6,7 @@ Hey! Here is what changed today in this project:
 The admin area can now manage imported AKA attributes, AKA types, and award categories through dedicated Livewire pages instead of leaving those lookup tables hidden behind the import pipeline. The title detail page also gained a much more useful AKA types section that explains what each type means and shows which alternate titles actually use it. On the import side, IMDb AKA payloads can now create both lookup rows and bridge rows for AKA types, so the catalog carries more of the source data all the way through to the public UI. The demo seeder was also expanded so local installs have a fuller mix of titles, seasons, episodes, awards, contributions, watchlist activity, and notifications to browse.
 
 ### What Was Improved
-Catalog-only mode is much better aligned with the remote IMDb-style schema now. Titles, people, credits, professions, ratings, awards, and media helpers all understand the remote column names more directly, which means fewer translation gaps between local app code and imported catalog data. Search suggestions, people filter options, hero spotlight credits, and title/person detail loaders were also tightened so they reuse the new catalog-aware projections instead of assuming the local schema. The global search shell now leans harder on shared UI buttons and empty-state components, which gives the overlay a cleaner structure and a steadier contract for future styling or behavior changes.
+Catalog-only mode is much better aligned with the remote IMDb-style schema now. Titles, people, credits, professions, ratings, awards, and media helpers all understand the remote column names more directly, which means fewer translation gaps between local app code and imported catalog data. Search suggestions, people filter options, hero spotlight credits, and title/person detail loaders were also tightened so they reuse the new catalog-aware projections instead of assuming the local schema. The global search shell now leans harder on shared UI buttons and empty-state components, which gives the overlay a cleaner structure and a steadier contract for future styling or behavior changes. Several Livewire components also now lock their route-bound models and move more render payload building into computed state, which should make UI behavior more predictable.
 
 ### What Was Removed or Cleaned Up
 The old controller-based admin mutation endpoints were removed from the admin route surface because the write flows now live on Livewire pages. Several embedded Livewire Blade views also dropped their island wrappers, which simplifies rendering and shifts the tests toward direct component behavior. A stale changelog entry that described a different refactor was replaced with this one so the project history actually matches the current tree.
@@ -54,7 +54,26 @@ The old controller-based admin mutation endpoints were removed from the admin ro
 - `app/Livewire/Pages/Admin/AwardCategoriesPage.php` — added the shared Livewire CRUD page logic for award category management.
 - `app/Livewire/Pages/Admin/AwardCategoryCreatePage.php` — added the Livewire create page wrapper for award categories.
 - `app/Livewire/Pages/Admin/AwardCategoryEditPage.php` — added the Livewire edit page wrapper for award categories.
+- `app/Livewire/Pages/Admin/Concerns/ResolvesAdminFormState.php` — added shared helpers for Livewire admin field paths, old-input keys, and allowed media-kind checks.
+- `app/Livewire/Pages/Admin/EpisodesPage.php` — wired episode editing into the shared admin form-state helper.
+- `app/Livewire/Pages/Admin/MediaAssetsPage.php` — wired media asset editing into the shared admin form-state helper.
+- `app/Livewire/Pages/Admin/PeoplePage.php` — wired people editing into the shared admin form-state helper.
+- `app/Livewire/Pages/Admin/SeasonsPage.php` — wired season editing into the shared admin form-state helper.
+- `app/Livewire/Pages/Admin/TitlesPage.php` — wired title editing into the shared admin form-state helper.
 - `app/Livewire/Pages/Public/TitlePage.php` — switched the title page payload contract from raw AKA type rows to richer AKA type entries.
+- `app/Livewire/Pages/Public/UserPage.php` — locked the public page’s bound user and list models to keep Livewire state stable.
+- `app/Livewire/Admin/ContributionModerationCard.php` — locked the bound contribution record in the moderation card.
+- `app/Livewire/Admin/PersonProfessionEditor.php` — locked the bound person and profession records in the profession editor.
+- `app/Livewire/Admin/ReportModerationCard.php` — locked the bound report record in the moderation card.
+- `app/Livewire/Admin/ReviewModerationCard.php` — locked the bound review record in the moderation card.
+- `app/Livewire/Lists/ReportListForm.php` — locked the bound list record in the list reporting form.
+- `app/Livewire/Reviews/ReportReviewForm.php` — locked the bound review record in the review reporting form.
+- `app/Livewire/Reviews/TitleReviewList.php` — moved review list rendering data into computed state and tightened loading targets for sort/helpful actions.
+- `app/Livewire/Seasons/WatchProgressPanel.php` — locked the bound series and season records in the watch progress panel.
+- `app/Livewire/Titles/RatingPanel.php` — moved rating panel rendering data into computed state and locked the bound title.
+- `app/Livewire/Titles/ReviewComposer.php` — moved review composer rendering data into computed state and locked the bound title and review.
+- `app/Livewire/Titles/WatchStatePanel.php` — locked the bound title record in the watch-state panel.
+- `app/Livewire/Titles/WatchlistToggle.php` — locked the bound title record in the watchlist toggle.
 - `app/Models/AkaAttribute.php` — added admin listing scopes, lookup row helpers, and usage-count helpers for AKA attributes.
 - `app/Models/AkaType.php` — added admin listing scopes, lookup row helpers, usage counts, and presentation helpers for AKA types.
 - `app/Models/AwardCategory.php` — added admin listing scopes, lookup row helpers, usage counts, and presentation helpers for award categories.
@@ -86,6 +105,9 @@ The old controller-based admin mutation endpoints were removed from the admin ro
 - `resources/views/admin/award-categories/create.blade.php` — added the award category create screen and catalog-only write-disabled state.
 - `resources/views/admin/award-categories/edit.blade.php` — added the award category edit screen, linked nomination badge, and delete action.
 - `resources/views/admin/award-categories/index.blade.php` — added the award category listing screen with search.
+- `resources/views/admin/episodes/_form.blade.php` — rewired the episode admin form to the shared Livewire field-state helpers.
+- `resources/views/admin/media-assets/_form.blade.php` — rewired the media asset admin form to the shared Livewire field-state and media-kind helpers.
+- `resources/views/admin/seasons/_form.blade.php` — rewired the season admin form to the shared Livewire field-state helpers.
 - `resources/views/admin/titles/_form.blade.php` — preserved selected genre ids more safely when title genre relations are not already loaded.
 - `resources/views/livewire/account/watchlist-browser.blade.php` — removed the outer island wrapper from the watchlist browser view.
 - `resources/views/livewire/catalog/interest-category-browser.blade.php` — removed the outer island wrapper from the interest category browser view.
@@ -93,8 +115,12 @@ The old controller-based admin mutation endpoints were removed from the admin ro
 - `resources/views/livewire/catalog/title-browser.blade.php` — removed the outer island wrapper from the title browser view.
 - `resources/views/livewire/lists/manage-list.blade.php` — removed the outer island wrapper from the list management view.
 - `resources/views/livewire/people/filmography-panel.blade.php` — removed the outer island wrapper from the filmography panel view.
+- `resources/views/livewire/reviews/title-review-list.blade.php` — tightened review list loading targets so button spinners follow the exact action being run.
 - `resources/views/livewire/search/global-search.blade.php` — switched the search overlay to shared button and empty-state components with explicit control slots.
+- `resources/views/livewire/search/discovery-filters.blade.php` — added a lazy island placeholder skeleton for the discovery results shell.
+- `resources/views/livewire/search/search-results.blade.php` — added a lazy island placeholder skeleton for the full search results shell.
 - `resources/views/titles/show.blade.php` — replaced the raw AKA type table with a richer explanation of type meaning and linked AKA usage.
+- `resources/views/welcome.blade.php` — removed the external Bunny font include from the welcome scaffold.
 - `routes/admin.php` — removed legacy controller mutation routes and added Livewire routes for AKA attributes, AKA types, and award categories.
 - `tests/Concerns/BootstrapsImdbMysqlSqlite.php` — expanded the SQLite-backed IMDb test schema with the new lookup, bridge, and remote-support tables.
 - `tests/Concerns/BuildsCatalogTitleFixtures.php` — expanded catalog title and poster fixtures with the fields needed by the richer title mapping.
@@ -118,6 +144,7 @@ The old controller-based admin mutation endpoints were removed from the admin ro
 - `tests/Feature/Feature/PeopleDirectorySnapshotTest.php` — added coverage for remote profession filters and adjusted catalog-only fixture creation.
 - `tests/Feature/Feature/PortalRouteRegistrationTest.php` — updated route coverage for the new lookup pages and the removal of controller mutation routes.
 - `tests/Feature/Feature/Search/GlobalSearchShellContractTest.php` — added shell contract coverage for the global search overlay controls and empty states.
+- `tests/Feature/Feature/SharedPublicLayoutRenderTest.php` — added coverage that the public scaffold does not pull Bunny fonts from a CDN.
 - `tests/Feature/Feature/TitlePagePayloadFallbackTest.php` — added title page coverage for the richer AKA type payload entries.
 - `tests/Unit/Actions/Catalog/HydrateTitleCastCatalogActionTest.php` — tightened title statistic assertions around formatted aggregate ratings.
 - `tests/Unit/Actions/Search/GetDiscoveryTitleSuggestionsActionTest.php` — added coverage that discovery suggestions exclude episode rows.
