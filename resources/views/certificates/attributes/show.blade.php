@@ -157,13 +157,12 @@
                                                 </span>
                                             @endif
 
-                                            @if ($archiveRecord['ratingHref'] && $archiveRecord['ratingLabel'])
-                                                <a
-                                                    href="{{ $archiveRecord['ratingHref'] }}"
-                                                    class="inline-flex items-center rounded-full border border-black/8 px-2.5 py-1 text-xs font-medium text-neutral-700 transition hover:bg-white dark:border-white/10 dark:text-neutral-200 dark:hover:bg-white/[0.05]"
-                                                >
-                                                    {{ $archiveRecord['ratingLabel'] }}
-                                                </a>
+                                            @if ($archiveRecord['ratingLabel'])
+                                                <x-catalog.certificate-rating-chip
+                                                    :rating="$archiveRecord['ratingLabel']"
+                                                    :href="$archiveRecord['ratingHref']"
+                                                    class="text-xs"
+                                                />
                                             @endif
                                         </div>
                                     </div>

@@ -38,6 +38,7 @@
         'movieImageSummaryRows',
         'certificateAttributeRows',
         'certificateRatingRows',
+        'companyEntries',
         'companyRows',
         'companyCreditAttributeRows',
         'companyCreditCategoryRows',
@@ -782,14 +783,22 @@
                                         <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
                                             <tr>
                                                 <th scope="col" class="px-4 py-3 font-medium">Rating</th>
+                                                <th scope="col" class="px-4 py-3 font-medium">Meaning</th>
                                                 <th scope="col" class="px-4 py-3 font-medium">Country</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
                                             @foreach ($movieCertificateRows as $movieCertificateRow)
                                                 <tr>
-                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
-                                                        {{ $movieCertificateRow->certificateRating?->name ?? $movieCertificateRow->certificate_rating_id ?? '—' }}
+                                                    <td class="px-4 py-3 align-top text-neutral-900 dark:text-neutral-100">
+                                                        @if ($movieCertificateRow->certificateRating)
+                                                            <x-catalog.certificate-rating-chip :rating="$movieCertificateRow->certificateRating" />
+                                                        @else
+                                                            <span class="text-neutral-500 dark:text-neutral-400">—</span>
+                                                        @endif
+                                                    </td>
+                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
+                                                        {{ $movieCertificateRow->ratingDescription() ?? 'Regional age classification attached to this title.' }}
                                                     </td>
                                                     <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
                                                         @if (filled($movieCertificateRow->country_code))
@@ -833,8 +842,12 @@
                                         <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
                                             @foreach ($movieCertificateAttributeRows as $movieCertificateAttributeRow)
                                                 <tr>
-                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
-                                                        {{ $movieCertificateAttributeRow->movieCertificate?->certificateRating?->name ?? '—' }}
+                                                    <td class="px-4 py-3 align-top text-neutral-900 dark:text-neutral-100">
+                                                        @if ($movieCertificateAttributeRow->movieCertificate?->certificateRating)
+                                                            <x-catalog.certificate-rating-chip :rating="$movieCertificateAttributeRow->movieCertificate->certificateRating" />
+                                                        @else
+                                                            <span class="text-neutral-500 dark:text-neutral-400">—</span>
+                                                        @endif
                                                     </td>
                                                     <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
                                                         {{ $movieCertificateAttributeRow->certificateAttribute?->name ?? $movieCertificateAttributeRow->certificate_attribute_id }}
@@ -922,12 +935,10 @@
                                                     <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
                                                         <div class="flex flex-wrap gap-2">
                                                             @forelse ($certificateAttributeEntry['ratings'] as $certificateRating)
-                                                                <a
-                                                                    href="{{ route('public.certificate-ratings.show', $certificateRating) }}"
-                                                                    class="inline-flex items-center rounded-full border border-black/8 px-2.5 py-1 text-xs font-medium text-neutral-700 transition hover:bg-white dark:border-white/10 dark:text-neutral-200 dark:hover:bg-white/[0.05]"
-                                                                >
-                                                                    {{ $certificateRating->name }}
-                                                                </a>
+                                                                <x-catalog.certificate-rating-chip
+                                                                    :rating="$certificateRating"
+                                                                    class="text-xs"
+                                                                />
                                                             @empty
                                                                 <span class="text-neutral-500 dark:text-neutral-400">—</span>
                                                             @endforelse
@@ -983,12 +994,12 @@
                                             @foreach ($certificateRatingEntries as $certificateRatingEntry)
                                                 <tr>
                                                     <td class="px-4 py-3 align-top">
-                                                        <a
-                                                            href="{{ route('public.certificate-ratings.show', $certificateRatingEntry['rating']) }}"
-                                                            class="font-medium text-neutral-900 transition hover:opacity-80 dark:text-neutral-100"
-                                                        >
-                                                            {{ $certificateRatingEntry['rating']->name }}
-                                                        </a>
+                                                        <div class="space-y-2">
+                                                            <x-catalog.certificate-rating-chip :rating="$certificateRatingEntry['rating']" />
+                                                            <div class="sb-certificate-rating-note">
+                                                                {{ $certificateRatingEntry['rating']->shortDescription() }}
+                                                            </div>
+                                                        </div>
                                                     </td>
                                                     <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
                                                         <div class="flex flex-wrap gap-2">
@@ -1054,7 +1065,16 @@
                                             @foreach ($movieCompanyCreditRows as $movieCompanyCreditRow)
                                                 <tr>
                                                     <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
-                                                        {{ $movieCompanyCreditRow->company?->name ?? $movieCompanyCreditRow->company_imdb_id }}
+                                                        @if ($movieCompanyCreditRow->company)
+                                                            <a
+                                                                href="{{ route('public.companies.show', $movieCompanyCreditRow->company) }}"
+                                                                class="transition hover:opacity-80"
+                                                            >
+                                                                {{ $movieCompanyCreditRow->company->name }}
+                                                            </a>
+                                                        @else
+                                                            {{ $movieCompanyCreditRow->company_imdb_id }}
+                                                        @endif
                                                     </td>
                                                     <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
                                                         {{ $movieCompanyCreditRow->companyCreditCategory?->name ?? $movieCompanyCreditRow->company_credit_category_id ?? '—' }}
@@ -1085,63 +1105,195 @@
                                 </x-ui.text>
                             </div>
 
-                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
-                                <div class="overflow-x-auto">
-                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
-                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
-                                            <tr>
-                                                <th scope="col" class="px-4 py-3 font-medium">Director</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
-                                            @foreach ($movieDirectorRows as $movieDirectorRow)
-                                                <tr>
-                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
-                                                        {{ $movieDirectorRow->nameBasic?->displayName ?? $movieDirectorRow->nameBasic?->primaryname ?? $movieDirectorRow->name_basic_id }}
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
+                            <div class="grid gap-3 md:grid-cols-2">
+                                @foreach ($movieDirectorRows as $movieDirectorRow)
+                                    @php
+                                        $directorPerson = $movieDirectorRow->person;
+                                        $directorName = $directorPerson?->name
+                                            ?? $movieDirectorRow->nameBasic?->displayName
+                                            ?? $movieDirectorRow->nameBasic?->primaryname
+                                            ?? (string) $movieDirectorRow->name_basic_id;
+                                        $directorHeadshot = $directorPerson?->preferredHeadshot();
+                                        $directorProfileHref = $directorPerson ? route('public.people.show', $directorPerson) : null;
+                                        $directorArchiveHref = $directorPerson
+                                            ? route('public.people.show', ['person' => $directorPerson, 'job' => 'Directing']).'#person-filmography'
+                                            : null;
+                                        $directorSummary = $directorPerson?->summaryText();
+                                        $directorProfessionLabels = collect($directorPerson?->professionLabels() ?? []);
+                                    @endphp
+
+                                    <div class="rounded-[1.15rem] border border-black/5 bg-white/70 p-4 dark:border-white/10 dark:bg-white/[0.02]">
+                                        <div class="flex items-start gap-4">
+                                            @if ($directorProfileHref)
+                                                <a href="{{ $directorProfileHref }}" class="shrink-0" data-slot="title-detail-director-avatar-link">
+                                                    <x-ui.avatar
+                                                        :src="$directorHeadshot?->url"
+                                                        :alt="$directorHeadshot?->alt_text ?: $directorName"
+                                                        :name="$directorName"
+                                                        color="auto"
+                                                        class="!h-20 !w-16 rounded-[1rem] border border-black/5 dark:border-white/10"
+                                                    />
+                                                </a>
+                                            @else
+                                                <x-ui.avatar
+                                                    :src="$directorHeadshot?->url"
+                                                    :alt="$directorHeadshot?->alt_text ?: $directorName"
+                                                    :name="$directorName"
+                                                    color="auto"
+                                                    class="!h-20 !w-16 shrink-0 rounded-[1rem] border border-black/5 dark:border-white/10"
+                                                />
+                                            @endif
+
+                                            <div class="min-w-0 flex-1 space-y-3">
+                                                <div class="space-y-2">
+                                                    @if ($directorProfileHref)
+                                                        <a
+                                                            href="{{ $directorProfileHref }}"
+                                                            data-slot="title-detail-director-link"
+                                                            class="block text-lg font-semibold text-neutral-900 transition hover:opacity-80 dark:text-neutral-100"
+                                                        >
+                                                            {{ $directorName }}
+                                                        </a>
+                                                    @else
+                                                        <div class="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+                                                            {{ $directorName }}
+                                                        </div>
+                                                    @endif
+
+                                                    <div class="flex flex-wrap gap-2">
+                                                        @foreach ($directorProfessionLabels as $directorProfessionLabel)
+                                                            <x-ui.badge variant="outline" color="slate" icon="briefcase">
+                                                                {{ $directorProfessionLabel }}
+                                                            </x-ui.badge>
+                                                        @endforeach
+
+                                                        @if ($directorPerson?->nationality)
+                                                            <x-ui.badge variant="outline" color="neutral" icon="globe-alt">
+                                                                {{ $directorPerson->nationality }}
+                                                            </x-ui.badge>
+                                                        @endif
+
+                                                        @if ($directorPerson?->credits_count)
+                                                            <x-ui.badge variant="outline" color="neutral" icon="film">
+                                                                {{ $directorPerson->creditsBadgeLabel() }}
+                                                            </x-ui.badge>
+                                                        @endif
+                                                    </div>
+
+                                                    @if ($directorSummary)
+                                                        <x-ui.text class="text-sm text-neutral-600 dark:text-neutral-300">
+                                                            {{ str($directorSummary)->limit(180) }}
+                                                        </x-ui.text>
+                                                    @endif
+                                                </div>
+
+                                                <div class="flex flex-wrap gap-2">
+                                                    @if ($directorProfileHref)
+                                                        <x-ui.button as="a" :href="$directorProfileHref" variant="outline" size="sm" icon="user">
+                                                            View person
+                                                        </x-ui.button>
+                                                    @endif
+
+                                                    @if ($directorArchiveHref)
+                                                        <x-ui.button as="a" :href="$directorArchiveHref" size="sm" icon="film">
+                                                            Directed titles
+                                                        </x-ui.button>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
                             </div>
                         </div>
                     </x-ui.card>
                 @endif
 
-                @if ($companyRows->isNotEmpty())
+                @if ($companyEntries->isNotEmpty())
                     <x-ui.card data-slot="title-detail-companies" class="sb-detail-section !max-w-none">
                         <div class="space-y-4">
                             <div>
                                 <x-ui.heading level="h2" size="lg">Companies</x-ui.heading>
                                 <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                    Raw rows imported from the <code>companies</code> table and linked to this movie through its company credit records.
+                                    Companies connected to this title through its company credit records.
                                 </x-ui.text>
                             </div>
 
-                            <div class="overflow-hidden rounded-[1.1rem] border border-black/5 dark:border-white/10">
-                                <div class="overflow-x-auto">
-                                    <table class="min-w-full divide-y divide-black/5 text-sm dark:divide-white/10">
-                                        <thead class="bg-black/[0.03] text-left text-xs uppercase tracking-[0.18em] text-neutral-500 dark:bg-white/[0.03] dark:text-neutral-400">
-                                            <tr>
-                                                <th scope="col" class="px-4 py-3 font-medium">imdb_id</th>
-                                                <th scope="col" class="px-4 py-3 font-medium">name</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
-                                            @foreach ($companyRows as $companyRow)
-                                                <tr>
-                                                    <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
-                                                        {{ $companyRow->imdb_id }}
-                                                    </td>
-                                                    <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
-                                                        {{ $companyRow->name }}
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
+                            <div class="grid gap-3 md:grid-cols-2">
+                                @foreach ($companyEntries as $companyEntry)
+                                    <div class="rounded-[1.15rem] border border-black/5 bg-white/70 p-4 dark:border-white/10 dark:bg-white/[0.02]">
+                                        <div class="space-y-4">
+                                            <div class="space-y-2">
+                                                <a
+                                                    href="{{ route('public.companies.show', $companyEntry['company']) }}"
+                                                    class="block text-lg font-semibold text-neutral-900 transition hover:opacity-80 dark:text-neutral-100"
+                                                >
+                                                    {{ $companyEntry['company']->name }}
+                                                </a>
+
+                                                <div class="flex flex-wrap gap-2 text-sm text-neutral-600 dark:text-neutral-300">
+                                                    <x-ui.badge variant="outline" color="neutral" icon="building-office-2">
+                                                        {{ number_format($companyEntry['creditCount']) }} record{{ $companyEntry['creditCount'] === 1 ? '' : 's' }} on this title
+                                                    </x-ui.badge>
+
+                                                    @foreach ($companyEntry['activeYears'] as $companyYearsLabel)
+                                                        <x-ui.badge variant="outline" color="slate" icon="calendar-days">
+                                                            {{ $companyYearsLabel }}
+                                                        </x-ui.badge>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+
+                                            <div class="space-y-3">
+                                                <div class="space-y-2">
+                                                    <div class="text-xs uppercase tracking-[0.18em] text-neutral-500 dark:text-neutral-400">Categories</div>
+                                                    <div class="flex flex-wrap gap-2">
+                                                        @forelse ($companyEntry['categories'] as $companyCategory)
+                                                            <span class="inline-flex items-center rounded-full border border-black/8 px-2.5 py-1 text-xs font-medium text-neutral-700 dark:border-white/10 dark:text-neutral-200">
+                                                                {{ $companyCategory->name }}
+                                                            </span>
+                                                        @empty
+                                                            <span class="text-sm text-neutral-500 dark:text-neutral-400">No category rows recorded.</span>
+                                                        @endforelse
+                                                    </div>
+                                                </div>
+
+                                                <div class="space-y-2">
+                                                    <div class="text-xs uppercase tracking-[0.18em] text-neutral-500 dark:text-neutral-400">Countries</div>
+                                                    <div class="flex flex-wrap gap-2">
+                                                        @forelse ($companyEntry['countries'] as $companyCountry)
+                                                            <span class="inline-flex items-center gap-2 rounded-full border border-black/8 px-2.5 py-1 text-xs font-medium dark:border-white/10">
+                                                                <x-ui.flag type="country" :code="$companyCountry['code']" class="size-3.5" />
+                                                                <span>{{ $companyCountry['label'] }}</span>
+                                                            </span>
+                                                        @empty
+                                                            <span class="text-sm text-neutral-500 dark:text-neutral-400">No country rows recorded.</span>
+                                                        @endforelse
+                                                    </div>
+                                                </div>
+
+                                                <div class="space-y-2">
+                                                    <div class="text-xs uppercase tracking-[0.18em] text-neutral-500 dark:text-neutral-400">Attributes</div>
+                                                    <div class="flex flex-wrap gap-2">
+                                                        @forelse ($companyEntry['attributes'] as $companyAttribute)
+                                                            <span class="inline-flex items-center rounded-full border border-black/8 px-2.5 py-1 text-xs font-medium text-neutral-700 dark:border-white/10 dark:text-neutral-200">
+                                                                {{ $companyAttribute->name }}
+                                                            </span>
+                                                        @empty
+                                                            <span class="text-sm text-neutral-500 dark:text-neutral-400">No attribute rows recorded.</span>
+                                                        @endforelse
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="flex justify-start">
+                                                <x-ui.button as="a" :href="route('public.companies.show', $companyEntry['company'])" variant="outline" icon="building-office-2">
+                                                    Open company archive
+                                                </x-ui.button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
                             </div>
                         </div>
                     </x-ui.card>

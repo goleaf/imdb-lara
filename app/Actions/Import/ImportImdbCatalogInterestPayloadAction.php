@@ -2,6 +2,7 @@
 
 namespace App\Actions\Import;
 
+use App\Actions\Import\Concerns\BatchesCatalogImportLookups;
 use App\Models\Interest;
 use App\Models\InterestCategory;
 use App\Models\InterestCategoryInterest;
@@ -12,6 +13,8 @@ use RuntimeException;
 
 class ImportImdbCatalogInterestPayloadAction
 {
+    use BatchesCatalogImportLookups;
+
     /**
      * @param  array<string, mixed>  $payload
      */
@@ -23,14 +26,20 @@ class ImportImdbCatalogInterestPayloadAction
             throw new RuntimeException('The IMDb interest payload is missing the interest object.');
         }
 
-        return DB::connection('imdb_mysql')->transaction(function () use ($interestPayload): Interest {
-            $interest = $this->upsertInterest($interestPayload);
+        $this->resetBatchedLookupCache();
 
-            $this->syncPrimaryImage($interest, is_array(data_get($interestPayload, 'primaryImage')) ? data_get($interestPayload, 'primaryImage') : []);
-            $this->syncSimilarInterests($interest, $this->normalizeObjectList(data_get($interestPayload, 'similarInterests')));
+        try {
+            return DB::connection('imdb_mysql')->transaction(function () use ($interestPayload): Interest {
+                $interest = $this->upsertInterest($interestPayload);
 
-            return $interest->fresh() ?? $interest;
-        });
+                $this->syncPrimaryImage($interest, is_array(data_get($interestPayload, 'primaryImage')) ? data_get($interestPayload, 'primaryImage') : []);
+                $this->syncSimilarInterests($interest, $this->normalizeObjectList(data_get($interestPayload, 'similarInterests')));
+
+                return $interest->fresh() ?? $interest;
+            });
+        } finally {
+            $this->resetBatchedLookupCache();
+        }
     }
 
     /**
@@ -44,46 +53,84 @@ class ImportImdbCatalogInterestPayloadAction
             return 0;
         }
 
-        return DB::connection('imdb_mysql')->transaction(function () use ($categoryPayloads): int {
-            $bridges = [];
-            $seenCategoryIds = [];
+        $this->resetBatchedLookupCache();
 
-            foreach ($categoryPayloads as $categoryPayload) {
-                $categoryName = $this->nullableString(data_get($categoryPayload, 'category'));
+        try {
+            return DB::connection('imdb_mysql')->transaction(function () use ($categoryPayloads): int {
+                $categoriesByName = $this->resolveInterestCategoriesByName(
+                    array_map(
+                        fn (array $categoryPayload): ?string => $this->nullableString(data_get($categoryPayload, 'category')),
+                        $categoryPayloads,
+                    ),
+                );
+                $interestPayloads = [];
+                $primaryImagesByInterestId = [];
+                $bridges = [];
+                $seenCategoryIds = [];
 
-                if ($categoryName === null) {
-                    continue;
+                foreach ($categoryPayloads as $categoryPayload) {
+                    $categoryName = $this->nullableString(data_get($categoryPayload, 'category'));
+
+                    if ($categoryName === null) {
+                        continue;
+                    }
+
+                    $category = $categoriesByName[$categoryName] ?? null;
+
+                    if (! $category instanceof InterestCategory) {
+                        continue;
+                    }
+
+                    $seenCategoryIds[] = (int) $category->getKey();
+
+                    foreach ($this->normalizeObjectList(data_get($categoryPayload, 'interests')) as $interestIndex => $interestPayload) {
+                        $interestId = $this->nullableString(data_get($interestPayload, 'id'));
+
+                        if ($interestId === null) {
+                            continue;
+                        }
+
+                        $interestPayloads[] = $interestPayload;
+
+                        if (is_array(data_get($interestPayload, 'primaryImage'))) {
+                            $primaryImagesByInterestId[$interestId] = data_get($interestPayload, 'primaryImage');
+                        }
+
+                        $bridges[$category->getKey().'|'.$interestId] = [
+                            'interest_category_id' => $category->getKey(),
+                            'interest_imdb_id' => $interestId,
+                            'position' => $interestIndex + 1,
+                        ];
+                    }
                 }
 
-                $category = InterestCategory::query()->firstOrCreate(['name' => $categoryName]);
-                $seenCategoryIds[] = (int) $category->getKey();
+                $interestsByImdbId = $this->resolveInterestModels($interestPayloads);
 
-                foreach ($this->normalizeObjectList(data_get($categoryPayload, 'interests')) as $interestIndex => $interestPayload) {
-                    $interest = $this->upsertInterest($interestPayload);
-                    $this->syncPrimaryImage($interest, is_array(data_get($interestPayload, 'primaryImage')) ? data_get($interestPayload, 'primaryImage') : []);
+                foreach ($primaryImagesByInterestId as $interestId => $primaryImagePayload) {
+                    $interest = $interestsByImdbId[$interestId] ?? null;
 
-                    $bridges[$category->getKey().'|'.$interest->getKey()] = [
-                        'interest_category_id' => $category->getKey(),
-                        'interest_imdb_id' => $interest->getKey(),
-                        'position' => $interestIndex + 1,
-                    ];
+                    if ($interest instanceof Interest && is_array($primaryImagePayload)) {
+                        $this->syncPrimaryImage($interest, $primaryImagePayload);
+                    }
                 }
-            }
 
-            InterestCategoryInterest::query()->delete();
+                InterestCategoryInterest::query()->delete();
 
-            if ($bridges !== []) {
-                InterestCategoryInterest::query()->insert(array_values($bridges));
-            }
+                if ($bridges !== []) {
+                    InterestCategoryInterest::query()->insert(array_values($bridges));
+                }
 
-            if ($seenCategoryIds !== []) {
-                InterestCategory::query()
-                    ->whereNotIn('id', array_values(array_unique($seenCategoryIds)))
-                    ->delete();
-            }
+                if ($seenCategoryIds !== []) {
+                    InterestCategory::query()
+                        ->whereNotIn('id', array_values(array_unique($seenCategoryIds)))
+                        ->delete();
+                }
 
-            return count($bridges);
-        });
+                return count($bridges);
+            });
+        } finally {
+            $this->resetBatchedLookupCache();
+        }
     }
 
     /**
@@ -138,15 +185,79 @@ class ImportImdbCatalogInterestPayloadAction
     {
         InterestSimilarInterest::query()->where('interest_imdb_id', $interest->getKey())->delete();
 
-        foreach ($similarInterests as $index => $similarInterestPayload) {
-            $similarInterest = $this->upsertInterest($similarInterestPayload);
+        $similarInterestModels = $this->resolveInterestModels($similarInterests);
+        $rows = [];
 
-            InterestSimilarInterest::query()->create([
+        foreach ($similarInterests as $index => $similarInterestPayload) {
+            $similarInterestId = $this->nullableString(data_get($similarInterestPayload, 'id'));
+            $similarInterest = $similarInterestId !== null
+                ? ($similarInterestModels[$similarInterestId] ?? null)
+                : null;
+
+            if (! $similarInterest instanceof Interest) {
+                continue;
+            }
+
+            $rows[] = [
                 'interest_imdb_id' => $interest->getKey(),
                 'similar_interest_imdb_id' => $similarInterest->getKey(),
                 'position' => $index + 1,
-            ]);
+            ];
         }
+
+        if ($rows !== []) {
+            InterestSimilarInterest::query()->insert($rows);
+        }
+    }
+
+    /**
+     * @param  list<string|null>  $categoryNames
+     * @return array<string, InterestCategory>
+     */
+    private function resolveInterestCategoriesByName(array $categoryNames): array
+    {
+        $rowsByName = [];
+
+        foreach ($categoryNames as $categoryName) {
+            if ($categoryName === null) {
+                continue;
+            }
+
+            $rowsByName[$categoryName] = ['name' => $categoryName];
+        }
+
+        return $this->batchLookupModels(InterestCategory::class, 'name', $rowsByName);
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $interestPayloads
+     * @return array<string, Interest>
+     */
+    private function resolveInterestModels(array $interestPayloads): array
+    {
+        $rowsByImdbId = [];
+
+        foreach ($interestPayloads as $interestPayload) {
+            $imdbId = $this->nullableString(data_get($interestPayload, 'id'));
+
+            if ($imdbId === null) {
+                continue;
+            }
+
+            $rowsByImdbId[$imdbId] = [
+                'imdb_id' => $imdbId,
+                'name' => $this->nullableString(data_get($interestPayload, 'name')),
+                'description' => $this->nullableString(data_get($interestPayload, 'description')),
+                'is_subgenre' => $this->nullableBool(data_get($interestPayload, 'isSubgenre')) ?? false,
+            ];
+        }
+
+        return $this->batchUpsertModels(
+            Interest::class,
+            'imdb_id',
+            $rowsByImdbId,
+            ['name', 'description', 'is_subgenre'],
+        );
     }
 
     /**

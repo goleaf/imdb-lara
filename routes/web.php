@@ -8,6 +8,7 @@ use App\Livewire\Pages\Public\BrowseTitlesPage;
 use App\Livewire\Pages\Public\CatalogExplorerPage;
 use App\Livewire\Pages\Public\CertificateAttributePage;
 use App\Livewire\Pages\Public\CertificateRatingPage;
+use App\Livewire\Pages\Public\CompanyPage;
 use App\Livewire\Pages\Public\DiscoverPage;
 use App\Livewire\Pages\Public\EpisodeShowPage;
 use App\Livewire\Pages\Public\HomePage;
@@ -60,6 +61,7 @@ Route::name('public.')->group(function (): void {
     Route::livewire('/titles/{title:slug}/metadata', TitleMetadataPage::class)->name('titles.metadata');
     Route::livewire('/people', PeoplePage::class)->name('people.index');
     Route::livewire('/people/{person:slug}', PeoplePage::class)->name('people.show');
+    Route::livewire('/companies/{company:slug}', CompanyPage::class)->name('companies.show');
     Route::livewire('/interest-categories', InterestCategoriesPage::class)->name('interest-categories.index');
     Route::livewire('/interest-categories/{interestCategory:slug}', InterestCategoriesPage::class)->name('interest-categories.show');
     Route::livewire('/awards', AwardsPage::class)->name('awards.index');

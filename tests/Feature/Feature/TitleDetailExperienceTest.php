@@ -658,7 +658,9 @@ class TitleDetailExperienceTest extends TestCase
             ->assertOk()
             ->assertSeeHtml('data-slot="title-detail-movie-certificates"')
             ->assertSee('Certificate records linked directly to this title.')
-            ->assertSee($movieCertificate->certificateRating->name);
+            ->assertSee($movieCertificate->certificateRating->resolvedLabel())
+            ->assertSee($movieCertificate->certificateRating->shortDescription())
+            ->assertSeeHtml('data-slot="certificate-rating-chip"');
 
         $content = $response->getContent();
 
@@ -676,6 +678,7 @@ class TitleDetailExperienceTest extends TestCase
         $sectionMarkup = $matches[0] ?? '';
 
         $this->assertStringContainsString('>Rating</th>', $sectionMarkup);
+        $this->assertStringContainsString('>Meaning</th>', $sectionMarkup);
         $this->assertStringContainsString('>Country</th>', $sectionMarkup);
         $this->assertStringNotContainsString('>id</th>', $sectionMarkup);
         $this->assertStringNotContainsString('>movie_id</th>', $sectionMarkup);
@@ -794,7 +797,9 @@ class TitleDetailExperienceTest extends TestCase
         $this->assertStringContainsString(route('public.certificate-attributes.show', $movieCertificateAttribute->certificateAttribute), $sectionMarkup);
 
         if ($movieCertificateAttribute->movieCertificate?->certificateRating !== null) {
-            $response->assertSee($movieCertificateAttribute->movieCertificate->certificateRating->name);
+            $response
+                ->assertSee($movieCertificateAttribute->movieCertificate->certificateRating->resolvedLabel())
+                ->assertSeeHtml('data-slot="certificate-rating-chip"');
         }
     }
 
@@ -835,7 +840,7 @@ class TitleDetailExperienceTest extends TestCase
         $response = $this->get(route('public.titles.show', $title))
             ->assertOk()
             ->assertSeeHtml('data-slot="title-detail-movie-certificate-attributes"')
-            ->assertSee($movieCertificateAttribute->movieCertificate->certificateRating->name)
+            ->assertSee($movieCertificateAttribute->movieCertificate->certificateRating->resolvedLabel())
             ->assertSee($movieCertificateAttribute->certificateAttribute->name);
 
         $sectionMarkup = $this->sectionMarkup($response, 'title-detail-movie-certificate-attributes');
@@ -884,7 +889,9 @@ class TitleDetailExperienceTest extends TestCase
             ->assertOk()
             ->assertSeeHtml('data-slot="title-detail-certificate-ratings"')
             ->assertSee('Certificate ratings linked to this title through its certificate records.')
-            ->assertSee($movieCertificate->certificateRating->name)
+            ->assertSee($movieCertificate->certificateRating->resolvedLabel())
+            ->assertSee($movieCertificate->certificateRating->shortDescription())
+            ->assertSeeHtml('data-slot="certificate-rating-chip"')
             ->assertSee(route('public.certificate-ratings.show', $movieCertificate->certificateRating), false);
 
         $sectionMarkup = $this->sectionMarkup($response, 'title-detail-certificate-ratings');
@@ -942,7 +949,8 @@ class TitleDetailExperienceTest extends TestCase
             ->assertSeeHtml('data-slot="title-detail-movie-company-credits"')
             ->assertSee('Company credits linked directly to this title.')
             ->assertSee($movieCompanyCredit->company->name)
-            ->assertSee($movieCompanyCredit->companyCreditCategory->name);
+            ->assertSee($movieCompanyCredit->companyCreditCategory->name)
+            ->assertSee(route('public.companies.show', $movieCompanyCredit->company), false);
 
         $sectionMarkup = $this->sectionMarkup($response, 'title-detail-movie-company-credits');
 
@@ -973,13 +981,17 @@ class TitleDetailExperienceTest extends TestCase
             ->select(['movie_id', 'name_basic_id', 'position'])
             ->with([
                 'nameBasic:id,primaryname,displayName',
+                'person' => fn ($personQuery) => $personQuery
+                    ->selectDirectoryColumns()
+                    ->withDirectoryRelations()
+                    ->withDirectoryMetrics(),
             ])
-            ->whereHas('nameBasic', fn ($query) => $query->whereNotNull('primaryname'))
+            ->whereHas('person', fn ($query) => $query->whereNotNull('primaryname'))
             ->orderBy('movie_id')
             ->orderBy('position')
             ->first();
 
-        if (! $movieDirector instanceof MovieDirector || ! $movieDirector->nameBasic) {
+        if (! $movieDirector instanceof MovieDirector || ! $movieDirector->person) {
             $this->markTestSkipped('The remote catalog does not currently expose movie director rows with linked people.');
         }
 
@@ -997,14 +1009,20 @@ class TitleDetailExperienceTest extends TestCase
             ->assertOk()
             ->assertSeeHtml('data-slot="title-detail-movie-directors"')
             ->assertSee('Directors linked directly to this title.')
-            ->assertSee($movieDirector->nameBasic->displayName ?? $movieDirector->nameBasic->primaryname);
+            ->assertSeeHtml('data-slot="title-detail-director-link"')
+            ->assertSee($movieDirector->person->name)
+            ->assertSee(route('public.people.show', $movieDirector->person), false)
+            ->assertSee(route('public.people.show', ['person' => $movieDirector->person, 'job' => 'Directing']), false)
+            ->assertSee('Directed titles');
 
         $sectionMarkup = $this->sectionMarkup($response, 'title-detail-movie-directors');
 
-        $this->assertStringContainsString('>Director</th>', $sectionMarkup);
-        $this->assertStringNotContainsString('>movie_id</th>', $sectionMarkup);
-        $this->assertStringNotContainsString('>name_basic_id</th>', $sectionMarkup);
-        $this->assertStringNotContainsString('>position</th>', $sectionMarkup);
+        $this->assertStringContainsString($movieDirector->person->name, $sectionMarkup);
+        $this->assertStringContainsString(route('public.people.show', $movieDirector->person), $sectionMarkup);
+
+        if ($movieDirector->person->primaryImage_url !== null) {
+            $response->assertSee($movieDirector->person->primaryImage_url);
+        }
     }
 
     public function test_title_page_surfaces_raw_company_rows_when_available(): void
@@ -1015,6 +1033,7 @@ class TitleDetailExperienceTest extends TestCase
             ->select(['id', 'movie_id', 'company_imdb_id', 'position'])
             ->with([
                 'company:imdb_id,name',
+                'companyCreditCategory:id,name',
             ])
             ->whereHas('company', fn ($query) => $query->whereNotNull('name'))
             ->orderBy('movie_id')
@@ -1035,13 +1054,22 @@ class TitleDetailExperienceTest extends TestCase
             $this->markTestSkipped('The selected movie company credit row is not linked to a published title page.');
         }
 
-        $this->get(route('public.titles.show', $title))
+        $response = $this->get(route('public.titles.show', $title))
             ->assertOk()
             ->assertSeeHtml('data-slot="title-detail-companies"')
-            ->assertSee('imdb_id')
-            ->assertSee('name')
-            ->assertSee($movieCompanyCredit->company->imdb_id)
-            ->assertSee($movieCompanyCredit->company->name);
+            ->assertSee('Companies connected to this title through its company credit records.')
+            ->assertSee($movieCompanyCredit->company->name)
+            ->assertSee(route('public.companies.show', $movieCompanyCredit->company), false)
+            ->assertSee('Open company archive');
+
+        $sectionMarkup = $this->sectionMarkup($response, 'title-detail-companies');
+
+        $this->assertStringNotContainsString('>imdb_id</th>', $sectionMarkup);
+        $this->assertStringNotContainsString('>name</th>', $sectionMarkup);
+
+        if ($movieCompanyCredit->companyCreditCategory?->name !== null) {
+            $response->assertSee($movieCompanyCredit->companyCreditCategory->name);
+        }
     }
 
     public function test_title_page_surfaces_raw_movie_company_credit_attribute_rows_when_available(): void

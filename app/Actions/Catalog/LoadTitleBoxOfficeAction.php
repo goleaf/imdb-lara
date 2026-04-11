@@ -171,7 +171,7 @@ class LoadTitleBoxOfficeAction
                     'key' => 'reportedFields',
                     'label' => 'Imported Fields',
                     'value' => number_format($reportedCoverageCount),
-                    'copy' => 'Commercial fields currently populated on the imported box-office row.',
+                    'copy' => 'Commercial details currently attached to the imported box office record.',
                 ]
                 : null,
         ])
@@ -351,7 +351,7 @@ class LoadTitleBoxOfficeAction
                     'key' => 'lifetimeGross',
                     'label' => 'Lifetime gross reporting',
                     'badge' => $this->formatCurrencyBadge($boxOffice->worldwide_gross_currency_code),
-                    'copy' => 'Worldwide theatrical gross is populated on the imported box-office row.',
+                    'copy' => 'A worldwide theatrical gross is currently attached to the imported box office record.',
                 ]
                 : null,
             filled($boxOffice->domestic_gross_amount)
@@ -359,7 +359,7 @@ class LoadTitleBoxOfficeAction
                     'key' => 'domesticGross',
                     'label' => 'Domestic gross reporting',
                     'badge' => $this->formatCurrencyBadge($boxOffice->domestic_gross_currency_code),
-                    'copy' => 'Home-market theatrical gross is available for this title.',
+                    'copy' => 'A domestic theatrical gross is currently attached to this title.',
                 ]
                 : null,
             filled($boxOffice->opening_weekend_gross_amount)
@@ -368,8 +368,8 @@ class LoadTitleBoxOfficeAction
                     'label' => 'Opening weekend reporting',
                     'badge' => $openingWeekendCloseDate ?? $this->formatCurrencyBadge($boxOffice->opening_weekend_gross_currency_code),
                     'copy' => $openingWeekendCloseDate !== null
-                        ? 'Opening weekend gross is present with a tracked weekend close date.'
-                        : 'Opening weekend gross is attached on the imported commercial row.',
+                        ? 'An opening weekend gross is present, along with the recorded weekend close date.'
+                        : 'An opening weekend gross is currently attached to the imported box office record.',
                 ]
                 : null,
             filled($boxOffice->production_budget_amount)
@@ -377,7 +377,7 @@ class LoadTitleBoxOfficeAction
                     'key' => 'productionBudget',
                     'label' => 'Production budget reporting',
                     'badge' => $this->formatCurrencyBadge($boxOffice->production_budget_currency_code),
-                    'copy' => 'Budget reporting is available for revenue and multiple comparisons.',
+                    'copy' => 'A production budget is available for revenue comparisons and multiples.',
                 ]
                 : null,
             $reportedCurrenciesLabel !== null
@@ -385,7 +385,7 @@ class LoadTitleBoxOfficeAction
                     'key' => 'reportedCurrencies',
                     'label' => 'Reported currencies',
                     'badge' => $reportedCurrenciesLabel,
-                    'copy' => 'Distinct currency codes currently attached to the imported commercial fields.',
+                    'copy' => 'These are the currency codes currently attached to the imported commercial figures.',
                 ]
                 : null,
             $summaryCards->isNotEmpty()
@@ -393,7 +393,7 @@ class LoadTitleBoxOfficeAction
                     'key' => 'figureCoverage',
                     'label' => 'Figure coverage',
                     'badge' => $summaryCards->count().' / 4',
-                    'copy' => 'Headline commercial fields currently populated on the title\'s box-office record.',
+                    'copy' => 'This shows how many headline commercial figures are already filled on the imported record.',
                 ]
                 : null,
         ])
@@ -461,7 +461,7 @@ class LoadTitleBoxOfficeAction
             'key' => 'figureCoverage',
             'label' => 'Figure coverage',
             'value' => $summaryCards->count().' / 4',
-            'copy' => 'Headline commercial fields currently populated on the imported box-office row.',
+            'copy' => 'Headline commercial figures currently filled on the imported box office record.',
         ];
     }
 
@@ -499,7 +499,7 @@ class LoadTitleBoxOfficeAction
             'key' => 'reportedCurrencies',
             'label' => 'Reported currencies',
             'value' => $reportedCurrenciesLabel,
-            'copy' => 'Distinct currency codes attached to the imported commercial figures.',
+            'copy' => 'Currency codes currently attached to the imported commercial figures.',
         ];
     }
 

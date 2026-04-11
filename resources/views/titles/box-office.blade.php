@@ -60,7 +60,7 @@
                         <div>
                             <div class="sb-box-office-panel-kicker">Revenue Spotlight</div>
                             <div class="sb-box-office-panel-copy">
-                                Strong headline grosses stay prominent while the supporting cards expose the imported date, currency, rank, and coverage context that already exists on the commercial row.
+                                Strong headline grosses stay prominent while the supporting cards explain the imported date, currency, rank, and coverage details already attached to this box office record.
                             </div>
                         </div>
 
@@ -90,7 +90,7 @@
                                     <div class="sb-box-office-mini-card">
                                         <div class="sb-box-office-mini-label">Imported fields</div>
                                         <div class="sb-box-office-mini-value">0 / 4</div>
-                                        <div class="sb-box-office-mini-copy">No headline commercial fields are currently populated on the title's box-office row.</div>
+                                        <div class="sb-box-office-mini-copy">No headline commercial figures are currently attached to this title's imported box office record.</div>
                                     </div>
                                 @endif
                             @endforelse
@@ -212,49 +212,55 @@
 
         <x-ui.card class="sb-detail-section sb-box-office-shell !max-w-none p-5 sm:p-6" data-slot="title-box-office-markets">
             <div class="space-y-5">
-                <div class="flex flex-wrap items-center justify-between gap-4">
+                <div class="grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(18rem,0.52fr)] xl:items-start">
                     <div>
                         <x-ui.heading level="h2" size="lg">Reporting Footprint</x-ui.heading>
                         <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                            The imported <code>movie_box_office</code> row currently carries these commercial fields, currencies, and date details for {{ $title->name }}.
+                            The imported box office record currently carries these commercial fields, currencies, and date details for {{ $title->name }}.
                         </x-ui.text>
                     </div>
 
-                    <x-ui.badge variant="outline" color="neutral" icon="queue-list">
-                        {{ number_format($reportedCoverageCount) }} imported fields
-                    </x-ui.badge>
+                    <article class="sb-box-office-mini-card">
+                        <div class="sb-box-office-mini-label">Imported coverage</div>
+                        <div class="sb-box-office-mini-value">{{ number_format($reportedCoverageCount) }} details</div>
+                        <div class="sb-box-office-mini-copy">
+                            {{ $reportingRows->isNotEmpty()
+                                ? 'Commercial fields, currencies, and calendar details already visible on this imported box office record.'
+                                : 'No structured commercial fields, currencies, or dates have been attached to this imported box office record yet.' }}
+                        </div>
+                    </article>
                 </div>
 
-                @if ($reportingRows->isNotEmpty())
-                    <div class="space-y-3">
-                        @foreach ($reportingRows as $reportingRow)
-                            <article class="sb-box-office-market-row">
-                                <div class="flex flex-wrap items-start justify-between gap-3">
-                                    <div>
-                                        <div class="sb-box-office-market-label">{{ $reportingRow['label'] }}</div>
-                                        <div class="sb-box-office-market-copy">{{ $reportingRow['copy'] }}</div>
-                                    </div>
-
-                                    @if ($reportingRow['badge'])
-                                        <x-ui.badge variant="outline" color="slate" icon="queue-list">
-                                            {{ $reportingRow['badge'] }}
-                                        </x-ui.badge>
-                                    @endif
+                <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                    @forelse ($reportingRows as $reportingRow)
+                        <article class="sb-box-office-mini-card h-full">
+                            <div class="flex h-full flex-wrap items-start justify-between gap-3">
+                                <div class="min-w-0">
+                                    <div class="sb-box-office-mini-label">{{ $reportingRow['label'] }}</div>
+                                    <div class="sb-box-office-mini-copy">{{ $reportingRow['copy'] }}</div>
                                 </div>
-                            </article>
-                        @endforeach
-                    </div>
-                @else
-                    <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
-                        <x-ui.empty.media>
-                            <x-ui.icon name="queue-list" class="size-8 text-neutral-400 dark:text-neutral-500" />
-                        </x-ui.empty.media>
-                        <x-ui.heading level="h3">Reporting footprint has not been attached yet.</x-ui.heading>
-                        <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
-                            This section will populate automatically once the imported <code>movie_box_office</code> row carries structured commercial figures for the title.
-                        </x-ui.text>
-                    </x-ui.empty>
-                @endif
+
+                                @if ($reportingRow['badge'])
+                                    <x-ui.badge variant="outline" color="slate" icon="queue-list">
+                                        {{ $reportingRow['badge'] }}
+                                    </x-ui.badge>
+                                @endif
+                            </div>
+                        </article>
+                    @empty
+                        <div class="sm:col-span-2 xl:col-span-3">
+                            <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
+                                <x-ui.empty.media>
+                                    <x-ui.icon name="queue-list" class="size-8 text-neutral-400 dark:text-neutral-500" />
+                                </x-ui.empty.media>
+                                <x-ui.heading level="h3">Box office details have not been attached yet.</x-ui.heading>
+                                <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
+                                    This section will fill in automatically once the imported box office record includes structured commercial figures for the title.
+                                </x-ui.text>
+                            </x-ui.empty>
+                        </div>
+                    @endforelse
+                </div>
             </div>
         </x-ui.card>
     </section>

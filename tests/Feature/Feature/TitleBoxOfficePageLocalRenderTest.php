@@ -67,8 +67,10 @@ class TitleBoxOfficePageLocalRenderTest extends TestCase
         $this->get(route('public.titles.box-office', $title))
             ->assertOk()
             ->assertSee('Reporting Footprint')
+            ->assertSee('The imported box office record currently carries these commercial fields, currencies, and date details for The Matrix.')
             ->assertSee('Lifetime gross reporting')
             ->assertSee('USD 467,222,728')
+            ->assertDontSee('movie_box_office')
             ->assertDontSee('Call to a member function getKey() on string');
     }
 }

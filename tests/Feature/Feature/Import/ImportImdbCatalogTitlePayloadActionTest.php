@@ -4,8 +4,12 @@ namespace Tests\Feature\Feature\Import;
 
 use App\Actions\Import\ImportImdbCatalogTitlePayloadAction;
 use App\Console\Commands\ImdbImportTitlesFrontierCommand;
+use App\Models\CertificateAttribute;
+use App\Models\CertificateRating;
 use App\Models\Country;
 use App\Models\Movie;
+use App\Models\MovieCertificate;
+use App\Models\MovieCertificateAttribute;
 use App\Models\MovieParentsGuideSection;
 use App\Models\MovieParentsGuideSeverityBreakdown;
 use App\Models\MovieReleaseDate;
@@ -16,6 +20,7 @@ use Illuminate\Contracts\Console\Isolatable;
 use Illuminate\Database\QueryException;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use PDOException;
 use Tests\Concerns\BootstrapsImdbMysqlSqlite;
@@ -35,6 +40,7 @@ class ImportImdbCatalogTitlePayloadActionTest extends TestCase
         Schema::connection('imdb_mysql')->enableForeignKeyConstraints();
         $this->setUpParentsGuideTables();
         $this->setUpReleaseDateTables();
+        $this->setUpCertificateTables();
     }
 
     public function test_sync_parents_guide_defaults_missing_severity_vote_counts_to_zero(): void
@@ -259,6 +265,95 @@ class ImportImdbCatalogTitlePayloadActionTest extends TestCase
         ], 'imdb_mysql');
     }
 
+    public function test_sync_genres_resolves_genre_existence_checks_in_batch_queries(): void
+    {
+        $movie = Movie::query()->create([
+            'tconst' => 'tt0319729',
+            'imdb_id' => 'tt0319729',
+            'titletype' => 'movie',
+            'primarytitle' => 'Batch Genres',
+            'originaltitle' => 'Batch Genres',
+            'isadult' => 0,
+            'startyear' => 2026,
+        ]);
+
+        $action = app(ImportImdbCatalogTitlePayloadAction::class);
+
+        $syncGenres = \Closure::bind(
+            function (Movie $movie, array $genreNames): void {
+                $this->syncGenres($movie, $genreNames);
+            },
+            $action,
+            ImportImdbCatalogTitlePayloadAction::class,
+        );
+
+        DB::connection('imdb_mysql')->flushQueryLog();
+        DB::connection('imdb_mysql')->enableQueryLog();
+
+        $syncGenres($movie, ['Action', 'Thriller', 'Mystery']);
+
+        $genreQueries = collect(DB::connection('imdb_mysql')->getQueryLog())
+            ->pluck('query')
+            ->filter(fn (string $query): bool => str_contains($query, 'into "genres"') || str_contains($query, 'from "genres"'));
+
+        $this->assertLessThanOrEqual(3, $genreQueries->count());
+        $this->assertCount(3, Movie::query()->findOrFail($movie->getKey())->movieGenres()->get());
+    }
+
+    public function test_sync_certificates_skips_entries_without_a_rating(): void
+    {
+        $movie = Movie::query()->create([
+            'tconst' => 'tt33244668',
+            'imdb_id' => 'tt33244668',
+            'titletype' => 'movie',
+            'primarytitle' => 'Missing Certificate Rating',
+            'originaltitle' => 'Missing Certificate Rating',
+            'isadult' => 0,
+            'startyear' => 2026,
+        ]);
+
+        $action = app(ImportImdbCatalogTitlePayloadAction::class);
+
+        $syncCertificates = \Closure::bind(
+            function (Movie $movie, array $certificatesPayload): void {
+                $this->syncCertificates($movie, $certificatesPayload);
+            },
+            $action,
+            ImportImdbCatalogTitlePayloadAction::class,
+        );
+
+        $syncCertificates($movie, [
+            'certificates' => [
+                [
+                    'country' => [
+                        'code' => 'US',
+                        'name' => 'United States',
+                    ],
+                    'attributes' => ['language'],
+                ],
+                [
+                    'rating' => 'PG-13',
+                    'country' => [
+                        'code' => 'IL',
+                        'name' => 'Israel',
+                    ],
+                    'attributes' => ['violence'],
+                ],
+            ],
+        ]);
+
+        $certificates = MovieCertificate::query()
+            ->where('movie_id', $movie->getKey())
+            ->orderBy('position')
+            ->get();
+
+        $this->assertCount(1, $certificates);
+        $this->assertSame('IL', $certificates->first()->country_code);
+        $this->assertSame('PG-13', CertificateRating::query()->findOrFail($certificates->first()->certificate_rating_id)->name);
+        $this->assertCount(1, MovieCertificateAttribute::query()->where('movie_certificate_id', $certificates->first()->getKey())->get());
+        $this->assertSame(['violence'], CertificateAttribute::query()->orderBy('name')->pluck('name')->all());
+    }
+
     public function test_sync_credits_merges_duplicate_unique_name_credit_rows_before_writing(): void
     {
         $movie = Movie::query()->create([
@@ -384,6 +479,39 @@ class ImportImdbCatalogTitlePayloadActionTest extends TestCase
             $table->primary(['movie_release_date_id', 'release_date_attribute_id']);
             $table->foreign('movie_release_date_id')->references('id')->on('movie_release_dates')->cascadeOnDelete();
             $table->foreign('release_date_attribute_id')->references('id')->on('release_date_attributes')->cascadeOnUpdate()->restrictOnDelete();
+        });
+    }
+
+    private function setUpCertificateTables(): void
+    {
+        Schema::connection('imdb_mysql')->create('certificate_ratings', function (Blueprint $table): void {
+            $table->increments('id');
+            $table->string('name')->unique();
+        });
+
+        Schema::connection('imdb_mysql')->create('certificate_attributes', function (Blueprint $table): void {
+            $table->increments('id');
+            $table->string('name')->unique();
+        });
+
+        Schema::connection('imdb_mysql')->create('movie_certificates', function (Blueprint $table): void {
+            $table->increments('id');
+            $table->unsignedInteger('movie_id');
+            $table->unsignedInteger('certificate_rating_id');
+            $table->string('country_code', 8)->nullable();
+            $table->unsignedInteger('position')->nullable();
+            $table->foreign('movie_id')->references('id')->on('movies')->cascadeOnDelete();
+            $table->foreign('certificate_rating_id')->references('id')->on('certificate_ratings')->cascadeOnUpdate()->restrictOnDelete();
+            $table->foreign('country_code')->references('code')->on('countries')->cascadeOnUpdate()->restrictOnDelete();
+        });
+
+        Schema::connection('imdb_mysql')->create('movie_certificate_attributes', function (Blueprint $table): void {
+            $table->unsignedInteger('movie_certificate_id');
+            $table->unsignedInteger('certificate_attribute_id');
+            $table->unsignedSmallInteger('position');
+            $table->primary(['movie_certificate_id', 'certificate_attribute_id']);
+            $table->foreign('movie_certificate_id')->references('id')->on('movie_certificates')->cascadeOnDelete();
+            $table->foreign('certificate_attribute_id')->references('id')->on('certificate_attributes')->cascadeOnUpdate()->restrictOnDelete();
         });
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Actions\Import;
 
+use App\Actions\Import\Concerns\BatchesCatalogImportLookups;
 use App\Actions\Import\Concerns\ManagesImdbImportConcurrency;
 use App\Models\Genre;
 use App\Models\Movie;
@@ -31,7 +32,13 @@ use RuntimeException;
 
 class ImportImdbCatalogNamePayloadAction
 {
+    use BatchesCatalogImportLookups;
     use ManagesImdbImportConcurrency;
+
+    /**
+     * @var array<string, Movie>
+     */
+    private array $movieStubCache = [];
 
     /**
      * @param  array<string, mixed>  $payload
@@ -46,27 +53,33 @@ class ImportImdbCatalogNamePayloadAction
 
         $imdbId = $this->requiredImdbId($detailsPayload);
 
-        /** @var NameBasic $person */
-        $person = $this->runLockedImport('name', $imdbId, function () use ($payload, $detailsPayload): NameBasic {
-            $person = $this->upsertPerson($detailsPayload);
+        $this->resetImportCaches();
 
-            $this->syncAlternativeNames($person, $this->alternativeNames($detailsPayload));
-            $this->syncProfessions($person, $this->normalizeStringList(data_get($detailsPayload, 'primaryProfessions')));
-            $this->syncPrimaryImage($person, is_array(data_get($detailsPayload, 'primaryImage')) ? data_get($detailsPayload, 'primaryImage') : []);
-            $this->syncImages($person, is_array(data_get($payload, 'images')) ? data_get($payload, 'images') : []);
-            $this->syncFilmography($person, is_array(data_get($payload, 'filmography')) ? data_get($payload, 'filmography') : []);
-            $this->syncKnownForTitles(
-                $person,
-                $this->normalizeObjectList(data_get($detailsPayload, 'knownForTitles')),
-                $this->normalizeObjectList(data_get($payload, 'filmography.credits')),
-            );
-            $this->syncRelationships($person, is_array(data_get($payload, 'relationships')) ? data_get($payload, 'relationships') : []);
-            $this->syncTrivia($person, is_array(data_get($payload, 'trivia')) ? data_get($payload, 'trivia') : []);
+        try {
+            /** @var NameBasic $person */
+            $person = $this->runLockedImport('name', $imdbId, function () use ($payload, $detailsPayload): NameBasic {
+                $person = $this->upsertPerson($detailsPayload);
 
-            return $person->fresh() ?? $person;
-        });
+                $this->syncAlternativeNames($person, $this->alternativeNames($detailsPayload));
+                $this->syncProfessions($person, $this->normalizeStringList(data_get($detailsPayload, 'primaryProfessions')));
+                $this->syncPrimaryImage($person, is_array(data_get($detailsPayload, 'primaryImage')) ? data_get($detailsPayload, 'primaryImage') : []);
+                $this->syncImages($person, is_array(data_get($payload, 'images')) ? data_get($payload, 'images') : []);
+                $this->syncFilmography($person, is_array(data_get($payload, 'filmography')) ? data_get($payload, 'filmography') : []);
+                $this->syncKnownForTitles(
+                    $person,
+                    $this->normalizeObjectList(data_get($detailsPayload, 'knownForTitles')),
+                    $this->normalizeObjectList(data_get($payload, 'filmography.credits')),
+                );
+                $this->syncRelationships($person, is_array(data_get($payload, 'relationships')) ? data_get($payload, 'relationships') : []);
+                $this->syncTrivia($person, is_array(data_get($payload, 'trivia')) ? data_get($payload, 'trivia') : []);
 
-        return $person;
+                return $person->fresh() ?? $person;
+            });
+
+            return $person;
+        } finally {
+            $this->resetImportCaches();
+        }
     }
 
     /**
@@ -150,12 +163,18 @@ class ImportImdbCatalogNamePayloadAction
     {
         NameBasicAlternativeName::query()->where('name_basic_id', $person->getKey())->delete();
 
+        $rows = [];
+
         foreach ($alternativeNames as $index => $alternativeName) {
-            NameBasicAlternativeName::query()->create([
+            $rows[] = [
                 'name_basic_id' => $person->getKey(),
                 'alternative_name' => $alternativeName,
                 'position' => $index + 1,
-            ]);
+            ];
+        }
+
+        if ($rows !== []) {
+            NameBasicAlternativeName::query()->insert($rows);
         }
     }
 
@@ -166,14 +185,25 @@ class ImportImdbCatalogNamePayloadAction
     {
         NameBasicProfession::query()->where('name_basic_id', $person->getKey())->delete();
 
-        foreach ($professionNames as $index => $professionName) {
-            $profession = Profession::query()->firstOrCreate(['name' => $professionName]);
+        $professionsByName = $this->resolveProfessionsByName($professionNames);
+        $rows = [];
 
-            NameBasicProfession::query()->create([
+        foreach ($professionNames as $index => $professionName) {
+            $profession = $professionsByName[$professionName] ?? null;
+
+            if (! $profession instanceof Profession) {
+                continue;
+            }
+
+            $rows[] = [
                 'name_basic_id' => $person->getKey(),
                 'profession_id' => $profession->getKey(),
                 'position' => $index + 1,
-            ]);
+            ];
+        }
+
+        if ($rows !== []) {
+            NameBasicProfession::query()->insert($rows);
         }
     }
 
@@ -206,6 +236,8 @@ class ImportImdbCatalogNamePayloadAction
     {
         NameImage::query()->where('name_basic_id', $person->getKey())->delete();
 
+        $rows = [];
+
         foreach ($this->normalizeObjectList(data_get($imagesPayload, 'images')) as $index => $imagePayload) {
             $url = $this->nullableString(data_get($imagePayload, 'url'));
 
@@ -213,14 +245,18 @@ class ImportImdbCatalogNamePayloadAction
                 continue;
             }
 
-            NameImage::query()->create([
+            $rows[] = [
                 'name_basic_id' => $person->getKey(),
                 'position' => $index + 1,
                 'url' => $url,
                 'width' => $this->nullableInt(data_get($imagePayload, 'width')),
                 'height' => $this->nullableInt(data_get($imagePayload, 'height')),
                 'type' => $this->nullableString(data_get($imagePayload, 'type')),
-            ]);
+            ];
+        }
+
+        if ($rows !== []) {
+            NameImage::query()->insert($rows);
         }
 
         if ($this->nullableInt(data_get($imagesPayload, 'totalCount')) !== null) {
@@ -243,10 +279,17 @@ class ImportImdbCatalogNamePayloadAction
         $creditCharacters = [];
         $movieIds = [];
 
-        foreach ($this->collapseFilmographyCredits(
+        $collapsedCredits = $this->collapseFilmographyCredits(
             $this->normalizeObjectList(data_get($filmographyPayload, 'credits')),
-        ) as $creditPayload) {
-            $movie = $this->upsertMovieStub(data_get($creditPayload, 'title'));
+        );
+        $moviesByImdbId = $this->preloadMovieStubs(array_values(array_filter(array_map(
+            fn (array $creditPayload): mixed => data_get($creditPayload, 'title'),
+            $collapsedCredits,
+        ), fn (mixed $payload): bool => is_array($payload))));
+
+        foreach ($collapsedCredits as $creditPayload) {
+            $titleId = $this->nullableString(data_get($creditPayload, 'title.id'));
+            $movie = $titleId !== null ? ($moviesByImdbId[$titleId] ?? null) : null;
 
             if (! $movie instanceof Movie) {
                 continue;
@@ -283,6 +326,10 @@ class ImportImdbCatalogNamePayloadAction
                     $credit->category,
                 ));
 
+            NameCreditCharacter::query()->whereIn('name_credit_id', $persistedCredits->pluck('id')->all())->delete();
+
+            $characterRows = [];
+
             foreach ($creditCharacters as $creditKey => $characters) {
                 $credit = $persistedCredits->get($creditKey);
 
@@ -290,7 +337,17 @@ class ImportImdbCatalogNamePayloadAction
                     continue;
                 }
 
-                $this->syncNameCreditCharacters($credit, $characters);
+                foreach ($characters as $index => $characterName) {
+                    $characterRows[] = [
+                        'name_credit_id' => $credit->getKey(),
+                        'position' => $index + 1,
+                        'character_name' => $characterName,
+                    ];
+                }
+            }
+
+            if ($characterRows !== []) {
+                NameCreditCharacter::query()->insert($characterRows);
             }
         }
 
@@ -318,18 +375,33 @@ class ImportImdbCatalogNamePayloadAction
 
         NameRelationship::query()->where('name_basic_id', $person->getKey())->delete();
 
-        foreach ($this->normalizeObjectList(data_get($relationshipsPayload, 'relationships')) as $index => $relationshipPayload) {
-            $related = $this->upsertPerson([
-                'id' => $this->nullableString(data_get($relationshipPayload, 'name.id')),
-                'displayName' => $this->nullableString(data_get($relationshipPayload, 'name.displayName')),
-            ]);
-            $relationTypeName = $this->nullableString(data_get($relationshipPayload, 'relationType'));
+        $relationships = $this->normalizeObjectList(data_get($relationshipsPayload, 'relationships'));
+        $relatedPeopleByImdbId = $this->resolveRelatedPeople($relationships);
+        $relationTypesByName = $this->resolveRelationTypesByName(array_map(
+            fn (array $relationshipPayload): ?string => $this->nullableString(data_get($relationshipPayload, 'relationType')),
+            $relationships,
+        ));
+        $relationAttributesByName = $this->resolveRelationAttributesByName($this->flattenStringLists(array_map(
+            fn (array $relationshipPayload): array => $this->normalizeStringList(data_get($relationshipPayload, 'attributes')),
+            $relationships,
+        )));
+        $attributeRows = [];
 
-            if ($relationTypeName === null) {
+        foreach ($relationships as $index => $relationshipPayload) {
+            $relatedId = $this->nullableString(data_get($relationshipPayload, 'name.id'));
+            $relationTypeName = $this->nullableString(data_get($relationshipPayload, 'relationType'));
+            $related = $relatedId !== null ? ($relatedPeopleByImdbId[$relatedId] ?? null) : null;
+
+            if (! $related instanceof NameBasic || $relationTypeName === null) {
                 continue;
             }
 
-            $relationType = NameRelationType::query()->firstOrCreate(['name' => $relationTypeName]);
+            $relationType = $relationTypesByName[$relationTypeName] ?? null;
+
+            if (! $relationType instanceof NameRelationType) {
+                continue;
+            }
+
             $relationship = NameRelationship::query()->create([
                 'name_basic_id' => $person->getKey(),
                 'related_name_basic_id' => $related->getKey(),
@@ -338,14 +410,22 @@ class ImportImdbCatalogNamePayloadAction
             ]);
 
             foreach ($this->normalizeStringList(data_get($relationshipPayload, 'attributes')) as $attributeIndex => $attributeName) {
-                $attribute = RelationAttribute::query()->firstOrCreate(['name' => $attributeName]);
+                $attribute = $relationAttributesByName[$attributeName] ?? null;
 
-                NameRelationshipAttribute::query()->create([
+                if (! $attribute instanceof RelationAttribute) {
+                    continue;
+                }
+
+                $attributeRows[] = [
                     'name_relationship_id' => $relationship->getKey(),
                     'relation_attribute_id' => $attribute->getKey(),
                     'position' => $attributeIndex + 1,
-                ]);
+                ];
             }
+        }
+
+        if ($attributeRows !== []) {
+            NameRelationshipAttribute::query()->insert($attributeRows);
         }
     }
 
@@ -366,8 +446,12 @@ class ImportImdbCatalogNamePayloadAction
                 $filmographyCredits,
             ), fn (mixed $titlePayload): bool => is_array($titlePayload)));
 
+        $moviesByImdbId = $this->preloadMovieStubs($candidatePayloads);
+        $rows = [];
+
         foreach ($candidatePayloads as $candidatePayload) {
-            $movie = $this->upsertMovieStub($candidatePayload);
+            $titleId = $this->nullableString(data_get($candidatePayload, 'id'));
+            $movie = $titleId !== null ? ($moviesByImdbId[$titleId] ?? null) : null;
 
             if (! $movie instanceof Movie) {
                 continue;
@@ -381,17 +465,21 @@ class ImportImdbCatalogNamePayloadAction
 
             $seenMovieIds[$movieId] = true;
 
-            NameBasicKnownForTitle::query()->create([
+            $rows[] = [
                 'name_basic_id' => $person->getKey(),
                 'title_basic_id' => $movieId,
                 'position' => $position,
-            ]);
+            ];
 
             $position++;
 
             if ($position > 4) {
                 break;
             }
+        }
+
+        if ($rows !== []) {
+            NameBasicKnownForTitle::query()->insert($rows);
         }
     }
 
@@ -402,6 +490,8 @@ class ImportImdbCatalogNamePayloadAction
     {
         NameTriviaEntry::query()->where('name_basic_id', $person->getKey())->delete();
 
+        $rows = [];
+
         foreach ($this->normalizeObjectList(data_get($triviaPayload, 'triviaEntries')) as $index => $entryPayload) {
             $entryId = $this->nullableString(data_get($entryPayload, 'id'));
 
@@ -409,14 +499,18 @@ class ImportImdbCatalogNamePayloadAction
                 continue;
             }
 
-            NameTriviaEntry::query()->create([
+            $rows[] = [
                 'imdb_id' => $entryId,
                 'name_basic_id' => $person->getKey(),
                 'text' => $this->nullableString(data_get($entryPayload, 'text')),
                 'interest_count' => $this->nullableInt(data_get($entryPayload, 'interestCount')),
                 'vote_count' => $this->nullableInt(data_get($entryPayload, 'voteCount')),
                 'position' => $index + 1,
-            ]);
+            ];
+        }
+
+        if ($rows !== []) {
+            NameTriviaEntry::query()->insert($rows);
         }
 
         if ($this->nullableInt(data_get($triviaPayload, 'totalCount')) !== null) {
@@ -445,15 +539,10 @@ class ImportImdbCatalogNamePayloadAction
             return null;
         }
 
-        $movie = Movie::query()
-            ->where('tconst', $imdbId)
-            ->orWhere('imdb_id', $imdbId)
-            ->first() ?? new Movie;
+        $movie = $this->movieStubCache[$imdbId] ?? new Movie;
 
         $typeName = $this->nullableString(data_get($payload, 'type'));
-        $titleType = $typeName !== null
-            ? TitleType::query()->firstOrCreate(['name' => $typeName])
-            : null;
+        $titleType = $this->resolveTitleType($typeName);
         $genres = $this->normalizeStringList(data_get($payload, 'genres'));
 
         $movie->fill([
@@ -471,18 +560,29 @@ class ImportImdbCatalogNamePayloadAction
             'title_type_id' => $titleType?->getKey() ?? $movie->title_type_id,
         ]);
         $movie->save();
+        $this->movieStubCache[$imdbId] = $movie;
 
         if ($genres !== []) {
             MovieGenre::query()->where('movie_id', $movie->getKey())->delete();
+            $genresByName = $this->resolveGenresByName($genres);
+            $genreRows = [];
 
             foreach ($genres as $index => $genreName) {
-                $genre = Genre::query()->firstOrCreate(['name' => $genreName]);
+                $genre = $genresByName[$genreName] ?? null;
 
-                MovieGenre::query()->create([
+                if (! $genre instanceof Genre) {
+                    continue;
+                }
+
+                $genreRows[] = [
                     'movie_id' => $movie->getKey(),
                     'genre_id' => $genre->getKey(),
                     'position' => $index + 1,
-                ]);
+                ];
+            }
+
+            if ($genreRows !== []) {
+                MovieGenre::query()->insert($genreRows);
             }
         }
 
@@ -533,6 +633,192 @@ class ImportImdbCatalogNamePayloadAction
             ['movie_id' => $movie->getKey()],
             $attributes,
         );
+    }
+
+    private function resetImportCaches(): void
+    {
+        $this->resetBatchedLookupCache();
+        $this->movieStubCache = [];
+    }
+
+    private function resolveTitleType(?string $typeName): ?TitleType
+    {
+        if ($typeName === null) {
+            return null;
+        }
+
+        return $this->batchLookupModels(
+            TitleType::class,
+            'name',
+            [$typeName => ['name' => $typeName]],
+        )[$typeName] ?? null;
+    }
+
+    /**
+     * @param  list<string>  $genreNames
+     * @return array<string, Genre>
+     */
+    private function resolveGenresByName(array $genreNames): array
+    {
+        return $this->batchLookupModels(Genre::class, 'name', $this->stringLookupRows($genreNames));
+    }
+
+    /**
+     * @param  list<string>  $professionNames
+     * @return array<string, Profession>
+     */
+    private function resolveProfessionsByName(array $professionNames): array
+    {
+        return $this->batchLookupModels(Profession::class, 'name', $this->stringLookupRows($professionNames));
+    }
+
+    /**
+     * @param  list<string|null>  $relationTypeNames
+     * @return array<string, NameRelationType>
+     */
+    private function resolveRelationTypesByName(array $relationTypeNames): array
+    {
+        return $this->batchLookupModels(
+            NameRelationType::class,
+            'name',
+            $this->stringLookupRows(array_values(array_filter($relationTypeNames))),
+        );
+    }
+
+    /**
+     * @param  list<string>  $attributeNames
+     * @return array<string, RelationAttribute>
+     */
+    private function resolveRelationAttributesByName(array $attributeNames): array
+    {
+        return $this->batchLookupModels(
+            RelationAttribute::class,
+            'name',
+            $this->stringLookupRows($attributeNames),
+        );
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $relationships
+     * @return array<string, NameBasic>
+     */
+    private function resolveRelatedPeople(array $relationships): array
+    {
+        $rowsByImdbId = [];
+
+        foreach ($relationships as $relationshipPayload) {
+            $imdbId = $this->nullableString(data_get($relationshipPayload, 'name.id'));
+
+            if ($imdbId === null) {
+                continue;
+            }
+
+            $rowsByImdbId[$imdbId] = [
+                'nconst' => $imdbId,
+                'imdb_id' => $imdbId,
+                'displayName' => $this->nullableString(data_get($relationshipPayload, 'name.displayName')) ?? $imdbId,
+                'primaryname' => $this->nullableString(data_get($relationshipPayload, 'name.displayName')) ?? $imdbId,
+            ];
+        }
+
+        return $this->batchUpsertModels(
+            NameBasic::class,
+            'nconst',
+            $rowsByImdbId,
+            ['imdb_id', 'displayName', 'primaryname'],
+        );
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $payloads
+     * @return array<string, Movie>
+     */
+    private function preloadMovieStubs(array $payloads): array
+    {
+        $payloadsById = [];
+
+        foreach ($payloads as $payload) {
+            $imdbId = $this->nullableString(data_get($payload, 'id'));
+
+            if ($imdbId === null) {
+                continue;
+            }
+
+            $payloadsById[$imdbId] = $payload;
+        }
+
+        $this->warmMovieStubCache(array_keys($payloadsById));
+
+        $models = [];
+
+        foreach ($payloadsById as $imdbId => $payload) {
+            $model = $this->upsertMovieStub($payload);
+
+            if ($model instanceof Movie) {
+                $models[$imdbId] = $model;
+            }
+        }
+
+        return $models;
+    }
+
+    /**
+     * @param  list<string>  $imdbIds
+     */
+    private function warmMovieStubCache(array $imdbIds): void
+    {
+        $missingIds = array_values(array_diff($imdbIds, array_keys($this->movieStubCache)));
+
+        if ($missingIds === []) {
+            return;
+        }
+
+        Movie::query()
+            ->where(fn ($query) => $query->whereIn('tconst', $missingIds)->orWhereIn('imdb_id', $missingIds))
+            ->get()
+            ->each(function (Movie $movie): void {
+                foreach (array_unique(array_filter([(string) $movie->tconst, (string) $movie->imdb_id])) as $imdbId) {
+                    $this->movieStubCache[$imdbId] = $movie;
+                }
+            });
+    }
+
+    /**
+     * @param  list<list<string>>  $stringLists
+     * @return list<string>
+     */
+    private function flattenStringLists(array $stringLists): array
+    {
+        $flattened = [];
+
+        foreach ($stringLists as $stringList) {
+            foreach ($stringList as $value) {
+                $flattened[] = $value;
+            }
+        }
+
+        return $this->normalizeStringList($flattened);
+    }
+
+    /**
+     * @param  list<string>  $values
+     * @return array<string, array<string, string>>
+     */
+    private function stringLookupRows(array $values, string $column = 'name'): array
+    {
+        $rows = [];
+
+        foreach ($values as $value) {
+            $value = trim((string) $value);
+
+            if ($value === '') {
+                continue;
+            }
+
+            $rows[$value] = [$column => $value];
+        }
+
+        return $rows;
     }
 
     /**

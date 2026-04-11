@@ -47,6 +47,7 @@ use App\Models\Title;
 use App\Models\TitleStatistic;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 class LoadTitleDetailsAction
 {
@@ -94,6 +95,14 @@ class LoadTitleDetailsAction
      *         usageCount: int,
      *         countries: Collection<int, array{code: string, label: string}>,
      *         attributes: Collection<int, CertificateAttribute>
+     *     }>,
+     *     companyEntries: Collection<int, array{
+     *         company: Company,
+     *         creditCount: int,
+     *         categories: Collection<int, CompanyCreditCategory>,
+     *         attributes: Collection<int, CompanyCreditAttribute>,
+     *         countries: Collection<int, array{code: string, label: string}>,
+     *         activeYears: Collection<int, string>
      *     }>,
      *     companyRows: Collection<int, Company>,
      *     companyCreditAttributeRows: Collection<int, CompanyCreditAttribute>,
@@ -217,6 +226,7 @@ class LoadTitleDetailsAction
             $certificateRatingRows,
             $movieCertificateRows,
         );
+        $companyEntries = $this->buildCompanyEntries($movieCompanyCreditRows);
         $companyRows = $title->resolvedCompanies();
         $companyCreditAttributeRows = $title->resolvedCompanyCreditAttributes();
         $companyCreditCategoryRows = $title->resolvedCompanyCreditCategories();
@@ -264,7 +274,7 @@ class LoadTitleDetailsAction
         $certificateItems = $movieCertificateRows
             ->map(fn ($certificate): ?array => $certificate->certificateRating?->name
                 ? [
-                    'rating' => $certificate->certificateRating->name,
+                    'rating' => $certificate->certificateRating->resolvedLabel(),
                     'country' => $certificate->resolvedCountryLabel(),
                 ]
                 : null)
@@ -451,6 +461,7 @@ class LoadTitleDetailsAction
             'certificateRatingRows' => $certificateRatingRows,
             'certificateAttributeEntries' => $certificateAttributeEntries,
             'certificateRatingEntries' => $certificateRatingEntries,
+            'companyEntries' => $companyEntries,
             'companyRows' => $companyRows,
             'companyCreditAttributeRows' => $companyCreditAttributeRows,
             'companyCreditCategoryRows' => $companyCreditCategoryRows,
@@ -523,6 +534,92 @@ class LoadTitleDetailsAction
                 ])
                 ->orderBy('position'),
         ]);
+    }
+
+    /**
+     * @param  Collection<int, MovieCompanyCredit>  $movieCompanyCreditRows
+     * @return Collection<int, array{
+     *     company: Company,
+     *     creditCount: int,
+     *     categories: Collection<int, CompanyCreditCategory>,
+     *     attributes: Collection<int, CompanyCreditAttribute>,
+     *     countries: Collection<int, array{code: string, label: string}>,
+     *     activeYears: Collection<int, string>
+     * }>
+     */
+    private function buildCompanyEntries(Collection $movieCompanyCreditRows): Collection
+    {
+        return $movieCompanyCreditRows
+            ->filter(fn (MovieCompanyCredit $movieCompanyCredit): bool => $movieCompanyCredit->company instanceof Company)
+            ->groupBy('company_imdb_id')
+            ->map(function (Collection $creditsForCompany): ?array {
+                /** @var MovieCompanyCredit|null $leadCredit */
+                $leadCredit = $creditsForCompany->first();
+
+                if (! $leadCredit instanceof MovieCompanyCredit || ! $leadCredit->company instanceof Company) {
+                    return null;
+                }
+
+                $categories = $creditsForCompany
+                    ->map(fn (MovieCompanyCredit $movieCompanyCredit): ?CompanyCreditCategory => $movieCompanyCredit->companyCreditCategory)
+                    ->filter(fn (mixed $companyCreditCategory): bool => $companyCreditCategory instanceof CompanyCreditCategory && filled($companyCreditCategory->name))
+                    ->unique('id')
+                    ->values();
+
+                $attributes = $creditsForCompany
+                    ->flatMap(function (MovieCompanyCredit $movieCompanyCredit): Collection {
+                        if (! $movieCompanyCredit->relationLoaded('movieCompanyCreditAttributes')) {
+                            return collect();
+                        }
+
+                        return $movieCompanyCredit->movieCompanyCreditAttributes;
+                    })
+                    ->map(fn (MovieCompanyCreditAttribute $movieCompanyCreditAttribute): ?CompanyCreditAttribute => $movieCompanyCreditAttribute->companyCreditAttribute)
+                    ->filter(fn (mixed $companyCreditAttribute): bool => $companyCreditAttribute instanceof CompanyCreditAttribute && filled($companyCreditAttribute->name))
+                    ->unique('id')
+                    ->values();
+
+                $countries = $creditsForCompany
+                    ->flatMap(function (MovieCompanyCredit $movieCompanyCredit): Collection {
+                        if (! $movieCompanyCredit->relationLoaded('movieCompanyCreditCountries')) {
+                            return collect();
+                        }
+
+                        return $movieCompanyCredit->movieCompanyCreditCountries;
+                    })
+                    ->map(function (MovieCompanyCreditCountry $movieCompanyCreditCountry): ?array {
+                        if (! filled($movieCompanyCreditCountry->country_code)) {
+                            return null;
+                        }
+
+                        return [
+                            'code' => strtoupper((string) $movieCompanyCreditCountry->country_code),
+                            'label' => $movieCompanyCreditCountry->resolvedCountryLabel() ?? strtoupper((string) $movieCompanyCreditCountry->country_code),
+                        ];
+                    })
+                    ->filter()
+                    ->unique('code')
+                    ->sortBy('label')
+                    ->values();
+
+                $activeYears = $creditsForCompany
+                    ->map(fn (MovieCompanyCredit $movieCompanyCredit): ?string => $movieCompanyCredit->activeYearsLabel())
+                    ->filter()
+                    ->unique()
+                    ->values();
+
+                return [
+                    'company' => $leadCredit->company,
+                    'creditCount' => $creditsForCompany->count(),
+                    'categories' => $categories,
+                    'attributes' => $attributes,
+                    'countries' => $countries,
+                    'activeYears' => $activeYears,
+                ];
+            })
+            ->filter()
+            ->sortBy(fn (array $companyEntry): string => Str::lower((string) $companyEntry['company']->name))
+            ->values();
     }
 
     /**

@@ -5,6 +5,7 @@ namespace Tests\Feature\Feature\Feature\Import;
 use App\Actions\Import\ImportImdbCatalogNamePayloadAction;
 use App\Models\NameBasic;
 use App\Models\NameCredit;
+use Illuminate\Support\Facades\DB;
 use Tests\Concerns\BootstrapsImdbMysqlSqlite;
 use Tests\Concerns\UsesCatalogOnlyApplication;
 use Tests\TestCase;
@@ -74,5 +75,37 @@ class ImportImdbCatalogNamePayloadActionTest extends TestCase
             ['First Alias', 'Second Alias'],
             $credits->first()->nameCreditCharacters()->orderBy('position')->pluck('character_name')->all(),
         );
+    }
+
+    public function test_sync_professions_resolves_profession_existence_checks_in_batch_queries(): void
+    {
+        $person = NameBasic::query()->create([
+            'nconst' => 'nm10443893',
+            'imdb_id' => 'nm10443893',
+            'displayName' => 'Batch Professions',
+            'primaryname' => 'Batch Professions',
+        ]);
+
+        $action = app(ImportImdbCatalogNamePayloadAction::class);
+
+        $syncProfessions = \Closure::bind(
+            function (NameBasic $person, array $professionNames): void {
+                $this->syncProfessions($person, $professionNames);
+            },
+            $action,
+            ImportImdbCatalogNamePayloadAction::class,
+        );
+
+        DB::connection('imdb_mysql')->flushQueryLog();
+        DB::connection('imdb_mysql')->enableQueryLog();
+
+        $syncProfessions($person, ['actor', 'producer', 'writer']);
+
+        $professionQueries = collect(DB::connection('imdb_mysql')->getQueryLog())
+            ->pluck('query')
+            ->filter(fn (string $query): bool => str_contains($query, 'into "professions"') || str_contains($query, 'from "professions"'));
+
+        $this->assertLessThanOrEqual(3, $professionQueries->count());
+        $this->assertCount(3, $person->nameBasicProfessions()->get());
     }
 }

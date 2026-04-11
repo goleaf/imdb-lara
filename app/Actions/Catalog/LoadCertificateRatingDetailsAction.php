@@ -91,10 +91,10 @@ class LoadCertificateRatingDetailsAction
             ['label' => 'Certificate records', 'value' => number_format((int) $recordCount)],
         ])->values();
 
-        $ratingName = filled($certificateRating->name) ? (string) $certificateRating->name : 'selected';
-        $description = 'Browse related certificate records, linked attributes, and other published titles that share the '.$ratingName.' rating.';
+        $ratingLabel = $certificateRating->resolvedLabel();
+        $description = $certificateRating->shortDescription().' Browse related certificate records, linked attributes, and other published titles that share the '.$ratingLabel.' rating.';
         $openGraphAsset = data_get($archiveRecords->getCollection()->first(), 'posterUrl');
-        $pageTitle = filled($certificateRating->name) ? $certificateRating->name.' certificate rating' : 'Certificate rating';
+        $pageTitle = $ratingLabel.' certificate rating';
 
         return [
             'certificateRating' => $certificateRating,
@@ -110,11 +110,11 @@ class LoadCertificateRatingDetailsAction
                 canonical: route('public.certificate-ratings.show', $certificateRating),
                 openGraphType: 'article',
                 openGraphImage: $openGraphAsset,
-                openGraphImageAlt: $certificateRating->name ?: 'Certificate rating',
+                openGraphImageAlt: $ratingLabel,
                 breadcrumbs: [
                     ['label' => 'Home', 'href' => route('public.home')],
                     ['label' => 'Certificate rating archive', 'href' => route('public.certificate-ratings.show', $certificateRating)],
-                    ['label' => $certificateRating->name ?: 'Certificate rating'],
+                    ['label' => $ratingLabel],
                 ],
             ),
         ];
@@ -260,7 +260,7 @@ class LoadCertificateRatingDetailsAction
             'countryLabel' => $movieCertificate->resolvedCountryLabel(),
             'ratingId' => $movieCertificate->certificateRating?->getKey(),
             'ratingHref' => $movieCertificate->certificateRating ? route('public.certificate-ratings.show', $movieCertificate->certificateRating) : null,
-            'ratingLabel' => $movieCertificate->certificateRating?->name,
+            'ratingLabel' => $movieCertificate->certificateRating?->resolvedLabel(),
             'attributeLinks' => $attributeLinks,
         ];
     }

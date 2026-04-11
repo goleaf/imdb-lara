@@ -1,5 +1,6 @@
 @import './theme.css'; /* By Sheaf.dev */ 
 @import './components/slider.css';
+@import '@fortawesome/fontawesome-free/css/all.min.css';
 @import 'tailwindcss';
 
 @source not '../../.codex';
@@ -33,6 +34,160 @@
 }
 
 @layer components {
+    .sb-certificate-rating-chip {
+        --sb-certificate-rating-text: #374151;
+        --sb-certificate-rating-bg: rgba(15, 23, 42, 0.05);
+        --sb-certificate-rating-border: rgba(15, 23, 42, 0.1);
+        --sb-certificate-rating-icon-bg: rgba(255, 255, 255, 0.8);
+        align-items: center;
+        background: var(--sb-certificate-rating-bg);
+        border: 1px solid var(--sb-certificate-rating-border);
+        border-radius: 9999px;
+        color: var(--sb-certificate-rating-text);
+        display: inline-flex;
+        font-size: 0.88rem;
+        font-weight: 600;
+        gap: 0.55rem;
+        line-height: 1.1;
+        max-width: 100%;
+        min-height: 2.1rem;
+        padding: 0.4rem 0.85rem 0.4rem 0.5rem;
+        text-decoration: none;
+    }
+
+    .sb-certificate-rating-chip__icon {
+        align-items: center;
+        background: var(--sb-certificate-rating-icon-bg);
+        border-radius: 9999px;
+        display: inline-flex;
+        flex: none;
+        height: 1.45rem;
+        justify-content: center;
+        width: 1.45rem;
+    }
+
+    .sb-certificate-rating-note {
+        color: #6b7280;
+        font-size: 0.78rem;
+        line-height: 1.55;
+    }
+
+    .dark .sb-certificate-rating-note {
+        color: #d1d5db;
+    }
+
+    .sb-certificate-rating-tone--neutral {
+        --sb-certificate-rating-text: #475569;
+        --sb-certificate-rating-bg: rgba(71, 85, 105, 0.08);
+        --sb-certificate-rating-border: rgba(71, 85, 105, 0.18);
+        --sb-certificate-rating-icon-bg: rgba(255, 255, 255, 0.92);
+    }
+
+    .dark .sb-certificate-rating-tone--neutral {
+        --sb-certificate-rating-text: #e2e8f0;
+        --sb-certificate-rating-bg: rgba(71, 85, 105, 0.2);
+        --sb-certificate-rating-border: rgba(148, 163, 184, 0.28);
+        --sb-certificate-rating-icon-bg: rgba(15, 23, 42, 0.55);
+    }
+
+    .sb-certificate-rating-tone--general {
+        --sb-certificate-rating-text: #047857;
+        --sb-certificate-rating-bg: rgba(16, 185, 129, 0.12);
+        --sb-certificate-rating-border: rgba(16, 185, 129, 0.24);
+        --sb-certificate-rating-icon-bg: rgba(236, 253, 245, 0.95);
+    }
+
+    .dark .sb-certificate-rating-tone--general {
+        --sb-certificate-rating-text: #86efac;
+        --sb-certificate-rating-bg: rgba(5, 150, 105, 0.24);
+        --sb-certificate-rating-border: rgba(52, 211, 153, 0.26);
+        --sb-certificate-rating-icon-bg: rgba(6, 78, 59, 0.7);
+    }
+
+    .sb-certificate-rating-tone--advisory {
+        --sb-certificate-rating-text: #0369a1;
+        --sb-certificate-rating-bg: rgba(14, 165, 233, 0.11);
+        --sb-certificate-rating-border: rgba(14, 165, 233, 0.24);
+        --sb-certificate-rating-icon-bg: rgba(240, 249, 255, 0.95);
+    }
+
+    .dark .sb-certificate-rating-tone--advisory {
+        --sb-certificate-rating-text: #7dd3fc;
+        --sb-certificate-rating-bg: rgba(3, 105, 161, 0.28);
+        --sb-certificate-rating-border: rgba(56, 189, 248, 0.24);
+        --sb-certificate-rating-icon-bg: rgba(12, 74, 110, 0.7);
+    }
+
+    .sb-certificate-rating-tone--teen {
+        --sb-certificate-rating-text: #b45309;
+        --sb-certificate-rating-bg: rgba(251, 191, 36, 0.16);
+        --sb-certificate-rating-border: rgba(245, 158, 11, 0.24);
+        --sb-certificate-rating-icon-bg: rgba(255, 251, 235, 0.96);
+    }
+
+    .dark .sb-certificate-rating-tone--teen {
+        --sb-certificate-rating-text: #fde68a;
+        --sb-certificate-rating-bg: rgba(180, 83, 9, 0.3);
+        --sb-certificate-rating-border: rgba(251, 191, 36, 0.24);
+        --sb-certificate-rating-icon-bg: rgba(120, 53, 15, 0.72);
+    }
+
+    .sb-certificate-rating-tone--mature {
+        --sb-certificate-rating-text: #c2410c;
+        --sb-certificate-rating-bg: rgba(249, 115, 22, 0.14);
+        --sb-certificate-rating-border: rgba(249, 115, 22, 0.26);
+        --sb-certificate-rating-icon-bg: rgba(255, 247, 237, 0.96);
+    }
+
+    .dark .sb-certificate-rating-tone--mature {
+        --sb-certificate-rating-text: #fdba74;
+        --sb-certificate-rating-bg: rgba(154, 52, 18, 0.3);
+        --sb-certificate-rating-border: rgba(251, 146, 60, 0.26);
+        --sb-certificate-rating-icon-bg: rgba(124, 45, 18, 0.72);
+    }
+
+    .sb-certificate-rating-tone--adult {
+        --sb-certificate-rating-text: #be123c;
+        --sb-certificate-rating-bg: rgba(244, 63, 94, 0.12);
+        --sb-certificate-rating-border: rgba(244, 63, 94, 0.24);
+        --sb-certificate-rating-icon-bg: rgba(255, 241, 242, 0.96);
+    }
+
+    .dark .sb-certificate-rating-tone--adult {
+        --sb-certificate-rating-text: #fda4af;
+        --sb-certificate-rating-bg: rgba(159, 18, 57, 0.32);
+        --sb-certificate-rating-border: rgba(251, 113, 133, 0.28);
+        --sb-certificate-rating-icon-bg: rgba(136, 19, 55, 0.72);
+    }
+
+    .sb-certificate-rating-tone--banned {
+        --sb-certificate-rating-text: #b91c1c;
+        --sb-certificate-rating-bg: rgba(239, 68, 68, 0.13);
+        --sb-certificate-rating-border: rgba(239, 68, 68, 0.24);
+        --sb-certificate-rating-icon-bg: rgba(254, 242, 242, 0.96);
+    }
+
+    .dark .sb-certificate-rating-tone--banned {
+        --sb-certificate-rating-text: #fca5a5;
+        --sb-certificate-rating-bg: rgba(153, 27, 27, 0.34);
+        --sb-certificate-rating-border: rgba(248, 113, 113, 0.28);
+        --sb-certificate-rating-icon-bg: rgba(127, 29, 29, 0.74);
+    }
+
+    .sb-certificate-rating-tone--tv {
+        --sb-certificate-rating-text: #6d28d9;
+        --sb-certificate-rating-bg: rgba(139, 92, 246, 0.12);
+        --sb-certificate-rating-border: rgba(139, 92, 246, 0.24);
+        --sb-certificate-rating-icon-bg: rgba(245, 243, 255, 0.96);
+    }
+
+    .dark .sb-certificate-rating-tone--tv {
+        --sb-certificate-rating-text: #c4b5fd;
+        --sb-certificate-rating-bg: rgba(91, 33, 182, 0.32);
+        --sb-certificate-rating-border: rgba(167, 139, 250, 0.28);
+        --sb-certificate-rating-icon-bg: rgba(76, 29, 149, 0.72);
+    }
+
     .sb-auth-shell {
         background:
             radial-gradient(circle at top, rgba(214, 181, 116, 0.16), transparent 34%),

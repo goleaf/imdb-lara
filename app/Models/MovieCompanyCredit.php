@@ -62,4 +62,23 @@ class MovieCompanyCredit extends ImdbModel
     {
         return $this->hasMany(MovieCompanyCreditCountry::class, 'movie_company_credit_id', 'id');
     }
+
+    public function activeYearsLabel(): ?string
+    {
+        if ($this->start_year !== null && $this->end_year !== null) {
+            return $this->start_year === $this->end_year
+                ? (string) $this->start_year
+                : $this->start_year.'-'.$this->end_year;
+        }
+
+        if ($this->start_year !== null) {
+            return 'Since '.$this->start_year;
+        }
+
+        if ($this->end_year !== null) {
+            return 'Until '.$this->end_year;
+        }
+
+        return null;
+    }
 }

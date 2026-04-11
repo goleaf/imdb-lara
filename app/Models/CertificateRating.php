@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\CertificateRatingValue;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
@@ -45,6 +46,33 @@ class CertificateRating extends ImdbModel
     public function movieCertificates(): HasMany
     {
         return $this->hasMany(MovieCertificate::class, 'certificate_rating_id', 'id');
+    }
+
+    public function ratingValue(): ?CertificateRatingValue
+    {
+        return CertificateRatingValue::fromValue($this->name);
+    }
+
+    public function resolvedLabel(): string
+    {
+        return $this->ratingValue()?->label()
+            ?? (filled($this->name) ? (string) $this->name : 'Unrated');
+    }
+
+    public function shortDescription(): string
+    {
+        return $this->ratingValue()?->description()
+            ?? 'Regional age classification attached to this title.';
+    }
+
+    public function tone(): string
+    {
+        return $this->ratingValue()?->tone() ?? 'neutral';
+    }
+
+    public function iconName(): string
+    {
+        return $this->ratingValue()?->iconName() ?? 'circle-question';
     }
 
     public function getSlugAttribute(): string

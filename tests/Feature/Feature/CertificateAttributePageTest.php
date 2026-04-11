@@ -58,7 +58,8 @@ class CertificateAttributePageTest extends TestCase
 
         if ($movieCertificateAttribute->movieCertificate->certificateRating !== null) {
             $response
-                ->assertSee($movieCertificateAttribute->movieCertificate->certificateRating->name)
+                ->assertSee($movieCertificateAttribute->movieCertificate->certificateRating->resolvedLabel())
+                ->assertSeeHtml('data-slot="certificate-rating-chip"')
                 ->assertSee(route('public.certificate-ratings.show', $movieCertificateAttribute->movieCertificate->certificateRating), false);
         }
 

@@ -60,4 +60,22 @@ class MovieCertificate extends ImdbModel
 
         return Country::labelForCode($this->country_code, $fallbackName);
     }
+
+    public function resolvedRatingLabel(): ?string
+    {
+        if (! $this->relationLoaded('certificateRating') || ! $this->certificateRating instanceof CertificateRating) {
+            return null;
+        }
+
+        return $this->certificateRating->resolvedLabel();
+    }
+
+    public function ratingDescription(): ?string
+    {
+        if (! $this->relationLoaded('certificateRating') || ! $this->certificateRating instanceof CertificateRating) {
+            return null;
+        }
+
+        return $this->certificateRating->shortDescription();
+    }
 }

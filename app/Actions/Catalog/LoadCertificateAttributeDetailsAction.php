@@ -260,7 +260,7 @@ class LoadCertificateAttributeDetailsAction
             'countryLabel' => $movieCertificate->resolvedCountryLabel(),
             'ratingId' => $movieCertificate->certificateRating?->getKey(),
             'ratingHref' => $movieCertificate->certificateRating ? route('public.certificate-ratings.show', $movieCertificate->certificateRating) : null,
-            'ratingLabel' => $movieCertificate->certificateRating?->name,
+            'ratingLabel' => $movieCertificate->certificateRating?->resolvedLabel(),
             'attributeLinks' => $attributeLinks,
         ];
     }

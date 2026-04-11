@@ -216,6 +216,10 @@ class Title extends Model
                 ->select(['movie_id', 'name_basic_id', 'position'])
                 ->with([
                     'nameBasic:id,primaryname,displayName',
+                    'person' => fn ($personQuery) => $personQuery
+                        ->selectDirectoryColumns()
+                        ->withDirectoryRelations()
+                        ->withDirectoryMetrics(),
                 ])
                 ->orderBy('position'),
             'movieCompanyCredits' => fn ($query) => $query

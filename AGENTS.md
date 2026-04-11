@@ -45,6 +45,7 @@ This project has domain-specific skills available. You MUST activate the relevan
 ## Frontend Bundling
 
 - If the user doesn't see a frontend change reflected in the UI, it could mean they need to run `npm run build`, `npm run dev`, or `composer run dev`. Ask them.
+- Never load third-party CSS, JS, fonts, or icon sets from CDNs in this project. Install them through npm or Composer and bundle or ship them locally so the portal works offline.
 
 ## Documentation Files
 
