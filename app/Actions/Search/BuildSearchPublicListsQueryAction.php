@@ -74,19 +74,6 @@ class BuildSearchPublicListsQueryAction
                             ->orWhere('username', 'like', '%'.$search.'%');
                     });
             });
-
-            $searchPrefix = $search.'%';
-
-            $query->orderByRaw(
-                'case
-                    when lower(name) = lower(?) then 0
-                    when lower(slug) = lower(?) then 1
-                    when lower(name) like lower(?) then 2
-                    when lower(slug) like lower(?) then 3
-                    else 4
-                end',
-                [$search, $search, $searchPrefix, $searchPrefix],
-            );
         }
 
         return $query

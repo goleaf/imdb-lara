@@ -39,10 +39,7 @@
 
                     @include('admin.people._form')
 
-                    <div class="flex justify-end gap-3">
-                        <x-ui.button as="a" :href="route('admin.people.index')" variant="ghost" icon="arrow-left">
-                            Cancel
-                        </x-ui.button>
+                    <div class="flex justify-end">
                         <x-ui.button type="submit" icon="plus">
                             Create person
                         </x-ui.button>

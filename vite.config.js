@@ -10,6 +10,22 @@ export default defineConfig({
         }),
         tailwindcss(),
     ],
+    build: {
+        cssMinify: 'lightningcss',
+        rollupOptions: {
+            output: {
+                manualChunks(id) {
+                    if (id.includes('/vendor/livewire/livewire/dist/livewire.esm.js')) {
+                        return 'livewire';
+                    }
+
+                    if (id.includes('/node_modules/@alpinejs/') || id.includes('/node_modules/@sheaf/rover/')) {
+                        return 'ui-interactions';
+                    }
+                },
+            },
+        },
+    },
     server: {
         watch: {
             ignored: ['**/storage/framework/views/**'],

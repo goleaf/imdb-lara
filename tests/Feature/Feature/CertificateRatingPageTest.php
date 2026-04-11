@@ -45,11 +45,14 @@ class CertificateRatingPageTest extends TestCase
         $response
             ->assertOk()
             ->assertSeeHtml('data-slot="certificate-rating-detail-hero"')
+            ->assertSeeHtml('data-slot="certificate-rating-detail-filters"')
             ->assertSeeHtml('data-slot="certificate-rating-detail-records"')
             ->assertSee($movieCertificate->certificateRating->resolvedLabel())
             ->assertSee($movieCertificate->certificateRating->shortDescription())
             ->assertSeeHtml('data-slot="certificate-rating-chip"')
             ->assertSee($movieCertificate->title->name)
+            ->assertSee('Updates live')
+            ->assertDontSee('<form method="GET"', false)
             ->assertSee(route('public.titles.show', $movieCertificate->title), false);
 
         $attribute = $movieCertificate->movieCertificateAttributes
@@ -73,6 +76,8 @@ class CertificateRatingPageTest extends TestCase
             ->assertOk()
             ->assertSeeHtml('data-slot="certificate-rating-detail-filters"')
             ->assertSee($movieCertificate->title->name)
-            ->assertSee($movieCertificate->certificateRating->resolvedLabel());
+            ->assertSee($movieCertificate->certificateRating->resolvedLabel())
+            ->assertSee('Updates live')
+            ->assertDontSee('<form method="GET"', false);
     }
 }

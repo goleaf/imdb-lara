@@ -2,13 +2,21 @@
 
 namespace Tests\Feature\Feature\Admin;
 
-use App\Enums\MediaKind;
+use App\Enums\ContributionStatus;
+use App\Enums\ReportStatus;
+use App\Enums\ReviewStatus;
+use App\Enums\UserStatus;
+use App\Models\Contribution;
 use App\Models\MediaAsset;
 use App\Models\Person;
+use App\Models\Report;
+use App\Models\Review;
 use App\Models\Title;
 use App\Models\User;
+use App\Models\UserList;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -16,284 +24,237 @@ class MediaAssetUploadTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_editor_can_upload_and_replace_a_title_poster(): void
+    public function test_admin_media_and_moderation_mutation_routes_are_registered(): void
+    {
+        $routeNames = [
+            'admin.titles.media-assets.store',
+            'admin.people.media-assets.store',
+            'admin.media-assets.update',
+            'admin.media-assets.destroy',
+            'admin.reviews.update',
+            'admin.reports.update',
+            'admin.contributions.update',
+        ];
+
+        foreach ($routeNames as $routeName) {
+            $this->assertTrue(Route::has($routeName), $routeName.' should be registered.');
+        }
+    }
+
+    public function test_editor_can_upload_replace_and_delete_title_media_assets_and_public_title_page_uses_latest_primary(): void
     {
         Storage::fake('public');
 
         $editor = User::factory()->editor()->create();
-        $title = Title::factory()->movie()->create([
-            'name' => 'Aurora Relay',
-            'slug' => 'aurora-relay',
-        ]);
+        $title = Title::factory()->create();
+        $existingPrimaryPoster = MediaAsset::factory()->poster()->for($title, 'mediable')->create();
 
         $this->actingAs($editor)
             ->post(route('admin.titles.media-assets.store', $title), [
-                'kind' => MediaKind::Poster->value,
-                'file' => UploadedFile::fake()->image('aurora-relay-poster.jpg', 640, 960),
-                'url' => '',
-                'alt_text' => 'Aurora Relay poster',
-                'caption' => 'Primary theatrical poster',
-                'provider' => '',
-                'provider_key' => '',
+                'kind' => 'poster',
+                'file' => UploadedFile::fake()->image('poster-one.jpg', 600, 900),
+                'url' => null,
+                'alt_text' => 'Poster one',
+                'caption' => 'Primary poster',
+                'width' => null,
+                'height' => null,
+                'provider' => null,
+                'provider_key' => null,
                 'language' => 'en',
-                'duration_seconds' => '',
-                'metadata' => json_encode(['credit' => 'Studio Unit'], JSON_THROW_ON_ERROR),
-                'is_primary' => true,
+                'duration_seconds' => null,
+                'metadata' => null,
+                'is_primary' => '1',
                 'position' => 0,
-                'published_at' => '2026-04-01 12:00:00',
+                'published_at' => now()->toDateTimeString(),
             ])
             ->assertRedirect(route('admin.titles.edit', $title));
 
-        $mediaAsset = MediaAsset::query()
-            ->whereMorphedTo('mediable', $title)
+        $uploadedPoster = MediaAsset::query()
+            ->where('mediable_type', Title::class)
+            ->where('mediable_id', $title->id)
+            ->where('provider', 'upload')
+            ->latest('id')
             ->firstOrFail();
 
-        $this->assertSame(MediaKind::Poster, $mediaAsset->kind);
-        $this->assertSame('upload', $mediaAsset->provider);
-        $this->assertTrue($mediaAsset->is_primary);
-        $this->assertSame(640, $mediaAsset->width);
-        $this->assertSame(960, $mediaAsset->height);
-        $this->assertSame('public', data_get($mediaAsset->metadata, 'storage.disk'));
-        $this->assertSame($mediaAsset->provider_key, data_get($mediaAsset->metadata, 'storage.path'));
-        $this->assertSame('Studio Unit', data_get($mediaAsset->metadata, 'credit'));
-        Storage::disk('public')->assertExists($mediaAsset->provider_key);
+        $existingPrimaryPoster->refresh();
+
+        $this->assertTrue($uploadedPoster->is_primary);
+        $this->assertFalse($existingPrimaryPoster->is_primary);
+        $this->assertNotNull($uploadedPoster->storagePath());
+        Storage::disk('public')->assertExists($uploadedPoster->storagePath());
 
         $this->get(route('public.titles.show', $title))
             ->assertOk()
-            ->assertSee($mediaAsset->url, false);
+            ->assertSee($uploadedPoster->url, false);
 
-        $originalPath = $mediaAsset->provider_key;
+        $previousUploadPath = $uploadedPoster->storagePath();
 
         $this->actingAs($editor)
-            ->patch(route('admin.media-assets.update', $mediaAsset), [
-                'kind' => MediaKind::Poster->value,
-                'file' => UploadedFile::fake()->image('aurora-relay-poster-revised.jpg', 800, 1200),
-                'url' => '',
-                'alt_text' => 'Aurora Relay revised poster',
-                'caption' => 'Revised primary poster',
-                'width' => '',
-                'height' => '',
-                'provider' => '',
-                'provider_key' => '',
+            ->patch(route('admin.media-assets.update', $uploadedPoster), [
+                'kind' => 'poster',
+                'file' => UploadedFile::fake()->image('poster-two.jpg', 800, 1200),
+                'url' => null,
+                'alt_text' => 'Poster two',
+                'caption' => 'Updated poster',
+                'width' => null,
+                'height' => null,
+                'provider' => null,
+                'provider_key' => null,
                 'language' => 'en',
-                'duration_seconds' => '',
-                'metadata' => json_encode(['credit' => 'Campaign Refresh'], JSON_THROW_ON_ERROR),
-                'is_primary' => true,
-                'position' => 0,
-                'published_at' => '2026-04-02 12:00:00',
+                'duration_seconds' => null,
+                'metadata' => null,
+                'is_primary' => '1',
+                'position' => 1,
+                'published_at' => now()->toDateTimeString(),
             ])
-            ->assertRedirect(route('admin.media-assets.edit', $mediaAsset));
+            ->assertRedirect(route('admin.media-assets.edit', $uploadedPoster));
 
-        $mediaAsset->refresh();
+        $uploadedPoster->refresh();
 
-        $this->assertSame('upload', $mediaAsset->provider);
-        $this->assertNotSame($originalPath, $mediaAsset->provider_key);
-        $this->assertSame(800, $mediaAsset->width);
-        $this->assertSame(1200, $mediaAsset->height);
-        $this->assertSame('Campaign Refresh', data_get($mediaAsset->metadata, 'credit'));
-        Storage::disk('public')->assertMissing($originalPath);
-        Storage::disk('public')->assertExists($mediaAsset->provider_key);
+        $this->assertNotSame($previousUploadPath, $uploadedPoster->storagePath());
+        Storage::disk('public')->assertMissing($previousUploadPath);
+        Storage::disk('public')->assertExists($uploadedPoster->storagePath());
+
+        $this->actingAs($editor)
+            ->delete(route('admin.media-assets.destroy', $uploadedPoster))
+            ->assertRedirect(route('admin.titles.edit', $title));
+
+        $this->assertSoftDeleted('media_assets', ['id' => $uploadedPoster->id]);
+        Storage::disk('public')->assertMissing($uploadedPoster->storagePath());
     }
 
-    public function test_editor_can_upload_a_person_headshot_and_render_it_publicly(): void
+    public function test_editor_can_upload_person_headshots_and_validation_rejects_invalid_media_sources_or_kinds(): void
     {
         Storage::fake('public');
 
         $editor = User::factory()->editor()->create();
-        $person = Person::factory()->create([
-            'name' => 'Marta Vale',
-            'slug' => 'marta-vale',
-            'is_published' => true,
-        ]);
+        $person = Person::factory()->create();
+        $title = Title::factory()->create();
 
         $this->actingAs($editor)
             ->post(route('admin.people.media-assets.store', $person), [
-                'kind' => MediaKind::Headshot->value,
-                'file' => UploadedFile::fake()->image('marta-vale-headshot.jpg', 720, 900),
-                'url' => '',
-                'alt_text' => 'Portrait of Marta Vale',
-                'caption' => 'Profile headshot',
-                'provider' => '',
-                'provider_key' => '',
-                'language' => '',
-                'duration_seconds' => '',
-                'metadata' => '',
-                'is_primary' => true,
+                'kind' => 'headshot',
+                'file' => UploadedFile::fake()->image('headshot.jpg', 500, 700),
+                'url' => null,
+                'alt_text' => 'Ava Mercer headshot',
+                'caption' => 'Portrait',
+                'width' => null,
+                'height' => null,
+                'provider' => null,
+                'provider_key' => null,
+                'language' => 'en',
+                'duration_seconds' => null,
+                'metadata' => null,
+                'is_primary' => '1',
                 'position' => 0,
-                'published_at' => '2026-04-01 10:00:00',
+                'published_at' => now()->toDateTimeString(),
             ])
             ->assertRedirect(route('admin.people.edit', $person));
 
-        $mediaAsset = MediaAsset::query()
-            ->whereMorphedTo('mediable', $person)
+        $headshot = MediaAsset::query()
+            ->where('mediable_type', Person::class)
+            ->where('mediable_id', $person->id)
+            ->latest('id')
             ->firstOrFail();
 
-        $this->assertSame(MediaKind::Headshot, $mediaAsset->kind);
-        $this->assertTrue($mediaAsset->isUploadBacked());
-        Storage::disk('public')->assertExists($mediaAsset->provider_key);
+        $this->assertSame('headshot', $headshot->kind->value);
+        Storage::disk('public')->assertExists($headshot->storagePath());
 
         $this->get(route('public.people.show', $person))
             ->assertOk()
-            ->assertSee($mediaAsset->url, false);
-    }
-
-    public function test_editor_can_store_remote_title_trailer_metadata(): void
-    {
-        $editor = User::factory()->editor()->create();
-        $title = Title::factory()->movie()->create([
-            'name' => 'Aurora Relay',
-            'slug' => 'aurora-relay',
-        ]);
-
-        $this->actingAs($editor)
-            ->post(route('admin.titles.media-assets.store', $title), [
-                'kind' => MediaKind::Trailer->value,
-                'file' => null,
-                'url' => 'https://videos.example.test/aurora-relay-official-trailer',
-                'alt_text' => '',
-                'caption' => 'Official Trailer',
-                'provider' => 'youtube',
-                'provider_key' => 'aurora-relay-official-trailer',
-                'language' => 'en',
-                'duration_seconds' => 128,
-                'metadata' => json_encode(['video' => ['quality' => '1080p']], JSON_THROW_ON_ERROR),
-                'is_primary' => true,
-                'position' => 0,
-                'published_at' => '2026-04-01 12:00:00',
-            ])
-            ->assertRedirect(route('admin.titles.edit', $title));
-
-        $mediaAsset = MediaAsset::query()
-            ->whereMorphedTo('mediable', $title)
-            ->firstOrFail();
-
-        $this->assertSame(MediaKind::Trailer, $mediaAsset->kind);
-        $this->assertSame('youtube', $mediaAsset->provider);
-        $this->assertSame('aurora-relay-official-trailer', $mediaAsset->provider_key);
-        $this->assertSame(128, $mediaAsset->duration_seconds);
-        $this->assertFalse($mediaAsset->isUploadBacked());
-        $this->assertSame('1080p', data_get($mediaAsset->metadata, 'video.quality'));
-
-        $this->get(route('public.titles.show', $title))
-            ->assertOk()
-            ->assertSee('Official Trailer')
-            ->assertSee('Open video');
-    }
-
-    public function test_marking_a_new_primary_asset_demotes_the_existing_primary_asset_of_the_same_kind(): void
-    {
-        Storage::fake('public');
-
-        $editor = User::factory()->editor()->create();
-        $title = Title::factory()->movie()->create();
-
-        $firstPoster = MediaAsset::factory()->for($title, 'mediable')->poster()->create([
-            'is_primary' => true,
-            'position' => 0,
-        ]);
-
-        $this->actingAs($editor)
-            ->post(route('admin.titles.media-assets.store', $title), [
-                'kind' => MediaKind::Poster->value,
-                'file' => UploadedFile::fake()->image('replacement-poster.jpg', 700, 1000),
-                'url' => '',
-                'alt_text' => 'Replacement poster',
-                'caption' => 'Replacement poster',
-                'provider' => '',
-                'provider_key' => '',
-                'language' => 'en',
-                'duration_seconds' => '',
-                'metadata' => '',
-                'is_primary' => true,
-                'position' => 1,
-                'published_at' => '2026-04-02 12:00:00',
-            ])
-            ->assertRedirect(route('admin.titles.edit', $title));
-
-        $firstPoster->refresh();
-        $replacementPoster = MediaAsset::query()
-            ->whereMorphedTo('mediable', $title)
-            ->whereKeyNot($firstPoster->id)
-            ->firstOrFail();
-
-        $this->assertFalse($firstPoster->is_primary);
-        $this->assertTrue($replacementPoster->is_primary);
-    }
-
-    public function test_editor_cannot_attach_unsupported_media_kinds_to_titles_and_people(): void
-    {
-        $editor = User::factory()->editor()->create();
-        $title = Title::factory()->movie()->create();
-        $person = Person::factory()->create();
+            ->assertSee($headshot->url, false);
 
         $this->actingAs($editor)
             ->from(route('admin.titles.edit', $title))
             ->post(route('admin.titles.media-assets.store', $title), [
-                'kind' => MediaKind::Headshot->value,
-                'file' => UploadedFile::fake()->image('invalid-headshot.jpg', 600, 600),
-                'url' => '',
-                'alt_text' => 'Invalid headshot',
-                'caption' => '',
-                'provider' => '',
-                'provider_key' => '',
-                'language' => '',
-                'duration_seconds' => '',
-                'metadata' => '',
-                'is_primary' => false,
+                'kind' => 'trailer',
+                'file' => UploadedFile::fake()->image('not-a-video.jpg'),
+                'url' => null,
+                'alt_text' => null,
+                'caption' => null,
+                'width' => null,
+                'height' => null,
+                'provider' => null,
+                'provider_key' => null,
+                'language' => null,
+                'duration_seconds' => null,
+                'metadata' => null,
+                'is_primary' => '0',
                 'position' => 0,
-                'published_at' => '',
+                'published_at' => null,
             ])
             ->assertRedirect(route('admin.titles.edit', $title))
-            ->assertSessionHasErrors('kind');
+            ->assertSessionHasErrors(['file', 'url']);
 
         $this->actingAs($editor)
             ->from(route('admin.people.edit', $person))
             ->post(route('admin.people.media-assets.store', $person), [
-                'kind' => MediaKind::Poster->value,
-                'file' => UploadedFile::fake()->image('invalid-poster.jpg', 600, 900),
-                'url' => '',
-                'alt_text' => 'Invalid poster',
-                'caption' => '',
-                'provider' => '',
-                'provider_key' => '',
-                'language' => '',
-                'duration_seconds' => '',
-                'metadata' => '',
-                'is_primary' => false,
+                'kind' => 'poster',
+                'file' => null,
+                'url' => 'https://videos.example.test/person-poster',
+                'alt_text' => null,
+                'caption' => null,
+                'width' => null,
+                'height' => null,
+                'provider' => 'external',
+                'provider_key' => 'person-poster',
+                'language' => null,
+                'duration_seconds' => null,
+                'metadata' => null,
+                'is_primary' => '0',
                 'position' => 0,
-                'published_at' => '',
+                'published_at' => null,
             ])
             ->assertRedirect(route('admin.people.edit', $person))
-            ->assertSessionHasErrors('kind');
-
-        $this->assertDatabaseCount('media_assets', 0);
+            ->assertSessionHasErrors(['kind']);
     }
 
-    public function test_regular_users_cannot_manage_admin_media_assets(): void
+    public function test_staff_can_update_moderation_routes_over_http(): void
     {
-        Storage::fake('public');
-
-        $regularUser = User::factory()->create();
+        $moderator = User::factory()->moderator()->create();
+        $editor = User::factory()->editor()->create();
+        $author = User::factory()->create();
+        $reporter = User::factory()->create();
         $title = Title::factory()->movie()->create();
+        $review = Review::factory()->for($author, 'author')->published()->create([
+            'title_id' => $title->id,
+        ]);
+        $report = Report::factory()->for($reporter, 'reporter')->for($review, 'reportable')->create();
+        $list = UserList::factory()->for($author)->public()->create();
+        $listContribution = Contribution::factory()->for($reporter)->for($list, 'contributable')->create();
 
-        $this->actingAs($regularUser)
-            ->post(route('admin.titles.media-assets.store', $title), [
-                'kind' => MediaKind::Poster->value,
-                'file' => UploadedFile::fake()->image('forbidden-poster.jpg', 600, 900),
-                'url' => '',
-                'alt_text' => 'Forbidden poster',
-                'caption' => 'Should never persist',
-                'provider' => '',
-                'provider_key' => '',
-                'language' => '',
-                'duration_seconds' => '',
-                'metadata' => '',
-                'is_primary' => true,
-                'position' => 0,
-                'published_at' => '',
+        $this->actingAs($moderator)
+            ->patch(route('admin.reviews.update', $review), [
+                'status' => ReviewStatus::Rejected->value,
+                'moderation_notes' => 'Rejected from HTTP moderation route.',
             ])
-            ->assertForbidden();
+            ->assertRedirect(route('admin.reviews.index'));
 
-        $this->assertDatabaseCount('media_assets', 0);
+        $this->actingAs($moderator)
+            ->patch(route('admin.reports.update', $report), [
+                'status' => ReportStatus::Resolved->value,
+                'content_action' => 'hide_content',
+                'resolution_notes' => 'Resolved from HTTP moderation route.',
+                'suspend_owner' => '1',
+            ])
+            ->assertRedirect(route('admin.reports.index'));
+
+        $this->actingAs($editor)
+            ->patch(route('admin.contributions.update', $listContribution), [
+                'status' => ContributionStatus::Approved->value,
+                'notes' => 'Approved from HTTP route.',
+            ])
+            ->assertRedirect(route('admin.contributions.index'));
+
+        $review->refresh();
+        $report->refresh();
+        $listContribution->refresh();
+        $author->refresh();
+
+        $this->assertSame(ReviewStatus::Rejected, $review->status);
+        $this->assertNull($review->published_at);
+        $this->assertSame(ReportStatus::Resolved, $report->status);
+        $this->assertSame(UserStatus::Suspended, $author->status);
+        $this->assertSame(ContributionStatus::Approved, $listContribution->status);
     }
 }

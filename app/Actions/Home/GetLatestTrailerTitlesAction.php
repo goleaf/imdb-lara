@@ -3,10 +3,10 @@
 namespace App\Actions\Home;
 
 use App\Actions\Catalog\BuildPublicTitleIndexQueryAction;
+use App\Enums\MediaKind;
 use App\Models\Title;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Cache;
 
 class GetLatestTrailerTitlesAction
@@ -18,34 +18,10 @@ class GetLatestTrailerTitlesAction
     public function query(): Builder
     {
         return $this->buildPublicTitleIndexQuery
-            ->handle([
-                'includePresentationRelations' => false,
-                'sort' => 'trending',
-            ])
-            ->whereHas('titleVideos')
-            ->with([
-                'statistic:movie_id,aggregate_rating,vote_count',
-                'titleImages' => fn (HasMany $imageQuery) => $imageQuery
-                    ->select(['id', 'movie_id', 'position', 'url', 'width', 'height', 'type'])
-                    ->whereIn('type', ['poster', 'backdrop', 'still_frame', 'gallery'])
-                    ->orderBy('position'),
-                'primaryImageRecord:movie_id,url,width,height,type',
-                'plotRecord:movie_id,plot',
-                'titleVideos' => fn (HasMany $videoQuery) => $videoQuery
-                    ->select([
-                        'imdb_id',
-                        'movie_id',
-                        'video_type_id',
-                        'name',
-                        'description',
-                        'width',
-                        'height',
-                        'runtime_seconds',
-                        'position',
-                    ])
-                    ->orderBy('position')
-                    ->orderBy('imdb_id'),
-            ]);
+            ->handle(['sort' => 'trending'])
+            ->whereHas('mediaAssets', fn (Builder $mediaQuery) => $mediaQuery
+                ->whereIn('kind', [MediaKind::Trailer, MediaKind::Clip, MediaKind::Featurette])
+                ->whereNotNull('url'));
     }
 
     /**

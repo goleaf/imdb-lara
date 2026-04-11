@@ -2,7 +2,7 @@
 
 namespace App\Actions\Catalog;
 
-use App\Models\Profession;
+use App\Models\PersonProfession;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
@@ -20,12 +20,12 @@ class GetPublicPeopleFilterOptionsAction
             'catalog:people-filter-options',
             now()->addMinutes(10),
             fn (): array => [
-                'professions' => Profession::query()
-                    ->select(['professions.id', 'professions.name'])
-                    ->whereNotNull('professions.name')
-                    ->whereHas('nameBasics', fn ($query) => $query->whereNotNull('name_basics.primaryname'))
-                    ->pluck('name')
+                'professions' => PersonProfession::query()
+                    ->whereNotNull('profession')
+                    ->whereHas('person', fn ($query) => $query->published())
+                    ->pluck('profession')
                     ->sort()
+                    ->unique()
                     ->values(),
                 'sortOptions' => collect([
                     ['value' => 'popular', 'label' => 'Most popular'],

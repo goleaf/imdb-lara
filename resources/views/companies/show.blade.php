@@ -48,12 +48,11 @@
         </x-ui.card>
 
         <x-ui.card data-slot="company-detail-filters" class="sb-detail-section !max-w-none">
-            <form method="GET" action="{{ route('public.companies.show', $company) }}" class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_12rem_14rem_14rem_auto] xl:items-end">
+            <div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_12rem_14rem_14rem_auto] xl:items-end">
                 <x-ui.field>
                     <x-ui.label>Search titles</x-ui.label>
                     <x-ui.input
-                        name="q"
-                        :value="$filters['q']"
+                        wire:model.live.debounce.300ms="search"
                         placeholder="Search by title or IMDb id"
                         left-icon="magnifying-glass"
                     />
@@ -62,12 +61,12 @@
                 <x-ui.field>
                     <x-ui.label>Type</x-ui.label>
                     <select
-                        name="type"
+                        wire:model.live="type"
                         class="w-full rounded-[1rem] border border-black/10 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus:border-neutral-400 dark:border-white/10 dark:bg-neutral-900 dark:text-neutral-100 dark:focus:border-white/20"
                     >
                         <option value="">All types</option>
                         @foreach ($typeOptions as $typeOption)
-                            <option value="{{ $typeOption['value'] }}" @selected($filters['type'] === $typeOption['value'])>
+                            <option value="{{ $typeOption['value'] }}">
                                 {{ $typeOption['label'] }}
                             </option>
                         @endforeach
@@ -77,12 +76,12 @@
                 <x-ui.field>
                     <x-ui.label>Category</x-ui.label>
                     <select
-                        name="category"
+                        wire:model.live="category"
                         class="w-full rounded-[1rem] border border-black/10 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus:border-neutral-400 dark:border-white/10 dark:bg-neutral-900 dark:text-neutral-100 dark:focus:border-white/20"
                     >
                         <option value="">All categories</option>
                         @foreach ($categoryOptions as $categoryOption)
-                            <option value="{{ $categoryOption['value'] }}" @selected($filters['category'] === $categoryOption['value'])>
+                            <option value="{{ $categoryOption['value'] }}">
                                 {{ $categoryOption['label'] }}
                             </option>
                         @endforeach
@@ -92,30 +91,30 @@
                 <x-ui.field>
                     <x-ui.label>Country</x-ui.label>
                     <select
-                        name="country"
+                        wire:model.live="country"
                         class="w-full rounded-[1rem] border border-black/10 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus:border-neutral-400 dark:border-white/10 dark:bg-neutral-900 dark:text-neutral-100 dark:focus:border-white/20"
                     >
                         <option value="">All countries</option>
                         @foreach ($countryOptions as $countryOption)
-                            <option value="{{ $countryOption['value'] }}" @selected($filters['country'] === $countryOption['value'])>
+                            <option value="{{ $countryOption['value'] }}">
                                 {{ $countryOption['label'] }}
                             </option>
                         @endforeach
                     </select>
                 </x-ui.field>
 
-                <div class="flex flex-wrap gap-2">
-                    <x-ui.button type="submit" icon="magnifying-glass">
-                        Filter
-                    </x-ui.button>
+                <div class="flex flex-wrap items-center gap-2">
+                    <x-ui.badge variant="outline" color="slate" icon="bolt">
+                        Updates live
+                    </x-ui.badge>
 
                     @if ($hasActiveFilters)
-                        <x-ui.button as="a" :href="route('public.companies.show', $company)" variant="ghost" icon="x-mark">
+                        <x-ui.button type="button" wire:click="resetFilters" variant="ghost" icon="x-mark">
                             Clear
                         </x-ui.button>
                     @endif
                 </div>
-            </form>
+            </div>
         </x-ui.card>
 
         <x-ui.card data-slot="company-detail-records" class="sb-detail-section !max-w-none">

@@ -10,7 +10,25 @@
 
 @section('content')
     <section class="space-y-4">
-        @if (! $catalogOnly && session('status'))
+        <div class="flex flex-wrap items-start justify-between gap-4">
+            <div>
+                <x-ui.heading level="h1" size="xl">Edit {{ $season->name }}</x-ui.heading>
+                <x-ui.text class="mt-1 text-neutral-600 dark:text-neutral-300">
+                    Manage season metadata and episode hierarchy for {{ $season->series->name }}.
+                </x-ui.text>
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+                <x-ui.button as="a" :href="route('admin.titles.edit', $season->series)" variant="outline" icon="arrow-left">
+                    Back to title
+                </x-ui.button>
+                <x-ui.button as="a" :href="route('public.seasons.show', ['series' => $season->series, 'season' => $season])" variant="outline" icon="arrow-top-right-on-square">
+                    View public page
+                </x-ui.button>
+            </div>
+        </div>
+
+        @if (session('status'))
             <x-ui.alerts variant="success" icon="check-circle">
                 <x-ui.alerts.description>{{ session('status') }}</x-ui.alerts.description>
             </x-ui.alerts>
@@ -26,89 +44,92 @@
                 Keep using the Livewire admin shell to inspect hierarchy, but apply season and episode changes through the upstream catalog synchronization workflow.
             </x-admin.catalog-write-disabled-panel>
         @else
-            <x-ui.card class="!max-w-none">
-                <form method="POST" action="{{ route('admin.seasons.update', $season) }}" class="space-y-6">
-                    @csrf
-                    @method('PATCH')
+            <div class="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+                <div class="space-y-4">
+                    <x-ui.card class="!max-w-none">
+                        <form method="POST" action="{{ route('admin.seasons.update', $season) }}" class="space-y-6">
+                            @csrf
+                            @method('PATCH')
 
-                    @include('admin.seasons._form')
+                            @include('admin.seasons._form')
 
-                    <div class="flex justify-end gap-3">
-                        <x-ui.button as="a" :href="route('admin.titles.edit', $season->series)" variant="ghost" icon="arrow-left">
-                            Back to title
-                        </x-ui.button>
-                        <x-ui.button type="submit" icon="check-circle">
-                            Save season
-                        </x-ui.button>
+                            <div class="flex justify-end">
+                                <x-ui.button type="submit" icon="check">
+                                    Save changes
+                                </x-ui.button>
+                            </div>
+                        </form>
+                    </x-ui.card>
+
+                    <div class="flex justify-end">
+                        <form method="POST" action="{{ route('admin.seasons.destroy', $season) }}">
+                            @csrf
+                            @method('DELETE')
+                            <x-ui.button type="submit" variant="outline" color="red" icon="trash">
+                                Delete season
+                            </x-ui.button>
+                        </form>
                     </div>
-                </form>
-            </x-ui.card>
-
-            <x-ui.card class="!max-w-none space-y-4">
-                <div>
-                    <x-ui.heading level="h2" size="lg">Episodes</x-ui.heading>
-                    <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                        Build and maintain the episode lineup for this season.
-                    </x-ui.text>
                 </div>
 
-                <form method="POST" action="{{ route('admin.seasons.episodes.store', $season) }}" class="space-y-4">
-                    @csrf
-                    @include('admin.episodes._form', [
-                        'episode' => new \App\Models\Episode(['season_number' => $season->season_number]),
-                        'fieldPrefix' => 'episode',
-                    ])
-                    <div>
-                        <x-ui.button type="submit" icon="plus">Add episode</x-ui.button>
-                    </div>
-                </form>
+                <div class="space-y-4">
+                    <x-ui.card class="!max-w-none">
+                        <div class="space-y-3">
+                            <div>
+                                <x-ui.heading level="h2" size="md">Episodes</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Episodes stay linked to both the season and the parent series title.
+                                </x-ui.text>
+                            </div>
 
-                <div class="space-y-3">
-                    @forelse ($season->episodes as $episode)
-                        <div class="rounded-box border border-black/10 p-3 dark:border-white/10">
-                            <div class="flex flex-wrap items-center justify-between gap-3">
-                                <div>
-                                    <div class="font-medium">{{ $episode->title->name }}</div>
-                                    <div class="text-sm text-neutral-500 dark:text-neutral-400">
-                                        Episode {{ $episode->episode_number ?: 'TBA' }}
-                                    </div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <x-ui.button as="a" :href="route('admin.episodes.edit', $episode)" size="sm" variant="outline" icon="pencil-square">
-                                        Edit
-                                    </x-ui.button>
-                                    <form method="POST" action="{{ route('admin.episodes.destroy', $episode) }}">
-                                        @csrf
-                                        @method('DELETE')
-                                        <x-ui.button type="submit" size="sm" variant="ghost" icon="trash">
-                                            Delete
-                                        </x-ui.button>
-                                    </form>
-                                </div>
+                            <div class="space-y-2">
+                                @forelse ($season->episodes as $episode)
+                                    <a href="{{ route('admin.episodes.edit', $episode) }}" class="flex items-center justify-between gap-3 rounded-box border border-black/10 p-3 transition hover:border-black/20 dark:border-white/10 dark:hover:border-white/20">
+                                        <div>
+                                            <div class="font-medium text-neutral-900 dark:text-white">
+                                                S{{ str_pad((string) $episode->season_number, 2, '0', STR_PAD_LEFT) }}E{{ str_pad((string) ($episode->episode_number ?? 0), 2, '0', STR_PAD_LEFT) }}
+                                                · {{ $episode->title?->name ?? 'Untitled episode' }}
+                                            </div>
+                                            <div class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                                {{ $episode->production_code ?: 'No production code' }}
+                                            </div>
+                                        </div>
+
+                                        <div class="flex items-center gap-2">
+                                            @if ($episode->title?->is_published)
+                                                <x-ui.badge color="green" icon="eye">Published</x-ui.badge>
+                                            @else
+                                                <x-ui.badge variant="outline" color="neutral" icon="eye-slash">Draft</x-ui.badge>
+                                            @endif
+                                            <x-ui.badge variant="outline" icon="arrow-right">Edit</x-ui.badge>
+                                        </div>
+                                    </a>
+                                @empty
+                                    <x-ui.empty-state
+                                        title="No episodes yet"
+                                        description="Add the first episode to establish numbering and public season detail records."
+                                        icon="play"
+                                    />
+                                @endforelse
                             </div>
                         </div>
-                    @empty
-                        <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
-                            <x-ui.empty.media>
-                                <x-ui.icon name="rectangle-stack" class="size-8 text-neutral-400 dark:text-neutral-500" />
-                            </x-ui.empty.media>
-                            <x-ui.heading level="h3">No episodes added yet.</x-ui.heading>
-                        </x-ui.empty>
-                    @endforelse
-                </div>
-            </x-ui.card>
+                    </x-ui.card>
 
-            <x-ui.card class="!max-w-none">
-                <div class="flex justify-end">
-                    <form method="POST" action="{{ route('admin.seasons.destroy', $season) }}">
-                        @csrf
-                        @method('DELETE')
-                        <x-ui.button type="submit" variant="ghost" icon="trash">
-                            Delete season
-                        </x-ui.button>
-                    </form>
+                    <x-ui.card class="!max-w-none">
+                        <form method="POST" action="{{ route('admin.seasons.episodes.store', $season) }}" class="space-y-6">
+                            @csrf
+
+                            @include('admin.episodes._form', ['episode' => $draftEpisode, 'fieldPrefix' => 'episode'])
+
+                            <div class="flex justify-end">
+                                <x-ui.button type="submit" icon="plus">
+                                    Add episode
+                                </x-ui.button>
+                            </div>
+                        </form>
+                    </x-ui.card>
                 </div>
-            </x-ui.card>
+            </div>
         @endif
     </section>
 @endsection

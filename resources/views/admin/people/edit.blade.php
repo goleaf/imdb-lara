@@ -18,12 +18,17 @@
                 </x-ui.text>
             </div>
 
-            <x-ui.button as="a" :href="route('public.people.show', $person)" variant="outline" icon="arrow-top-right-on-square">
-                View public page
-            </x-ui.button>
+            <div class="flex flex-wrap gap-2">
+                <x-ui.button as="a" :href="route('public.people.show', $person)" variant="outline" icon="arrow-top-right-on-square">
+                    View public page
+                </x-ui.button>
+                <x-ui.button as="a" :href="route('admin.credits.create', ['person' => $person->id])" variant="outline" icon="plus">
+                    Add credit
+                </x-ui.button>
+            </div>
         </div>
 
-        @if (! $catalogOnly && session('status'))
+        @if (session('status'))
             <x-ui.alerts variant="success" icon="check-circle">
                 <x-ui.alerts.description>{{ session('status') }}</x-ui.alerts.description>
             </x-ui.alerts>
@@ -39,283 +44,235 @@
                 This route stays on the Livewire shell, but changes to people records now need to come from the upstream catalog synchronization workflow.
             </x-admin.catalog-write-disabled-panel>
         @else
-            <x-ui.card class="!max-w-none">
-                <form method="POST" action="{{ route('admin.people.update', $person) }}" class="space-y-6">
-                    @csrf
-                    @method('PATCH')
+            <div class="grid gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+                <div class="space-y-4">
+                    <x-ui.card class="!max-w-none">
+                        <form method="POST" action="{{ route('admin.people.update', $person) }}" class="space-y-6">
+                            @csrf
+                            @method('PATCH')
 
-                    @include('admin.people._form')
+                            @include('admin.people._form')
 
-                    <div class="flex justify-end gap-3">
-                        <x-ui.button as="a" :href="route('admin.people.index')" variant="ghost" icon="arrow-left">
-                            Back to people
-                        </x-ui.button>
-                        <x-ui.button type="submit" icon="check-circle">
-                            Save changes
-                        </x-ui.button>
-                    </div>
-                </form>
-            </x-ui.card>
+                            <div class="flex justify-end">
+                                <x-ui.button type="submit" icon="check">
+                                    Save changes
+                                </x-ui.button>
+                            </div>
+                        </form>
+                    </x-ui.card>
 
-            <div class="grid gap-4 xl:grid-cols-2">
-                <x-ui.card class="!max-w-none space-y-4">
-                    <div>
-                        <x-ui.heading level="h2" size="lg">Professions</x-ui.heading>
-                        <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                            Shape the public profession chips and career grouping.
-                        </x-ui.text>
-                    </div>
+                    <x-ui.card class="!max-w-none">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between gap-3">
+                                <div>
+                                    <x-ui.heading level="h2" size="md">Professions</x-ui.heading>
+                                    <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                        Keep department and primary-role metadata aligned with credit attribution.
+                                    </x-ui.text>
+                                </div>
+                            </div>
 
-                    <form method="POST" action="{{ route('admin.people.professions.store', $person) }}" class="grid gap-4 md:grid-cols-2">
-                        @csrf
-                        <x-ui.field>
-                            <x-ui.label>Department</x-ui.label>
-                            <x-ui.input name="department" :value="old('department')" placeholder="Cast" />
-                            <x-ui.error name="department" />
-                        </x-ui.field>
-                        <x-ui.field>
-                            <x-ui.label>Profession</x-ui.label>
-                            <x-ui.input name="profession" :value="old('profession')" placeholder="Actor" />
-                            <x-ui.error name="profession" />
-                        </x-ui.field>
-                        <x-ui.field>
-                            <x-ui.label>Sort order</x-ui.label>
-                            <x-ui.input name="sort_order" type="number" min="0" :value="old('sort_order', 0)" />
-                            <x-ui.error name="sort_order" />
-                        </x-ui.field>
-                        <label class="flex items-center gap-2 text-sm md:self-end">
-                            <input type="hidden" name="is_primary" value="0">
-                            <input type="checkbox" name="is_primary" value="1" class="rounded border-black/20 dark:border-white/20 dark:bg-neutral-900" @checked(old('is_primary'))>
-                            <span>Primary profession</span>
-                        </label>
-                        <div class="md:col-span-2">
-                            <x-ui.button type="submit" icon="plus">Add profession</x-ui.button>
-                        </div>
-                    </form>
+                            <div class="space-y-3">
+                                @forelse ($person->professions as $profession)
+                                    <div class="rounded-box border border-black/10 p-4 dark:border-white/10">
+                                        <form method="POST" action="{{ route('admin.professions.update', $profession) }}" class="space-y-3">
+                                            @csrf
+                                            @method('PATCH')
 
-                    <div class="space-y-3">
-                        @forelse ($person->professions as $profession)
-                            <div class="rounded-box border border-black/10 p-3 dark:border-white/10">
-                                <form method="POST" action="{{ route('admin.professions.update', $profession) }}">
+                                            <div class="grid gap-3 md:grid-cols-2">
+                                                <x-ui.field>
+                                                    <x-ui.label>Department</x-ui.label>
+                                                    <x-ui.input name="department" :value="old('department', $profession->department)" />
+                                                </x-ui.field>
+
+                                                <x-ui.field>
+                                                    <x-ui.label>Profession</x-ui.label>
+                                                    <x-ui.input name="profession" :value="old('profession', $profession->profession)" />
+                                                </x-ui.field>
+
+                                                <x-ui.field>
+                                                    <x-ui.label>Sort order</x-ui.label>
+                                                    <x-ui.input name="sort_order" type="number" min="0" :value="old('sort_order', $profession->sort_order)" />
+                                                </x-ui.field>
+
+                                                <label class="flex items-center gap-2 text-sm md:self-end">
+                                                    <input type="hidden" name="is_primary" value="0">
+                                                    <input type="checkbox" name="is_primary" value="1" class="rounded border-black/20 dark:border-white/20 dark:bg-neutral-900" @checked(old('is_primary', $profession->is_primary))>
+                                                    <span>Primary profession</span>
+                                                </label>
+                                            </div>
+
+                                            <div class="flex flex-wrap justify-end gap-2">
+                                                <x-ui.button type="submit" size="sm" icon="check">
+                                                    Save profession
+                                                </x-ui.button>
+                                            </div>
+                                        </form>
+
+                                        <div class="mt-3 flex justify-end">
+                                            <form method="POST" action="{{ route('admin.professions.destroy', $profession) }}">
+                                                @csrf
+                                                @method('DELETE')
+                                                <x-ui.button type="submit" variant="outline" color="red" size="sm" icon="trash">
+                                                    Delete
+                                                </x-ui.button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                @empty
+                                    <x-ui.empty-state
+                                        title="No professions yet"
+                                        description="Add a profession so credits can validate against this person’s role taxonomy."
+                                        icon="briefcase"
+                                    />
+                                @endforelse
+                            </div>
+
+                            <div class="rounded-box border border-dashed border-black/10 p-4 dark:border-white/10">
+                                <form method="POST" action="{{ route('admin.people.professions.store', $person) }}" class="space-y-4">
                                     @csrf
-                                    @method('PATCH')
-                                    <div class="grid gap-3 md:grid-cols-4">
-                                        <x-ui.input name="department" :value="$profession->department" />
-                                        <x-ui.input name="profession" :value="$profession->profession" />
-                                        <x-ui.input name="sort_order" type="number" min="0" :value="$profession->sort_order" />
-                                        <label class="flex items-center gap-2 text-sm">
+
+                                    <div class="grid gap-3 md:grid-cols-2">
+                                        <x-ui.field>
+                                            <x-ui.label>Department</x-ui.label>
+                                            <x-ui.input name="department" :value="old('department', $draftProfession->department)" />
+                                            <x-ui.error name="department" />
+                                        </x-ui.field>
+
+                                        <x-ui.field>
+                                            <x-ui.label>Profession</x-ui.label>
+                                            <x-ui.input name="profession" :value="old('profession', $draftProfession->profession)" />
+                                            <x-ui.error name="profession" />
+                                        </x-ui.field>
+
+                                        <x-ui.field>
+                                            <x-ui.label>Sort order</x-ui.label>
+                                            <x-ui.input name="sort_order" type="number" min="0" :value="old('sort_order', $draftProfession->sort_order)" />
+                                            <x-ui.error name="sort_order" />
+                                        </x-ui.field>
+
+                                        <label class="flex items-center gap-2 text-sm md:self-end">
                                             <input type="hidden" name="is_primary" value="0">
-                                            <input type="checkbox" name="is_primary" value="1" class="rounded border-black/20 dark:border-white/20 dark:bg-neutral-900" @checked($profession->is_primary)>
-                                            <span>Primary</span>
+                                            <input type="checkbox" name="is_primary" value="1" class="rounded border-black/20 dark:border-white/20 dark:bg-neutral-900" @checked(old('is_primary', $draftProfession->is_primary))>
+                                            <span>Primary profession</span>
                                         </label>
                                     </div>
-                                    <div class="mt-3 flex justify-end gap-2">
-                                        <x-ui.button type="submit" size="sm" variant="outline" icon="check-circle">
-                                            Update
+
+                                    <div class="flex justify-end">
+                                        <x-ui.button type="submit" size="sm" icon="plus">
+                                            Add profession
                                         </x-ui.button>
                                     </div>
                                 </form>
-
-                                <div class="mt-2 flex justify-end">
-                                    <form method="POST" action="{{ route('admin.professions.destroy', $profession) }}">
-                                        @csrf
-                                        @method('DELETE')
-                                        <x-ui.button type="submit" size="sm" variant="ghost" icon="trash">
-                                            Delete
-                                        </x-ui.button>
-                                    </form>
-                                </div>
                             </div>
-                        @empty
-                            <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
-                                <x-ui.empty.media>
-                                    <x-ui.icon name="sparkles" class="size-8 text-neutral-400 dark:text-neutral-500" />
-                                </x-ui.empty.media>
-                                <x-ui.heading level="h3">No professions added yet.</x-ui.heading>
-                            </x-ui.empty>
-                        @endforelse
-                    </div>
-                </x-ui.card>
-
-                <x-ui.card class="!max-w-none space-y-4">
-                    <div class="flex items-center justify-between gap-3">
-                        <div>
-                            <x-ui.heading level="h2" size="lg">Credit Linking</x-ui.heading>
-                            <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                                Credits connect this person to titles across the catalog.
-                            </x-ui.text>
                         </div>
-                        <x-ui.button as="a" :href="route('admin.credits.create', ['person' => $person->id])" variant="outline" icon="plus">
-                            Add credit
-                        </x-ui.button>
-                    </div>
-
-                    <div class="space-y-3">
-                        @forelse ($person->credits as $credit)
-                            <div class="rounded-box border border-black/10 p-3 dark:border-white/10">
-                                <div class="flex flex-wrap items-center justify-between gap-3">
-                                    <div>
-                                        <div class="font-medium">{{ $credit->title->name }}</div>
-                                        <div class="text-sm text-neutral-500 dark:text-neutral-400">
-                                            {{ $credit->department }} · {{ $credit->job }}
-                                            @if ($credit->character_name)
-                                                · {{ $credit->character_name }}
-                                            @endif
-                                        </div>
-                                    </div>
-                                    <x-ui.button as="a" :href="route('admin.credits.edit', $credit)" size="sm" variant="outline" icon="pencil-square">
-                                        Edit credit
-                                    </x-ui.button>
-                                </div>
-                            </div>
-                        @empty
-                            <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
-                                <x-ui.empty.media>
-                                    <x-ui.icon name="film" class="size-8 text-neutral-400 dark:text-neutral-500" />
-                                </x-ui.empty.media>
-                                <x-ui.heading level="h3">No credits linked yet.</x-ui.heading>
-                            </x-ui.empty>
-                        @endforelse
-                    </div>
-                </x-ui.card>
-            </div>
-
-            <x-ui.card class="!max-w-none space-y-4">
-                <div>
-                    <x-ui.heading level="h2" size="lg">Photo and Media</x-ui.heading>
-                    <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                        Attach headshots, gallery images, and video assets to the person profile.
-                    </x-ui.text>
+                    </x-ui.card>
                 </div>
-
-                <form method="POST" action="{{ route('admin.people.media-assets.store', $person) }}" enctype="multipart/form-data" class="grid gap-4 md:grid-cols-2">
-                    @csrf
-                    <x-ui.field>
-                        <x-ui.label>Kind</x-ui.label>
-                        <select
-                            name="kind"
-                            class="min-h-10 rounded-box border border-black/10 bg-white px-3 text-sm text-neutral-800 shadow-xs transition focus:border-black/15 focus:outline-none focus:ring-2 focus:ring-neutral-900/15 dark:border-white/15 dark:bg-neutral-900 dark:text-neutral-200 dark:focus:border-white/20 dark:focus:ring-neutral-100/15"
-                        >
-                            @foreach (\App\Enums\MediaKind::allowedForMediable($person) as $mediaKind)
-                                <option value="{{ $mediaKind->value }}">{{ str($mediaKind->value)->headline() }}</option>
-                            @endforeach
-                        </select>
-                    </x-ui.field>
-                    <x-ui.field>
-                        <x-ui.label>Upload image</x-ui.label>
-                        <x-ui.input name="file" type="file" accept="image/*" />
-                        <x-ui.text class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-                            Upload headshots and gallery images directly to local storage.
-                        </x-ui.text>
-                        <x-ui.error name="file" />
-                    </x-ui.field>
-                    <x-ui.field>
-                        <x-ui.label>URL</x-ui.label>
-                        <x-ui.input name="url" type="url" placeholder="https://..." />
-                        <x-ui.text class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-                            Use a remote URL for externally hosted portrait or gallery assets.
-                        </x-ui.text>
-                        <x-ui.error name="url" />
-                    </x-ui.field>
-                    <x-ui.field>
-                        <x-ui.label>Alt text</x-ui.label>
-                        <x-ui.input name="alt_text" />
-                        <x-ui.error name="alt_text" />
-                    </x-ui.field>
-                    <x-ui.field>
-                        <x-ui.label>Provider</x-ui.label>
-                        <x-ui.input name="provider" />
-                        <x-ui.error name="provider" />
-                    </x-ui.field>
-                    <label class="flex items-center gap-2 text-sm md:col-span-2">
-                        <input type="hidden" name="is_primary" value="0">
-                        <input type="checkbox" name="is_primary" value="1" class="rounded border-black/20 dark:border-white/20 dark:bg-neutral-900">
-                        <span>Primary asset</span>
-                    </label>
-                    <div class="md:col-span-2">
-                        <x-ui.button type="submit" icon="plus">Add media asset</x-ui.button>
-                    </div>
-                </form>
 
                 <div class="space-y-4">
-                    @if ($person->mediaAssets->isEmpty())
-                        <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10 lg:col-span-2">
-                            <x-ui.empty.media>
-                                <x-ui.icon name="photo" class="size-8 text-neutral-400 dark:text-neutral-500" />
-                            </x-ui.empty.media>
-                            <x-ui.heading level="h3">No media assets attached yet.</x-ui.heading>
-                        </x-ui.empty>
-                    @endif
-
-                    @foreach (\App\Enums\MediaKind::allowedForMediable($person) as $mediaKind)
-                        @continue(($person->groupedMediaAssetsByKind()->get($mediaKind->value, collect()))->isEmpty())
-
+                    <x-ui.card class="!max-w-none">
                         <div class="space-y-3">
-                            <div class="flex flex-wrap items-center justify-between gap-2">
-                                <x-ui.heading level="h3" size="md">{{ str($mediaKind->value)->headline() }}</x-ui.heading>
-                                <x-ui.badge variant="outline" color="neutral" icon="photo">
-                                    {{ number_format(($person->groupedMediaAssetsByKind()->get($mediaKind->value, collect()))->count()) }} assets
-                                </x-ui.badge>
+                            <div class="flex items-center justify-between gap-3">
+                                <div>
+                                    <x-ui.heading level="h2" size="md">Linked credits</x-ui.heading>
+                                    <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                        Credits for this person stay editable from the dedicated credit editor.
+                                    </x-ui.text>
+                                </div>
                             </div>
 
-                            <div class="grid gap-3 lg:grid-cols-2">
-                                @foreach ($person->groupedMediaAssetsByKind()->get($mediaKind->value, collect()) as $mediaAsset)
-                                    <div class="rounded-box border border-black/10 p-3 dark:border-white/10">
-                                        <div class="flex flex-wrap items-center justify-between gap-3">
-                                            <div class="flex items-center gap-3">
-                                                <div class="overflow-hidden rounded-box border border-black/5 bg-neutral-100 dark:border-white/10 dark:bg-neutral-800">
-                                                    <img
-                                                        src="{{ $mediaAsset->url }}"
-                                                        alt="{{ $mediaAsset->alt_text ?: $person->name }}"
-                                                        class="size-14 object-cover"
-                                                    >
+                            <div class="space-y-2">
+                                @forelse ($person->credits as $credit)
+                                    <a href="{{ route('admin.credits.edit', $credit) }}" class="block rounded-box border border-black/10 p-3 transition hover:border-black/20 dark:border-white/10 dark:hover:border-white/20">
+                                        <div class="flex items-start justify-between gap-3">
+                                            <div>
+                                                <div class="font-medium text-neutral-900 dark:text-white">
+                                                    {{ $credit->title?->name ?? 'Untitled title' }}
                                                 </div>
+                                                <div class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                                    {{ $credit->department }} · {{ $credit->job }}
+                                                    @if ($credit->episode?->title)
+                                                        · Episode: {{ $credit->episode->title->name }}
+                                                    @endif
+                                                </div>
+                                            </div>
 
-                                                <div>
-                                                    <div class="font-medium">{{ $mediaAsset->caption ?: str($mediaAsset->kind->value)->headline() }}</div>
-                                                    <div class="text-sm text-neutral-500 dark:text-neutral-400">
-                                                        {{ $mediaAsset->provider ?: 'Direct URL' }} · Position {{ $mediaAsset->position }}
-                                                        @if ($mediaAsset->is_primary)
-                                                            · Primary
-                                                        @endif
-                                                        @if ($mediaAsset->width && $mediaAsset->height)
-                                                            · {{ number_format($mediaAsset->width) }} × {{ number_format($mediaAsset->height) }}
-                                                        @endif
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="flex gap-2">
-                                                <x-ui.button as="a" :href="route('admin.media-assets.edit', $mediaAsset)" size="sm" variant="outline" icon="pencil-square">
-                                                    Edit
-                                                </x-ui.button>
-                                                <form method="POST" action="{{ route('admin.media-assets.destroy', $mediaAsset) }}">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <x-ui.button type="submit" size="sm" variant="ghost" icon="trash">
-                                                        Delete
-                                                    </x-ui.button>
-                                                </form>
-                                            </div>
+                                            <x-ui.badge variant="outline" icon="arrow-right">Edit</x-ui.badge>
                                         </div>
-                                    </div>
-                                @endforeach
+                                    </a>
+                                @empty
+                                    <x-ui.empty-state
+                                        title="No credits linked"
+                                        description="Use the credit editor to link this person to titles, episodes, and profession records."
+                                        icon="film"
+                                    />
+                                @endforelse
                             </div>
                         </div>
-                    @endforeach
-                </div>
-            </x-ui.card>
+                    </x-ui.card>
 
-            <x-ui.card class="!max-w-none">
-                <div class="flex justify-end">
-                    <form method="POST" action="{{ route('admin.people.destroy', $person) }}">
-                        @csrf
-                        @method('DELETE')
-                        <x-ui.button type="submit" variant="ghost" icon="trash">
-                            Delete person
-                        </x-ui.button>
-                    </form>
+                    <x-ui.card class="!max-w-none">
+                        <div class="space-y-4">
+                            <div>
+                                <x-ui.heading level="h2" size="md">Media assets</x-ui.heading>
+                                <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                    Headshots, stills, and gallery assets published from here flow directly to the public person page.
+                                </x-ui.text>
+                            </div>
+
+                            <div class="space-y-2">
+                                @forelse ($person->mediaAssets as $mediaAsset)
+                                    <a href="{{ route('admin.media-assets.edit', $mediaAsset) }}" class="flex items-center justify-between gap-3 rounded-box border border-black/10 p-3 transition hover:border-black/20 dark:border-white/10 dark:hover:border-white/20">
+                                        <div>
+                                            <div class="font-medium text-neutral-900 dark:text-white">
+                                                {{ $mediaAsset->kindLabel() }}
+                                            </div>
+                                            <div class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                                                {{ $mediaAsset->caption ?: ($mediaAsset->alt_text ?: 'No caption') }}
+                                            </div>
+                                        </div>
+
+                                        <div class="flex items-center gap-2">
+                                            @if ($mediaAsset->is_primary)
+                                                <x-ui.badge color="amber" icon="star">Primary</x-ui.badge>
+                                            @endif
+                                            <x-ui.badge variant="outline" icon="arrow-right">Edit</x-ui.badge>
+                                        </div>
+                                    </a>
+                                @empty
+                                    <x-ui.empty-state
+                                        title="No media assets"
+                                        description="Add a headshot or gallery asset to populate the public person presentation."
+                                        icon="photo"
+                                    />
+                                @endforelse
+                            </div>
+
+                            <form method="POST" action="{{ route('admin.people.media-assets.store', $person) }}" enctype="multipart/form-data" class="space-y-4 rounded-box border border-dashed border-black/10 p-4 dark:border-white/10">
+                                @csrf
+
+                                @include('admin.media-assets._form', ['mediaAsset' => $draftMediaAsset])
+
+                                <div class="flex justify-end">
+                                    <x-ui.button type="submit" size="sm" icon="plus">
+                                        Add media asset
+                                    </x-ui.button>
+                                </div>
+                            </form>
+                        </div>
+                    </x-ui.card>
+
+                    <div class="flex justify-end">
+                        <form method="POST" action="{{ route('admin.people.destroy', $person) }}">
+                            @csrf
+                            @method('DELETE')
+                            <x-ui.button type="submit" variant="outline" color="red" icon="trash">
+                                Delete person
+                            </x-ui.button>
+                        </form>
+                    </div>
                 </div>
-            </x-ui.card>
+            </div>
         @endif
     </section>
 @endsection

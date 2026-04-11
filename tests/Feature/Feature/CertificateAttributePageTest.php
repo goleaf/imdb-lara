@@ -51,9 +51,12 @@ class CertificateAttributePageTest extends TestCase
         $response
             ->assertOk()
             ->assertSeeHtml('data-slot="certificate-attribute-detail-hero"')
+            ->assertSeeHtml('data-slot="certificate-attribute-detail-filters"')
             ->assertSeeHtml('data-slot="certificate-attribute-detail-records"')
             ->assertSee($movieCertificateAttribute->certificateAttribute->name)
             ->assertSee($movieCertificateAttribute->movieCertificate->title->name)
+            ->assertSee('Updates live')
+            ->assertDontSee('<form method="GET"', false)
             ->assertSee(route('public.titles.show', $movieCertificateAttribute->movieCertificate->title), false);
 
         if ($movieCertificateAttribute->movieCertificate->certificateRating !== null) {
@@ -74,6 +77,8 @@ class CertificateAttributePageTest extends TestCase
             ->assertOk()
             ->assertSeeHtml('data-slot="certificate-attribute-detail-filters"')
             ->assertSee($movieCertificateAttribute->movieCertificate->title->name)
-            ->assertSee($movieCertificateAttribute->certificateAttribute->name);
+            ->assertSee($movieCertificateAttribute->certificateAttribute->name)
+            ->assertSee('Updates live')
+            ->assertDontSee('<form method="GET"', false);
     }
 }

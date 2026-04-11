@@ -7,12 +7,10 @@ use App\Livewire\Pages\Concerns\RendersPageView;
 use App\Models\MediaAsset;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
-use Livewire\WithPagination;
 
 class MediaAssetsPage extends Component
 {
     use RendersPageView;
-    use WithPagination;
 
     public ?MediaAsset $mediaAsset = null;
 
@@ -21,17 +19,18 @@ class MediaAssetsPage extends Component
         $this->mediaAsset = $mediaAsset;
     }
 
-    public function render(BuildAdminMediaAssetsIndexQueryAction $buildAdminMediaAssetsIndexQuery): View
+    protected function renderMediaAssetsIndexPage(BuildAdminMediaAssetsIndexQueryAction $buildAdminMediaAssetsIndexQuery): View
     {
-        if (request()->routeIs('admin.media-assets.index')) {
-            return $this->renderPageView('admin.media-assets.index', [
-                'mediaAssets' => $buildAdminMediaAssetsIndexQuery
-                    ->handle()
-                    ->simplePaginate(20)
-                    ->withQueryString(),
-            ]);
-        }
+        return $this->renderPageView('admin.media-assets.index', [
+            'mediaAssets' => $buildAdminMediaAssetsIndexQuery
+                ->handle()
+                ->simplePaginate(20)
+                ->withQueryString(),
+        ]);
+    }
 
+    protected function renderMediaAssetEditPage(): View
+    {
         abort_unless($this->mediaAsset instanceof MediaAsset, 404);
 
         if ($this->isCatalogOnlyApplication()) {

@@ -32,10 +32,11 @@
 
                     @include('admin.credits._form')
 
-                    <div class="flex justify-end gap-3">
-                        <x-ui.button as="a" :href="route('admin.dashboard')" variant="ghost" icon="arrow-left">
-                            Cancel
-                        </x-ui.button>
+                    <x-ui.text class="text-sm text-neutral-500 dark:text-neutral-400">
+                        Change the selected title or person and resubmit if you need refreshed episode or profession options.
+                    </x-ui.text>
+
+                    <div class="flex justify-end">
                         <x-ui.button type="submit" icon="plus">
                             Create credit
                         </x-ui.button>

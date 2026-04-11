@@ -4,7 +4,7 @@
             as="button"
             type="button"
             wire:click="logout"
-            wire:loading.attr="disabled"
+            wire:target="logout"
             :icon="$icon"
             :variant="$variant"
         >
@@ -14,7 +14,7 @@
         <x-ui.button
             type="button"
             wire:click="logout"
-            wire:loading.attr="disabled"
+            wire:target="logout"
             :variant="$variant"
             :size="$size"
             :icon="$icon"

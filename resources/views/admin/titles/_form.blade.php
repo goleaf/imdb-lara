@@ -19,16 +19,13 @@
 
     <x-ui.field>
         <x-ui.label>Type</x-ui.label>
-        <select
-            name="title_type"
-            class="min-h-10 rounded-box border border-black/10 bg-white px-3 text-sm text-neutral-800 shadow-xs transition focus:border-black/15 focus:outline-none focus:ring-2 focus:ring-neutral-900/15 dark:border-white/15 dark:bg-neutral-900 dark:text-neutral-200 dark:focus:border-white/20 dark:focus:ring-neutral-100/15"
-        >
+        <x-ui.native-select name="title_type">
             @foreach ($titleTypes as $titleType)
                 <option value="{{ $titleType->value }}" @selected(old('title_type', $title->title_type?->value) === $titleType->value)>
-                    {{ str($titleType->value)->headline() }}
+                    {{ $titleType->label() }}
                 </option>
             @endforeach
-        </select>
+        </x-ui.native-select>
         <x-ui.error name="title_type" />
     </x-ui.field>
 
@@ -76,31 +73,29 @@
 
     <x-ui.field>
         <x-ui.label>Publish status</x-ui.label>
-        <select
-            name="is_published"
-            class="min-h-10 rounded-box border border-black/10 bg-white px-3 text-sm text-neutral-800 shadow-xs transition focus:border-black/15 focus:outline-none focus:ring-2 focus:ring-neutral-900/15 dark:border-white/15 dark:bg-neutral-900 dark:text-neutral-200 dark:focus:border-white/20 dark:focus:ring-neutral-100/15"
-        >
+        <x-ui.native-select name="is_published">
             <option value="1" @selected(old('is_published', $title->is_published) == true)>Published</option>
             <option value="0" @selected(old('is_published', $title->is_published) == false)>Draft</option>
-        </select>
+        </x-ui.native-select>
         <x-ui.error name="is_published" />
     </x-ui.field>
 </div>
 
 <x-ui.field>
     <x-ui.label>Genres</x-ui.label>
+    @php
+        $selectedGenreIds = collect(old('genre_ids', $title->genres?->modelKeys() ?? []))
+            ->map(fn ($genreId) => (int) $genreId);
+    @endphp
     <div class="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
         @foreach ($genres as $genre)
-            <label class="flex items-center gap-2 rounded-box border border-black/10 px-3 py-2 text-sm dark:border-white/10">
-                <input
-                    type="checkbox"
-                    name="genre_ids[]"
-                    value="{{ $genre->id }}"
-                    class="rounded border-black/20 text-neutral-900 focus:ring-neutral-900/20 dark:border-white/20 dark:bg-neutral-900 dark:text-neutral-100 dark:focus:ring-neutral-100/20"
-                    @checked(collect(old('genre_ids', $title->genres?->modelKeys() ?? []))->map(fn ($genreId) => (int) $genreId)->contains($genre->id))
-                >
-                <span>{{ $genre->name }}</span>
-            </label>
+            <x-ui.checkbox
+                name="genre_ids[]"
+                :value="$genre->id"
+                :checked="$selectedGenreIds->contains($genre->id)"
+                :label="$genre->name"
+                class="rounded-box border border-black/10 px-3 py-2 text-sm dark:border-white/10"
+            />
         @endforeach
     </div>
     <x-ui.error name="genre_ids" />

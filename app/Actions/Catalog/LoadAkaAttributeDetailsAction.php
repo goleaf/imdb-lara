@@ -41,9 +41,9 @@ class LoadAkaAttributeDetailsAction
      *     seo: PageSeoData
      * }
      */
-    public function handle(AkaAttribute $akaAttribute): array
+    public function handle(AkaAttribute $akaAttribute, array $filters): array
     {
-        $filters = $this->filtersFromRequest();
+        $filters = $this->normalizeFilters($filters);
         $archiveQuery = $this->baseArchiveQuery($akaAttribute, $filters);
         $countryOptions = $this->countryOptions($akaAttribute, $filters);
         $languageOptions = $this->languageOptions($akaAttribute, $filters);
@@ -162,15 +162,19 @@ class LoadAkaAttributeDetailsAction
     /**
      * @return array{q: string, type: string, country: string, language: string}
      */
-    private function filtersFromRequest(): array
+    /**
+     * @param  array{q?: string, type?: string, country?: string, language?: string}  $filters
+     * @return array{q: string, type: string, country: string, language: string}
+     */
+    private function normalizeFilters(array $filters): array
     {
-        $type = TitleType::tryFrom((string) request()->query('type', ''));
+        $type = TitleType::tryFrom((string) ($filters['type'] ?? ''));
 
         return [
-            'q' => trim((string) request()->query('q', '')),
+            'q' => trim((string) ($filters['q'] ?? '')),
             'type' => $type?->value ?? '',
-            'country' => str((string) request()->query('country', ''))->trim()->upper()->toString(),
-            'language' => str((string) request()->query('language', ''))->trim()->lower()->toString(),
+            'country' => str((string) ($filters['country'] ?? ''))->trim()->upper()->toString(),
+            'language' => str((string) ($filters['language'] ?? ''))->trim()->lower()->toString(),
         ];
     }
 

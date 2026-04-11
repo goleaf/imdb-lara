@@ -2,6 +2,7 @@
 
 namespace App\Actions\Seo;
 
+use App\Enums\TitleType;
 use App\Models\Genre;
 use App\Models\InterestCategory;
 use App\Models\Person;
@@ -39,10 +40,10 @@ class GetSitemapDataAction
     public function handle(): array
     {
         $titles = Title::query()
-            ->select(['id', 'tconst', 'primarytitle', 'isadult', 'startyear'])
+            ->select(['id', 'slug', 'name', 'release_year'])
             ->publishedCatalog()
-            ->orderByDesc('startyear')
-            ->orderBy('primarytitle')
+            ->orderByDesc('release_year')
+            ->orderBy('name')
             ->limit(self::TITLE_LIMIT)
             ->get();
         $staticRoutes = collect([
@@ -80,12 +81,12 @@ class GetSitemapDataAction
                     ->get()
                 : new EloquentCollection,
             'years' => Title::query()
-                ->select(['startyear'])
+                ->select(['release_year'])
                 ->publishedCatalog()
-                ->whereNotNull('startyear')
+                ->whereNotNull('release_year')
                 ->distinct()
-                ->orderByDesc('startyear')
-                ->pluck('startyear'),
+                ->orderByDesc('release_year')
+                ->pluck('release_year'),
             'titles' => $titles,
             'titleArchiveUrls' => $titles
                 ->flatMap(function (Title $title): Collection {
@@ -103,27 +104,28 @@ class GetSitemapDataAction
                 ->values(),
             'episodes' => Route::has('public.episodes.show')
                 ? Title::query()
-                    ->select(['id', 'tconst', 'primarytitle', 'titletype'])
+                    ->select(['id', 'slug', 'name', 'title_type'])
                     ->published()
-                    ->where('titletype', 'tvEpisode')
-                    ->with('episodeMeta.series:id,tconst,primarytitle', 'episodeMeta')
-                    ->orderBy('primarytitle')
+                    ->where('title_type', TitleType::Episode->value)
+                    ->with('episodeMeta.series:id,slug,name', 'episodeMeta')
+                    ->orderBy('name')
                     ->limit(self::EPISODE_LIMIT)
                     ->get()
                 : new EloquentCollection,
             'seasons' => Route::has('public.seasons.show')
                 ? Season::query()
-                    ->select(['movie_id', 'season', 'episode_count'])
-                    ->with('series:id,tconst,primarytitle')
-                    ->orderBy('movie_id')
-                    ->orderBy('season')
+                    ->select(['id', 'series_id', 'slug', 'season_number', 'name'])
+                    ->with('series:id,slug,name')
+                    ->withCount('episodes')
+                    ->orderBy('series_id')
+                    ->orderBy('season_number')
                     ->limit(self::SEASON_LIMIT)
                     ->get()
                 : new EloquentCollection,
             'people' => Person::query()
-                ->select(['id', 'nconst', 'primaryname', 'displayName'])
+                ->select(['id', 'slug', 'name'])
                 ->published()
-                ->orderBy('displayName')
+                ->orderBy('name')
                 ->limit(self::PERSON_LIMIT)
                 ->get(),
         ];

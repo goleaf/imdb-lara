@@ -71,6 +71,23 @@ class LivewireLoadingStateConventionTest extends TestCase
         }
     }
 
+    public function test_heavier_embedded_livewire_views_are_wrapped_in_islands(): void
+    {
+        $viewExpectations = [
+            resource_path('views/livewire/account/watchlist-browser.blade.php') => 'data-slot="watchlist-browser-island"',
+            resource_path('views/livewire/lists/manage-list.blade.php') => 'data-slot="manage-list-island"',
+            resource_path('views/livewire/people/filmography-panel.blade.php') => 'data-slot="person-filmography-island"',
+        ];
+
+        foreach ($viewExpectations as $viewPath => $islandSlot) {
+            $contents = file_get_contents($viewPath);
+
+            $this->assertNotFalse($contents);
+            $this->assertStringContainsString('@island(name:', $contents, $viewPath);
+            $this->assertStringContainsString($islandSlot, $contents, $viewPath);
+        }
+    }
+
     public function test_profile_settings_panel_defines_a_lazy_placeholder_and_scoped_submit_loading_state(): void
     {
         $contents = file_get_contents(resource_path('views/components/account/⚡profile-settings-panel.blade.php'));

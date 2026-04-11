@@ -72,7 +72,7 @@ class BuildSearchResultsViewDataAction
                 'sort' => 'popular',
             ])->limit($resultsPerLane)->get()
             : collect();
-        $interestCategories = mb_strlen($searchQuery) >= 2
+        $interestCategories = mb_strlen($searchQuery) >= 2 && config('screenbase.catalog_only', false)
             ? $this->buildPublicInterestCategoryIndexQuery->handle([
                 'search' => $searchQuery,
                 'sort' => 'popular',

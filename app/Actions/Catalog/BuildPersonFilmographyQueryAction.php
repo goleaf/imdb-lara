@@ -32,27 +32,32 @@ class BuildPersonFilmographyQueryAction
 
         $credits = Credit::query()
             ->select([
-                'name_credits.id',
-                'name_credits.name_basic_id',
-                'name_credits.movie_id',
-                'name_credits.category',
-                'name_credits.episode_count',
-                'name_credits.position',
+                'id',
+                'title_id',
+                'person_id',
+                'department',
+                'job',
+                'character_name',
+                'billing_order',
+                'is_principal',
+                'person_profession_id',
+                'episode_id',
+                'credited_as',
             ])
-            ->where('name_credits.name_basic_id', $person->getKey())
+            ->where('credits.person_id', $person->getKey())
             ->ordered()
             ->with([
-                'nameCreditCharacters:name_credit_id,position,character_name',
                 'title' => fn ($query) => $query
                     ->selectCatalogCardColumns()
                     ->addSelect([
                         'popularity_rank' => TitleStatistic::query()
-                            ->select('vote_count')
-                            ->whereColumn('movie_ratings.movie_id', 'movies.id')
+                            ->select('watchlist_count')
+                            ->whereColumn('title_statistics.title_id', 'titles.id')
                             ->limit(1),
                     ])
-                    ->published()
+                    ->publishedCatalog()
                     ->withCatalogCardRelations(),
+                'profession:id,person_id,department,profession,is_primary,sort_order',
             ])
             ->get()
             ->filter(fn (Credit $credit): bool => $credit->title instanceof Title)
@@ -105,7 +110,7 @@ class BuildPersonFilmographyQueryAction
 
     private function resolveProfessionLabel(Credit $credit): string
     {
-        return $credit->department ?: $credit->job;
+        return $credit->profession?->profession ?: ($credit->job ?: $credit->department);
     }
 
     /**
@@ -133,10 +138,11 @@ class BuildPersonFilmographyQueryAction
             ->unique()
             ->values();
 
-        $episodeCount = (int) $creditsForTitle
-            ->pluck('episode_count')
-            ->filter(fn (mixed $value): bool => is_numeric($value) && (int) $value > 0)
-            ->max();
+        $episodeCount = $creditsForTitle
+            ->pluck('episode_id')
+            ->filter(fn (mixed $value): bool => is_numeric($value))
+            ->unique()
+            ->count();
 
         $episodeLabel = $episodeCount > 0
             ? number_format($episodeCount).' episode'.($episodeCount === 1 ? '' : 's')

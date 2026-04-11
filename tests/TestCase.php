@@ -28,6 +28,8 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
 
+        $this->configureApplicationSurfaceMode();
+
         if (
             $this->isCatalogOnlySurface()
             && ! $this->supportsCatalogOnlyApplicationTestContract()
@@ -55,6 +57,13 @@ abstract class TestCase extends BaseTestCase
     protected function isCatalogOnlySurface(): bool
     {
         return (bool) config('screenbase.catalog_only', false);
+    }
+
+    protected function configureApplicationSurfaceMode(): void
+    {
+        if ($this->supportsCatalogOnlyApplicationTestContract()) {
+            config()->set('screenbase.catalog_only', true);
+        }
     }
 
     protected function supportsCatalogOnlyApplicationTestContract(): bool

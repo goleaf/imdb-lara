@@ -5,6 +5,7 @@ namespace App\Actions\Search;
 use App\Enums\TitleType;
 use App\Models\Genre;
 use App\Models\InterestCategory;
+use App\Models\Title;
 use Illuminate\Database\Eloquent\Collection;
 
 class BuildDiscoveryViewDataAction
@@ -42,12 +43,7 @@ class BuildDiscoveryViewDataAction
                 ...$normalizedFilters,
                 'includePresentationRelations' => false,
             ])
-            ->with([
-                'statistic:movie_id,aggregate_rating,vote_count',
-                'titleImages:id,movie_id,position,url,width,height,type',
-                'primaryImageRecord:movie_id,url,width,height,type',
-                'genres:id,name',
-            ])
+            ->with(Title::catalogCardRelations())
             ->simplePaginate($perPage, pageName: $pageName)
             ->withQueryString();
 

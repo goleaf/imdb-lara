@@ -105,9 +105,17 @@
 
                         <div class="flex flex-wrap gap-3">
                             @if ($primaryVideo?->url)
-                                <x-ui.button as="a" :href="$primaryVideo->url" icon="play" color="amber">
-                                    Watch trailer
-                                </x-ui.button>
+                                <div class="flex flex-wrap items-center gap-3">
+                                    <x-ui.button as="a" :href="$primaryVideo->url" icon="play" color="amber">
+                                        Open video
+                                    </x-ui.button>
+
+                                    @if ($primaryVideo->caption)
+                                        <x-ui.badge variant="outline" color="slate" icon="play">
+                                            {{ $primaryVideo->caption }}
+                                        </x-ui.badge>
+                                    @endif
+                                </div>
                             @endif
                             <x-ui.button as="a" :href="$shareUrl" variant="outline" color="amber" icon="share">
                                 Share title

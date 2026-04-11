@@ -10,12 +10,8 @@ class AuthPage extends Component
 {
     use RendersPageView;
 
-    public function render(): View
+    protected function renderAuthPage(string $view): View
     {
-        if (request()->routeIs('login')) {
-            return $this->renderPageView('auth.login');
-        }
-
-        return $this->renderPageView('auth.register');
+        return $this->renderPageView($view);
     }
 }

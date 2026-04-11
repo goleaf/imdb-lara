@@ -46,9 +46,16 @@
         'rounded-[calc(var(--dropdown-radius)-var(--dropdown-padding))]',
         'focus-within:outline-none',
         'data-active:bg-neutral-950/[3%] dark:data-active:bg-white/[3%]',
+        'data-loading:opacity-55 data-loading:pointer-events-none data-loading:cursor-default',
         $variantClasses . ' cursor-pointer' => ! $disabled,
         'opacity-50 cursor-not-allowed text-neutral-500 dark:text-neutral-400' => $disabled,
     ];
+
+    $loadingStateAttributes = new \Illuminate\View\ComponentAttributeBag();
+    $loadingStateAttributes = $loadingStateAttributes->merge(filled($attributes->get('wire:target')) ? [
+        'wire:loading.attr' => 'data-loading',
+        'wire:target' => $attributes->get('wire:target'),
+    ] : []);
 
     if ($active) {
         $attributes['data-active'] = 'true';
@@ -65,7 +72,8 @@
                 'tabindex' => $disabled ? '-1' : '0',
                 'aria-disabled' => $disabled ? 'true' : 'false',
                 'role' => 'menuitem',
-            ])"
+            ])
+            ->merge($loadingStateAttributes->getAttributes())"
         data-slot="dropdown-item"
     >
         @if (filled($icon))

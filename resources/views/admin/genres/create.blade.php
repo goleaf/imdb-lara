@@ -26,7 +26,7 @@
                 heading="Genre Writes Paused"
                 description="Genre creation is disabled while Screenbase is running in catalog-only mode."
             >
-                Add or reconcile taxonomy entries through the remote catalog sync instead of local admin forms.
+                Add or reconcile taxonomy entries through the remote catalog sync instead of the retired local admin form.
             </x-admin.catalog-write-disabled-panel>
         @else
             <x-ui.card class="!max-w-none">
@@ -35,10 +35,7 @@
 
                     @include('admin.genres._form')
 
-                    <div class="flex justify-end gap-3">
-                        <x-ui.button as="a" :href="route('admin.genres.index')" variant="ghost" icon="arrow-left">
-                            Cancel
-                        </x-ui.button>
+                    <div class="flex justify-end">
                         <x-ui.button type="submit" icon="plus">
                             Create genre
                         </x-ui.button>

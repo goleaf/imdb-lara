@@ -34,24 +34,51 @@ class LoadEpisodeDetailsAction
     public function handle(Title $series, Season $season, Title $episode): array
     {
         $series->loadMissing([
-            'seasons:movie_id,season,episode_count',
+            'seasons' => fn ($query) => $query
+                ->select([
+                    'id',
+                    'series_id',
+                    'name',
+                    'slug',
+                    'season_number',
+                    'summary',
+                    'release_year',
+                    'meta_title',
+                    'meta_description',
+                ])
+                ->withCount('episodes')
+                ->orderBy('season_number')
+                ->orderBy('id'),
             ...Title::catalogHeroRelations(),
         ]);
 
         $season->load([
             'episodes' => fn ($query) => $query
-                ->select(['episode_movie_id', 'movie_id', 'season', 'episode_number', 'release_year', 'release_month', 'release_day'])
+                ->select([
+                    'id',
+                    'title_id',
+                    'series_id',
+                    'season_id',
+                    'season_number',
+                    'episode_number',
+                    'absolute_number',
+                    'production_code',
+                    'aired_at',
+                ])
                 ->with([
                     'title' => fn ($titleQuery) => $titleQuery
                         ->selectCatalogCardColumns()
                         ->withCatalogHeroRelations(),
                 ])
-                ->orderBy('episode_number'),
+                ->orderBy('episode_number')
+                ->orderBy('id'),
         ]);
 
         $episode->loadMissing([
-            'episodeMeta:episode_movie_id,movie_id,season,episode_number,release_year,release_month,release_day',
-            'genres:id,name',
+            'episodeMeta:id,title_id,series_id,season_id,season_number,episode_number,absolute_number,production_code,aired_at',
+            'episodeMeta.series:id,slug,name,title_type,is_published',
+            'episodeMeta.season:id,series_id,slug,name,season_number',
+            'genres:id,name,slug',
             ...Title::catalogHeroRelations(),
         ]);
         $this->loadEpisodeCredits($episode);
@@ -123,12 +150,21 @@ class LoadEpisodeDetailsAction
     private function loadEpisodeCredits(Title $episode): void
     {
         $episode->setRelation('credits', $episode->credits()
-            ->select(['name_credits.id', 'name_credits.name_basic_id', 'name_credits.movie_id', 'name_credits.category', 'name_credits.episode_count', 'name_credits.position'])
+            ->select([
+                'id',
+                'title_id',
+                'person_id',
+                'department',
+                'job',
+                'character_name',
+                'billing_order',
+                'is_principal',
+                'person_profession_id',
+                'episode_id',
+                'credited_as',
+            ])
             ->ordered()
             ->withPersonPreview()
-            ->with([
-                'nameCreditCharacters:name_credit_id,position,character_name',
-            ])
             ->limit(24)
             ->get());
     }

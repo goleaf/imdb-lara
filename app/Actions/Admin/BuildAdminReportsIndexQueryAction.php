@@ -2,7 +2,6 @@
 
 namespace App\Actions\Admin;
 
-use App\Enums\ReportStatus;
 use App\Models\Report;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -19,27 +18,14 @@ class BuildAdminReportsIndexQueryAction
                 'reason',
                 'details',
                 'status',
+                'status_priority',
                 'reviewed_by',
                 'reviewed_at',
                 'resolution_notes',
                 'created_at',
             ])
             ->with(Report::adminQueueRelations())
-            ->orderByRaw(
-                'case status
-                    when ? then 0
-                    when ? then 1
-                    when ? then 2
-                    when ? then 3
-                    else 4
-                end',
-                [
-                    ReportStatus::Open->value,
-                    ReportStatus::Investigating->value,
-                    ReportStatus::Resolved->value,
-                    ReportStatus::Dismissed->value,
-                ],
-            )
+            ->orderBy('status_priority')
             ->latest('created_at')
             ->latest('id');
     }

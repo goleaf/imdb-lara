@@ -24,14 +24,13 @@ class UserPage extends Component
 
     public function mount(User $user, ?UserList $list = null): void
     {
-        if (request()->routeIs('public.users.show')) {
+        if (! $list instanceof UserList) {
             abort_unless($user->isProfileVisibleToPublic(), 404);
         }
 
-        if (request()->routeIs('public.lists.show')) {
+        if ($list instanceof UserList) {
             abort_unless(
-                $list instanceof UserList
-                && $list->user_id === $user->id
+                $list->user_id === $user->id
                 && Gate::allows('view', $list),
                 404,
             );
@@ -46,7 +45,7 @@ class UserPage extends Component
         BuildUserListItemsQueryAction $buildUserListItemsQuery,
         LoadPublicUserListAction $loadPublicUserList,
     ): View {
-        if (request()->routeIs('public.lists.show')) {
+        if ($this->list instanceof UserList) {
             $list = $loadPublicUserList->handle($this->list);
             $itemsQuery = $buildUserListItemsQuery->handle($list);
             $items = $itemsQuery

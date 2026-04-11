@@ -9,7 +9,29 @@
 
 @section('content')
     <section class="space-y-4">
-        @if (! $catalogOnly && session('status'))
+        <div class="flex flex-wrap items-start justify-between gap-4">
+            <div>
+                <x-ui.heading level="h1" size="xl">Edit Credit</x-ui.heading>
+                <x-ui.text class="mt-1 text-neutral-600 dark:text-neutral-300">
+                    Update title, person, profession, episode specificity, and billing metadata.
+                </x-ui.text>
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+                @if ($credit->title)
+                    <x-ui.button as="a" :href="route('admin.titles.edit', $credit->title)" variant="outline" icon="film">
+                        View title
+                    </x-ui.button>
+                @endif
+                @if ($credit->person)
+                    <x-ui.button as="a" :href="route('admin.people.edit', $credit->person)" variant="outline" icon="user">
+                        View person
+                    </x-ui.button>
+                @endif
+            </div>
+        </div>
+
+        @if (session('status'))
             <x-ui.alerts variant="success" icon="check-circle">
                 <x-ui.alerts.description>{{ session('status') }}</x-ui.alerts.description>
             </x-ui.alerts>
@@ -32,16 +54,27 @@
 
                     @include('admin.credits._form')
 
-                    <div class="flex justify-end gap-3">
-                        <x-ui.button as="a" :href="route('admin.titles.edit', $credit->title)" variant="ghost" icon="arrow-left">
-                            Back to title
-                        </x-ui.button>
-                        <x-ui.button type="submit" icon="check-circle">
+                    <x-ui.text class="text-sm text-neutral-500 dark:text-neutral-400">
+                        If you change the selected title or person, resubmit to refresh scoped episode and profession options.
+                    </x-ui.text>
+
+                    <div class="flex justify-end">
+                        <x-ui.button type="submit" icon="check">
                             Save changes
                         </x-ui.button>
                     </div>
                 </form>
             </x-ui.card>
+
+            <div class="flex justify-end">
+                <form method="POST" action="{{ route('admin.credits.destroy', $credit) }}">
+                    @csrf
+                    @method('DELETE')
+                    <x-ui.button type="submit" variant="outline" color="red" icon="trash">
+                        Delete credit
+                    </x-ui.button>
+                </form>
+            </div>
         @endif
     </section>
 @endsection

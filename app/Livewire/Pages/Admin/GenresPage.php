@@ -7,12 +7,10 @@ use App\Livewire\Pages\Concerns\RendersPageView;
 use App\Models\Genre;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
-use Livewire\WithPagination;
 
 class GenresPage extends Component
 {
     use RendersPageView;
-    use WithPagination;
 
     public ?Genre $genre = null;
 
@@ -21,23 +19,25 @@ class GenresPage extends Component
         $this->genre = $genre;
     }
 
-    public function render(BuildAdminGenresIndexQueryAction $buildAdminGenresIndexQuery): View
+    protected function renderGenresIndexPage(BuildAdminGenresIndexQueryAction $buildAdminGenresIndexQuery): View
     {
-        if (request()->routeIs('admin.genres.index')) {
-            return $this->renderPageView('admin.genres.index', [
-                'genres' => $buildAdminGenresIndexQuery
-                    ->handle()
-                    ->simplePaginate(20)
-                    ->withQueryString(),
-            ]);
-        }
+        return $this->renderPageView('admin.genres.index', [
+            'genres' => $buildAdminGenresIndexQuery
+                ->handle()
+                ->simplePaginate(20)
+                ->withQueryString(),
+        ]);
+    }
 
-        if (request()->routeIs('admin.genres.create')) {
-            return $this->renderPageView('admin.genres.create', [
-                'genre' => new Genre,
-            ]);
-        }
+    protected function renderGenreCreatePage(): View
+    {
+        return $this->renderPageView('admin.genres.create', [
+            'genre' => new Genre,
+        ]);
+    }
 
+    protected function renderGenreEditPage(): View
+    {
         abort_unless($this->genre instanceof Genre, 404);
 
         if ($this->isCatalogOnlyApplication()) {

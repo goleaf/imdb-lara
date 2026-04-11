@@ -1,4 +1,6 @@
-<div class="space-y-4">
+<div>
+@island(name: 'manage-list-panel')
+<div class="space-y-4" data-slot="manage-list-island">
     <x-ui.card class="!max-w-none">
         <div class="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
             <div class="space-y-3">
@@ -275,4 +277,6 @@
             </div>
         </div>
     </div>
+</div>
+@endisland
 </div>

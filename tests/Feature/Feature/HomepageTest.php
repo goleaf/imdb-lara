@@ -10,17 +10,19 @@ use App\Actions\Home\GetAwardsSpotlightNominationsAction;
 use App\Actions\Home\GetHeroSpotlightAction;
 use App\Actions\Home\GetLatestTrailerTitlesAction;
 use App\Actions\Home\GetPopularPeopleAction;
+use App\Enums\MediaKind;
 use App\Models\Credit;
 use App\Models\Genre;
+use App\Models\MediaAsset;
 use App\Models\MoviePlot;
 use App\Models\MoviePrimaryImage;
 use App\Models\Person;
 use App\Models\Title;
 use App\Models\TitleImage;
 use App\Models\TitleStatistic;
-use App\Models\TitleVideo;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Mockery;
 use Tests\Concerns\BootstrapsImdbMysqlSqlite;
@@ -30,6 +32,7 @@ use Tests\TestCase;
 class HomepageTest extends TestCase
 {
     use BootstrapsImdbMysqlSqlite;
+    use RefreshDatabase;
     use UsesCatalogOnlyApplication;
 
     protected function setUp(): void
@@ -160,6 +163,12 @@ class HomepageTest extends TestCase
         $title = new Title;
         $title->forceFill([
             'id' => 1,
+            'name' => 'The Matrix',
+            'original_name' => 'The Matrix',
+            'slug' => 'the-matrix',
+            'title_type' => 'movie',
+            'release_year' => 1999,
+            'plot_outline' => 'A hacker learns the world is a simulation and joins the resistance.',
             'tconst' => 'tt0133093',
             'imdb_id' => 'tt0133093',
             'titletype' => 'movie',
@@ -174,34 +183,45 @@ class HomepageTest extends TestCase
         ]);
         $title->exists = true;
 
-        $title->setRelation('primaryImageRecord', $this->makeMoviePrimaryImage([
-            'movie_id' => 1,
-            'url' => 'https://images.test/matrix-poster.jpg',
-            'width' => 1000,
-            'height' => 1500,
-            'type' => 'poster',
-        ]));
-
-        $title->setRelation('titleImages', new EloquentCollection([
-            $this->makeTitleImage([
-                'movie_id' => 1,
+        $title->setRelation('mediaAssets', new EloquentCollection([
+            $this->makeMediaAsset([
+                'mediable_type' => Title::class,
+                'mediable_id' => 1,
+                'kind' => MediaKind::Poster->value,
+                'url' => 'https://images.test/matrix-poster.jpg',
+                'alt_text' => 'The Matrix poster',
+                'width' => 1000,
+                'height' => 1500,
+                'is_primary' => true,
                 'position' => 1,
+            ]),
+            $this->makeMediaAsset([
+                'mediable_type' => Title::class,
+                'mediable_id' => 1,
+                'kind' => MediaKind::Backdrop->value,
                 'url' => 'https://images.test/matrix-backdrop.jpg',
+                'alt_text' => 'The Matrix backdrop',
                 'width' => 1920,
                 'height' => 1080,
-                'type' => 'backdrop',
+                'position' => 2,
+            ]),
+            $this->makeMediaAsset([
+                'mediable_type' => Title::class,
+                'mediable_id' => 1,
+                'kind' => MediaKind::Trailer->value,
+                'url' => 'https://videos.test/matrix-trailer.mp4',
+                'caption' => 'Official trailer',
+                'width' => 1920,
+                'height' => 1080,
+                'duration_seconds' => 150,
+                'position' => 3,
             ]),
         ]));
 
-        $title->setRelation('plotRecord', $this->makeMoviePlot([
-            'movie_id' => 1,
-            'plot' => 'A hacker learns the world is a simulation and joins the resistance.',
-        ]));
-
         $title->setRelation('statistic', $this->makeTitleStatistic([
-            'movie_id' => 1,
-            'aggregate_rating' => 8.7,
-            'vote_count' => 2100000,
+            'title_id' => 1,
+            'average_rating' => 8.7,
+            'rating_count' => 2100000,
         ]));
 
         $title->setRelation('genres', new EloquentCollection([
@@ -213,6 +233,8 @@ class HomepageTest extends TestCase
 
         $person = $this->makePerson([
             'id' => 1,
+            'name' => 'Keanu Reeves',
+            'slug' => 'keanu-reeves',
             'nconst' => 'nm0000206',
             'imdb_id' => 'nm0000206',
             'displayName' => 'Keanu Reeves',
@@ -232,22 +254,6 @@ class HomepageTest extends TestCase
         $credit->setRelation('person', $person);
 
         $title->setRelation('credits', new EloquentCollection([$credit]));
-
-        $video = new TitleVideo;
-        $video->forceFill([
-            'imdb_id' => 'vi1032782617',
-            'movie_id' => 1,
-            'video_type_id' => 1,
-            'name' => 'Official Trailer',
-            'description' => 'Official trailer',
-            'width' => 1920,
-            'height' => 1080,
-            'runtime_seconds' => 150,
-            'position' => 1,
-        ]);
-        $video->exists = true;
-
-        $title->setRelation('titleVideos', new EloquentCollection([$video]));
 
         return $title;
     }
@@ -294,6 +300,18 @@ class HomepageTest extends TestCase
     private function makeTitleImage(array $attributes): TitleImage
     {
         $model = new TitleImage;
+        $model->forceFill($attributes);
+        $model->exists = true;
+
+        return $model;
+    }
+
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
+    private function makeMediaAsset(array $attributes): MediaAsset
+    {
+        $model = new MediaAsset;
         $model->forceFill($attributes);
         $model->exists = true;
 

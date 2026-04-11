@@ -5,10 +5,8 @@ namespace App\Actions\Catalog;
 use App\Actions\Seo\PageSeoData;
 use App\Models\AwardNomination;
 use App\Models\Credit;
-use App\Models\NameBasicAlternativeName;
 use App\Models\Person;
 use App\Models\Title;
-use App\Models\TitleStatistic;
 use Illuminate\Support\Collection;
 
 class LoadPersonDetailsAction
@@ -19,7 +17,7 @@ class LoadPersonDetailsAction
      *     headshot: mixed,
      *     photoGallery: Collection<int, mixed>,
      *     alternateNames: Collection<int, string>,
-     *     alternativeNameRows: Collection<int, NameBasicAlternativeName>,
+     *     alternativeNameRows: Collection<int, mixed>,
      *     professionLabels: Collection<int, string>,
      *     biographyIntro: string|null,
      *     detailItems: Collection<int, array{label: string, value: string}>,
@@ -50,11 +48,9 @@ class LoadPersonDetailsAction
             ->reject(fn ($asset) => $headshot && $asset->url === $headshot->url)
             ->take(8)
             ->values();
-        $alternativeNameRows = $person->alternativeNameRecords
-            ->filter(fn (NameBasicAlternativeName $alternativeNameRecord): bool => filled($alternativeNameRecord->alternative_name))
-            ->values();
-        $alternateNames = $alternativeNameRows
-            ->pluck('alternative_name')
+        $alternativeNameRows = collect();
+        $alternateNames = collect($person->imdb_alternative_names)
+            ->filter(fn (mixed $value): bool => is_string($value) && $value !== '')
             ->concat($person->resolvedAlternateNames())
             ->map(fn (mixed $value): string => trim((string) $value))
             ->filter()
@@ -111,9 +107,22 @@ class LoadPersonDetailsAction
 
         if ($collaborationTitleIds !== []) {
             $frequentCollaborators = Credit::query()
-                ->select(['name_credits.id', 'name_credits.name_basic_id', 'name_credits.movie_id', 'name_credits.category', 'name_credits.episode_count', 'name_credits.position'])
-                ->whereIn('movie_id', $collaborationTitleIds)
-                ->where('name_basic_id', '!=', $person->getKey())
+                ->select([
+                    'id',
+                    'title_id',
+                    'person_id',
+                    'department',
+                    'job',
+                    'character_name',
+                    'billing_order',
+                    'is_principal',
+                    'person_profession_id',
+                    'episode_id',
+                    'credited_as',
+                    'imdb_source_group',
+                ])
+                ->whereIn('title_id', $collaborationTitleIds)
+                ->where('person_id', '!=', $person->getKey())
                 ->ordered()
                 ->withPersonPreview()
                 ->with([
@@ -257,39 +266,33 @@ class LoadPersonDetailsAction
     private function loadPreviewCredits(Person $person): void
     {
         $person->setRelation('credits', $person->credits()
-            ->select(['id', 'name_basic_id', 'movie_id', 'category', 'episode_count', 'position'])
+            ->select([
+                'id',
+                'title_id',
+                'person_id',
+                'department',
+                'job',
+                'character_name',
+                'billing_order',
+                'is_principal',
+                'person_profession_id',
+                'episode_id',
+                'credited_as',
+                'imdb_source_group',
+            ])
             ->with([
-                'nameCreditCharacters:name_credit_id,position,character_name',
                 'title' => fn ($titleQuery) => $titleQuery
                     ->selectCatalogCardColumns()
-                    ->addSelect([
-                        'popularity_rank' => TitleStatistic::query()
-                            ->select('vote_count')
-                            ->whereColumn('movie_ratings.movie_id', 'movies.id')
-                            ->limit(1),
-                    ])
                     ->publishedCatalog()
                     ->withCatalogCardRelations(),
             ])
-            ->orderBy('position')
+            ->ordered()
             ->limit(40)
             ->get());
     }
 
     private function loadAwardHighlights(Person $person): void
     {
-        $person->setRelation('awardNominations', $person->awardNominations()
-            ->select(['movie_award_nominations.id', 'movie_award_nominations.movie_id', 'movie_award_nominations.event_imdb_id', 'movie_award_nominations.award_category_id', 'movie_award_nominations.award_year', 'movie_award_nominations.text', 'movie_award_nominations.is_winner', 'movie_award_nominations.winner_rank', 'movie_award_nominations.position'])
-            ->with([
-                'awardEvent:imdb_id,name',
-                'awardCategory:id,name',
-                'title' => fn ($titleQuery) => $titleQuery
-                    ->selectCatalogCardColumns()
-                    ->withCatalogCardRelations(),
-            ])
-            ->orderByDesc('is_winner')
-            ->orderByDesc('award_year')
-            ->limit(8)
-            ->get());
+        $person->setRelation('awardNominations', collect());
     }
 }

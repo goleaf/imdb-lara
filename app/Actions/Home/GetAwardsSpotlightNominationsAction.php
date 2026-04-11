@@ -21,6 +21,10 @@ class GetAwardsSpotlightNominationsAction
      */
     public function handle(int $limit = 4): Collection
     {
+        if (! config('screenbase.catalog_only', false)) {
+            return collect();
+        }
+
         return Cache::remember(
             "home:awards-spotlight-nominations:{$limit}",
             now()->addMinutes(10),

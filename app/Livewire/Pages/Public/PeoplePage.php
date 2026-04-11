@@ -29,9 +29,7 @@ class PeoplePage extends Component
         LoadPersonDetailsAction $loadPersonDetails,
         GetPeopleDirectorySnapshotAction $getPeopleDirectorySnapshot,
     ): View {
-        if (request()->routeIs('public.people.show')) {
-            abort_unless($this->person instanceof Person, 404);
-
+        if ($this->person instanceof Person) {
             return $this->renderPageView('people.show', $loadPersonDetails->handle($this->person));
         }
 

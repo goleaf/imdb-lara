@@ -3,7 +3,7 @@
 namespace App\Actions\Catalog;
 
 use App\Models\Person;
-use App\Models\Profession;
+use App\Models\PersonProfession;
 use Illuminate\Support\Facades\Cache;
 
 class GetPeopleDirectorySnapshotAction
@@ -24,25 +24,28 @@ class GetPeopleDirectorySnapshotAction
             now()->addMinutes(10),
             function (): array {
                 $publishedPeopleQuery = Person::query()
-                    ->select(['name_basics.id'])
-                    ->published()
-                    ->whereNotNull('name_basics.primaryname');
+                    ->select(['people.id'])
+                    ->published();
 
-                $topProfessions = Profession::query()
-                    ->select(['professions.id', 'professions.name'])
-                    ->whereNotNull('professions.name')
-                    ->whereHas('persons', fn ($query) => $query->whereNotNull('name_basics.primaryname'))
-                    ->withCount([
-                        'persons as published_people_count' => fn ($query) => $query->whereNotNull('name_basics.primaryname'),
-                    ])
-                    ->orderByDesc('published_people_count')
-                    ->orderBy('professions.name')
-                    ->limit(5)
+                $publishedProfessionRows = PersonProfession::query()
+                    ->select(['id', 'person_id', 'profession'])
+                    ->whereNotNull('profession')
+                    ->whereHas('person', fn ($query) => $query->published())
                     ->get()
-                    ->map(fn (Profession $profession): array => [
-                        'name' => (string) $profession->name,
-                        'peopleCount' => (int) ($profession->published_people_count ?? 0),
+                    ->groupBy(fn (PersonProfession $profession): string => (string) $profession->profession)
+                    ->map(fn ($rows, string $profession): array => [
+                        'name' => $profession,
+                        'peopleCount' => $rows
+                            ->pluck('person_id')
+                            ->filter(fn (mixed $personId): bool => is_numeric($personId))
+                            ->unique()
+                            ->count(),
                     ])
+                    ->sortByDesc('peopleCount')
+                    ->values();
+
+                $topProfessions = $publishedProfessionRows
+                    ->take(5)
                     ->values()
                     ->all();
 
@@ -54,11 +57,7 @@ class GetPeopleDirectorySnapshotAction
                     'creditedPeopleCount' => (clone $publishedPeopleQuery)
                         ->whereHas('credits')
                         ->count(),
-                    'professionCount' => Profession::query()
-                        ->select(['professions.id'])
-                        ->whereNotNull('professions.name')
-                        ->whereHas('persons', fn ($query) => $query->whereNotNull('name_basics.primaryname'))
-                        ->count(),
+                    'professionCount' => $publishedProfessionRows->count(),
                     'topProfessions' => $topProfessions,
                 ];
             },

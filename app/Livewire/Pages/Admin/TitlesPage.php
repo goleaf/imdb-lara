@@ -6,16 +6,16 @@ use App\Actions\Admin\BuildAdminTitlesIndexQueryAction;
 use App\Enums\TitleType;
 use App\Livewire\Pages\Concerns\RendersPageView;
 use App\Models\Genre;
+use App\Models\MediaAsset;
+use App\Models\Season;
 use App\Models\Title;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Component;
-use Livewire\WithPagination;
 
 class TitlesPage extends Component
 {
     use RendersPageView;
-    use WithPagination;
 
     public ?Title $title = null;
 
@@ -24,30 +24,32 @@ class TitlesPage extends Component
         $this->title = $title;
     }
 
-    public function render(BuildAdminTitlesIndexQueryAction $buildAdminTitlesIndexQuery): View
+    protected function renderTitlesIndexPage(BuildAdminTitlesIndexQueryAction $buildAdminTitlesIndexQuery): View
     {
-        if (request()->routeIs('admin.titles.index')) {
-            return $this->renderPageView('admin.titles.index', [
-                'titles' => $buildAdminTitlesIndexQuery
-                    ->handle()
-                    ->simplePaginate(20)
-                    ->withQueryString(),
-            ]);
-        }
+        return $this->renderPageView('admin.titles.index', [
+            'titles' => $buildAdminTitlesIndexQuery
+                ->handle()
+                ->simplePaginate(20)
+                ->withQueryString(),
+        ]);
+    }
 
-        if (request()->routeIs('admin.titles.create')) {
-            if ($this->isCatalogOnlyApplication()) {
-                return $this->renderPageView('admin.titles.create', [
-                    'title' => new Title(['is_published' => true]),
-                ]);
-            }
-
+    protected function renderTitleCreatePage(): View
+    {
+        if ($this->isCatalogOnlyApplication()) {
             return $this->renderPageView('admin.titles.create', [
                 'title' => new Title(['is_published' => true]),
-                ...$this->formOptions(),
             ]);
         }
 
+        return $this->renderPageView('admin.titles.create', [
+            'title' => new Title(['is_published' => true]),
+            ...$this->formOptions(),
+        ]);
+    }
+
+    protected function renderTitleEditPage(): View
+    {
         abort_unless($this->title instanceof Title, 404);
 
         if ($this->isCatalogOnlyApplication()) {
@@ -97,6 +99,15 @@ class TitlesPage extends Component
                     'position',
                     'published_at',
                 ]),
+            ]),
+            'draftSeason' => new Season([
+                'season_number' => ($this->title->seasons->max('season_number') ?? 0) + 1,
+                'release_year' => $this->title->release_year,
+            ]),
+            'draftMediaAsset' => new MediaAsset([
+                'mediable_type' => Title::class,
+                'kind' => \App\Enums\MediaKind::Poster,
+                'is_primary' => true,
             ]),
             ...$this->formOptions(),
         ]);

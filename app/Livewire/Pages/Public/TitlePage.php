@@ -109,25 +109,15 @@ class TitlePage extends Component
         }
 
         $title->loadMissing([
-            'episodeMeta:episode_movie_id,movie_id,season,episode_number,release_year,release_month,release_day',
-            'episodeMeta.series' => fn ($query) => $query->select([
-                'movies.id',
-                'movies.tconst',
-                'movies.imdb_id',
-                'movies.primarytitle',
-                'movies.originaltitle',
-                'movies.titletype',
-                'movies.isadult',
-                'movies.startyear',
-                'movies.endyear',
-                'movies.runtimeminutes',
-            ]),
+            'episodeMeta:id,title_id,series_id,season_id,season_number,episode_number',
+            'episodeMeta.series:id,slug,name,title_type,is_published',
+            'episodeMeta.season:id,series_id,slug,name,season_number',
         ]);
 
         if ($title->episodeMeta?->series instanceof Title) {
             $this->redirectRoute('public.episodes.show', [
                 'series' => $title->episodeMeta->series,
-                'season' => 'season-'.$title->episodeMeta->season_number,
+                'season' => $title->episodeMeta->season ?? 'season-'.$title->episodeMeta->season_number,
                 'episode' => $title,
             ]);
 

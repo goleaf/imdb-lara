@@ -8,7 +8,6 @@ use App\Models\CatalogMediaAsset;
 use App\Models\Credit;
 use App\Models\Title;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 
@@ -27,11 +26,10 @@ class LoadTitleCastAction
     /**
      * @var list<string>
      */
-    private const LEAD_CREW_CATEGORIES = [
-        'director',
-        'writer',
-        'producer',
-        'executive',
+    private const LEAD_CREW_DEPARTMENTS = [
+        'Directing',
+        'Writing',
+        'Production',
     ];
 
     private const PAGE_SIZE = 24;
@@ -62,7 +60,7 @@ class LoadTitleCastAction
      */
     public function handle(Title $title): array
     {
-        if ($this->shouldHydrateCatalog($title)) {
+        if (config('screenbase.catalog_only', false) && $this->shouldHydrateCatalog($title)) {
             try {
                 $title = $this->hydrateTitleCastCatalogAction->handle($title);
             } catch (\Throwable $exception) {
@@ -94,11 +92,11 @@ class LoadTitleCastAction
             ->groupBy(fn (Credit $credit): string => $credit->department)
             ->sortKeys();
         $leadCrewGroups = $crewPageCredits
-            ->filter(fn (Credit $credit): bool => in_array($credit->category, self::LEAD_CREW_CATEGORIES, true))
+            ->filter(fn (Credit $credit): bool => in_array($credit->department, self::LEAD_CREW_DEPARTMENTS, true))
             ->groupBy(fn (Credit $credit): string => $credit->department)
             ->sortKeys();
         $technicalCrewGroups = $crewPageCredits
-            ->reject(fn (Credit $credit): bool => in_array($credit->category, self::LEAD_CREW_CATEGORIES, true))
+            ->reject(fn (Credit $credit): bool => in_array($credit->department, self::LEAD_CREW_DEPARTMENTS, true))
             ->groupBy(fn (Credit $credit): string => $credit->department)
             ->sortKeys();
         $openGraphType = in_array($title->title_type, [TitleType::Series, TitleType::MiniSeries], true)
@@ -144,19 +142,21 @@ class LoadTitleCastAction
     {
         $query = $title->credits()
             ->select([
-                'name_credits.id',
-                'name_credits.name_basic_id',
-                'name_credits.movie_id',
-                'name_credits.category',
-                'name_credits.episode_count',
-                'name_credits.position',
+                'id',
+                'title_id',
+                'person_id',
+                'department',
+                'job',
+                'character_name',
+                'billing_order',
+                'is_principal',
+                'person_profession_id',
+                'episode_id',
+                'credited_as',
             ])
             ->whereHas('person')
             ->ordered()
-            ->withPersonPreview()
-            ->with([
-                'nameCreditCharacters:name_credit_id,position,character_name',
-            ]);
+            ->withPersonPreview();
 
         if ($castOnly) {
             return $query->cast();
@@ -167,6 +167,10 @@ class LoadTitleCastAction
 
     private function shouldHydrateCatalog(Title $title): bool
     {
+        if (! config('screenbase.catalog_only', false)) {
+            return false;
+        }
+
         $credits = $title->credits();
 
         if (! $credits->exists()) {
@@ -177,16 +181,12 @@ class LoadTitleCastAction
             return true;
         }
 
-        if (! $title->credits()->whereIn('category', self::CAST_CATEGORIES)->exists()) {
+        if (! $title->credits()->where('department', 'Cast')->exists()) {
             return true;
         }
 
         return ! $title->credits()
-            ->where(function (Builder $crewQuery): void {
-                $crewQuery
-                    ->whereNull('category')
-                    ->orWhereNotIn('category', self::CAST_CATEGORIES);
-            })
+            ->where('department', '!=', 'Cast')
             ->exists();
     }
 }

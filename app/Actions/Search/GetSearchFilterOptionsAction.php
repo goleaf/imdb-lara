@@ -2,13 +2,12 @@
 
 namespace App\Actions\Search;
 
+use App\Enums\CountryCode;
+use App\Enums\LanguageCode;
 use App\Enums\TitleType;
-use App\Models\Country;
 use App\Models\Genre;
 use App\Models\InterestCategory;
-use App\Models\Language;
 use App\Models\Title;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
 
@@ -35,43 +34,43 @@ class GetSearchFilterOptionsAction
             now()->addMinutes(10),
             function (): array {
                 $publishedTitles = Title::query()->published();
-                $minimumYear = (clone $publishedTitles)->whereNotNull('startyear')->min('startyear');
-                $maximumYear = (clone $publishedTitles)->whereNotNull('startyear')->max('startyear');
+                $minimumYear = (clone $publishedTitles)->whereNotNull('release_year')->min('release_year');
+                $maximumYear = (clone $publishedTitles)->whereNotNull('release_year')->max('release_year');
+                $countries = (clone $publishedTitles)
+                    ->whereNotNull('origin_country')
+                    ->pluck('origin_country')
+                    ->map(fn (string $countryCode): string => strtoupper(trim(strtok($countryCode, ','))))
+                    ->filter()
+                    ->unique()
+                    ->sort()
+                    ->map(fn (string $countryCode): array => [
+                        'value' => $countryCode,
+                        'label' => CountryCode::labelFor($countryCode) ?? $countryCode,
+                    ])
+                    ->values()
+                    ->all();
+                $languages = (clone $publishedTitles)
+                    ->whereNotNull('original_language')
+                    ->pluck('original_language')
+                    ->map(fn (string $languageCode): string => strtolower(trim($languageCode)))
+                    ->filter()
+                    ->unique()
+                    ->sort()
+                    ->map(fn (string $languageCode): array => [
+                        'value' => $languageCode,
+                        'label' => LanguageCode::labelFor($languageCode) ?? strtoupper($languageCode),
+                    ])
+                    ->values()
+                    ->all();
 
                 return [
-                    'countries' => Country::query()
-                        ->select(['code', 'name'])
-                        ->whereHas('movies', fn (Builder $query) => $query->where('isadult', 0))
-                        ->get()
-                        ->sortBy(fn (Country $country): string => mb_strtolower($country->resolvedLabel()))
-                        ->map(fn (Country $country): array => [
-                            'value' => $country->code,
-                            'label' => $country->resolvedLabel(),
-                        ])
-                        ->values()
-                        ->all(),
+                    'countries' => $countries,
                     'genres' => Genre::query()
                         ->select(['id', 'name'])
                         ->orderBy('name')
                         ->get(),
-                    'interestCategories' => InterestCategory::query()
-                        ->select(['interest_categories.id', 'interest_categories.name'])
-                        ->withDirectoryMetrics()
-                        ->orderByDesc('title_linked_interests_count')
-                        ->orderByDesc('interests_count')
-                        ->orderBy('interest_categories.name')
-                        ->get(),
-                    'languages' => Language::query()
-                        ->select(['code', 'name'])
-                        ->whereHas('movies', fn (Builder $query) => $query->where('isadult', 0))
-                        ->orderBy('name')
-                        ->get()
-                        ->map(fn (Language $language): array => [
-                            'value' => $language->code,
-                            'label' => $language->name ?: strtoupper($language->code),
-                        ])
-                        ->values()
-                        ->all(),
+                    'interestCategories' => new Collection,
+                    'languages' => $languages,
                     'runtimeOptions' => [
                         ['value' => 'under-30', 'label' => 'Under 30 min'],
                         ['value' => '30-60', 'label' => '30 to 60 min'],

@@ -4,17 +4,18 @@ namespace Tests\Feature\Feature\Admin;
 
 use App\Models\Credit;
 use App\Models\Episode;
+use App\Models\Genre;
 use App\Models\MediaAsset;
+use App\Models\Person;
 use App\Models\Season;
+use App\Models\Title;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\Concerns\InteractsWithRemoteCatalog;
 use Tests\Concerns\UsesCatalogOnlyApplication;
 use Tests\TestCase;
 
 class AdminCatalogReadonlyPagesTest extends TestCase
 {
-    use InteractsWithRemoteCatalog;
     use RefreshDatabase;
     use UsesCatalogOnlyApplication;
 
@@ -46,13 +47,23 @@ class AdminCatalogReadonlyPagesTest extends TestCase
         config()->set('screenbase.catalog_only', true);
 
         $admin = User::factory()->admin()->create();
-        $title = $this->sampleTitle();
-        $series = $this->sampleSeries();
-        $person = $this->samplePerson();
-        $genre = $this->sampleGenre();
-        $season = $this->sampleSeason();
-        $episode = $this->sampleEpisode();
-        $credit = $this->sampleCredit();
+        $title = Title::factory()->create();
+        $person = Person::factory()->create();
+        $genre = Genre::factory()->create();
+        $series = Title::factory()->series()->create();
+        $season = Season::factory()->for($series, 'series')->create();
+        $episodeTitle = Title::factory()->episode()->create();
+        $episode = Episode::factory()
+            ->for($episodeTitle, 'title')
+            ->for($series, 'series')
+            ->for($season, 'season')
+            ->create([
+                'season_number' => $season->season_number,
+            ]);
+        $credit = Credit::factory()
+            ->for($title)
+            ->for($person)
+            ->create();
         $mediaAsset = MediaAsset::factory()->for($title, 'mediable')->create();
 
         $pages = [
@@ -80,7 +91,7 @@ class AdminCatalogReadonlyPagesTest extends TestCase
         config()->set('screenbase.catalog_only', true);
 
         $admin = User::factory()->admin()->create();
-        $title = $this->sampleTitle();
+        $title = Title::factory()->create();
         $mediaAsset = MediaAsset::factory()->for($title, 'mediable')->create();
 
         $this->actingAs($admin)
@@ -89,69 +100,5 @@ class AdminCatalogReadonlyPagesTest extends TestCase
             ->assertSee('Media Asset Mutations Paused')
             ->assertSee('Read only')
             ->assertDontSee('<form method="POST"', false);
-    }
-
-    private function sampleCredit(): Credit
-    {
-        return Credit::query()
-            ->select([
-                'name_credits.id',
-                'name_credits.movie_id',
-                'name_credits.name_basic_id',
-                'name_credits.category',
-                'name_credits.episode_count',
-                'name_credits.position',
-            ])
-            ->orderBy('name_credits.position')
-            ->orderBy('name_credits.id')
-            ->firstOrFail();
-    }
-
-    private function sampleSeason(): Season
-    {
-        return Season::query()
-            ->select([
-                'movie_seasons.movie_id',
-                'movie_seasons.season',
-                'movie_seasons.episode_count',
-            ])
-            ->where('movie_seasons.episode_count', '>', 0)
-            ->with([
-                'series' => fn ($query) => $query->select([
-                    'movies.id',
-                    'movies.tconst',
-                    'movies.imdb_id',
-                    'movies.primarytitle',
-                    'movies.originaltitle',
-                    'movies.titletype',
-                    'movies.isadult',
-                    'movies.startyear',
-                    'movies.endyear',
-                    'movies.runtimeminutes',
-                    'movies.title_type_id',
-                    'movies.runtimeSeconds',
-                ]),
-            ])
-            ->orderBy('movie_seasons.movie_id')
-            ->orderBy('movie_seasons.season')
-            ->firstOrFail();
-    }
-
-    private function sampleEpisode(): Episode
-    {
-        return Episode::query()
-            ->select([
-                'movie_episodes.episode_movie_id',
-                'movie_episodes.movie_id',
-                'movie_episodes.season',
-                'movie_episodes.episode_number',
-                'movie_episodes.release_year',
-                'movie_episodes.release_month',
-                'movie_episodes.release_day',
-            ])
-            ->orderBy('movie_episodes.movie_id')
-            ->orderBy('movie_episodes.season')
-            ->orderBy('movie_episodes.episode_number')
-            ->firstOrFail();
     }
 }

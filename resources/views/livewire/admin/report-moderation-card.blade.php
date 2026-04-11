@@ -116,7 +116,7 @@
 
                 <x-ui.field>
                     <x-ui.label>Resolution notes</x-ui.label>
-                    <x-ui.input wire:model="resolutionNotes" placeholder="Resolution notes" />
+                    <x-ui.input wire:model.live.blur="resolutionNotes" placeholder="Resolution notes" />
                     <x-ui.error name="resolutionNotes" />
                 </x-ui.field>
 

@@ -40,6 +40,7 @@ class Episode extends Model
             'episode_number' => 'integer',
             'absolute_number' => 'integer',
             'aired_at' => 'date',
+            'deleted_at' => 'datetime',
         ];
     }
 
@@ -65,6 +66,6 @@ class Episode extends Model
 
     public function credits(): HasMany
     {
-        return $this->hasMany(Credit::class)->orderBy('billing_order')->orderBy('id');
+        return $this->hasMany(Credit::class)->ordered();
     }
 }

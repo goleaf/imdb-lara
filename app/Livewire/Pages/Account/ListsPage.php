@@ -15,17 +15,14 @@ class ListsPage extends Component
 
     public ?UserList $list = null;
 
-    public function mount(): void
+    public function mount(?UserList $list = null): void
     {
-        if (! request()->routeIs('account.lists.show')) {
+        if (! $list instanceof UserList) {
             return;
         }
 
         $user = auth()->user();
-        $routeList = request()->route('list');
-        $slug = $routeList instanceof UserList
-            ? (string) $routeList->getRouteKey()
-            : (string) $routeList;
+        $slug = (string) $list->getRouteKey();
 
         abort_unless($user instanceof User && $slug !== '', 404);
 
@@ -53,7 +50,7 @@ class ListsPage extends Component
 
     public function render(BuildAccountListsIndexQueryAction $buildAccountListsIndexQuery): View
     {
-        if (request()->routeIs('account.lists.show')) {
+        if ($this->list instanceof UserList) {
             return $this->renderPageView('account.lists.show', [
                 'list' => $this->list,
             ]);

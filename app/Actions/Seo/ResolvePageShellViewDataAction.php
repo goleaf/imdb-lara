@@ -173,7 +173,7 @@ class ResolvePageShellViewDataAction
         $renderedNavbarText = strip_tags((string) ($data['renderedNavbar'] ?? ''));
         $shouldRenderAdminShortcut = ! $catalogOnly
             && $adminShortcutsEnabled
-            && auth()->user()?->can('access-admin-area')
+            && auth()->user()?->canAccessAdminPanel()
             && Route::has('admin.dashboard')
             && ! request()->routeIs('admin.*')
             && ! str_contains($renderedNavbarText, 'Admin');

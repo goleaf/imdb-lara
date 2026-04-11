@@ -12,6 +12,7 @@ use App\Models\Genre;
 use App\Models\InterestCategory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Throwable;
 
@@ -25,6 +26,12 @@ class BrowseTitlesPage extends Component
 
     public ?int $year = null;
 
+    #[Url]
+    public string $country = '';
+
+    #[Url]
+    public string $theme = '';
+
     public function boot(GetFeaturedInterestCategoriesAction $getFeaturedInterestCategories): void
     {
         $this->getFeaturedInterestCategories = $getFeaturedInterestCategories;
@@ -34,8 +41,10 @@ class BrowseTitlesPage extends Component
     {
         $this->genre = $genre;
         $this->year = $year;
+        $this->country = str($this->country)->trim()->upper()->toString();
+        $this->theme = str($this->theme)->trim()->toString();
 
-        if (request()->routeIs('public.years.show')) {
+        if ($this->isYearBrowsePage()) {
             abort_unless(
                 is_int($year) && $year >= 1888 && $year <= now()->addYear()->year,
                 404,
@@ -54,22 +63,25 @@ class BrowseTitlesPage extends Component
     private function browsePageConfiguration(): array
     {
         return match (true) {
-            request()->routeIs('public.genres.show') => $this->genreBrowsePageConfiguration(),
-            request()->routeIs('public.years.show') => $this->yearBrowsePageConfiguration(),
+            $this->isGenreBrowsePage() => $this->genreBrowsePageConfiguration(),
+            $this->isYearBrowsePage() => $this->yearBrowsePageConfiguration(),
             default => $this->staticBrowsePageConfiguration($this->browsePageKey()),
         };
     }
 
-    private function browsePageKey(): string
+    protected function browsePageKey(): string
     {
-        return match (true) {
-            request()->routeIs('public.movies.index') => 'movies',
-            request()->routeIs('public.series.index') => 'series',
-            request()->routeIs('public.rankings.movies') => 'top-rated-movies',
-            request()->routeIs('public.rankings.series') => 'top-rated-series',
-            request()->routeIs('public.trending') => 'trending',
-            default => 'titles',
-        };
+        return 'titles';
+    }
+
+    protected function isGenreBrowsePage(): bool
+    {
+        return false;
+    }
+
+    protected function isYearBrowsePage(): bool
+    {
+        return false;
     }
 
     /**
@@ -331,12 +343,9 @@ class BrowseTitlesPage extends Component
         $browserProps = is_array($payload['browserProps'] ?? null) ? $payload['browserProps'] : [];
         $displayMode = (string) ($browserProps['displayMode'] ?? 'catalog');
         $pageName = (string) ($browserProps['pageName'] ?? 'titles');
-        $countryCode = str((string) request()->query('country', ''))
-            ->trim()
-            ->upper()
-            ->toString();
+        $countryCode = $this->country;
         $countryLabel = $countryCode !== '' ? Country::labelForCode($countryCode) : null;
-        $themeSlug = str((string) request()->query('theme', ''))->trim()->toString();
+        $themeSlug = $this->theme;
         $selectedTheme = $this->resolveSelectedTheme($themeSlug);
         $themeSpotlightItems = collect();
         $themeSpotlightUnavailable = false;
@@ -350,7 +359,7 @@ class BrowseTitlesPage extends Component
         }
 
         if ($themeSlug !== '') {
-            $clearThemeHref = request()->fullUrlWithoutQuery(['theme']);
+            $clearThemeHref = $this->browseRouteUrl(['theme' => '']);
         }
 
         $actions = collect($payload['actions'] ?? []);
@@ -415,7 +424,7 @@ class BrowseTitlesPage extends Component
             $items = $this->getFeaturedInterestCategories
                 ->handle(4, $selectedTheme?->id)
                 ->map(fn (InterestCategory $interestCategory): array => [
-                    'href' => request()->fullUrlWithQuery(['theme' => $interestCategory->slug]),
+                    'href' => $this->browseRouteUrl(['theme' => $interestCategory->slug]),
                     'description' => $interestCategory->description,
                     'interestCountBadgeLabel' => $interestCategory->interestCountBadgeLabel(),
                     'name' => $interestCategory->name,
@@ -440,6 +449,61 @@ class BrowseTitlesPage extends Component
                 'isUnavailable' => true,
             ];
         }
+    }
+
+    /**
+     * @param  array{country?: string, theme?: string}  $queryOverrides
+     */
+    private function browseRouteUrl(array $queryOverrides = []): string
+    {
+        return route($this->browseRouteName(), [
+            ...$this->browseRouteParameters(),
+            ...$this->browseQueryParameters($queryOverrides),
+        ]);
+    }
+
+    private function browseRouteName(): string
+    {
+        return match (true) {
+            $this->genre instanceof Genre => 'public.genres.show',
+            is_int($this->year) => 'public.years.show',
+            default => match ($this->browsePageKey()) {
+                'movies' => 'public.movies.index',
+                'series' => 'public.series.index',
+                'top-rated-movies' => 'public.rankings.movies',
+                'top-rated-series' => 'public.rankings.series',
+                'trending' => 'public.trending',
+                default => 'public.titles.index',
+            },
+        };
+    }
+
+    /**
+     * @return array{genre?: Genre, year?: int}
+     */
+    private function browseRouteParameters(): array
+    {
+        return match (true) {
+            $this->genre instanceof Genre => ['genre' => $this->genre],
+            is_int($this->year) => ['year' => $this->year],
+            default => [],
+        };
+    }
+
+    /**
+     * @param  array{country?: string, theme?: string}  $queryOverrides
+     * @return array{country?: string, theme?: string}
+     */
+    private function browseQueryParameters(array $queryOverrides = []): array
+    {
+        return collect([
+            'country' => $this->country,
+            'theme' => $this->theme,
+            ...$queryOverrides,
+        ])
+            ->filter(fn (mixed $value): bool => filled($value))
+            ->map(fn (mixed $value): string => (string) $value)
+            ->all();
     }
 
     /**

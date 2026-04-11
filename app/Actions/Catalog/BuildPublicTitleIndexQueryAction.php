@@ -54,7 +54,7 @@ class BuildPublicTitleIndexQueryAction
         $types = collect($filters['types'] ?? [])
             ->map(fn (mixed $value): ?TitleType => TitleType::tryFrom((string) $value))
             ->filter()
-            ->flatMap(fn (TitleType $titleType): array => Title::remoteTypesForCatalogType($titleType))
+            ->map(fn (TitleType $titleType): string => $titleType->value)
             ->unique()
             ->values()
             ->all();
@@ -74,8 +74,12 @@ class BuildPublicTitleIndexQueryAction
             ->selectCatalogCardColumns()
             ->addSelect([
                 'popularity_rank' => TitleStatistic::query()
-                    ->select('vote_count')
-                    ->whereColumn('movie_ratings.movie_id', 'movies.id')
+                    ->select('watchlist_count')
+                    ->whereColumn('title_statistics.title_id', 'titles.id')
+                    ->limit(1),
+                'rating_count_sort' => TitleStatistic::query()
+                    ->select('rating_count')
+                    ->whereColumn('title_statistics.title_id', 'titles.id')
                     ->limit(1),
             ])
             ->published();
@@ -105,29 +109,29 @@ class BuildPublicTitleIndexQueryAction
         if ($minimumRating !== null || $maximumRating !== null || $votesMin !== null) {
             $query->whereHas('statistic', function (Builder $statisticQuery) use ($maximumRating, $minimumRating, $votesMin): void {
                 if ($minimumRating !== null) {
-                    $statisticQuery->where('aggregate_rating', '>=', $minimumRating);
+                    $statisticQuery->where('average_rating', '>=', $minimumRating);
                 }
 
                 if ($maximumRating !== null) {
-                    $statisticQuery->where('aggregate_rating', '<=', $maximumRating);
+                    $statisticQuery->where('average_rating', '<=', $maximumRating);
                 }
 
                 if ($votesMin !== null) {
-                    $statisticQuery->where('vote_count', '>=', $votesMin);
+                    $statisticQuery->where('rating_count', '>=', $votesMin);
                 }
             });
         }
 
         if ($typeEnum = TitleType::tryFrom((string) $type)) {
-            $query->whereIn('titletype', Title::remoteTypesForCatalogType($typeEnum));
+            $query->where('titles.title_type', $typeEnum->value);
         }
 
         if ($types !== []) {
-            $query->whereIn('titletype', $types);
+            $query->whereIn('titles.title_type', $types);
         }
 
         if ($year !== null) {
-            $query->where('startyear', $year);
+            $query->where('titles.release_year', $year);
         }
 
         $query->releasedBetweenYears($yearFrom, $yearTo);
@@ -157,12 +161,17 @@ class BuildPublicTitleIndexQueryAction
         }
 
         return match ($sort) {
-            'name' => $query->orderBy('primarytitle'),
-            'latest' => $query->orderByDesc('startyear')->orderByDesc('movies.id'),
-            'year' => $query->orderByDesc('startyear')->orderBy('primarytitle'),
+            'name' => $query->orderBy('titles.sort_title')->orderBy('titles.name'),
+            'latest' => $query->orderByDesc('titles.release_year')->orderByDesc('titles.id'),
+            'year' => $query->orderByDesc('titles.release_year')->orderBy('titles.sort_title')->orderBy('titles.name'),
             'rating' => $query->orderByTopRated(max(1, $votesMin ?? 1)),
             'trending' => $query->orderByTrending(),
-            default => $query->orderByDesc('popularity_rank')->orderByDesc('startyear')->orderBy('primarytitle'),
+            default => $query
+                ->orderByDesc('popularity_rank')
+                ->orderByDesc('rating_count_sort')
+                ->orderByDesc('titles.release_year')
+                ->orderBy('titles.sort_title')
+                ->orderBy('titles.name'),
         };
     }
 
@@ -171,24 +180,24 @@ class BuildPublicTitleIndexQueryAction
         $currentYear = now()->year;
 
         if ($status === 'limited') {
-            $query->whereIn('titletype', Title::remoteTypesForCatalogType(TitleType::MiniSeries));
+            $query->where('titles.title_type', TitleType::MiniSeries->value);
 
             return;
         }
 
-        $query->whereIn('titletype', [
-            ...Title::remoteTypesForCatalogType(TitleType::Series),
-            ...Title::remoteTypesForCatalogType(TitleType::MiniSeries),
+        $query->whereIn('titles.title_type', [
+            TitleType::Series->value,
+            TitleType::MiniSeries->value,
         ]);
 
         match ($status) {
             'returning' => $query->where(function (Builder $seriesQuery) use ($currentYear): void {
                 $seriesQuery
-                    ->whereNull('endyear')
-                    ->orWhere('endyear', '>=', $currentYear);
+                    ->whereNull('titles.end_year')
+                    ->orWhere('titles.end_year', '>=', $currentYear);
             }),
-            'ended' => $query->whereNotNull('endyear')->where('endyear', '<', $currentYear),
-            'upcoming' => $query->where('startyear', '>', $currentYear),
+            'ended' => $query->whereNotNull('titles.end_year')->where('titles.end_year', '<', $currentYear),
+            'upcoming' => $query->where('titles.release_year', '>', $currentYear),
             default => null,
         };
     }

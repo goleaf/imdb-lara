@@ -9,16 +9,11 @@ use App\Models\Review;
 use App\Models\Title;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
-use Tests\Concerns\InteractsWithRemoteCatalog;
-use Tests\Concerns\UsesCatalogOnlyApplication;
 use Tests\TestCase;
 
 class AdminReviewModerationQueueTest extends TestCase
 {
-    use InteractsWithRemoteCatalog;
     use RefreshDatabase;
-    use UsesCatalogOnlyApplication;
 
     public function test_review_and_reports_queues_are_limited_to_moderation_roles(): void
     {
@@ -87,8 +82,7 @@ class AdminReviewModerationQueueTest extends TestCase
     private function createReview(array $attributes = []): Review
     {
         $author = User::factory()->create();
-        $title = $this->sampleTitle();
-        $this->seedLocalTitleRecord($title);
+        $title = Title::factory()->movie()->create();
 
         return Review::withoutEvents(fn (): Review => Review::query()->create(array_merge([
             'user_id' => $author->id,
@@ -102,34 +96,5 @@ class AdminReviewModerationQueueTest extends TestCase
             'published_at' => null,
             'edited_at' => null,
         ], $attributes)));
-    }
-
-    private function seedLocalTitleRecord(Title $title): void
-    {
-        $attributes = $title->getAttributes();
-
-        DB::table('titles')->updateOrInsert(
-            ['id' => $title->getKey()],
-            [
-                'name' => (string) ($attributes['primarytitle'] ?? 'Catalog Title '.$title->getKey()),
-                'original_name' => $attributes['originaltitle'] ?? null,
-                'slug' => 'catalog-title-'.$title->getKey(),
-                'title_type' => 'movie',
-                'release_year' => $attributes['startyear'] ?? null,
-                'end_year' => $attributes['endyear'] ?? null,
-                'release_date' => null,
-                'runtime_minutes' => $attributes['runtimeminutes'] ?? null,
-                'age_rating' => null,
-                'plot_outline' => null,
-                'synopsis' => null,
-                'tagline' => null,
-                'origin_country' => null,
-                'original_language' => null,
-                'popularity_rank' => null,
-                'is_published' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        );
     }
 }

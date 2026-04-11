@@ -3,71 +3,78 @@
 namespace App\Models;
 
 use App\Enums\MediaKind;
+use Database\Factories\PersonFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Number;
 use Illuminate\Support\Str;
 
 class Person extends Model
 {
-    protected $connection = 'imdb_mysql';
+    /** @use HasFactory<PersonFactory> */
+    use HasFactory;
 
-    protected $table = 'name_basics';
-
-    public $timestamps = false;
+    use SoftDeletes;
 
     /**
      * @var list<string>
      */
     protected $fillable = [
+        'name',
+        'alternate_names',
+        'slug',
+        'biography',
+        'short_biography',
+        'known_for_department',
+        'birth_date',
+        'death_date',
+        'birth_place',
+        'death_place',
+        'nationality',
+        'popularity_rank',
+        'meta_title',
+        'meta_description',
+        'search_keywords',
+        'is_published',
+        'imdb_id',
+        'imdb_alternative_names',
+        'imdb_primary_professions',
+        'imdb_payload',
         'nconst',
         'primaryname',
-        'birthyear',
-        'deathyear',
-        'primaryprofession',
-        'knownfortitles',
-        'alternativeNames',
-        'biography',
-        'birthDate_day',
-        'birthDate_month',
-        'birthDate_year',
-        'birthLocation',
-        'birthName',
-        'deathDate_day',
-        'deathDate_month',
-        'deathDate_year',
-        'deathLocation',
-        'deathReason',
         'displayName',
-        'heightCm',
-        'imdb_id',
-        'primaryImage_height',
-        'primaryImage_url',
-        'primaryImage_width',
+        'alternativeNames',
         'primaryProfessions',
+        'birthLocation',
+        'deathLocation',
     ];
 
     protected function casts(): array
     {
         return [
-            'id' => 'integer',
-            'birthyear' => 'integer',
-            'deathyear' => 'integer',
-            'birthDate_day' => 'integer',
-            'birthDate_month' => 'integer',
-            'birthDate_year' => 'integer',
-            'deathDate_day' => 'integer',
-            'deathDate_month' => 'integer',
-            'deathDate_year' => 'integer',
-            'heightCm' => 'integer',
-            'primaryImage_height' => 'integer',
-            'primaryImage_width' => 'integer',
+            'birth_date' => 'date',
+            'death_date' => 'date',
+            'popularity_rank' => 'integer',
+            'is_published' => 'boolean',
+            'imdb_alternative_names' => 'array',
+            'imdb_primary_professions' => 'array',
+            'imdb_payload' => 'array',
+            'deleted_at' => 'datetime',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(function (self $person): void {
+            $person->slug = $person->slug ?: Str::slug($person->name ?: 'unknown-person');
+        });
     }
 
     /**
@@ -76,19 +83,24 @@ class Person extends Model
     public static function directoryColumns(): array
     {
         return [
-            'name_basics.id',
-            'name_basics.nconst',
-            'name_basics.imdb_id',
-            'name_basics.primaryname',
-            'name_basics.displayName',
-            'name_basics.alternativeNames',
-            'name_basics.primaryProfessions',
-            'name_basics.biography',
-            'name_basics.birthLocation',
-            'name_basics.deathLocation',
-            'name_basics.primaryImage_url',
-            'name_basics.primaryImage_width',
-            'name_basics.primaryImage_height',
+            'people.id',
+            'people.imdb_id',
+            'people.name',
+            'people.slug',
+            'people.alternate_names',
+            'people.short_biography',
+            'people.biography',
+            'people.known_for_department',
+            'people.birth_date',
+            'people.death_date',
+            'people.birth_place',
+            'people.death_place',
+            'people.nationality',
+            'people.popularity_rank',
+            'people.meta_title',
+            'people.meta_description',
+            'people.search_keywords',
+            'people.is_published',
         ];
     }
 
@@ -98,9 +110,25 @@ class Person extends Model
     public static function directoryRelations(): array
     {
         return [
-            'personImages:name_basic_id,position,url,width,height,type',
-            'professionTerms:id,name',
-            'meterRanking:name_basic_id,current_rank,change_direction,difference',
+            'mediaAssets' => fn ($query) => $query
+                ->select([
+                    'id',
+                    'mediable_type',
+                    'mediable_id',
+                    'kind',
+                    'url',
+                    'alt_text',
+                    'caption',
+                    'width',
+                    'height',
+                    'duration_seconds',
+                    'metadata',
+                    'is_primary',
+                    'position',
+                    'published_at',
+                ])
+                ->ordered(),
+            'professions:id,person_id,department,profession,is_primary,sort_order',
         ];
     }
 
@@ -111,11 +139,32 @@ class Person extends Model
     {
         return [
             ...self::directoryRelations(),
-            'alternativeNameRecords:name_basic_id,alternative_name,position',
-            'knownForTitles' => fn ($query) => $query
-                ->selectCatalogCardColumns()
-                ->publishedCatalog()
-                ->withCatalogCardRelations(),
+            'credits' => fn ($query) => $query
+                ->select([
+                    'id',
+                    'title_id',
+                    'person_id',
+                    'department',
+                    'job',
+                    'character_name',
+                    'billing_order',
+                    'is_principal',
+                    'person_profession_id',
+                    'episode_id',
+                    'credited_as',
+                    'imdb_source_group',
+                ])
+                ->ordered()
+                ->with([
+                    'title' => fn ($titleQuery) => $titleQuery
+                        ->select(Title::catalogCardColumns())
+                        ->with(Title::catalogCardRelations()),
+                    'profession:id,person_id,department,profession,is_primary,sort_order',
+                ]),
+            'awardNominations:id,title_id,person_id,award_event_id,award_category_id,details,credited_name,is_winner,sort_order',
+            'awardNominations.title:id,name,slug,title_type,release_year',
+            'awardNominations.awardCategory:id,name',
+            'awardNominations.awardEvent:id,name,year',
         ];
     }
 
@@ -131,18 +180,28 @@ class Person extends Model
 
     public function resolveRouteBindingQuery($query, $value, $field = null)
     {
-        if (preg_match('/-(?P<imdb>nm\d+)$/', (string) $value, $matches) === 1) {
-            return $query->where('nconst', $matches['imdb']);
+        if ($field !== null) {
+            return $query->where($field, $value);
         }
 
-        return $query
-            ->where('nconst', (string) $value)
-            ->orWhere('imdb_id', (string) $value);
+        return $query->where(function (Builder $personQuery) use ($value): void {
+            $personQuery->where('slug', (string) $value);
+
+            if (is_numeric($value)) {
+                $personQuery->orWhereKey((int) $value);
+            }
+
+            if (is_string($value) && $value !== '') {
+                $personQuery
+                    ->orWhere('imdb_id', $value)
+                    ->orWhere('slug', Str::slug($value));
+            }
+        });
     }
 
     public function scopePublished(Builder $query): Builder
     {
-        return $query;
+        return $query->where('people.is_published', true);
     }
 
     public function scopeMatchingSearch(Builder $query, string $search): Builder
@@ -154,21 +213,16 @@ class Person extends Model
         }
 
         if (preg_match('/^nm\d+$/i', $search) === 1) {
-            return $query->where(function (Builder $personQuery) use ($search): void {
-                $personQuery
-                    ->where('nconst', $search)
-                    ->orWhere('imdb_id', $search);
-            });
+            return $query->where('people.imdb_id', $search);
         }
 
         return $query->where(function (Builder $personQuery) use ($search): void {
             $personQuery
-                ->where('primaryname', 'like', '%'.$search.'%')
-                ->orWhere('displayName', 'like', '%'.$search.'%')
-                ->orWhere('nconst', 'like', '%'.$search.'%')
-                ->orWhere('imdb_id', 'like', '%'.$search.'%')
-                ->orWhere('alternativeNames', 'like', '%'.$search.'%')
-                ->orWhere('biography', 'like', '%'.$search.'%');
+                ->where('people.name', 'like', '%'.$search.'%')
+                ->orWhere('people.alternate_names', 'like', '%'.$search.'%')
+                ->orWhere('people.biography', 'like', '%'.$search.'%')
+                ->orWhere('people.short_biography', 'like', '%'.$search.'%')
+                ->orWhere('people.imdb_id', 'like', '%'.$search.'%');
         });
     }
 
@@ -185,8 +239,8 @@ class Person extends Model
     public function scopeWithDirectoryMetrics(Builder $query): Builder
     {
         return $query
-            ->withCount(['credits', 'awardNominations'])
-            ->withExists('meterRanking');
+            ->withCount(['credits'])
+            ->addSelect(['award_nominations_count' => 0]);
     }
 
     public function scopeWithDetailRelations(Builder $query): Builder
@@ -197,78 +251,51 @@ class Person extends Model
     public function scopeInProfession(Builder $query, string $profession): Builder
     {
         return $query->whereHas(
-            'professionTerms',
-            fn (Builder $builder) => $builder->where('professions.name', $profession),
+            'professions',
+            fn (Builder $builder) => $builder->where('profession', $profession),
         );
     }
 
     public function credits(): HasMany
     {
-        return $this->hasMany(Credit::class, 'name_basic_id', 'id')->orderBy('position');
-    }
-
-    public function relationships(): HasMany
-    {
-        return $this->hasMany(NameRelationship::class, 'name_basic_id', 'id')->orderBy('position');
-    }
-
-    public function relationshipsAbout(): HasMany
-    {
-        return $this->hasMany(NameRelationship::class, 'related_name_basic_id', 'id')->orderBy('position');
+        return $this->hasMany(Credit::class)->ordered();
     }
 
     public function professions(): HasMany
     {
-        return $this->hasMany(PersonProfession::class, 'name_basic_id', 'id')->orderBy('position');
+        return $this->hasMany(PersonProfession::class)->ordered();
     }
 
-    public function knownForTitleLinks(): HasMany
+    public function professionTerms(): HasMany
     {
-        return $this->hasMany(NameBasicKnownForTitle::class, 'name_basic_id', 'id')->orderBy('position');
+        return $this->professions();
     }
 
     public function knownForTitles(): BelongsToMany
     {
-        return $this->belongsToMany(Title::class, 'name_basic_known_for_titles', 'name_basic_id', 'title_basic_id', 'id', 'id')
-            ->withPivot('position')
-            ->orderByPivot('position');
+        return $this->belongsToMany(Title::class, 'credits')
+            ->whereNull('credits.deleted_at')
+            ->withPivot([
+                'department',
+                'job',
+                'character_name',
+                'billing_order',
+                'is_principal',
+                'credited_as',
+            ])
+            ->orderByPivot('is_principal', 'desc')
+            ->orderByPivot('billing_order')
+            ->orderBy('titles.name');
     }
 
-    public function professionTerms(): BelongsToMany
+    public function mediaAssets(): MorphMany
     {
-        return $this->belongsToMany(Profession::class, 'name_basic_professions', 'name_basic_id', 'profession_id', 'id', 'id')
-            ->withPivot('position')
-            ->orderByPivot('position');
+        return $this->morphMany(MediaAsset::class, 'mediable')->ordered();
     }
 
-    public function personImages(): HasMany
+    public function awardNominations(): HasMany
     {
-        return $this->hasMany(PersonImage::class, 'name_basic_id', 'id')->orderBy('position');
-    }
-
-    public function alternativeNameRecords(): HasMany
-    {
-        return $this->hasMany(NameBasicAlternativeName::class, 'name_basic_id', 'id')
-            ->orderBy('position')
-            ->orderBy('alternative_name');
-    }
-
-    public function meterRanking(): HasOne
-    {
-        return $this->hasOne(NameBasicMeterRanking::class, 'name_basic_id', 'id');
-    }
-
-    public function awardNominations(): BelongsToMany
-    {
-        return $this->belongsToMany(AwardNomination::class, 'movie_award_nomination_nominees', 'name_basic_id', 'movie_award_nomination_id', 'id', 'id');
-    }
-
-    /**
-     * @return array<string, mixed>|null
-     */
-    public function imdbPayloadSection(string $key): ?array
-    {
-        return null;
+        return $this->hasMany(AwardNomination::class);
     }
 
     /**
@@ -276,25 +303,13 @@ class Person extends Model
      */
     public function resolvedAlternateNames(): array
     {
-        $alternateNames = $this->alternativeNames;
+        $alternateNames = $this->alternate_names;
 
         if (! is_string($alternateNames) || trim($alternateNames) === '') {
             return [];
         }
 
-        $trimmed = trim($alternateNames);
-        $decoded = json_decode($trimmed, true);
-
-        if (is_array($decoded)) {
-            return collect($decoded)
-                ->filter(fn (mixed $value): bool => is_string($value) && trim($value) !== '')
-                ->map(fn (string $value): string => trim($value))
-                ->unique()
-                ->values()
-                ->all();
-        }
-
-        return collect(preg_split('/\s*[|,]\s*/', $trimmed, -1, PREG_SPLIT_NO_EMPTY) ?: [])
+        return collect(preg_split('/\s*[|,]\s*/', trim($alternateNames), -1, PREG_SPLIT_NO_EMPTY) ?: [])
             ->map(fn (string $value): string => trim($value))
             ->filter()
             ->unique()
@@ -304,26 +319,8 @@ class Person extends Model
 
     public function preferredHeadshot(): ?CatalogMediaAsset
     {
-        $assets = collect();
-
-        if ($this->relationLoaded('personImages')) {
-            $assets = $assets->concat($this->personImages);
-        }
-
-        if (filled($this->primaryImage_url)) {
-            $assets->prepend(CatalogMediaAsset::fromCatalog([
-                'kind' => MediaKind::Headshot,
-                'url' => $this->primaryImage_url,
-                'alt_text' => $this->name,
-                'width' => $this->primaryImage_width,
-                'height' => $this->primaryImage_height,
-                'position' => 0,
-                'is_primary' => true,
-            ]));
-        }
-
         return CatalogMediaAsset::preferredFrom(
-            $assets,
+            $this->allMediaAssets(),
             MediaKind::Headshot,
             MediaKind::Gallery,
             MediaKind::Still,
@@ -354,16 +351,6 @@ class Person extends Model
      */
     public function professionLabels(int $limit = 2): array
     {
-        if ($this->relationLoaded('professionTerms')) {
-            return $this->professionTerms
-                ->pluck('name')
-                ->filter()
-                ->unique()
-                ->take($limit)
-                ->values()
-                ->all();
-        }
-
         $professionLabels = $this->previewProfessions($limit)
             ->pluck('profession')
             ->filter()
@@ -375,16 +362,16 @@ class Person extends Model
         }
 
         return collect($this->imdb_primary_professions)
-            ->map(fn (string $profession): string => $this->professionMetadata($profession)['label'])
-            ->filter()
+            ->filter(fn (mixed $value): bool => is_string($value) && $value !== '')
             ->take($limit)
+            ->map(fn (string $profession): string => $this->professionMetadata($profession)['label'])
             ->values()
             ->all();
     }
 
     public function primaryProfessionLabel(): string
     {
-        return $this->professionLabels(1)[0] ?? ($this->resolvedKnownForDepartment() ?: 'Screenbase profile');
+        return $this->professionLabels(1)[0] ?? 'Screenbase profile';
     }
 
     public function secondaryProfessionLabel(): string
@@ -396,7 +383,7 @@ class Person extends Model
 
     public function summaryText(): ?string
     {
-        $summary = $this->getAttributeFromArray('short_biography') ?: $this->biography;
+        $summary = $this->short_biography ?: $this->biography;
 
         return filled($summary) ? (string) $summary : null;
     }
@@ -406,35 +393,36 @@ class Person extends Model
      */
     public function groupedMediaAssetsByKind(): SupportCollection
     {
-        $assets = collect();
-
-        if ($this->relationLoaded('personImages')) {
-            $assets = $assets->concat($this->personImages);
-        }
-
-        if ($headshot = $this->preferredHeadshot()) {
-            $assets->prepend($headshot);
-        }
-
-        return $assets
-            ->filter(fn (mixed $asset): bool => $asset instanceof CatalogMediaAsset)
+        return $this->allMediaAssets()
             ->unique('url')
             ->values()
             ->groupBy(fn (CatalogMediaAsset $mediaAsset): string => $mediaAsset->kind->value);
     }
 
-    public function getSlugAttribute(): string
+    public function getSlugAttribute(?string $value): string
     {
-        return Str::slug($this->name).'-'.($this->nconst ?: $this->imdb_id ?: $this->id);
+        if (filled($value)) {
+            return (string) $value;
+        }
+
+        return Str::slug($this->name).'-'.($this->imdb_id ?: $this->getKey());
     }
 
-    public function getNameAttribute(): string
+    public function getNameAttribute(?string $value): string
     {
-        return (string) ($this->displayName ?: $this->primaryname ?: $this->nconst ?: 'Unknown person');
+        if (filled($value)) {
+            return (string) $value;
+        }
+
+        return (string) ($this->attributes['primaryname'] ?? $this->attributes['displayName'] ?? $this->attributes['imdb_id'] ?? 'Unknown person');
     }
 
-    public function getAlternateNamesAttribute(): ?string
+    public function getAlternateNamesAttribute(?string $value): ?string
     {
+        if (filled($value)) {
+            return (string) $value;
+        }
+
         $names = $this->resolvedAlternateNames();
 
         return $names !== [] ? implode(' | ', $names) : null;
@@ -443,94 +431,33 @@ class Person extends Model
     /**
      * @return list<string>
      */
-    public function getImdbAlternativeNamesAttribute(): array
+    public function getImdbAlternativeNamesAttribute(mixed $value): array
     {
+        if (is_array($value)) {
+            return $value;
+        }
+
         return $this->resolvedAlternateNames();
     }
 
     /**
      * @return list<string>
      */
-    public function getImdbPrimaryProfessionsAttribute(): array
+    public function getImdbPrimaryProfessionsAttribute(mixed $value): array
     {
-        if (! is_string($this->primaryProfessions) || trim($this->primaryProfessions) === '') {
-            return [];
+        if (is_array($value)) {
+            return $value;
         }
 
-        $decoded = json_decode($this->primaryProfessions, true);
-
-        if (! is_array($decoded)) {
-            return [];
-        }
-
-        return collect($decoded)
-            ->filter(fn (mixed $value): bool => is_string($value) && trim($value) !== '')
-            ->map(fn (string $value): string => trim($value))
+        return collect($this->attributes['primaryProfessions'] ?? null)
+            ->filter(fn (mixed $item): bool => is_string($item) && $item !== '')
             ->values()
             ->all();
     }
 
-    public function getBiographyAttribute(): ?string
+    public function getKnownForDepartmentAttribute(?string $value): ?string
     {
-        return filled($this->attributes['biography'] ?? null) ? (string) $this->attributes['biography'] : null;
-    }
-
-    public function getShortBiographyAttribute(): ?string
-    {
-        return $this->biography
-            ? Str::of($this->biography)->limit(220)->toString()
-            : null;
-    }
-
-    public function getKnownForDepartmentAttribute(): ?string
-    {
-        return $this->resolvedKnownForDepartment();
-    }
-
-    public function getBirthDateAttribute(): mixed
-    {
-        return null;
-    }
-
-    public function getDeathDateAttribute(): mixed
-    {
-        return null;
-    }
-
-    public function getBirthPlaceAttribute(): ?string
-    {
-        return filled($this->birthLocation) ? (string) $this->birthLocation : null;
-    }
-
-    public function getDeathPlaceAttribute(): ?string
-    {
-        return filled($this->deathLocation) ? (string) $this->deathLocation : null;
-    }
-
-    public function getNationalityAttribute(): ?string
-    {
-        $birthPlace = $this->birth_place;
-
-        if (! filled($birthPlace)) {
-            return null;
-        }
-
-        return Str::of((string) $birthPlace)->afterLast(',')->trim()->toString();
-    }
-
-    public function getPopularityRankAttribute(): ?int
-    {
-        $selectedValue = $this->getAttributeFromArray('popularity_rank');
-
-        if ($selectedValue !== null) {
-            return (int) $selectedValue;
-        }
-
-        if ($this->relationLoaded('meterRanking')) {
-            return $this->meterRanking?->current_rank;
-        }
-
-        return null;
+        return filled($value) ? (string) $value : $this->resolvedKnownForDepartment();
     }
 
     public function creditsCount(): int
@@ -590,73 +517,66 @@ class Person extends Model
         return Number::format($this->creditsCount()).' credits';
     }
 
-    public function getMetaTitleAttribute(): string
+    public function setNconstAttribute(?string $value): void
+    {
+        $this->attributes['imdb_id'] = $value;
+    }
+
+    public function setPrimarynameAttribute(?string $value): void
+    {
+        $this->attributes['name'] = $value;
+    }
+
+    public function setDisplayNameAttribute(?string $value): void
+    {
+        if (! filled($this->attributes['name'] ?? null) && filled($value)) {
+            $this->attributes['name'] = $value;
+        }
+    }
+
+    public function setAlternativeNamesAttribute(?string $value): void
+    {
+        $this->attributes['alternate_names'] = $value;
+    }
+
+    public function setPrimaryProfessionsAttribute(mixed $value): void
+    {
+        $this->attributes['imdb_primary_professions'] = is_array($value) ? json_encode($value) : $value;
+    }
+
+    public function getNconstAttribute(): ?string
+    {
+        return $this->imdb_id;
+    }
+
+    public function getPrimarynameAttribute(): string
     {
         return $this->name;
     }
 
-    public function getMetaDescriptionAttribute(): string
+    public function getDisplayNameAttribute(): string
     {
-        return $this->summaryText() ?: 'Browse biography, credits, and career highlights for '.$this->name.'.';
-    }
-
-    public function getSearchKeywordsAttribute(): ?string
-    {
-        return null;
-    }
-
-    public function getIsPublishedAttribute(): bool
-    {
-        return true;
-    }
-
-    public function getUpdatedAtAttribute(): mixed
-    {
-        return null;
+        return $this->name;
     }
 
     private function resolvedKnownForDepartment(): ?string
     {
-        $storedDepartment = $this->getAttributeFromArray('known_for_department');
-
-        if (filled($storedDepartment)) {
-            return (string) $storedDepartment;
-        }
-
-        $primaryProfession = $this->primaryProfessionSeed();
-
-        if (! filled($primaryProfession)) {
-            return null;
-        }
-
-        return $this->professionMetadata((string) $primaryProfession)['department'];
-    }
-
-    private function primaryProfessionSeed(): ?string
-    {
-        if ($this->relationLoaded('professionTerms')) {
-            $profession = $this->professionTerms
-                ->pluck('name')
-                ->filter()
-                ->first();
-
-            if (is_string($profession) && $profession !== '') {
-                return $profession;
-            }
-        }
-
-        $profession = $this->previewProfessions(1)
+        $primaryProfession = $this->previewProfessions(1)
             ->pluck('profession')
             ->filter()
             ->first();
 
-        if (is_string($profession) && $profession !== '') {
-            return $profession;
+        if (is_string($primaryProfession) && $primaryProfession !== '') {
+            return $this->professionMetadata($primaryProfession)['department'];
         }
 
-        $profession = $this->imdb_primary_professions[0] ?? null;
+        $imdbProfession = $this->imdb_primary_professions[0] ?? null;
 
-        return is_string($profession) && $profession !== '' ? $profession : null;
+        if (is_string($imdbProfession) && $imdbProfession !== '') {
+            return $this->professionMetadata($imdbProfession)['department'];
+        }
+
+        return null;
     }
 
     /**
@@ -671,25 +591,42 @@ class Person extends Model
             ->toString();
 
         return match ($normalized) {
-            'actor' => ['label' => 'Actor', 'department' => 'Cast'],
-            'actress' => ['label' => 'Actress', 'department' => 'Cast'],
-            'self' => ['label' => 'Self', 'department' => 'Cast'],
-            'archive footage', 'archive sound' => ['label' => 'Archive', 'department' => 'Cast'],
+            'actor', 'actress', 'self', 'archive footage', 'archive sound' => ['label' => Str::title($normalized), 'department' => 'Cast'],
             'director' => ['label' => 'Director', 'department' => 'Directing'],
             'writer', 'screenplay', 'story', 'creator' => ['label' => 'Writer', 'department' => 'Writing'],
             'producer', 'executive producer', 'associate producer', 'co producer' => ['label' => 'Producer', 'department' => 'Production'],
             'editor', 'editorial department' => ['label' => 'Editor', 'department' => 'Editing'],
             'composer', 'music department', 'soundtrack' => ['label' => 'Composer', 'department' => 'Music'],
             'cinematographer', 'camera department' => ['label' => 'Cinematographer', 'department' => 'Camera'],
-            'art department', 'art director', 'production designer' => ['label' => 'Production Designer', 'department' => 'Art'],
-            'costume designer', 'costume department' => ['label' => 'Costume Designer', 'department' => 'Costume'],
-            'make up department' => ['label' => 'Make-Up', 'department' => 'Make-Up'],
-            'visual effects' => ['label' => 'Visual Effects', 'department' => 'Visual Effects'],
-            'animation department' => ['label' => 'Animation', 'department' => 'Animation'],
-            'stunts' => ['label' => 'Stunts', 'department' => 'Stunts'],
-            'script department' => ['label' => 'Script Department', 'department' => 'Writing'],
-            'miscellaneous' => ['label' => 'Miscellaneous', 'department' => 'Crew'],
             default => ['label' => Str::title($normalized), 'department' => 'Crew'],
         };
+    }
+
+    /**
+     * @return SupportCollection<int, CatalogMediaAsset>
+     */
+    private function allMediaAssets(): SupportCollection
+    {
+        if (! $this->relationLoaded('mediaAssets')) {
+            return collect();
+        }
+
+        return $this->mediaAssets
+            ->filter(fn (mixed $asset): bool => $asset instanceof MediaAsset)
+            ->map(function (MediaAsset $mediaAsset): CatalogMediaAsset {
+                return CatalogMediaAsset::fromCatalog([
+                    'kind' => $mediaAsset->kind,
+                    'url' => $mediaAsset->url,
+                    'alt_text' => $mediaAsset->alt_text,
+                    'caption' => $mediaAsset->caption,
+                    'width' => $mediaAsset->width,
+                    'height' => $mediaAsset->height,
+                    'duration_seconds' => $mediaAsset->duration_seconds,
+                    'is_primary' => $mediaAsset->is_primary,
+                    'position' => $mediaAsset->position,
+                    'metadata' => $mediaAsset->metadata,
+                ]);
+            })
+            ->values();
     }
 }

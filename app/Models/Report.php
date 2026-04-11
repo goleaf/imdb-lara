@@ -18,6 +18,13 @@ class Report extends Model
 
     use SoftDeletes;
 
+    protected static function booted(): void
+    {
+        static::saving(function (self $report): void {
+            $report->status_priority = $report->status?->priority() ?? ReportStatus::Open->priority();
+        });
+    }
+
     /**
      * @var list<string>
      */
@@ -28,6 +35,7 @@ class Report extends Model
         'reason',
         'details',
         'status',
+        'status_priority',
         'reviewed_by',
         'reviewed_at',
         'resolution_notes',
@@ -38,6 +46,7 @@ class Report extends Model
         return [
             'reason' => ReportReason::class,
             'status' => ReportStatus::class,
+            'status_priority' => 'integer',
             'reviewed_at' => 'datetime',
         ];
     }

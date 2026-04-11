@@ -50,10 +50,13 @@ class AkaAttributePageTest extends TestCase
         $response
             ->assertOk()
             ->assertSeeHtml('data-slot="aka-attribute-detail-hero"')
+            ->assertSeeHtml('data-slot="aka-attribute-detail-filters"')
             ->assertSeeHtml('data-slot="aka-attribute-detail-records"')
             ->assertSee($movieAkaAttribute->akaAttribute->resolvedLabel())
             ->assertSee($movieAkaAttribute->movieAka->title->name)
             ->assertSee($movieAkaAttribute->movieAka->text)
+            ->assertSee('Updates live')
+            ->assertDontSee('<form method="GET"', false)
             ->assertSee(route('public.titles.show', $movieAkaAttribute->movieAka->title), false);
 
         $filteredResponse = $this->get(route('public.aka-attributes.show', [
@@ -66,6 +69,8 @@ class AkaAttributePageTest extends TestCase
             ->assertOk()
             ->assertSeeHtml('data-slot="aka-attribute-detail-filters"')
             ->assertSee($movieAkaAttribute->movieAka->title->name)
-            ->assertSee($movieAkaAttribute->akaAttribute->resolvedLabel());
+            ->assertSee($movieAkaAttribute->akaAttribute->resolvedLabel())
+            ->assertSee('Updates live')
+            ->assertDontSee('<form method="GET"', false);
     }
 }

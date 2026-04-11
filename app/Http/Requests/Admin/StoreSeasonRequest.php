@@ -14,9 +14,14 @@ class StoreSeasonRequest extends FormRequest
     public function authorize(): bool
     {
         $title = $this->route('title');
+        $titleType = $title instanceof Title
+            ? ($title->title_type instanceof TitleType
+                ? $title->title_type
+                : TitleType::tryFrom((string) $title->title_type))
+            : null;
 
         return $title instanceof Title
-            && in_array($title->title_type, [TitleType::Series, TitleType::MiniSeries], true)
+            && in_array($titleType, [TitleType::Series, TitleType::MiniSeries], true)
             && ($this->user()?->can('create', Season::class) ?? false)
             && ($this->user()?->can('update', $title) ?? false);
     }

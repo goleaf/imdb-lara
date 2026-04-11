@@ -39,13 +39,15 @@ class GetGlobalSearchSuggestionsAction
         $limit = max(1, min($perGroup, 6));
 
         return [
-            'interestCategories' => $this->buildPublicInterestCategoryIndexQuery
-                ->handle([
-                    'search' => $query,
-                    'sort' => 'popular',
-                ])
-                ->limit($limit)
-                ->get(),
+            'interestCategories' => config('screenbase.catalog_only', false)
+                ? $this->buildPublicInterestCategoryIndexQuery
+                    ->handle([
+                        'search' => $query,
+                        'sort' => 'popular',
+                    ])
+                    ->limit($limit)
+                    ->get()
+                : new Collection,
             'people' => $this->buildPublicPeopleIndexQuery
                 ->handle([
                     'search' => $query,

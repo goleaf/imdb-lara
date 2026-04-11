@@ -46,9 +46,9 @@ class LoadCompanyCreditAttributeDetailsAction
      *     seo: PageSeoData
      * }
      */
-    public function handle(CompanyCreditAttribute $companyCreditAttribute): array
+    public function handle(CompanyCreditAttribute $companyCreditAttribute, array $filters): array
     {
-        $filters = $this->filtersFromRequest();
+        $filters = $this->normalizeFilters($filters);
         $archiveQuery = $this->baseArchiveQuery($companyCreditAttribute, $filters);
 
         $archiveRecords = (clone $archiveQuery)
@@ -187,16 +187,20 @@ class LoadCompanyCreditAttributeDetailsAction
     /**
      * @return array{q: string, type: string, country: string, company: string, category: string}
      */
-    private function filtersFromRequest(): array
+    /**
+     * @param  array{q?: string, type?: string, country?: string, company?: string, category?: string}  $filters
+     * @return array{q: string, type: string, country: string, company: string, category: string}
+     */
+    private function normalizeFilters(array $filters): array
     {
-        $type = TitleType::tryFrom((string) request()->query('type', ''));
-        $category = trim((string) request()->query('category', ''));
+        $type = TitleType::tryFrom((string) ($filters['type'] ?? ''));
+        $category = trim((string) ($filters['category'] ?? ''));
 
         return [
-            'q' => trim((string) request()->query('q', '')),
+            'q' => trim((string) ($filters['q'] ?? '')),
             'type' => $type?->value ?? '',
-            'country' => str((string) request()->query('country', ''))->trim()->upper()->toString(),
-            'company' => trim((string) request()->query('company', '')),
+            'country' => str((string) ($filters['country'] ?? ''))->trim()->upper()->toString(),
+            'company' => trim((string) ($filters['company'] ?? '')),
             'category' => is_numeric($category) ? (string) (int) $category : '',
         ];
     }

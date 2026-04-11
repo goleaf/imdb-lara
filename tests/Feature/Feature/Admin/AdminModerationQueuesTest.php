@@ -18,23 +18,18 @@ use App\Models\Title;
 use App\Models\User;
 use App\Models\UserList;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
-use Tests\Concerns\InteractsWithRemoteCatalog;
-use Tests\Concerns\UsesCatalogOnlyApplication;
 use Tests\TestCase;
 
 class AdminModerationQueuesTest extends TestCase
 {
-    use InteractsWithRemoteCatalog;
     use RefreshDatabase;
-    use UsesCatalogOnlyApplication;
 
     public function test_moderator_can_moderate_a_review_from_the_livewire_queue_card(): void
     {
         $moderator = User::factory()->moderator()->create();
         $author = User::factory()->create();
-        $title = $this->sampleTitle();
+        $title = Title::factory()->movie()->create();
         $review = $this->createReview($author, $title, [
             'status' => ReviewStatus::Published->value,
             'published_at' => now(),
@@ -69,7 +64,7 @@ class AdminModerationQueuesTest extends TestCase
         $moderator = User::factory()->moderator()->create();
         $author = User::factory()->create();
         $reporter = User::factory()->create();
-        $title = $this->sampleTitle();
+        $title = Title::factory()->movie()->create();
 
         $review = $this->createReview($author, $title, [
             'status' => ReviewStatus::Published->value,
@@ -123,7 +118,7 @@ class AdminModerationQueuesTest extends TestCase
         $moderator = User::factory()->moderator()->create();
         $author = User::factory()->create();
         $reporter = User::factory()->create();
-        $title = $this->sampleTitle();
+        $title = Title::factory()->movie()->create();
         $review = $this->createReview($author, $title, [
             'status' => ReviewStatus::Published->value,
             'published_at' => now(),
@@ -193,7 +188,7 @@ class AdminModerationQueuesTest extends TestCase
         $moderator = User::factory()->moderator()->create();
         $author = User::factory()->create();
         $reporter = User::factory()->create();
-        $title = $this->sampleTitle();
+        $title = Title::factory()->movie()->create();
         $review = $this->createReview($author, $title, [
             'status' => ReviewStatus::Published->value,
             'published_at' => now(),
@@ -233,7 +228,7 @@ class AdminModerationQueuesTest extends TestCase
         $editor = User::factory()->editor()->create();
         $moderator = User::factory()->moderator()->create();
         $contributor = User::factory()->contributor()->create();
-        $title = $this->sampleTitle();
+        $title = Title::factory()->movie()->create();
 
         $contribution = $this->createContribution($contributor, $title, [
             'status' => ContributionStatus::Submitted,
@@ -281,7 +276,7 @@ class AdminModerationQueuesTest extends TestCase
     {
         $editor = User::factory()->editor()->create();
         $contributor = User::factory()->contributor()->create();
-        $title = $this->sampleTitle();
+        $title = Title::factory()->movie()->create();
 
         $contribution = $this->createContribution($contributor, $title, [
             'status' => ContributionStatus::Submitted,
@@ -309,8 +304,6 @@ class AdminModerationQueuesTest extends TestCase
      */
     private function createContribution(User $contributor, Title $title, array $attributes = []): Contribution
     {
-        $this->seedLocalTitleRecord($title);
-
         return Contribution::query()->create(array_merge([
             'user_id' => $contributor->id,
             'contributable_type' => Title::class,
@@ -332,8 +325,6 @@ class AdminModerationQueuesTest extends TestCase
      */
     private function createReview(User $author, Title $title, array $attributes = []): Review
     {
-        $this->seedLocalTitleRecord($title);
-
         return Review::withoutEvents(fn (): Review => Review::query()->create(array_merge([
             'user_id' => $author->id,
             'title_id' => $title->getKey(),
@@ -346,34 +337,5 @@ class AdminModerationQueuesTest extends TestCase
             'published_at' => null,
             'edited_at' => null,
         ], $attributes)));
-    }
-
-    private function seedLocalTitleRecord(Title $title): void
-    {
-        $attributes = $title->getAttributes();
-
-        DB::table('titles')->updateOrInsert(
-            ['id' => $title->getKey()],
-            [
-                'name' => (string) ($attributes['primarytitle'] ?? 'Catalog Title '.$title->getKey()),
-                'original_name' => $attributes['originaltitle'] ?? null,
-                'slug' => 'catalog-title-'.$title->getKey(),
-                'title_type' => 'movie',
-                'release_year' => $attributes['startyear'] ?? null,
-                'end_year' => $attributes['endyear'] ?? null,
-                'release_date' => null,
-                'runtime_minutes' => $attributes['runtimeminutes'] ?? null,
-                'age_rating' => null,
-                'plot_outline' => null,
-                'synopsis' => null,
-                'tagline' => null,
-                'origin_country' => null,
-                'original_language' => null,
-                'popularity_rank' => null,
-                'is_published' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        );
     }
 }

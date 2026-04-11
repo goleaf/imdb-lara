@@ -11,7 +11,9 @@ use App\Actions\Titles\GetUserWatchStateForTitleAction;
 use App\Actions\Titles\SetUserWatchStateForTitleAction;
 use App\Enums\ListVisibility;
 use App\Enums\WatchState;
+use App\Models\ListItem;
 use App\Models\Title;
+use App\Models\UserList;
 use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Validation\Rule;
@@ -228,18 +230,14 @@ class WatchlistBrowser extends Component
         $items->withQueryString();
 
         return view('livewire.account.watchlist-browser', [
+            'emptyState' => $this->emptyState($watchlist),
             'filterOptions' => $filterOptions,
-            'hasActiveFilters' => (filled($this->state) && $this->state !== 'all')
-                || filled($this->type)
-                || filled($this->genre)
-                || filled($this->year)
-                || $this->sort !== 'added',
+            'hasActiveFilters' => $this->hasActiveFilters(),
             'items' => $items,
-            'visibilityOptions' => [
-                ['value' => ListVisibility::Private->value, 'label' => ListVisibility::Private->label()],
-                ['value' => ListVisibility::Public->value, 'label' => ListVisibility::Public->label()],
-            ],
-            'watchlist' => $watchlist,
+            'itemActionStates' => $this->itemActionStates($items),
+            'publicWatchlistUrl' => $this->publicWatchlistUrl($watchlist),
+            'summaryBadges' => $this->summaryBadges($watchlist),
+            'visibilityOptions' => $this->visibilityOptions(),
         ]);
     }
 
@@ -251,5 +249,114 @@ class WatchlistBrowser extends Component
     private function resetWatchlistPage(): void
     {
         $this->resetPage(pageName: 'watchlist');
+    }
+
+    /**
+     * @return array{heading: string, text: string}
+     */
+    private function emptyState(UserList $watchlist): array
+    {
+        return (int) $watchlist->items_count === 0
+            ? [
+                'heading' => 'Your watchlist is empty.',
+                'text' => 'Save titles from any title page to build a private queue you can sort and filter here.',
+            ]
+            : [
+                'heading' => 'No titles match the current watchlist filters.',
+                'text' => 'Adjust the state, genre, year, or type filters to widen the page.',
+            ];
+    }
+
+    private function hasActiveFilters(): bool
+    {
+        return (filled($this->state) && $this->state !== 'all')
+            || filled($this->type)
+            || filled($this->genre)
+            || filled($this->year)
+            || $this->sort !== 'added';
+    }
+
+    /**
+     * @return array<int, array{
+     *     removeTarget: string,
+     *     toggleWatchLabel: string,
+     *     toggleWatchTarget: string,
+     *     toggleWatchVariant: string
+     * }>
+     */
+    private function itemActionStates(LengthAwarePaginator $items): array
+    {
+        return collect($items->items())
+            ->filter(fn (mixed $item): bool => $item instanceof ListItem)
+            ->mapWithKeys(fn (ListItem $item): array => [$item->id => $this->itemActionState($item)])
+            ->all();
+    }
+
+    /**
+     * @return array{
+     *     removeTarget: string,
+     *     toggleWatchLabel: string,
+     *     toggleWatchTarget: string,
+     *     toggleWatchVariant: string
+     * }
+     */
+    private function itemActionState(ListItem $item): array
+    {
+        $toggleWatchTarget = "toggleWatched({$item->title_id})";
+
+        return [
+            'removeTarget' => "removeFromWatchlist({$item->title_id})",
+            'toggleWatchLabel' => $item->watch_state === WatchState::Completed ? 'Mark unwatched' : 'Mark watched',
+            'toggleWatchTarget' => $toggleWatchTarget,
+            'toggleWatchVariant' => $item->watch_state === WatchState::Completed ? 'outline' : 'primary',
+        ];
+    }
+
+    private function publicWatchlistUrl(UserList $watchlist): ?string
+    {
+        if ($watchlist->visibility !== ListVisibility::Public || ! auth()->check()) {
+            return null;
+        }
+
+        return route('public.lists.show', [auth()->user(), $watchlist]);
+    }
+
+    /**
+     * @return list<array{color: string, icon: string, label: string}>
+     */
+    private function summaryBadges(UserList $watchlist): array
+    {
+        $savedCount = (int) $watchlist->items_count;
+        $watchedCount = (int) $watchlist->watched_items_count;
+        $queuedCount = max(0, $savedCount - $watchedCount);
+
+        return [
+            [
+                'color' => 'neutral',
+                'icon' => 'bookmark',
+                'label' => number_format($savedCount).' saved',
+            ],
+            [
+                'color' => 'green',
+                'icon' => 'check-circle',
+                'label' => number_format($watchedCount).' watched',
+            ],
+            [
+                'color' => 'slate',
+                'icon' => 'queue-list',
+                'label' => number_format($queuedCount).' queued',
+            ],
+        ];
+    }
+
+    /**
+     * @return list<array{label: string, value: string}>
+     */
+    private function visibilityOptions(): array
+    {
+        return [
+            ['value' => ListVisibility::Private->value, 'label' => ListVisibility::Private->label()],
+            ['value' => ListVisibility::Public->value, 'label' => ListVisibility::Public->label()],
+        ];
     }
 }

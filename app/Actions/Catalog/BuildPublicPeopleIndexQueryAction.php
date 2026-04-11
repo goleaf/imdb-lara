@@ -2,7 +2,6 @@
 
 namespace App\Actions\Catalog;
 
-use App\Models\NameBasicMeterRanking;
 use App\Models\Person;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -21,12 +20,6 @@ class BuildPublicPeopleIndexQueryAction
 
         $query = Person::query()
             ->selectDirectoryColumns()
-            ->addSelect([
-                'popularity_rank' => NameBasicMeterRanking::query()
-                    ->select('current_rank')
-                    ->whereColumn('name_basic_meter_rankings.name_basic_id', 'name_basics.id')
-                    ->limit(1),
-            ])
             ->published()
             ->withDirectoryMetrics()
             ->withDirectoryRelations();
@@ -38,15 +31,14 @@ class BuildPublicPeopleIndexQueryAction
         }
 
         return match ($sort) {
-            'name' => $query->orderBy('displayName')->orderBy('primaryname'),
-            'credits' => $query->orderByDesc('credits_count')->orderBy('displayName'),
-            'awards' => $query->orderByDesc('award_nominations_count')->orderByDesc('credits_count')->orderBy('displayName'),
+            'name' => $query->orderBy('people.name'),
+            'credits' => $query->orderByDesc('credits_count')->orderBy('people.name'),
+            'awards' => $query->orderByDesc('award_nominations_count')->orderByDesc('credits_count')->orderBy('people.name'),
             default => $query
-                ->orderByDesc('meter_ranking_exists')
-                ->orderBy('popularity_rank')
+                ->orderBy('people.popularity_rank')
                 ->orderByDesc('award_nominations_count')
                 ->orderByDesc('credits_count')
-                ->orderBy('displayName'),
+                ->orderBy('people.name'),
         };
     }
 }

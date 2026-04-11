@@ -42,10 +42,23 @@ class CompanyPageTest extends TestCase
             ->assertSeeHtml('data-slot="company-detail-records"')
             ->assertSee($movieCompanyCredit->company->name)
             ->assertSee($movieCompanyCredit->title->name)
+            ->assertSee('Updates live')
+            ->assertDontSee('<form method="GET"', false)
             ->assertSee(route('public.titles.show', $movieCompanyCredit->title), false);
 
         if ($movieCompanyCredit->companyCreditCategory?->name !== null) {
             $response->assertSee($movieCompanyCredit->companyCreditCategory->name);
         }
+
+        $this->get(route('public.companies.show', [
+            'company' => $movieCompanyCredit->company,
+            'q' => $movieCompanyCredit->title->name,
+            'type' => $movieCompanyCredit->title->title_type->value,
+        ]))
+            ->assertOk()
+            ->assertSeeHtml('data-slot="company-detail-filters"')
+            ->assertSee($movieCompanyCredit->title->name)
+            ->assertSee('Updates live')
+            ->assertDontSee('<form method="GET"', false);
     }
 }

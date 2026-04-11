@@ -18,6 +18,10 @@ class GetFeaturedInterestCategoriesAction
      */
     public function handle(int $limit = 4, ?int $exceptInterestCategoryId = null): Collection
     {
+        if (! config('screenbase.catalog_only', false)) {
+            return new Collection;
+        }
+
         $cacheKey = sprintf(
             'catalog:featured-interest-categories:v1:%d:%s',
             $limit,

@@ -2,13 +2,21 @@
 
 namespace App\Models;
 
+use Database\Factories\CreditFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 class Credit extends Model
 {
+    /** @use HasFactory<CreditFactory> */
+    use HasFactory;
+
+    use SoftDeletes;
+
     /**
      * @var list<string>
      */
@@ -19,144 +27,152 @@ class Credit extends Model
         'self',
     ];
 
-    protected $connection = 'imdb_mysql';
-
-    protected $table = 'name_credits';
-
-    public $timestamps = false;
-
     /**
      * @var list<string>
      */
     protected $fillable = [
+        'title_id',
+        'person_id',
+        'department',
+        'job',
+        'character_name',
+        'billing_order',
+        'is_principal',
+        'person_profession_id',
+        'episode_id',
+        'credited_as',
+        'imdb_source_group',
         'name_basic_id',
         'movie_id',
         'category',
-        'episode_count',
         'position',
     ];
 
     protected function casts(): array
     {
         return [
-            'name_basic_id' => 'integer',
-            'movie_id' => 'integer',
-            'episode_count' => 'integer',
-            'position' => 'integer',
+            'title_id' => 'integer',
+            'person_id' => 'integer',
+            'billing_order' => 'integer',
+            'is_principal' => 'boolean',
+            'person_profession_id' => 'integer',
+            'episode_id' => 'integer',
+            'deleted_at' => 'datetime',
         ];
     }
 
     public function title(): BelongsTo
     {
-        return $this->belongsTo(Title::class, 'movie_id', 'id');
+        return $this->belongsTo(Title::class);
     }
 
     public function person(): BelongsTo
     {
-        return $this->belongsTo(Person::class, 'name_basic_id', 'id');
+        return $this->belongsTo(Person::class);
     }
 
-    public function nameCreditCharacters(): HasMany
+    public function profession(): BelongsTo
     {
-        return $this->hasMany(NameCreditCharacter::class, 'name_credit_id', 'id')->orderBy('position');
+        return $this->belongsTo(PersonProfession::class, 'person_profession_id');
+    }
+
+    public function episode(): BelongsTo
+    {
+        return $this->belongsTo(Episode::class);
     }
 
     public function scopeOrdered(Builder $query): Builder
     {
-        return $query->orderBy('name_credits.position');
+        return $query
+            ->orderBy('credits.billing_order')
+            ->orderBy('credits.id');
     }
 
     public function scopeCast(Builder $query): Builder
     {
-        return $query->whereIn('name_credits.category', self::CAST_CATEGORIES);
+        return $query->where('credits.department', 'Cast');
     }
 
     public function scopeCrew(Builder $query): Builder
     {
-        return $query->where(function (Builder $crewQuery): void {
-            $crewQuery
-                ->whereNull('name_credits.category')
-                ->orWhereNotIn('name_credits.category', self::CAST_CATEGORIES);
-        });
+        return $query->where('credits.department', '!=', 'Cast');
     }
 
     public function scopeWithPersonPreview(Builder $query): Builder
     {
         return $query->with([
             'person' => fn ($personQuery) => $personQuery
-                ->selectDirectoryColumns(),
+                ->selectDirectoryColumns()
+                ->withDirectoryRelations()
+                ->withDirectoryMetrics(),
         ]);
     }
 
-    public function getTitleIdAttribute(): int
+    public function getMovieIdAttribute(): int
     {
-        return (int) $this->movie_id;
+        return (int) $this->title_id;
     }
 
-    public function getPersonIdAttribute(): int
+    public function getNameBasicIdAttribute(): int
     {
-        return (int) $this->name_basic_id;
+        return (int) $this->person_id;
     }
 
-    public function getDepartmentAttribute(): string
+    public function getCategoryAttribute(): string
     {
-        return match ($this->category) {
-            'actor', 'actress', 'archive_footage', 'self' => 'Cast',
-            'director' => 'Directing',
-            'writer' => 'Writing',
-            'producer', 'executive' => 'Production',
-            'composer', 'music_department', 'soundtrack' => 'Music',
-            'cinematographer' => 'Camera',
-            'editor' => 'Editing',
-            'thanks' => 'Thanks',
-            default => str((string) $this->category)->headline()->toString(),
+        if (filled($this->imdb_source_group)) {
+            return (string) $this->imdb_source_group;
+        }
+
+        return match ($this->department) {
+            'Cast' => 'actor',
+            'Directing' => 'director',
+            'Writing' => 'writer',
+            'Production' => 'producer',
+            'Music' => 'composer',
+            'Camera' => 'cinematographer',
+            'Editing' => 'editor',
+            default => Str::of((string) $this->job)->snake()->toString(),
         };
     }
 
-    public function getJobAttribute(): string
+    public function getPositionAttribute(mixed $value): int
     {
-        return str((string) $this->category)->headline()->toString();
+        return (int) ($this->billing_order ?? $value ?? 0);
     }
 
-    public function getCharacterNameAttribute(): ?string
+    public function setNameBasicIdAttribute(mixed $value): void
     {
-        $rawCharacterName = $this->getAttributeFromArray('character_name');
+        $this->attributes['person_id'] = $value;
+    }
 
-        if (is_string($rawCharacterName) && trim($rawCharacterName) !== '') {
-            return trim($rawCharacterName);
+    public function setMovieIdAttribute(mixed $value): void
+    {
+        $this->attributes['title_id'] = $value;
+    }
+
+    public function setCategoryAttribute(?string $value): void
+    {
+        if (! filled($value)) {
+            return;
         }
 
-        if (! $this->relationLoaded('nameCreditCharacters')) {
-            return null;
-        }
-
-        $characterNames = $this->nameCreditCharacters
-            ->pluck('character_name')
-            ->filter(fn (mixed $value): bool => is_string($value) && trim($value) !== '')
-            ->map(fn (string $value): string => trim($value))
-            ->unique()
-            ->values();
-
-        return $characterNames->isEmpty() ? null : $characterNames->implode(' / ');
+        $this->attributes['imdb_source_group'] = $value;
+        $this->attributes['job'] = $this->attributes['job'] ?? Str::headline((string) $value);
+        $this->attributes['department'] = match (Str::of($value)->replace('_', ' ')->lower()->toString()) {
+            'actor', 'actress', 'archive footage', 'self' => 'Cast',
+            'director' => 'Directing',
+            'writer' => 'Writing',
+            'producer', 'executive producer' => 'Production',
+            'composer', 'soundtrack' => 'Music',
+            'cinematographer' => 'Camera',
+            'editor' => 'Editing',
+            default => 'Crew',
+        };
     }
 
-    public function getBillingOrderAttribute(): int
+    public function setPositionAttribute(mixed $value): void
     {
-        return (int) ($this->position ?? 0);
-    }
-
-    public function getIsPrincipalAttribute(): bool
-    {
-        return (int) ($this->position ?? 0) <= 5;
-    }
-
-    public function getCreditedAsAttribute(): ?string
-    {
-        return null;
-    }
-
-    public function getImdbSourceGroupAttribute(): ?string
-    {
-        return $this->category ? (string) $this->category : null;
+        $this->attributes['billing_order'] = $value;
     }
 }

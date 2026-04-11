@@ -52,7 +52,7 @@
 
                 <x-ui.field>
                     <x-ui.label>Moderation notes</x-ui.label>
-                    <x-ui.input wire:model="moderationNotes" placeholder="Moderation notes" />
+                    <x-ui.input wire:model.live.blur="moderationNotes" placeholder="Moderation notes" />
                     <x-ui.error name="moderationNotes" />
                 </x-ui.field>
 

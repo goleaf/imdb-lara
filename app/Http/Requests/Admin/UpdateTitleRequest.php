@@ -57,7 +57,10 @@ class UpdateTitleRequest extends FormRequest
     {
         return [
             function (Validator $validator): void {
-                $nextType = TitleType::tryFrom((string) $this->input('title_type', $this->title()->title_type?->value));
+                $currentType = $this->title()->title_type instanceof TitleType
+                    ? $this->title()->title_type
+                    : TitleType::tryFrom((string) $this->title()->title_type);
+                $nextType = TitleType::tryFrom((string) $this->input('title_type', $currentType?->value));
 
                 if ($nextType === null) {
                     return;

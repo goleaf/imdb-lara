@@ -1,4 +1,6 @@
-<div class="space-y-4">
+<div>
+@island(name: 'watchlist-browser-panel')
+<div class="space-y-4" data-slot="watchlist-browser-island">
     <x-ui.card class="!max-w-none">
         <div class="grid gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
             <div class="space-y-3">
@@ -11,15 +13,15 @@
                     </div>
 
                     <div class="flex flex-wrap gap-2">
-                        <x-ui.badge variant="outline" color="neutral" icon="bookmark">
-                            {{ number_format($watchlist->items_count) }} saved
-                        </x-ui.badge>
-                        <x-ui.badge variant="outline" color="green" icon="check-circle">
-                            {{ number_format((int) $watchlist->watched_items_count) }} watched
-                        </x-ui.badge>
-                        <x-ui.badge variant="outline" color="slate" icon="queue-list">
-                            {{ number_format(max(0, (int) $watchlist->items_count - (int) $watchlist->watched_items_count)) }} queued
-                        </x-ui.badge>
+                        @foreach ($summaryBadges as $summaryBadge)
+                            <x-ui.badge
+                                variant="outline"
+                                :color="$summaryBadge['color']"
+                                :icon="$summaryBadge['icon']"
+                            >
+                                {{ $summaryBadge['label'] }}
+                            </x-ui.badge>
+                        @endforeach
                     </div>
                 </div>
 
@@ -72,8 +74,8 @@
                         </x-ui.button>
                     </div>
 
-                    @if ($watchlist->visibility === \App\Enums\ListVisibility::Public)
-                        <x-ui.link :href="route('public.lists.show', [auth()->user(), $watchlist])" variant="ghost" iconAfter="arrow-right">
+                    @if ($publicWatchlistUrl)
+                        <x-ui.link :href="$publicWatchlistUrl" variant="ghost" iconAfter="arrow-right">
                             View public watchlist
                         </x-ui.link>
                     @endif
@@ -206,20 +208,20 @@
                             <x-ui.button
                                 type="button"
                                 size="sm"
-                                :variant="$item->watch_state === \App\Enums\WatchState::Completed ? 'outline' : 'primary'"
-                                wire:click="toggleWatched({{ $item->title_id }})"
-                                wire:target="toggleWatched({{ $item->title_id }})"
+                                :variant="$itemActionStates[$item->id]['toggleWatchVariant']"
+                                wire:click="{{ $itemActionStates[$item->id]['toggleWatchTarget'] }}"
+                                wire:target="{{ $itemActionStates[$item->id]['toggleWatchTarget'] }}"
                                 icon="check-circle"
                             >
-                                {{ $item->watch_state === \App\Enums\WatchState::Completed ? 'Mark unwatched' : 'Mark watched' }}
+                                {{ $itemActionStates[$item->id]['toggleWatchLabel'] }}
                             </x-ui.button>
 
                             <x-ui.button
                                 type="button"
                                 size="sm"
                                 variant="ghost"
-                                wire:click="removeFromWatchlist({{ $item->title_id }})"
-                                wire:target="removeFromWatchlist({{ $item->title_id }})"
+                                wire:click="{{ $itemActionStates[$item->id]['removeTarget'] }}"
+                                wire:target="{{ $itemActionStates[$item->id]['removeTarget'] }}"
                                 icon="bookmark-slash"
                             >
                                 Remove
@@ -232,17 +234,10 @@
                             <x-ui.empty.media>
                                 <x-ui.icon name="bookmark" class="size-8 text-neutral-400 dark:text-neutral-500" />
                             </x-ui.empty.media>
-                            @if ((int) $watchlist->items_count === 0)
-                                <x-ui.heading level="h3">Your watchlist is empty.</x-ui.heading>
-                                <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
-                                    Save titles from any title page to build a private queue you can sort and filter here.
-                                </x-ui.text>
-                            @else
-                                <x-ui.heading level="h3">No titles match the current watchlist filters.</x-ui.heading>
-                                <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
-                                    Adjust the state, genre, year, or type filters to widen the page.
-                                </x-ui.text>
-                            @endif
+                            <x-ui.heading level="h3">{{ $emptyState['heading'] }}</x-ui.heading>
+                            <x-ui.text class="mt-1 text-neutral-500 dark:text-neutral-400">
+                                {{ $emptyState['text'] }}
+                            </x-ui.text>
                         </x-ui.empty>
                     </div>
                 @endforelse
@@ -253,4 +248,6 @@
             </div>
         </div>
     </div>
+</div>
+@endisland
 </div>

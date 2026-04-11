@@ -50,11 +50,25 @@ class CompanyCreditAttributePageTest extends TestCase
             ->assertSee($movieCompanyCreditAttribute->companyCreditAttribute->name)
             ->assertSee($movieCompanyCreditAttribute->movieCompanyCredit->company->name)
             ->assertSee($movieCompanyCreditAttribute->movieCompanyCredit->title->name)
+            ->assertSee('Updates live')
+            ->assertDontSee('<form method="GET"', false)
             ->assertSee(route('public.companies.show', $movieCompanyCreditAttribute->movieCompanyCredit->company), false)
             ->assertSee(route('public.titles.show', $movieCompanyCreditAttribute->movieCompanyCredit->title), false);
 
         if ($movieCompanyCreditAttribute->movieCompanyCredit->companyCreditCategory?->name !== null) {
             $response->assertSee($movieCompanyCreditAttribute->movieCompanyCredit->companyCreditCategory->name);
         }
+
+        $this->get(route('public.company-credit-attributes.show', [
+            'companyCreditAttribute' => $movieCompanyCreditAttribute->companyCreditAttribute,
+            'q' => $movieCompanyCreditAttribute->movieCompanyCredit->title->name,
+            'type' => $movieCompanyCreditAttribute->movieCompanyCredit->title->title_type->value,
+            'company' => $movieCompanyCreditAttribute->movieCompanyCredit->company->imdb_id,
+        ]))
+            ->assertOk()
+            ->assertSeeHtml('data-slot="company-credit-attribute-detail-filters"')
+            ->assertSee($movieCompanyCreditAttribute->movieCompanyCredit->title->name)
+            ->assertSee('Updates live')
+            ->assertDontSee('<form method="GET"', false);
     }
 }

@@ -1,3 +1,6 @@
+<div>
+@island(name: 'person-filmography-panel')
+<div data-slot="person-filmography-island">
 <div id="person-filmography" data-slot="person-filmography-panel" class="space-y-4">
     <x-ui.card class="sb-detail-section sb-person-filmography-shell !max-w-none">
         <div class="space-y-4">
@@ -173,4 +176,7 @@
             @endforelse
         </div>
     </div>
+</div>
+</div>
+@endisland
 </div>

@@ -30,19 +30,45 @@ class LoadSeasonDetailsAction
     public function handle(Title $series, Season $season): array
     {
         $series->loadMissing([
-            'seasons:movie_id,season,episode_count',
+            'seasons' => fn ($query) => $query
+                ->select([
+                    'id',
+                    'series_id',
+                    'name',
+                    'slug',
+                    'season_number',
+                    'summary',
+                    'release_year',
+                    'meta_title',
+                    'meta_description',
+                ])
+                ->withCount('episodes')
+                ->orderBy('season_number')
+                ->orderBy('id'),
             ...Title::catalogHeroRelations(),
         ]);
 
+        $season->loadCount('episodes');
         $season->load([
             'episodes' => fn ($query) => $query
-                ->select(['episode_movie_id', 'movie_id', 'season', 'episode_number', 'release_year', 'release_month', 'release_day'])
+                ->select([
+                    'id',
+                    'title_id',
+                    'series_id',
+                    'season_id',
+                    'season_number',
+                    'episode_number',
+                    'absolute_number',
+                    'production_code',
+                    'aired_at',
+                ])
                 ->with([
                     'title' => fn ($titleQuery) => $titleQuery
                         ->selectCatalogCardColumns()
                         ->withCatalogHeroRelations(),
                 ])
-                ->orderBy('episode_number'),
+                ->orderBy('episode_number')
+                ->orderBy('id'),
         ]);
 
         $seasonNavigation = $series->seasons->values();

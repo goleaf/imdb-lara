@@ -9,12 +9,15 @@ class DeleteTitleAction
     public function __construct(
         private DeleteEpisodeAction $deleteEpisode,
         private DeleteSeasonAction $deleteSeason,
+        private DeleteMediaAssetAction $deleteMediaAsset,
     ) {}
 
     public function handle(Title $title): void
     {
         $title->credits()->delete();
-        $title->mediaAssets()->delete();
+        $title->mediaAssets()->get()->each(
+            fn ($mediaAsset) => $this->deleteMediaAsset->handle($mediaAsset),
+        );
 
         if ($title->episodeMeta()->exists()) {
             $this->deleteEpisode->handle($title->episodeMeta()->with('title')->firstOrFail());

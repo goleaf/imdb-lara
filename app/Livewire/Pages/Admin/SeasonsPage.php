@@ -3,6 +3,7 @@
 namespace App\Livewire\Pages\Admin;
 
 use App\Livewire\Pages\Concerns\RendersPageView;
+use App\Models\Episode;
 use App\Models\Season;
 use App\Models\Title;
 use Illuminate\Contracts\View\View;
@@ -47,6 +48,18 @@ class SeasonsPage extends Component
                     ])
                     ->with('title:id,name,slug,is_published'),
             ]),
+            'draftEpisode' => tap(
+                new Episode([
+                    'season_number' => $this->season->season_number,
+                    'episode_number' => (($this->season->episodes->max('episode_number') ?? 0) + 1),
+                ]),
+                function (Episode $episode): void {
+                    $episode->setRelation('title', new Title([
+                        'is_published' => true,
+                        'release_year' => $this->season->release_year,
+                    ]));
+                },
+            ),
         ]);
     }
 }

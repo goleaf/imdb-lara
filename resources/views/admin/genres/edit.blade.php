@@ -10,7 +10,7 @@
 
 @section('content')
     <section class="space-y-4">
-        @if (! $catalogOnly && session('status'))
+        @if (session('status'))
             <x-ui.alerts variant="success" icon="check-circle">
                 <x-ui.alerts.description>{{ session('status') }}</x-ui.alerts.description>
             </x-ui.alerts>
@@ -33,35 +33,23 @@
 
                     @include('admin.genres._form')
 
-                    <div class="flex justify-end gap-3">
-                        <x-ui.button as="a" :href="route('admin.genres.index')" variant="ghost" icon="arrow-left">
-                            Back to genres
-                        </x-ui.button>
-                        <x-ui.button type="submit" icon="check-circle">
+                    <div class="flex justify-end">
+                        <x-ui.button type="submit" icon="check">
                             Save changes
                         </x-ui.button>
                     </div>
                 </form>
             </x-ui.card>
 
-            <x-ui.card class="!max-w-none">
-                <div class="flex items-center justify-between gap-4">
-                    <div>
-                        <x-ui.heading level="h2" size="lg">Usage</x-ui.heading>
-                        <x-ui.text class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                            {{ number_format($genre->titles_count) }} titles currently map to this genre.
-                        </x-ui.text>
-                    </div>
-
-                    <form method="POST" action="{{ route('admin.genres.destroy', $genre) }}">
-                        @csrf
-                        @method('DELETE')
-                        <x-ui.button type="submit" variant="ghost" icon="trash">
-                            Delete genre
-                        </x-ui.button>
-                    </form>
-                </div>
-            </x-ui.card>
+            <div class="flex justify-end">
+                <form method="POST" action="{{ route('admin.genres.destroy', $genre) }}">
+                    @csrf
+                    @method('DELETE')
+                    <x-ui.button type="submit" variant="outline" color="red" icon="trash">
+                        Delete genre
+                    </x-ui.button>
+                </form>
+            </div>
         @endif
     </section>
 @endsection

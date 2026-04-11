@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (app()->runningUnitTests()) {
+            return;
+        }
+
         Schema::connection('imdb_mysql')->withoutForeignKeyConstraints(function (): void {
             Schema::connection('imdb_mysql')->dropIfExists('title_aka_attributes');
             Schema::connection('imdb_mysql')->dropIfExists('title_aka_types');
@@ -23,6 +27,10 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (app()->runningUnitTests()) {
+            return;
+        }
+
         Schema::connection('imdb_mysql')->create('title_akas', function (Blueprint $table): void {
             $table->integer('id')->primary();
             $table->string('titleid', 16)->index();

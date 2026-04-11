@@ -9,17 +9,6 @@ use Illuminate\Support\Facades\Cache;
 
 class GetHeroSpotlightAction
 {
-    /**
-     * @var list<string>
-     */
-    private const FEATURED_CREDIT_CATEGORIES = [
-        'actor',
-        'actress',
-        'director',
-        'writer',
-        'producer',
-    ];
-
     public function __construct(
         private BuildPublicTitleIndexQueryAction $buildPublicTitleIndexQuery,
     ) {}
@@ -41,9 +30,6 @@ class GetHeroSpotlightAction
                             TitleType::Special->value,
                             TitleType::Short->value,
                         ],
-                    ])
-                    ->with([
-                        'titleVideos:imdb_id,movie_id,video_type_id,name,description,width,height,runtime_seconds,position',
                     ]);
 
                 $title = $query->first();
@@ -63,14 +49,19 @@ class GetHeroSpotlightAction
     {
         $title->setRelation('credits', $title->credits()
             ->select([
-                'name_credits.id',
-                'name_credits.name_basic_id',
-                'name_credits.movie_id',
-                'name_credits.category',
-                'name_credits.episode_count',
-                'name_credits.position',
+                'id',
+                'title_id',
+                'person_id',
+                'department',
+                'job',
+                'character_name',
+                'billing_order',
+                'is_principal',
+                'person_profession_id',
+                'episode_id',
+                'credited_as',
             ])
-            ->whereIn('name_credits.category', self::FEATURED_CREDIT_CATEGORIES)
+            ->whereIn('credits.department', ['Cast', 'Directing', 'Writing', 'Production'])
             ->ordered()
             ->withPersonPreview()
             ->limit(8)

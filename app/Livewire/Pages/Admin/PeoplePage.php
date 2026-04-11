@@ -4,15 +4,15 @@ namespace App\Livewire\Pages\Admin;
 
 use App\Actions\Admin\BuildAdminPeopleIndexQueryAction;
 use App\Livewire\Pages\Concerns\RendersPageView;
+use App\Models\MediaAsset;
 use App\Models\Person;
+use App\Models\PersonProfession;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
-use Livewire\WithPagination;
 
 class PeoplePage extends Component
 {
     use RendersPageView;
-    use WithPagination;
 
     public ?Person $person = null;
 
@@ -21,23 +21,25 @@ class PeoplePage extends Component
         $this->person = $person;
     }
 
-    public function render(BuildAdminPeopleIndexQueryAction $buildAdminPeopleIndexQuery): View
+    protected function renderPeopleIndexPage(BuildAdminPeopleIndexQueryAction $buildAdminPeopleIndexQuery): View
     {
-        if (request()->routeIs('admin.people.index')) {
-            return $this->renderPageView('admin.people.index', [
-                'people' => $buildAdminPeopleIndexQuery
-                    ->handle()
-                    ->simplePaginate(20)
-                    ->withQueryString(),
-            ]);
-        }
+        return $this->renderPageView('admin.people.index', [
+            'people' => $buildAdminPeopleIndexQuery
+                ->handle()
+                ->simplePaginate(20)
+                ->withQueryString(),
+        ]);
+    }
 
-        if (request()->routeIs('admin.people.create')) {
-            return $this->renderPageView('admin.people.create', [
-                'person' => new Person,
-            ]);
-        }
+    protected function renderPersonCreatePage(): View
+    {
+        return $this->renderPageView('admin.people.create', [
+            'person' => new Person,
+        ]);
+    }
 
+    protected function renderPersonEditPage(): View
+    {
         abort_unless($this->person instanceof Person, 404);
 
         if ($this->isCatalogOnlyApplication()) {
@@ -87,6 +89,14 @@ class PeoplePage extends Component
                     'position',
                     'published_at',
                 ]),
+            ]),
+            'draftProfession' => new PersonProfession([
+                'sort_order' => (($this->person->professions->max('sort_order') ?? 0) + 1),
+            ]),
+            'draftMediaAsset' => new MediaAsset([
+                'mediable_type' => Person::class,
+                'kind' => \App\Enums\MediaKind::Headshot,
+                'is_primary' => true,
             ]),
         ]);
     }

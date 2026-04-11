@@ -25,35 +25,25 @@ class CreditsPage extends Component
 
     public function render(): View
     {
-        if (request()->routeIs('admin.credits.create')) {
-            if ($this->isCatalogOnlyApplication()) {
-                return $this->renderPageView('admin.credits.create', [
-                    'credit' => new Credit([
-                        'title_id' => request()->integer('title'),
-                        'person_id' => request()->integer('person'),
-                    ]),
-                ]);
-            }
+        if (! ($this->credit instanceof Credit)) {
+            $credit = new Credit([
+                'title_id' => $this->selectedTitleId(),
+                'person_id' => $this->selectedPersonId(),
+            ]);
 
             return $this->renderPageView('admin.credits.create', [
-                'credit' => new Credit([
-                    'title_id' => request()->integer('title'),
-                    'person_id' => request()->integer('person'),
-                ]),
+                'credit' => $credit,
                 ...$this->formOptions(),
             ]);
         }
 
-        abort_unless($this->credit instanceof Credit, 404);
-
-        if ($this->isCatalogOnlyApplication()) {
-            return $this->renderPageView('admin.credits.edit', [
-                'credit' => $this->credit,
-            ]);
-        }
-
         return $this->renderPageView('admin.credits.edit', [
-            'credit' => $this->credit->load(['title', 'person', 'profession', 'episode.title']),
+            'credit' => $this->credit->load([
+                'title:id,name,slug',
+                'person:id,name,slug',
+                'profession:id,person_id,department,profession,is_primary,sort_order',
+                'episode.title:id,name,slug',
+            ]),
             ...$this->formOptions(),
         ]);
     }
@@ -68,58 +58,80 @@ class CreditsPage extends Component
      */
     private function formOptions(): array
     {
-        $selectedTitleId = $this->credit?->title_id ?? request()->integer('title');
-        $selectedPersonId = $this->credit?->person_id ?? request()->integer('person');
-        $selectedProfessionId = $this->credit?->person_profession_id;
-        $selectedEpisodeId = $this->credit?->episode_id;
+        $selectedTitleId = $this->selectedTitleId();
+        $selectedPersonId = $this->selectedPersonId();
 
         return [
             'titles' => Title::query()
-                ->select(['id', 'name', 'slug', 'title_type'])
+                ->select(['id', 'name'])
                 ->orderBy('name')
-                ->limit(250)
+                ->limit(500)
                 ->get(),
             'people' => Person::query()
-                ->select(['id', 'name', 'slug'])
+                ->select(['id', 'name'])
                 ->orderBy('name')
-                ->limit(250)
+                ->limit(500)
                 ->get(),
             'professions' => PersonProfession::query()
-                ->select(['id', 'person_id', 'department', 'profession'])
-                ->when($selectedPersonId, function ($professionQuery) use ($selectedPersonId, $selectedProfessionId): void {
-                    $professionQuery->where(function ($scopedQuery) use ($selectedPersonId, $selectedProfessionId): void {
-                        $scopedQuery->where('person_id', $selectedPersonId);
-
-                        if ($selectedProfessionId !== null) {
-                            $scopedQuery->orWhere('id', $selectedProfessionId);
-                        }
-                    });
-                })
+                ->select([
+                    'id',
+                    'person_id',
+                    'department',
+                    'profession',
+                    'is_primary',
+                    'sort_order',
+                ])
+                ->when(
+                    $selectedPersonId !== null,
+                    fn ($query) => $query->where('person_id', $selectedPersonId),
+                )
                 ->with('person:id,name')
                 ->orderBy('person_id')
-                ->orderBy('department')
+                ->orderByDesc('is_primary')
+                ->orderBy('sort_order')
                 ->orderBy('profession')
                 ->limit(250)
                 ->get(),
             'episodes' => Episode::query()
-                ->select(['id', 'title_id', 'season_id', 'episode_number'])
-                ->when($selectedTitleId, function ($episodeQuery) use ($selectedTitleId, $selectedEpisodeId): void {
-                    $episodeQuery->where(function ($scopedQuery) use ($selectedTitleId, $selectedEpisodeId): void {
-                        $scopedQuery
+                ->select([
+                    'id',
+                    'title_id',
+                    'series_id',
+                    'season_id',
+                    'season_number',
+                    'episode_number',
+                    'absolute_number',
+                    'production_code',
+                    'aired_at',
+                ])
+                ->when(
+                    $selectedTitleId !== null,
+                    fn ($query) => $query->where(function ($episodeQuery) use ($selectedTitleId): void {
+                        $episodeQuery
                             ->where('series_id', $selectedTitleId)
                             ->orWhere('title_id', $selectedTitleId);
-
-                        if ($selectedEpisodeId !== null) {
-                            $scopedQuery->orWhere('id', $selectedEpisodeId);
-                        }
-                    });
-                })
-                ->with(['title:id,name', 'season:id,name'])
-                ->orderBy('season_id')
+                    }),
+                )
+                ->with('title:id,name')
+                ->orderBy('season_number')
                 ->orderBy('episode_number')
                 ->orderBy('id')
                 ->limit(250)
                 ->get(),
         ];
+    }
+
+    private function selectedPersonId(): ?int
+    {
+        $selectedPersonId = old('person_id', $this->credit?->person_id ?? request()->query('person'));
+
+        return is_numeric($selectedPersonId) ? (int) $selectedPersonId : null;
+    }
+
+    private function selectedTitleId(): ?int
+    {
+        $selectedTitleId = old('title_id', $this->credit?->title_id ?? request()->query('title'));
+
+        return is_numeric($selectedTitleId) ? (int) $selectedTitleId : null;
     }
 }

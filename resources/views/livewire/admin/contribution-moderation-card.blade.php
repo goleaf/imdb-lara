@@ -71,7 +71,7 @@
 
                 <x-ui.field>
                     <x-ui.label>Review notes</x-ui.label>
-                    <x-ui.input wire:model="notes" placeholder="Review notes" />
+                    <x-ui.input wire:model.live.blur="notes" placeholder="Review notes" />
                     <x-ui.error name="notes" />
                 </x-ui.field>
 

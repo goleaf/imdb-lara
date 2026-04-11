@@ -277,47 +277,17 @@ class LoadTitleDetailsAction
         $companyCreditCategoryRows = $title->resolvedCompanyCreditCategories();
         $movieBoxOfficeRows = $title->resolvedMovieBoxOfficeRows();
         $currencyRows = $title->resolvedCurrencies();
-        $countryRows = $title->resolvedCountries();
+        $countryRows = collect();
         $genreRows = $title->resolvedGenres();
         $genreEntries = $this->buildGenreEntries($title, $movieGenreRows, $poster, $backdrop);
-        $interestRows = $title->resolvedInterests();
-        $interestCategoryRows = $title->resolvedInterestCategories();
-        $interestCategoryEntries = $this->buildInterestCategoryEntries($title, $interestCategoryRows);
-        $interestPrimaryImageRows = $title->resolvedInterestPrimaryImages();
-        $interestSimilarInterestRows = $title->resolvedInterestSimilarInterests();
-        $countries = $countryRows
-            ->map(fn ($country): array => [
-                'code' => strtoupper((string) $country->code),
-                'label' => $country->resolvedLabel(),
-            ])
-            ->filter(fn (array $country): bool => $country['code'] !== '')
-            ->unique('code')
-            ->values();
-        $languages = $title->languages
-            ->map(fn ($language): array => [
-                'code' => strtoupper((string) $language->code),
-                'label' => filled($language->name) ? (string) $language->name : strtoupper((string) $language->code),
-            ])
-            ->filter(fn (array $language): bool => $language['code'] !== '')
-            ->unique('code')
-            ->values();
-        $interestHighlights = $title->interests
-            ->filter(fn ($interest): bool => filled($interest->name))
-            ->take(8)
-            ->map(function ($interest): array {
-                $interestCategory = $interest->interestCategoryInterests
-                    ->map(fn ($interestCategoryInterest) => $interestCategoryInterest->interestCategory)
-                    ->first();
-
-                return [
-                    'name' => (string) $interest->name,
-                    'href' => $interestCategory
-                        ? route('public.interest-categories.show', $interestCategory)
-                        : route('public.search', ['q' => (string) $interest->name]),
-                    'isSubgenre' => (bool) $interest->is_subgenre,
-                ];
-            })
-            ->values();
+        $interestRows = collect();
+        $interestCategoryRows = collect();
+        $interestCategoryEntries = collect();
+        $interestPrimaryImageRows = collect();
+        $interestSimilarInterestRows = collect();
+        $countries = $title->resolvedCountryItems();
+        $languages = $title->resolvedLanguageItems();
+        $interestHighlights = collect();
         $certificateItems = $movieCertificateRows
             ->map(fn ($certificate): ?array => $certificate->certificateRating?->name
                 ? [
@@ -339,10 +309,7 @@ class LoadTitleDetailsAction
             ->flatten(1)
             ->unique('url')
             ->count();
-        $hasBoxOfficeRecord = filled($title->boxOfficeRecord?->worldwide_gross_amount)
-            || filled($title->boxOfficeRecord?->domestic_gross_amount)
-            || filled($title->boxOfficeRecord?->opening_weekend_gross_amount)
-            || filled($title->boxOfficeRecord?->production_budget_amount);
+        $hasBoxOfficeRecord = false;
         $archiveLinks = collect([
             [
                 'label' => 'Full Cast & Crew',
@@ -370,14 +337,14 @@ class LoadTitleDetailsAction
                 'href' => route('public.titles.parents-guide', $title),
                 'icon' => 'shield-check',
                 'copy' => 'Certification and content-concern sections built from the imported advisory tables.',
-                'status' => number_format($title->parentsGuideSections->count()).' sections',
+                'status' => '0 sections',
             ],
             [
                 'label' => 'Keywords & Connections',
                 'href' => route('public.titles.metadata', $title),
                 'icon' => 'tag',
                 'copy' => 'Interest tags, adjacent themes, and connected titles discovered from catalog metadata.',
-                'status' => number_format($title->interests->count()).' interests',
+                'status' => '0 interests',
             ],
             [
                 'label' => 'Trivia & Goofs',
@@ -398,17 +365,13 @@ class LoadTitleDetailsAction
         if ($genreIds !== []) {
             $relatedTitles = Title::query()
                 ->selectCatalogCardColumns()
-                ->addSelect([
-                    'popularity_rank' => TitleStatistic::query()
-                        ->select('vote_count')
-                        ->whereColumn('movie_ratings.movie_id', 'movies.id')
-                        ->limit(1),
-                ])
                 ->publishedCatalog()
                 ->whereKeyNot($title->getKey())
                 ->whereHas('genres', fn ($genreQuery) => $genreQuery->whereIn('genres.id', $genreIds))
                 ->withCatalogCardRelations()
-                ->orderByDesc('popularity_rank')
+                ->orderByDesc('titles.popularity_rank')
+                ->orderByDesc('titles.release_year')
+                ->orderBy('titles.name')
                 ->limit(6)
                 ->get();
         }
@@ -428,18 +391,18 @@ class LoadTitleDetailsAction
             $topRatedEpisodes = $this->episodeGuideQuery($title)
                 ->addSelect([
                     'episode_rating' => TitleStatistic::query()
-                        ->select('aggregate_rating')
-                        ->whereColumn('movie_ratings.movie_id', 'movie_episodes.episode_movie_id')
+                        ->select('average_rating')
+                        ->whereColumn('title_statistics.title_id', 'episodes.title_id')
                         ->limit(1),
                     'episode_vote_count' => TitleStatistic::query()
-                        ->select('vote_count')
-                        ->whereColumn('movie_ratings.movie_id', 'movie_episodes.episode_movie_id')
+                        ->select('rating_count')
+                        ->whereColumn('title_statistics.title_id', 'episodes.title_id')
                         ->limit(1),
                 ])
                 ->orderByDesc('episode_rating')
                 ->orderByDesc('episode_vote_count')
-                ->orderBy('season')
-                ->orderBy('episode_number')
+                ->orderBy('episodes.season_number')
+                ->orderBy('episodes.episode_number')
                 ->limit(5)
                 ->get()
                 ->values();
@@ -1026,85 +989,63 @@ class LoadTitleDetailsAction
     private function loadCreditPreview(Title $title): void
     {
         $title->setRelation('credits', $title->credits()
-            ->select(['id', 'name_basic_id', 'movie_id', 'category', 'episode_count', 'position'])
+            ->select([
+                'id',
+                'title_id',
+                'person_id',
+                'department',
+                'job',
+                'character_name',
+                'billing_order',
+                'is_principal',
+                'person_profession_id',
+                'episode_id',
+                'credited_as',
+                'imdb_source_group',
+            ])
             ->with([
-                'nameCreditCharacters:name_credit_id,position,character_name',
                 'person' => fn ($personQuery) => $personQuery
                     ->select(Person::directoryColumns())
                     ->with(Person::directoryRelations()),
+                'profession:id,person_id,department,profession,is_primary,sort_order',
+                'episode:id,title_id,series_id,season_id,season_number,episode_number,absolute_number,production_code,aired_at',
+                'episode.title:id,name,slug,title_type,is_published',
             ])
-            ->orderBy('position')
+            ->ordered()
             ->limit(24)
             ->get());
     }
 
     private function loadAwardHighlights(Title $title): void
     {
-        $title->setRelation('awardNominations', $title->awardNominations()
-            ->select(['id', 'movie_id', 'event_imdb_id', 'award_category_id', 'award_year', 'text', 'is_winner', 'winner_rank', 'position'])
-            ->with([
-                'awardEvent:imdb_id,name',
-                'awardCategory:id,name',
-                'movieAwardNominationNominees' => fn ($nomineeQuery) => $nomineeQuery
-                    ->select(['movie_award_nomination_id', 'name_basic_id', 'position'])
-                    ->with([
-                        'person' => fn ($personQuery) => $personQuery->select([
-                            'name_basics.id',
-                            'name_basics.nconst',
-                            'name_basics.imdb_id',
-                            'name_basics.primaryname',
-                            'name_basics.displayName',
-                            'name_basics.primaryImage_url',
-                            'name_basics.primaryImage_width',
-                            'name_basics.primaryImage_height',
-                        ]),
-                        'awardNomination:id,event_imdb_id,award_category_id,award_year',
-                        'awardNomination.awardEvent:imdb_id,name',
-                        'awardNomination.awardCategory:id,name',
-                    ])
-                    ->orderBy('position'),
-                'movieAwardNominationTitles' => fn ($nominationTitleQuery) => $nominationTitleQuery
-                    ->select(['movie_award_nomination_id', 'nominated_movie_id', 'position'])
-                    ->with([
-                        'title:id,primarytitle,originaltitle,tconst',
-                        'movieAwardNomination:id,movie_id,event_imdb_id,award_category_id,award_year',
-                        'movieAwardNomination.event:imdb_id,name',
-                        'movieAwardNomination.awardCategory:id,name',
-                    ])
-                    ->orderBy('position'),
-                'people' => fn ($peopleQuery) => $peopleQuery->select(Person::directoryColumns()),
-            ])
-            ->orderByDesc('is_winner')
-            ->orderByDesc('award_year')
-            ->orderBy('position')
-            ->limit(8)
-            ->get());
+        $title->setRelation('awardNominations', collect());
     }
 
     private function episodeGuideQuery(Title $series, ?int $seasonNumber = null): Builder
     {
         $query = Episode::query()
             ->select([
-                'movie_episodes.episode_movie_id',
-                'movie_episodes.movie_id',
-                'movie_episodes.season',
-                'movie_episodes.episode_number',
-                'movie_episodes.release_year',
-                'movie_episodes.release_month',
-                'movie_episodes.release_day',
+                'episodes.id',
+                'episodes.title_id',
+                'episodes.series_id',
+                'episodes.season_id',
+                'episodes.season_number',
+                'episodes.episode_number',
+                'episodes.absolute_number',
+                'episodes.production_code',
+                'episodes.aired_at',
             ])
-            ->where('movie_episodes.movie_id', $series->getKey())
-            ->whereHas('title', fn (Builder $titleQuery) => $titleQuery
-                ->published()
-                ->whereNotNull('movies.primarytitle'))
+            ->where('episodes.series_id', $series->getKey())
+            ->whereHas('title', fn (Builder $titleQuery) => $titleQuery->published())
             ->with([
                 'title' => fn (Builder $titleQuery) => $titleQuery
                     ->selectCatalogCardColumns()
                     ->withCatalogHeroRelations(),
+                'season:id,series_id,name,slug,season_number',
             ]);
 
         if (is_int($seasonNumber)) {
-            $query->where('movie_episodes.season', $seasonNumber);
+            $query->where('episodes.season_number', $seasonNumber);
         }
 
         return $query;

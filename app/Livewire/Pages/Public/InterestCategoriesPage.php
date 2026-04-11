@@ -25,9 +25,7 @@ class InterestCategoriesPage extends Component
         GetInterestCategoryDirectorySnapshotAction $getInterestCategoryDirectorySnapshot,
         LoadInterestCategoryDetailsAction $loadInterestCategoryDetails,
     ): View {
-        if (request()->routeIs('public.interest-categories.show')) {
-            abort_unless($this->interestCategory instanceof InterestCategory, 404);
-
+        if ($this->interestCategory instanceof InterestCategory) {
             return $this->renderPageView(
                 'interest-categories.show',
                 $loadInterestCategoryDetails->handle($this->interestCategory),

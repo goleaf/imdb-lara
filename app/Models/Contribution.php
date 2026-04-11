@@ -20,6 +20,13 @@ class Contribution extends Model
 
     use SoftDeletes;
 
+    protected static function booted(): void
+    {
+        static::saving(function (self $contribution): void {
+            $contribution->status_priority = $contribution->status?->priority() ?? ContributionStatus::Submitted->priority();
+        });
+    }
+
     /**
      * @var list<string>
      */
@@ -29,6 +36,7 @@ class Contribution extends Model
         'contributable_id',
         'action',
         'status',
+        'status_priority',
         'payload',
         'notes',
         'reviewed_by',
@@ -40,6 +48,7 @@ class Contribution extends Model
         return [
             'action' => ContributionAction::class,
             'status' => ContributionStatus::class,
+            'status_priority' => 'integer',
             'payload' => 'array',
             'reviewed_at' => 'datetime',
         ];

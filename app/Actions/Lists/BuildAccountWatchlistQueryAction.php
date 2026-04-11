@@ -121,7 +121,7 @@ class BuildAccountWatchlistQueryAction
         }
 
         if ($year !== null) {
-            $titleQuery->where('startyear', $year);
+            $titleQuery->where('release_year', $year);
         }
 
         return $titleQuery
