@@ -84,6 +84,7 @@ class SeasonsPage extends Component
 
         return $this->renderPageView('admin.seasons.edit', [
             'season' => $loadedSeason,
+            'seasonFormData' => $this->adminFormBindingData(),
             'draftEpisode' => tap(
                 new Episode(Arr::only($this->episode, (new Episode)->getFillable())),
                 function (Episode $episode): void {
@@ -106,6 +107,7 @@ class SeasonsPage extends Component
                     ]));
                 },
             ),
+            'draftEpisodeFormData' => $this->adminFormBindingData('episode'),
         ]);
     }
 

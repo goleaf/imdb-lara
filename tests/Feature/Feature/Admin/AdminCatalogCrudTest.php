@@ -30,7 +30,7 @@ class AdminCatalogCrudTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_admin_catalog_surface_omits_legacy_controller_mutation_routes(): void
+    public function test_admin_catalog_surface_registers_controller_mutation_routes(): void
     {
         $routeNames = [
             'admin.titles.store',
@@ -57,8 +57,74 @@ class AdminCatalogCrudTest extends TestCase
         ];
 
         foreach ($routeNames as $routeName) {
-            $this->assertFalse(Route::has($routeName), $routeName.' should not be registered on the Livewire-only admin surface.');
+            $this->assertTrue(Route::has($routeName), $routeName.' should be registered on the admin write surface.');
         }
+    }
+
+    public function test_editor_can_manage_titles_through_controller_routes(): void
+    {
+        $editor = User::factory()->editor()->create();
+        $genre = Genre::factory()->create(['name' => 'Mystery', 'slug' => 'mystery']);
+
+        $this->actingAs($editor)
+            ->post(route('admin.titles.store'), [
+                'name' => 'Controller Title',
+                'original_name' => 'Controller Title',
+                'slug' => 'controller-title',
+                'title_type' => TitleType::Movie->value,
+                'release_year' => 2024,
+                'release_date' => '2024-05-01',
+                'runtime_minutes' => 118,
+                'age_rating' => 'PG-13',
+                'origin_country' => 'US',
+                'original_language' => 'en',
+                'is_published' => true,
+                'genre_ids' => [$genre->id],
+                'plot_outline' => 'Controller route outline.',
+                'synopsis' => 'Controller route synopsis.',
+                'tagline' => 'Controller route tagline.',
+                'meta_title' => 'Controller Title',
+                'meta_description' => 'Controller route SEO.',
+                'search_keywords' => 'controller, title',
+            ])
+            ->assertRedirect();
+
+        $title = Title::query()->where('slug', 'controller-title')->firstOrFail();
+
+        $updateResponse = $this->actingAs($editor)
+            ->patch(route('admin.titles.update', $title), [
+                'name' => 'Controller Title Updated',
+                'original_name' => 'Controller Title Updated',
+                'slug' => 'controller-title-updated',
+                'title_type' => TitleType::Movie->value,
+                'release_year' => 2025,
+                'release_date' => '2025-01-10',
+                'runtime_minutes' => 124,
+                'age_rating' => 'R',
+                'origin_country' => 'GB',
+                'original_language' => 'en',
+                'is_published' => false,
+                'genre_ids' => [$genre->id],
+                'plot_outline' => 'Updated controller outline.',
+                'synopsis' => 'Updated controller synopsis.',
+                'tagline' => 'Updated controller tagline.',
+                'meta_title' => 'Controller Title Updated',
+                'meta_description' => 'Updated controller SEO.',
+                'search_keywords' => 'controller, updated',
+            ]);
+
+        $title->refresh();
+        $updateResponse->assertRedirect(route('admin.titles.edit', $title));
+
+        $this->assertSame('Controller Title Updated', $title->name);
+        $this->assertSame('controller-title-updated', $title->slug);
+        $this->assertFalse($title->is_published);
+
+        $this->actingAs($editor)
+            ->delete(route('admin.titles.destroy', $title))
+            ->assertRedirect(route('admin.titles.index'));
+
+        $this->assertSoftDeleted('titles', ['id' => $title->id]);
     }
 
     public function test_editor_can_create_update_and_delete_titles_with_genres_from_livewire_pages(): void

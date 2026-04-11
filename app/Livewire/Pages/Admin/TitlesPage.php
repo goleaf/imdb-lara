@@ -174,14 +174,17 @@ class TitlesPage extends Component
             ]),
         ]);
         $loadedTitle->fill($this->titlePreviewPayload());
+        $draftMediaAsset = tap(
+            new MediaAsset(Arr::except($this->draftMediaAssetPayload(), ['file'])),
+            fn (MediaAsset $mediaAsset) => $mediaAsset->setRelation('mediable', $loadedTitle),
+        );
 
         return $this->renderPageView('admin.titles.edit', [
             'title' => $loadedTitle,
             'draftSeason' => new Season($this->season),
-            'draftMediaAsset' => tap(
-                new MediaAsset(Arr::except($this->draftMediaAssetPayload(), ['file'])),
-                fn (MediaAsset $mediaAsset) => $mediaAsset->setRelation('mediable', $loadedTitle),
-            ),
+            'draftSeasonFormData' => $this->adminFormBindingData('season'),
+            'draftMediaAsset' => $draftMediaAsset,
+            'draftMediaAssetFormData' => $this->adminMediaAssetFormData($draftMediaAsset, 'draftMediaAsset'),
             'selectedGenreIds' => $this->selectedGenreIds(),
             ...$this->formOptions(),
         ]);

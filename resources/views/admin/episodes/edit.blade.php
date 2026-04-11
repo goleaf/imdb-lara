@@ -63,7 +63,7 @@
         @else
             <x-ui.card class="!max-w-none">
                 <form wire:submit="saveEpisode" class="space-y-6">
-                    @include('admin.episodes._form')
+                    @include('admin.episodes._form', ['episode' => $episode] + $episodeFormData)
 
                     <div class="flex justify-end">
                         <x-ui.button type="submit" icon="check">

@@ -35,13 +35,11 @@
     @endif
     
     <ul  
-        class="grid grid-cols-[auto_auto_1fr] gap-y-1 relative overflow-y-auto data-loading:h-24 px-(--popup-padding) max-h-60"
+        class="grid grid-cols-[auto_auto_1fr] gap-y-1 relative overflow-y-auto px-(--popup-padding) max-h-60"
+        data-slot="options-list"
         x-bind:aria-multiselectable="__isMultiple ? 'true' : 'false'"
         {{ $attributes->whereStartsWith('wire:target') }} 
         x-bind:aria-label="@js($label ?? 'Options')"
-        @if (!$preventLoading)
-            wire:loading.attr="data-loading"
-        @endif
         x-rover:options
     >
         {{ $slot }}
@@ -49,7 +47,8 @@
         {{-- Empty and loading states are <li> elements to maintain valid HTML inside <ul>.
             col-span-full spans all 3 grid columns so they don't break the layout. --}}
         <li 
-            class="col-span-full [ul:is([data-loading])_&]:hidden"
+            class="col-span-full"
+            data-slot="options-list-empty"
             x-rover:empty 
         >
             @if ($empty instanceof \Illuminate\View\ComponentSlot)

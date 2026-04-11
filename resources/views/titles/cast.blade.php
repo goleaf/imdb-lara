@@ -244,42 +244,42 @@
                                             </div>
 
                                             <div class="mt-4 grid gap-3">
-                                                @foreach ($departmentCredits as $credit)
+                                                @foreach ($departmentCredits as $creditEntry)
                                                     <div class="sb-crew-credit-row">
                                                         <div class="min-w-0 space-y-1">
                                                             <div class="sb-crew-credit-name">
-                                                                <a href="{{ route('public.people.show', $credit->person) }}" class="hover:opacity-80">
-                                                                    {{ $credit->person->name }}
+                                                                <a href="{{ $creditEntry['personHref'] }}" class="hover:opacity-80">
+                                                                    {{ $creditEntry['personName'] }}
                                                                 </a>
                                                             </div>
                                                             <div class="sb-crew-credit-job">
-                                                                {{ $credit->job ?: 'Crew credit' }}
+                                                                {{ $creditEntry['jobLabel'] }}
                                                             </div>
 
-                                                            @if ($credit->credited_as)
+                                                            @if ($creditEntry['creditedAs'])
                                                                 <div class="sb-crew-credit-note">
-                                                                    Credited as {{ $credit->credited_as }}
+                                                                    Credited as {{ $creditEntry['creditedAs'] }}
                                                                 </div>
                                                             @endif
 
-                                                            @if ($credit->episode?->title && $credit->episode?->series && $credit->episode?->season)
+                                                            @if ($creditEntry['episodeHref'] && $creditEntry['episodeTitle'])
                                                                 <div class="sb-crew-credit-note">
                                                                     Episode-specific credit:
                                                                     <a
-                                                                        href="{{ route('public.episodes.show', ['series' => $credit->episode->series, 'season' => $credit->episode->season, 'episode' => $credit->episode->title]) }}"
+                                                                        href="{{ $creditEntry['episodeHref'] }}"
                                                                         class="font-medium hover:opacity-80"
                                                                     >
-                                                                        {{ $credit->episode->title->name }}
+                                                                        {{ $creditEntry['episodeTitle'] }}
                                                                     </a>
                                                                 </div>
                                                             @endif
                                                         </div>
 
                                                         <div class="space-y-1 text-right">
-                                                            @if ($credit->billing_order)
-                                                                <div class="sb-crew-credit-note">#{{ $credit->billing_order }}</div>
+                                                            @if ($creditEntry['billingOrder'])
+                                                                <div class="sb-crew-credit-note">#{{ $creditEntry['billingOrder'] }}</div>
                                                             @endif
-                                                            @if ($credit->is_principal)
+                                                            @if ($creditEntry['isPrincipal'])
                                                                 <div class="sb-crew-credit-note">Principal</div>
                                                             @endif
                                                         </div>
@@ -325,42 +325,42 @@
                                             </div>
 
                                             <div class="mt-4 grid gap-3">
-                                                @foreach ($departmentCredits as $credit)
+                                                @foreach ($departmentCredits as $creditEntry)
                                                     <div class="sb-crew-credit-row">
                                                         <div class="min-w-0 space-y-1">
                                                             <div class="sb-crew-credit-name">
-                                                                <a href="{{ route('public.people.show', $credit->person) }}" class="hover:opacity-80">
-                                                                    {{ $credit->person->name }}
+                                                                <a href="{{ $creditEntry['personHref'] }}" class="hover:opacity-80">
+                                                                    {{ $creditEntry['personName'] }}
                                                                 </a>
                                                             </div>
                                                             <div class="sb-crew-credit-job">
-                                                                {{ $credit->job ?: 'Crew credit' }}
+                                                                {{ $creditEntry['jobLabel'] }}
                                                             </div>
 
-                                                            @if ($credit->credited_as)
+                                                            @if ($creditEntry['creditedAs'])
                                                                 <div class="sb-crew-credit-note">
-                                                                    Credited as {{ $credit->credited_as }}
+                                                                    Credited as {{ $creditEntry['creditedAs'] }}
                                                                 </div>
                                                             @endif
 
-                                                            @if ($credit->episode?->title && $credit->episode?->series && $credit->episode?->season)
+                                                            @if ($creditEntry['episodeHref'] && $creditEntry['episodeTitle'])
                                                                 <div class="sb-crew-credit-note">
                                                                     Episode-specific credit:
                                                                     <a
-                                                                        href="{{ route('public.episodes.show', ['series' => $credit->episode->series, 'season' => $credit->episode->season, 'episode' => $credit->episode->title]) }}"
+                                                                        href="{{ $creditEntry['episodeHref'] }}"
                                                                         class="font-medium hover:opacity-80"
                                                                     >
-                                                                        {{ $credit->episode->title->name }}
+                                                                        {{ $creditEntry['episodeTitle'] }}
                                                                     </a>
                                                                 </div>
                                                             @endif
                                                         </div>
 
                                                         <div class="space-y-1 text-right">
-                                                            @if ($credit->billing_order)
-                                                                <div class="sb-crew-credit-note">#{{ $credit->billing_order }}</div>
+                                                            @if ($creditEntry['billingOrder'])
+                                                                <div class="sb-crew-credit-note">#{{ $creditEntry['billingOrder'] }}</div>
                                                             @endif
-                                                            @if ($credit->is_principal)
+                                                            @if ($creditEntry['isPrincipal'])
                                                                 <div class="sb-crew-credit-note">Principal</div>
                                                             @endif
                                                         </div>

@@ -3,7 +3,7 @@
 ])
 
 <div 
-    x-data="{ active: null }"
+    x-data="accordionRoot()"
     data-slot="accordion"
     {{ $attributes->merge([
         'class'=>"w-full flex flex-col"

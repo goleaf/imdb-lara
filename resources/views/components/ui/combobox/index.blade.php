@@ -50,6 +50,11 @@
     {{ 
         $attributes->class([
             'relative [--popup-round:var(--radius-box)] [--popup-padding:--spacing(1)]',
+            'data-loading:[&_[data-slot=options-list]]:h-24',
+            'data-loading:[&_[data-slot=options-list-empty]]:hidden',
+            'data-loading:[&_[data-slot=options-list-loading]]:flex',
+            'data-loading:[&_[data-slot=option]]:hidden',
+            'data-loading:[&_[data-slot=create-option]]:hidden',
             'dark:border-red-400! dark:shadow-red-400 text-red-400! placeholder:text-red-400!' => $invalid,
         ]) 
     }}

@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
@@ -117,10 +116,56 @@ class AwardNomination extends Model
     public function scopeWithTitleDetailRelations(Builder $query): Builder
     {
         if (static::usesCatalogOnlySchema()) {
-            return $query->with([
-                'awardEvent:imdb_id,name',
-                'awardCategory:id,name',
-            ]);
+            $relations = [];
+
+            if (Title::catalogTablesAvailable('award_events')) {
+                $relations[] = 'awardEvent:imdb_id,name';
+            }
+
+            if (Title::catalogTablesAvailable('award_categories')) {
+                $relations[] = 'awardCategory:id,name';
+            }
+
+            if (Title::catalogTablesAvailable('movie_award_nomination_nominees')) {
+                $relations['movieAwardNominationNominees'] = fn ($nomineeQuery) => $nomineeQuery
+                    ->chaperone()
+                    ->select([
+                        'movie_award_nomination_id',
+                        'name_basic_id',
+                        'position',
+                    ])
+                    ->with(
+                        Title::catalogTablesAvailable('name_basics')
+                            ? [
+                                'person' => fn ($personQuery) => $personQuery->select(Person::directoryColumns()),
+                            ]
+                            : []
+                    )
+                    ->orderBy('position');
+            }
+
+            if (Title::catalogTablesAvailable('movie_award_nomination_titles')) {
+                $relations['movieAwardNominationTitles'] = fn ($nominationTitleQuery) => $nominationTitleQuery
+                    ->chaperone()
+                    ->select([
+                        'movie_award_nomination_id',
+                        'nominated_movie_id',
+                        'position',
+                    ])
+                    ->with(
+                        Title::catalogTablesAvailable('movies')
+                            ? [
+                                'title' => fn ($titleQuery) => $titleQuery
+                                    ->selectCatalogCardColumns()
+                                    ->publishedCatalog()
+                                    ->withCatalogCardRelations(),
+                            ]
+                            : []
+                    )
+                    ->orderBy('position');
+            }
+
+            return $query->with($relations);
         }
 
         return $query->with([

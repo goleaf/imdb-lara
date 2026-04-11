@@ -174,6 +174,16 @@ class CatalogMediaAsset extends Model
         return number_format($this->duration_seconds).' sec';
     }
 
+    public function stableIdentifier(): string
+    {
+        return sha1(implode('|', [
+            (string) $this->url,
+            $this->kind?->value ?? 'media',
+            (string) ($this->provider_key ?? ''),
+            (string) ($this->position ?? 0),
+        ]));
+    }
+
     private function isMeaningfulMediaText(?string $text): bool
     {
         if (! filled($text)) {

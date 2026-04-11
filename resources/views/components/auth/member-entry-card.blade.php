@@ -8,11 +8,6 @@
     'title',
 ])
 
-@php
-    $isLoginActive = $activeTab === 'login';
-    $isRegisterActive = $activeTab === 'register';
-@endphp
-
 <section class="w-full max-w-[32rem]">
     <div class="sb-auth-card rounded-[1.75rem] px-5 py-6 sm:px-7 sm:py-8">
         <div class="space-y-7">
@@ -44,7 +39,7 @@
                     :href="route('login')"
                     variant="none"
                     class="sb-auth-toggle-link"
-                    :data-active="$isLoginActive ? 'true' : 'false'"
+                    :data-active="$activeTab === 'login' ? 'true' : 'false'"
                 >
                     Sign in
                 </x-ui.button>
@@ -54,7 +49,7 @@
                     :href="route('register')"
                     variant="none"
                     class="sb-auth-toggle-link"
-                    :data-active="$isRegisterActive ? 'true' : 'false'"
+                    :data-active="$activeTab === 'register' ? 'true' : 'false'"
                 >
                     Sign up
                 </x-ui.button>

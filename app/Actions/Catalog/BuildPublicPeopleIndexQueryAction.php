@@ -36,9 +36,13 @@ class BuildPublicPeopleIndexQueryAction
             return match ($sort) {
                 'name' => $query->orderBy($nameColumn),
                 'credits' => $query->orderByDesc('credits_count')->orderBy($nameColumn),
-                'awards' => $query->orderByDesc('credits_count')->orderBy($nameColumn),
+                'awards' => $query
+                    ->orderByDesc('award_nominations_count')
+                    ->orderByDesc('credits_count')
+                    ->orderBy($nameColumn),
                 default => $query
                     ->orderBy('popularity_rank')
+                    ->orderByDesc('award_nominations_count')
                     ->orderByDesc('credits_count')
                     ->orderBy($nameColumn),
             };

@@ -8,33 +8,7 @@
     'expanded' => false
 ])
 
-<div role="region" x-data="{
-    id: $id('accordion'),
-    init() {
-        if(@js($expanded)) {
-            this.active = this.id;
-        }
-    },
-    toggle() {
-        if (@js($disabled)) {
-            return;
-        }
-
-        this.isVisible = !this.isVisible;
-    },
-    get isVisible() {
-        return this.active === this.id && !@js($disabled)
-    },
-    set isVisible(value) {
-        this.active = value ? this.id : null
-    },
-    get triggerId() {
-        return `${this.id}-trigger`;
-    },
-    get panelId() {
-        return `${this.id}-panel`;
-    },
-}"
+<div role="region" x-data="accordionItem({ expanded: @js($expanded), disabled: @js($disabled) })"
     data-slot="accordion-item"
     {{ $attributes->class(
         Arr::toCssClasses([

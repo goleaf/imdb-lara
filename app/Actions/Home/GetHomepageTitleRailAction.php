@@ -53,6 +53,12 @@ class GetHomepageTitleRailAction
                         ],
                     ])
                     ->where(function ($query): void {
+                        if (Title::usesCatalogOnlySchema()) {
+                            $query->where(Title::catalogColumn('release_year'), '>=', now()->year);
+
+                            return;
+                        }
+
                         $query
                             ->whereDate('release_date', '>=', today()->toDateString())
                             ->orWhere(function ($futureYearQuery): void {
@@ -62,9 +68,16 @@ class GetHomepageTitleRailAction
                             });
                     })
                     ->reorder()
-                    ->orderBy('release_date')
-                    ->orderBy('release_year')
-                    ->orderBy('name')
+                    ->when(
+                        Title::usesCatalogOnlySchema(),
+                        fn ($titleQuery) => $titleQuery
+                            ->orderBy(Title::catalogColumn('release_year'))
+                            ->orderByCatalogName(),
+                        fn ($titleQuery) => $titleQuery
+                            ->orderBy('release_date')
+                            ->orderBy('release_year')
+                            ->orderBy('name'),
+                    )
                     ->limit($limit)
                     ->get(),
                 'recently-added' => $this->buildPublicTitleIndexQuery
@@ -79,8 +92,13 @@ class GetHomepageTitleRailAction
                         ],
                     ])
                     ->reorder()
-                    ->orderByDesc('created_at')
-                    ->orderByDesc('id')
+                    ->when(
+                        Title::usesCatalogOnlySchema(),
+                        fn ($titleQuery) => $titleQuery->orderByDesc('id'),
+                        fn ($titleQuery) => $titleQuery
+                            ->orderByDesc('created_at')
+                            ->orderByDesc('id'),
+                    )
                     ->limit($limit)
                     ->get(),
                 default => $this->buildPublicTitleIndexQuery

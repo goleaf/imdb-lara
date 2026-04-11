@@ -1,47 +1,6 @@
 <div
     data-slot="global-search"
-    x-data="{
-        open: false,
-        recent: [],
-        storageKey: 'screenbase.recent-searches',
-        init() {
-            try {
-                const storedValue = JSON.parse(localStorage.getItem(this.storageKey) ?? '[]');
-                this.recent = Array.isArray(storedValue) ? storedValue.slice(0, 5) : [];
-            } catch (error) {
-                this.recent = [];
-            }
-        },
-        persistRecent() {
-            localStorage.setItem(this.storageKey, JSON.stringify(this.recent.slice(0, 5)));
-        },
-        storeRecent(value) {
-            const query = (value || '').trim();
-
-            if (query.length < 2) {
-                return;
-            }
-
-            this.recent = [query, ...this.recent.filter((item) => item.toLowerCase() !== query.toLowerCase())].slice(0, 5);
-            this.persistRecent();
-        },
-        removeRecent(value) {
-            this.recent = this.recent.filter((item) => item !== value);
-            this.persistRecent();
-        },
-        goToSearch(value) {
-            const query = (value || '').trim();
-
-            if (query.length === 0) {
-                window.location = @js($searchRoute);
-
-                return;
-            }
-
-            this.storeRecent(query);
-            window.location = `${@js($searchRoute)}?q=${encodeURIComponent(query)}`;
-        },
-    }"
+    x-data="globalSearchOverlay({ searchRoute: @js($searchRoute) })"
     x-on:keydown.escape.window="open = false"
     class="relative w-full [&:has(input[data-loading])_[data-slot=global-search-loading]]:block [&:has(input[data-loading])_[data-slot=global-search-results]]:hidden"
 >
@@ -219,7 +178,10 @@
                     @if ($hasSuggestions)
                         <div class="grid gap-3 xl:grid-cols-3">
                             @foreach ($visibleSections as $section)
-                                <section class="sb-search-panel {{ $section['panelClass'] }} rounded-[1.35rem] p-4">
+                                <section
+                                    wire:key="global-search-section-{{ $section['key'] }}"
+                                    class="sb-search-panel {{ $section['panelClass'] }} rounded-[1.35rem] p-4"
+                                >
                                     <div class="mb-3 flex items-start justify-between gap-3">
                                         <div>
                                             <div class="sb-search-group-title inline-flex items-center gap-2">
@@ -240,6 +202,7 @@
                                         @foreach ($section['items'] as $suggestion)
                                             @if ($section['key'] === 'titles')
                                                 <a
+                                                    wire:key="global-search-{{ $section['key'] }}-{{ $suggestion->id }}"
                                                     href="{{ route('public.titles.show', $suggestion) }}"
                                                     x-on:click="storeRecent(@js($trimmedQuery))"
                                                     class="sb-search-item sb-search-item--title flex items-center gap-3 border border-white/6 bg-white/[0.025] p-2.5 hover:bg-white/[0.055]"
@@ -279,6 +242,7 @@
                                                 </a>
                                             @elseif ($section['key'] === 'people')
                                                 <a
+                                                    wire:key="global-search-{{ $section['key'] }}-{{ $suggestion->id }}"
                                                     href="{{ route('public.people.show', $suggestion) }}"
                                                     x-on:click="storeRecent(@js($trimmedQuery))"
                                                     class="sb-search-item sb-search-item--person flex items-center gap-3 border border-white/6 bg-white/[0.025] p-2.5 hover:bg-white/[0.055]"
@@ -328,6 +292,7 @@
                                                 </a>
                                             @else
                                                 <a
+                                                    wire:key="global-search-{{ $section['key'] }}-{{ $suggestion->id }}"
                                                     href="{{ route('public.interest-categories.show', $suggestion) }}"
                                                     x-on:click="storeRecent(@js($trimmedQuery))"
                                                     class="sb-search-item sb-search-item--person flex items-center gap-3 border border-white/6 bg-white/[0.025] p-2.5 hover:bg-white/[0.055]"

@@ -94,7 +94,7 @@ class Review extends Model
     {
         return [
             'author:id,name,username',
-            'title' => fn ($titleQuery) => $titleQuery->select(Title::catalogCardColumns()),
+            'adminTitle' => fn ($titleQuery) => $titleQuery->select(LocalTitle::catalogCardColumns()),
         ];
     }
 
@@ -105,7 +105,7 @@ class Review extends Model
     {
         return [
             'author:id,name,username,role,status',
-            'title' => fn ($titleQuery) => $titleQuery->select(Title::catalogCardColumns()),
+            'adminTitle' => fn ($titleQuery) => $titleQuery->select(LocalTitle::catalogCardColumns()),
         ];
     }
 
@@ -135,6 +135,11 @@ class Review extends Model
     public function title(): BelongsTo
     {
         return $this->belongsTo(Title::class);
+    }
+
+    public function adminTitle(): BelongsTo
+    {
+        return $this->belongsTo(LocalTitle::class, 'title_id');
     }
 
     public function votes(): HasMany

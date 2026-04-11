@@ -2,6 +2,7 @@
 
 namespace App\Actions\Lists;
 
+use App\Models\MovieRating;
 use App\Models\Title;
 use App\Models\UserList;
 use Illuminate\Database\Eloquent\Collection;
@@ -19,20 +20,28 @@ class GetListTitleSuggestionsAction
             return new Collection;
         }
 
-        return Title::query()
-            ->select([
-                'id',
-                'name',
-                'slug',
-                'title_type',
-                'release_year',
-                'popularity_rank',
-            ])
+        $query = Title::query()
+            ->selectCatalogCardColumns()
             ->publishedCatalog()
             ->matchingSearch($search)
-            ->whereDoesntHave('listItems', fn ($query) => $query->where('user_list_id', $list->id))
-            ->orderBy('popularity_rank')
-            ->orderBy('name')
+            ->whereDoesntHave('listItems', fn ($query) => $query->where('user_list_id', $list->id));
+
+        if (Title::usesCatalogOnlySchema()) {
+            $query->addSelect([
+                'popularity_rank' => MovieRating::query()
+                    ->select('vote_count')
+                    ->whereColumn('movie_ratings.movie_id', 'movies.id')
+                    ->limit(1),
+            ]);
+        }
+
+        return $query
+            ->when(
+                Title::usesCatalogOnlySchema(),
+                fn ($titleQuery) => $titleQuery->orderByDesc('popularity_rank'),
+                fn ($titleQuery) => $titleQuery->orderBy('popularity_rank'),
+            )
+            ->orderByCatalogName()
             ->limit(max(1, min($limit, 8)))
             ->get();
     }

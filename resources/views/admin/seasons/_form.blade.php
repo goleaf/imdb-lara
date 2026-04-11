@@ -1,81 +1,70 @@
-@php
-    $fieldPrefix = $fieldPrefix ?? null;
-    $fieldStatePath = static fn (?string $prefix, string $field): string => filled($prefix)
-        ? sprintf('%s.%s', $prefix, $field)
-        : $field;
-    $fieldName = static fn (?string $prefix, string $field): string => filled($prefix)
-        ? sprintf('%s[%s]', $prefix, $field)
-        : $field;
-    $fieldOldInputKey = $fieldStatePath;
-@endphp
-
 <div class="grid gap-4 lg:grid-cols-2">
     <x-ui.field>
         <x-ui.label>Name</x-ui.label>
         <x-ui.input
-            wire:model.defer="{{ $fieldStatePath($fieldPrefix, 'name') }}"
-            :name="$fieldName($fieldPrefix, 'name')"
-            :value="old($fieldOldInputKey($fieldPrefix, 'name'), $season->name)"
+            wire:model.defer="{{ $fieldStatePath('name') }}"
+            :name="$fieldName('name')"
+            :value="old($fieldOldInputKey('name'), $season->name)"
         />
-        <x-ui.error :name="$fieldStatePath($fieldPrefix, 'name')" />
+        <x-ui.error :name="$fieldStatePath('name')" />
     </x-ui.field>
 
     <x-ui.field>
         <x-ui.label>Slug</x-ui.label>
         <x-ui.input
-            wire:model.defer="{{ $fieldStatePath($fieldPrefix, 'slug') }}"
-            :name="$fieldName($fieldPrefix, 'slug')"
-            :value="old($fieldOldInputKey($fieldPrefix, 'slug'), $season->slug)"
+            wire:model.defer="{{ $fieldStatePath('slug') }}"
+            :name="$fieldName('slug')"
+            :value="old($fieldOldInputKey('slug'), $season->slug)"
         />
-        <x-ui.error :name="$fieldStatePath($fieldPrefix, 'slug')" />
+        <x-ui.error :name="$fieldStatePath('slug')" />
     </x-ui.field>
 
     <x-ui.field>
         <x-ui.label>Season number</x-ui.label>
         <x-ui.input
-            wire:model.defer="{{ $fieldStatePath($fieldPrefix, 'season_number') }}"
-            :name="$fieldName($fieldPrefix, 'season_number')"
+            wire:model.defer="{{ $fieldStatePath('season_number') }}"
+            :name="$fieldName('season_number')"
             type="number"
             min="1"
-            :value="old($fieldOldInputKey($fieldPrefix, 'season_number'), $season->season_number)"
+            :value="old($fieldOldInputKey('season_number'), $season->season_number)"
         />
-        <x-ui.error :name="$fieldStatePath($fieldPrefix, 'season_number')" />
+        <x-ui.error :name="$fieldStatePath('season_number')" />
     </x-ui.field>
 
     <x-ui.field>
         <x-ui.label>Release year</x-ui.label>
         <x-ui.input
-            wire:model.defer="{{ $fieldStatePath($fieldPrefix, 'release_year') }}"
-            :name="$fieldName($fieldPrefix, 'release_year')"
+            wire:model.defer="{{ $fieldStatePath('release_year') }}"
+            :name="$fieldName('release_year')"
             type="number"
             min="1888"
             max="2100"
-            :value="old($fieldOldInputKey($fieldPrefix, 'release_year'), $season->release_year)"
+            :value="old($fieldOldInputKey('release_year'), $season->release_year)"
         />
-        <x-ui.error :name="$fieldStatePath($fieldPrefix, 'release_year')" />
+        <x-ui.error :name="$fieldStatePath('release_year')" />
     </x-ui.field>
 </div>
 
 <x-ui.field>
     <x-ui.label>Summary</x-ui.label>
-    <x-ui.textarea wire:model.defer="{{ $fieldStatePath($fieldPrefix, 'summary') }}" :name="$fieldName($fieldPrefix, 'summary')" rows="4">{{ old($fieldOldInputKey($fieldPrefix, 'summary'), $season->summary) }}</x-ui.textarea>
-    <x-ui.error :name="$fieldStatePath($fieldPrefix, 'summary')" />
+    <x-ui.textarea wire:model.defer="{{ $fieldStatePath('summary') }}" :name="$fieldName('summary')" rows="4">{{ old($fieldOldInputKey('summary'), $season->summary) }}</x-ui.textarea>
+    <x-ui.error :name="$fieldStatePath('summary')" />
 </x-ui.field>
 
 <div class="grid gap-4 lg:grid-cols-2">
     <x-ui.field>
         <x-ui.label>SEO title</x-ui.label>
         <x-ui.input
-            wire:model.defer="{{ $fieldStatePath($fieldPrefix, 'meta_title') }}"
-            :name="$fieldName($fieldPrefix, 'meta_title')"
-            :value="old($fieldOldInputKey($fieldPrefix, 'meta_title'), $season->meta_title)"
+            wire:model.defer="{{ $fieldStatePath('meta_title') }}"
+            :name="$fieldName('meta_title')"
+            :value="old($fieldOldInputKey('meta_title'), $season->meta_title)"
         />
-        <x-ui.error :name="$fieldStatePath($fieldPrefix, 'meta_title')" />
+        <x-ui.error :name="$fieldStatePath('meta_title')" />
     </x-ui.field>
 
     <x-ui.field>
         <x-ui.label>SEO description</x-ui.label>
-        <x-ui.textarea wire:model.defer="{{ $fieldStatePath($fieldPrefix, 'meta_description') }}" :name="$fieldName($fieldPrefix, 'meta_description')" rows="3">{{ old($fieldOldInputKey($fieldPrefix, 'meta_description'), $season->meta_description) }}</x-ui.textarea>
-        <x-ui.error :name="$fieldStatePath($fieldPrefix, 'meta_description')" />
+        <x-ui.textarea wire:model.defer="{{ $fieldStatePath('meta_description') }}" :name="$fieldName('meta_description')" rows="3">{{ old($fieldOldInputKey('meta_description'), $season->meta_description) }}</x-ui.textarea>
+        <x-ui.error :name="$fieldStatePath('meta_description')" />
     </x-ui.field>
 </div>

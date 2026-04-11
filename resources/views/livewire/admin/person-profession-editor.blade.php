@@ -25,7 +25,7 @@
         </div>
 
         <div class="flex flex-wrap justify-end gap-2">
-            <x-ui.button type="submit" size="sm" :icon="$professionRecord?->exists ? 'check' : 'plus'">
+            <x-ui.button type="submit" size="sm" :icon="$professionRecord?->exists ? 'check' : 'plus'" wire:target="save">
                 {{ $professionRecord?->exists ? 'Save profession' : 'Add profession' }}
             </x-ui.button>
         </div>
@@ -33,7 +33,7 @@
 
     @if ($professionRecord?->exists)
         <div class="mt-3 flex justify-end">
-            <x-ui.button type="button" wire:click="delete" variant="outline" color="red" size="sm" icon="trash">
+            <x-ui.button type="button" wire:click="delete" wire:target="delete" variant="outline" color="red" size="sm" icon="trash">
                 Delete
             </x-ui.button>
         </div>

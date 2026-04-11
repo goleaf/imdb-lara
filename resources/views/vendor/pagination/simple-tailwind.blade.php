@@ -1,30 +1,24 @@
-@php
-    $actionClasses = 'inline-flex items-center rounded-full border px-4 py-2 text-sm font-semibold leading-5 transition duration-150';
-    $enabledClasses = $actionClasses.' border-[#322b21] bg-[#151310] text-[#f4eee5] hover:border-[#5b4b33] hover:bg-[#1d1914] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#d6b574]/25';
-    $disabledClasses = $actionClasses.' cursor-not-allowed border-[#2a251d] bg-[#12100d] text-[#7c7468]';
-@endphp
-
 @if ($paginator->hasPages())
-    <nav role="navigation" aria-label="{{ __('Pagination Navigation') }}" class="flex gap-2 items-center justify-between">
+    <nav role="navigation" aria-label="{{ __('Pagination Navigation') }}" class="flex items-center justify-between gap-2">
 
         @if ($paginator->onFirstPage())
-            <span class="{{ $disabledClasses }}">
+            <x-ui.pagination.control disabled aria-disabled="true">
                 {!! __('pagination.previous') !!}
-            </span>
+            </x-ui.pagination.control>
         @else
-            <a href="{{ $paginator->previousPageUrl() }}" rel="prev" class="{{ $enabledClasses }}">
+            <x-ui.pagination.control :href="$paginator->previousPageUrl()" rel="prev" aria-label="{{ __('pagination.previous') }}">
                 {!! __('pagination.previous') !!}
-            </a>
+            </x-ui.pagination.control>
         @endif
 
         @if ($paginator->hasMorePages())
-            <a href="{{ $paginator->nextPageUrl() }}" rel="next" class="{{ $enabledClasses }}">
+            <x-ui.pagination.control :href="$paginator->nextPageUrl()" rel="next" aria-label="{{ __('pagination.next') }}">
                 {!! __('pagination.next') !!}
-            </a>
+            </x-ui.pagination.control>
         @else
-            <span class="{{ $disabledClasses }}">
+            <x-ui.pagination.control disabled aria-disabled="true">
                 {!! __('pagination.next') !!}
-            </span>
+            </x-ui.pagination.control>
         @endif
 
     </nav>

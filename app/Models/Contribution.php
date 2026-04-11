@@ -69,6 +69,11 @@ class Contribution extends Model
         return $this->morphTo();
     }
 
+    public function adminContributable(): MorphTo
+    {
+        return $this->morphTo(__FUNCTION__, 'contributable_type', 'contributable_id');
+    }
+
     public function moderationActions(): MorphMany
     {
         return $this->morphMany(ModerationAction::class, 'actionable');
@@ -119,19 +124,46 @@ class Contribution extends Model
 
     public function contributableAdminUrl(): ?string
     {
+        $contributable = $this->resolvedAdminContributable();
+
         return match (true) {
-            $this->contributable instanceof Title => route('admin.titles.edit', $this->contributable),
-            $this->contributable instanceof Person => route('admin.people.edit', $this->contributable),
+            $contributable instanceof LocalTitle => route('admin.titles.edit', $contributable),
+            $contributable instanceof LocalPerson => route('admin.people.edit', $contributable),
             default => null,
         };
     }
 
     public function contributableLabel(): ?string
     {
+        $contributable = $this->resolvedAdminContributable();
+
         return match (true) {
-            $this->contributable instanceof Title => $this->contributable->name,
-            $this->contributable instanceof Person => $this->contributable->name,
+            $contributable instanceof LocalTitle => $contributable->name,
+            $contributable instanceof LocalPerson => $contributable->name,
             default => filled($this->contributable_type) ? Str::headline(class_basename($this->contributable_type)) : null,
         };
+    }
+
+    private function resolvedAdminContributable(): ?Model
+    {
+        if ($this->relationLoaded('adminContributable')) {
+            $resolvedContributable = $this->getRelation('adminContributable');
+
+            return $resolvedContributable instanceof Model ? $resolvedContributable : null;
+        }
+
+        $resolvedContributable = match ($this->contributable_type) {
+            Title::class => LocalTitle::query()
+                ->select(['id', 'name', 'slug'])
+                ->find($this->contributable_id),
+            Person::class => LocalPerson::query()
+                ->select(['id', 'name', 'slug'])
+                ->find($this->contributable_id),
+            default => $this->contributable,
+        };
+
+        $this->setRelation('adminContributable', $resolvedContributable);
+
+        return $resolvedContributable instanceof Model ? $resolvedContributable : null;
     }
 }

@@ -138,7 +138,7 @@
                                             @foreach ($viewerStripAssets as $asset)
                                                 <button
                                                     type="button"
-                                                    class="shrink-0 overflow-hidden rounded-[0.95rem] border {{ $viewerAsset?->id === $asset->id ? 'border-[rgba(214,181,116,0.34)]' : 'border-white/10' }} bg-black/30 transition hover:border-white/20"
+                                                    class="shrink-0 overflow-hidden rounded-[0.95rem] border {{ $viewerAsset?->stableIdentifier() === $asset->stableIdentifier() ? 'border-[rgba(214,181,116,0.34)]' : 'border-white/10' }} bg-black/30 transition hover:border-white/20"
                                                     x-on:click="openLightboxByUrl(@js($asset->url))"
                                                 >
                                                     <img

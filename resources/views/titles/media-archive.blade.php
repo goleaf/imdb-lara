@@ -44,15 +44,20 @@
                         </div>
                     </div>
 
-                    <div class="rounded-[1.2rem] border border-black/5 bg-white/70 p-4 dark:border-white/10 dark:bg-white/[0.03]">
-                        <div class="text-xs uppercase tracking-[0.18em] text-neutral-500 dark:text-neutral-400">Visible archive</div>
+                    <x-ui.card
+                        data-slot="title-media-archive-summary"
+                        class="!max-w-none !rounded-[1.2rem] !border-black/5 !bg-white/70 !p-4 hover:!bg-white/70 dark:!border-white/10 dark:!bg-white/[0.03] dark:hover:!bg-white/[0.03]"
+                    >
+                        <x-ui.badge variant="outline" color="neutral" size="sm" pill :icon="$archiveKind->badgeIcon()">
+                            Visible archive
+                        </x-ui.badge>
                         <div class="mt-2 text-lg font-semibold text-neutral-900 dark:text-neutral-100">
                             {{ number_format($archiveAssetsPagination->total()) }} items
                         </div>
-                        <div class="mt-3 text-sm text-neutral-600 dark:text-neutral-300">
+                        <x-ui.text class="mt-3 text-sm text-neutral-600 dark:text-neutral-300">
                             Open any image to inspect it in the lightbox, then step through the current archive page from the thumb rail.
-                        </div>
-                    </div>
+                        </x-ui.text>
+                    </x-ui.card>
                 </div>
             </x-ui.card>
 
@@ -106,11 +111,15 @@
                                                 @if ($mediaAsset->is_primary || $mediaAsset->published_at)
                                                     <div class="sb-media-card-meta">
                                                         @if ($mediaAsset->is_primary)
-                                                            <span>Primary</span>
+                                                            <x-ui.badge variant="outline" color="amber" size="sm" pill>
+                                                                Primary
+                                                            </x-ui.badge>
                                                         @endif
 
                                                         @if ($mediaAsset->published_at)
-                                                            <span>{{ $mediaAsset->published_at->format('M j, Y') }}</span>
+                                                            <x-ui.badge variant="outline" color="neutral" size="sm" pill icon="calendar-days">
+                                                                {{ $mediaAsset->published_at->format('M j, Y') }}
+                                                            </x-ui.badge>
                                                         @endif
                                                     </div>
                                                 @endif
@@ -174,15 +183,20 @@
                         </div>
                     </div>
 
-                    <div class="rounded-[1.2rem] border border-black/5 bg-white/70 p-4 dark:border-white/10 dark:bg-white/[0.03]">
-                        <div class="text-xs uppercase tracking-[0.18em] text-neutral-500 dark:text-neutral-400">Video archive</div>
+                    <x-ui.card
+                        data-slot="title-media-archive-summary"
+                        class="!max-w-none !rounded-[1.2rem] !border-black/5 !bg-white/70 !p-4 hover:!bg-white/70 dark:!border-white/10 dark:!bg-white/[0.03] dark:hover:!bg-white/[0.03]"
+                    >
+                        <x-ui.badge variant="outline" color="neutral" size="sm" pill icon="play">
+                            Video archive
+                        </x-ui.badge>
                         <div class="mt-2 text-lg font-semibold text-neutral-900 dark:text-neutral-100">
                             {{ number_format($trailerAssetsPagination->total()) }} links
                         </div>
-                        <div class="mt-3 text-sm text-neutral-600 dark:text-neutral-300">
+                        <x-ui.text class="mt-3 text-sm text-neutral-600 dark:text-neutral-300">
                             Every trailer row keeps the external IMDb video link plus the caption, runtime, and publish metadata exposed by the imported feed.
-                        </div>
-                    </div>
+                        </x-ui.text>
+                    </x-ui.card>
                 </div>
             </x-ui.card>
 
@@ -239,25 +253,25 @@
                                         <div class="space-y-2">
                                             <div class="sb-media-trailer-item-copy">{{ $trailerArchiveItem['copy'] }}</div>
 
-                                            <div class="flex flex-wrap items-center gap-2 text-sm text-neutral-600 dark:text-neutral-300">
-                                                <span class="inline-flex items-center rounded-full border border-black/8 px-2.5 py-1 text-xs font-medium dark:border-white/10">
+                                            <div data-slot="title-media-trailer-meta" class="flex flex-wrap items-center gap-2 text-sm text-neutral-600 dark:text-neutral-300">
+                                                <x-ui.badge variant="outline" color="amber" size="sm" pill icon="play">
                                                     {{ $trailerArchiveItem['label'] }}
-                                                </span>
-                                                <span class="inline-flex items-center rounded-full border border-black/8 px-2.5 py-1 text-xs font-medium dark:border-white/10">
+                                                </x-ui.badge>
+                                                <x-ui.badge variant="outline" color="neutral" size="sm" pill icon="film">
                                                     {{ $trailerArchiveItem['kindLabel'] }}
-                                                </span>
-                                                <span class="inline-flex items-center rounded-full border border-black/8 px-2.5 py-1 text-xs font-medium dark:border-white/10">
+                                                </x-ui.badge>
+                                                <x-ui.badge variant="outline" color="slate" size="sm" pill icon="link">
                                                     IMDb
-                                                </span>
+                                                </x-ui.badge>
                                                 @if ($trailerArchiveItem['video']->durationMinutesLabel())
-                                                    <span class="inline-flex items-center rounded-full border border-black/8 px-2.5 py-1 text-xs font-medium dark:border-white/10">
+                                                    <x-ui.badge variant="outline" color="neutral" size="sm" pill icon="clock">
                                                         {{ $trailerArchiveItem['video']->durationMinutesLabel() }}
-                                                    </span>
+                                                    </x-ui.badge>
                                                 @endif
                                                 @if ($trailerArchiveItem['video']->published_at)
-                                                    <span class="inline-flex items-center rounded-full border border-black/8 px-2.5 py-1 text-xs font-medium dark:border-white/10">
+                                                    <x-ui.badge variant="outline" color="neutral" size="sm" pill icon="calendar-days">
                                                         {{ $trailerArchiveItem['video']->published_at->format('M j, Y') }}
-                                                    </span>
+                                                    </x-ui.badge>
                                                 @endif
                                             </div>
                                         </div>

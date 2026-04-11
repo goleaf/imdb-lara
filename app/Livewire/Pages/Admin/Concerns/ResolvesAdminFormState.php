@@ -7,6 +7,22 @@ use App\Models\MediaAsset;
 
 trait ResolvesAdminFormState
 {
+    /**
+     * @return array{
+     *     fieldName: \Closure(string): string,
+     *     fieldOldInputKey: \Closure(string): string,
+     *     fieldStatePath: \Closure(string): string
+     * }
+     */
+    public function adminFormBindingData(?string $prefix = null): array
+    {
+        return [
+            'fieldStatePath' => fn (string $field): string => $this->adminFieldStatePath($prefix, $field),
+            'fieldName' => fn (string $field): string => $this->adminFieldName($prefix, $field),
+            'fieldOldInputKey' => fn (string $field): string => $this->adminFieldOldInputKey($prefix, $field),
+        ];
+    }
+
     public function adminFieldStatePath(?string $prefix, string $field): string
     {
         return filled($prefix)
@@ -48,5 +64,27 @@ trait ResolvesAdminFormState
     public function adminMediaKindIsImage(mixed $kind): bool
     {
         return is_string($kind) && in_array($kind, MediaKind::imageValues(), true);
+    }
+
+    /**
+     * @return array{
+     *     allowedMediaKinds: list<MediaKind>,
+     *     allowedMediaKindsIncludeVideo: bool,
+     *     fieldName: \Closure(string): string,
+     *     fieldOldInputKey: \Closure(string): string,
+     *     fieldStatePath: \Closure(string): string,
+     *     selectedKindIsImage: bool
+     * }
+     */
+    public function adminMediaAssetFormData(MediaAsset $mediaAsset, ?string $prefix = null): array
+    {
+        return [
+            ...$this->adminFormBindingData($prefix),
+            'allowedMediaKinds' => $this->adminAllowedMediaKinds($mediaAsset),
+            'allowedMediaKindsIncludeVideo' => $this->adminAllowedMediaKindsIncludeVideo($mediaAsset),
+            'selectedKindIsImage' => $this->adminMediaKindIsImage(
+                old('kind', $mediaAsset->kind?->value),
+            ),
+        ];
     }
 }

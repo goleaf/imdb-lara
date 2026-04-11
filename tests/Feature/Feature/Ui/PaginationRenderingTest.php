@@ -42,10 +42,10 @@ class PaginationRenderingTest extends TestCase
             ],
         );
 
-        $rendered = $this->view('livewire.pagination.island-simple', [
+        $rendered = (string) $this->view('livewire.pagination.island-simple', [
             'paginator' => $paginator,
             'scrollTo' => false,
-        ])->render();
+        ]);
 
         $this->assertStringContainsString('data-slot="button"', $rendered);
         $this->assertStringContainsString("wire:click=\"nextPage('discover')\"", $rendered);

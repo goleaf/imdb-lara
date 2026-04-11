@@ -8,6 +8,7 @@ use App\Livewire\Pages\Concerns\NormalizesPageViewData;
 use App\Livewire\Pages\Concerns\RendersPageView;
 use App\Models\Credit;
 use App\Models\MovieAwardNominationNominee;
+use App\Models\MovieAwardNominationTitle;
 use App\Models\MovieDirector;
 use App\Models\Person;
 use App\Models\Title;
@@ -24,6 +25,7 @@ class TitlePage extends Component
         'galleryAssets',
         'castPreview',
         'crewGroups',
+        'featuredCastEntries',
         'movieAkaRows',
         'movieAkaAttributeRows',
         'akaAttributeRows',
@@ -32,6 +34,8 @@ class TitlePage extends Component
         'akaTypeEntries',
         'awardCategoryRows',
         'awardEventRows',
+        'awardNomineeEntries',
+        'awardNominationTitleEntries',
         'movieAwardNominationRows',
         'movieAwardNominationNomineeRows',
         'movieAwardNominationTitleRows',
@@ -44,6 +48,7 @@ class TitlePage extends Component
         'movieCompanyCreditAttributeEntries',
         'movieCompanyCreditCountryRows',
         'movieCompanyCreditSummaryRows',
+        'directorEntries',
         'movieDirectorRows',
         'movieEpisodeRows',
         'movieEpisodeSummaryRows',
@@ -152,6 +157,7 @@ class TitlePage extends Component
             'posterLightboxModalId' => 'title-poster-lightbox-'.$this->title?->getKey(),
             'featuredCastEntries' => $this->mapFeaturedCastEntries($data['castPreview']),
             'awardNomineeEntries' => $this->mapAwardNomineeEntries($data['movieAwardNominationNomineeRows']),
+            'awardNominationTitleEntries' => $this->mapAwardNominationTitleEntries($data['movieAwardNominationTitleRows']),
             'directorEntries' => $this->mapDirectorEntries($data['movieDirectorRows']),
             'catalogInternalSectionCount' => $catalogInternalSectionCount,
             'hasCatalogInternals' => $catalogInternalSectionCount > 0,
@@ -279,7 +285,33 @@ class TitlePage extends Component
     }
 
     /**
-     * @param  Collection<int, MovieDirector>  $rows
+     * @param  Collection<int, MovieAwardNominationTitle>  $rows
+     * @return Collection<int, array{
+     *     awardLabel: string,
+     *     awardMeta: string|null,
+     *     titleLabel: string
+     * }>
+     */
+    private function mapAwardNominationTitleEntries(Collection $rows): Collection
+    {
+        return $rows
+            ->map(function (MovieAwardNominationTitle $row): array {
+                $awardNomination = $row->awardNomination;
+
+                return [
+                    'awardLabel' => $awardNomination?->awardCategory?->name ?? '—',
+                    'awardMeta' => collect([
+                        $awardNomination?->awardEvent?->name ?? (filled($awardNomination?->award_year) ? 'Unknown event' : null),
+                        $awardNomination?->award_year,
+                    ])->filter()->implode(' · ') ?: null,
+                    'titleLabel' => $row->title?->name ?? (string) $row->nominated_movie_id,
+                ];
+            })
+            ->values();
+    }
+
+    /**
+     * @param  Collection<int, Credit|MovieDirector>  $rows
      * @return Collection<int, array{
      *     name: string,
      *     headshotUrl: string|null,
@@ -295,13 +327,15 @@ class TitlePage extends Component
     private function mapDirectorEntries(Collection $rows): Collection
     {
         return $rows
-            ->map(function (MovieDirector $row): array {
+            ->map(function (MovieDirector|Credit $row): array {
                 $directorPerson = $row->person;
                 $directorHeadshot = $directorPerson?->preferredHeadshot();
                 $directorName = $directorPerson?->name
-                    ?? $row->nameBasic?->displayName
-                    ?? $row->nameBasic?->primaryname
-                    ?? (string) $row->name_basic_id;
+                    ?? ($row instanceof MovieDirector
+                        ? ($row->nameBasic?->displayName
+                            ?? $row->nameBasic?->primaryname
+                            ?? (string) $row->name_basic_id)
+                        : ($row->credited_as ?? (string) $row->name_basic_id));
 
                 return [
                     'name' => $directorName,

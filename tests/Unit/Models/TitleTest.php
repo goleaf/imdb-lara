@@ -2,6 +2,8 @@
 
 namespace Tests\Unit\Models;
 
+use App\Actions\Admin\BuildAdminTitlesIndexQueryAction;
+use App\Actions\Catalog\BuildPublicTitleIndexQueryAction;
 use App\Enums\TitleType as CatalogTitleType;
 use App\Models\AkaType;
 use App\Models\AwardCategory;
@@ -41,6 +43,7 @@ use App\Models\MovieEpisodeSummary;
 use App\Models\MovieGenre;
 use App\Models\MovieImageSummary;
 use App\Models\MoviePlot;
+use App\Models\Person;
 use App\Models\Title;
 use App\Models\TitleStatistic;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
@@ -77,6 +80,40 @@ class TitleTest extends TestCase
         $this->assertSame(CatalogTitleType::MiniSeries, $miniSeries->title_type);
         $this->assertSame(CatalogTitleType::Series, $pilot->title_type);
         $this->assertSame(CatalogTitleType::Series, $shortSeries->title_type);
+    }
+
+    public function test_catalog_only_schema_is_auto_enabled_for_the_remote_imdb_connection(): void
+    {
+        config()->set('screenbase.catalog_only', false);
+        config()->set('database.default', 'imdb_mysql');
+
+        $this->assertTrue(Title::usesCatalogOnlySchema());
+        $this->assertTrue(Person::usesCatalogOnlySchema());
+    }
+
+    public function test_admin_title_index_query_uses_movies_table_when_remote_imdb_connection_is_active(): void
+    {
+        config()->set('screenbase.catalog_only', false);
+        config()->set('database.default', 'imdb_mysql');
+
+        $sql = app(BuildAdminTitlesIndexQueryAction::class)->handle()->toSql();
+
+        $this->assertStringContainsString('from `movies`', $sql);
+        $this->assertStringNotContainsString('`titles`', $sql);
+    }
+
+    public function test_public_title_index_query_uses_movies_table_when_remote_imdb_connection_is_active(): void
+    {
+        config()->set('screenbase.catalog_only', false);
+        config()->set('database.default', 'imdb_mysql');
+
+        $sql = app(BuildPublicTitleIndexQueryAction::class)->handle([
+            'sort' => 'popular',
+            'types' => [CatalogTitleType::Movie->value],
+        ])->toSql();
+
+        $this->assertStringContainsString('from `movies`', $sql);
+        $this->assertStringNotContainsString('`titles`', $sql);
     }
 
     public function test_display_rating_helpers_use_loaded_statistic_accessors(): void
@@ -421,6 +458,7 @@ class TitleTest extends TestCase
         $this->assertSame([100, 101], $resolvedNominees->pluck('movie_award_nomination_id')->all());
         $this->assertSame([10, 11], $resolvedNominees->pluck('name_basic_id')->all());
         $this->assertSame([1, 2], $resolvedNominees->pluck('position')->all());
+        $this->assertSame([100, 101], $resolvedNominees->map(fn (MovieAwardNominationNominee $nominee): ?int => $nominee->awardNomination?->id)->all());
     }
 
     public function test_resolved_movie_award_nominations_returns_loaded_rows(): void
@@ -639,6 +677,7 @@ class TitleTest extends TestCase
         $this->assertSame([100, 101], $resolvedTitles->pluck('movie_award_nomination_id')->all());
         $this->assertSame([10, 11], $resolvedTitles->pluck('nominated_movie_id')->all());
         $this->assertSame([1, 2], $resolvedTitles->pluck('position')->all());
+        $this->assertSame([100, 101], $resolvedTitles->map(fn (MovieAwardNominationTitle $nominationTitle): ?int => $nominationTitle->awardNomination?->id)->all());
     }
 
     public function test_resolved_certificate_attributes_flattens_loaded_certificate_relations(): void
@@ -742,6 +781,7 @@ class TitleTest extends TestCase
         $this->assertSame([50, 51], $resolvedMovieCertificateAttributes->pluck('movie_certificate_id')->all());
         $this->assertSame([3, 7], $resolvedMovieCertificateAttributes->pluck('certificate_attribute_id')->all());
         $this->assertSame([1, 2], $resolvedMovieCertificateAttributes->pluck('position')->all());
+        $this->assertSame([50, 51], $resolvedMovieCertificateAttributes->map(fn (MovieCertificateAttribute $attribute): ?int => $attribute->movieCertificate?->id)->all());
     }
 
     public function test_resolved_certificate_ratings_flattens_loaded_certificate_relations(): void
@@ -1013,6 +1053,7 @@ class TitleTest extends TestCase
         $this->assertSame([50, 51], $resolvedMovieCompanyCreditAttributes->pluck('movie_company_credit_id')->all());
         $this->assertSame([3, 9], $resolvedMovieCompanyCreditAttributes->pluck('company_credit_attribute_id')->all());
         $this->assertSame([1, 2], $resolvedMovieCompanyCreditAttributes->pluck('position')->all());
+        $this->assertSame([50, 51], $resolvedMovieCompanyCreditAttributes->map(fn (MovieCompanyCreditAttribute $attribute): ?int => $attribute->movieCompanyCredit?->id)->all());
     }
 
     public function test_resolved_movie_company_credit_countries_returns_loaded_bridge_rows(): void
@@ -1050,6 +1091,7 @@ class TitleTest extends TestCase
         $this->assertSame([50, 51], $resolvedMovieCompanyCreditCountries->pluck('movie_company_credit_id')->all());
         $this->assertSame(['US', 'GB'], $resolvedMovieCompanyCreditCountries->pluck('country_code')->all());
         $this->assertSame([1, 2], $resolvedMovieCompanyCreditCountries->pluck('position')->all());
+        $this->assertSame([50, 51], $resolvedMovieCompanyCreditCountries->map(fn (MovieCompanyCreditCountry $country): ?int => $country->movieCompanyCredit?->id)->all());
     }
 
     public function test_resolved_movie_company_credit_summaries_returns_loaded_rows(): void

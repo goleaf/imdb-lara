@@ -155,18 +155,20 @@ class InterestCategory extends ImdbModel
 
     public function preferredDirectoryImage(): ?CatalogMediaAsset
     {
-        if (! filled($this->directory_image_url)) {
+        $directoryImageUrl = $this->getAttributeFromArray('directory_image_url');
+
+        if (! filled($directoryImageUrl)) {
             return null;
         }
 
-        $kind = MediaKind::tryFrom((string) $this->directory_image_type) ?? MediaKind::Gallery;
+        $kind = MediaKind::tryFrom((string) $this->getAttributeFromArray('directory_image_type')) ?? MediaKind::Gallery;
 
         return CatalogMediaAsset::fromCatalog([
             'kind' => $kind->value,
-            'url' => $this->directory_image_url,
+            'url' => $directoryImageUrl,
             'alt_text' => $this->name,
-            'width' => $this->directory_image_width,
-            'height' => $this->directory_image_height,
+            'width' => $this->getAttributeFromArray('directory_image_width'),
+            'height' => $this->getAttributeFromArray('directory_image_height'),
             'position' => 0,
             'is_primary' => true,
         ]);

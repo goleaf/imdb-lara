@@ -51,19 +51,28 @@ class LoadTitleParentsGuideAction
      */
     public function handle(Title $title): array
     {
-        $title->load([
-            'titleImages:id,movie_id,position,url,width,height,type',
-            'primaryImageRecord:movie_id,url,width,height,type',
-            'certificateRecords:id,movie_id,certificate_rating_id,country_code,position',
-            'certificateRecords.certificateRating:id,name',
-            'certificateRecords.movieCertificateAttributes:movie_certificate_id,certificate_attribute_id,position',
-            'certificateRecords.movieCertificateAttributes.certificateAttribute:id,name',
-            'parentsGuideSections:id,movie_id,parents_guide_category_id,position',
-            'parentsGuideSections.parentsGuideCategory:id,code',
-            'parentsGuideSections.movieParentsGuideReviews:id,movie_parents_guide_section_id,text,is_spoiler,position',
-            'parentsGuideSections.movieParentsGuideSeverityBreakdowns:movie_parents_guide_section_id,parents_guide_severity_level_id,vote_count,position',
-            'parentsGuideSections.movieParentsGuideSeverityBreakdowns.parentsGuideSeverityLevel:id,name',
-        ]);
+        if (Title::usesCatalogOnlySchema()) {
+            $title->loadMissing([
+                'titleImages:id,movie_id,position,url,width,height,type',
+                'primaryImageRecord:movie_id,url,width,height,type',
+            ]);
+
+            $this->hydrateCatalogRelations($title);
+        } else {
+            $title->load([
+                'titleImages:id,movie_id,position,url,width,height,type',
+                'primaryImageRecord:movie_id,url,width,height,type',
+                'certificateRecords:id,movie_id,certificate_rating_id,country_code,position',
+                'certificateRecords.certificateRating:id,name',
+                'certificateRecords.movieCertificateAttributes:movie_certificate_id,certificate_attribute_id,position',
+                'certificateRecords.movieCertificateAttributes.certificateAttribute:id,name',
+                'parentsGuideSections:id,movie_id,parents_guide_category_id,position',
+                'parentsGuideSections.parentsGuideCategory:id,code',
+                'parentsGuideSections.movieParentsGuideReviews:id,movie_parents_guide_section_id,text,is_spoiler,position',
+                'parentsGuideSections.movieParentsGuideSeverityBreakdowns:movie_parents_guide_section_id,parents_guide_severity_level_id,vote_count,position',
+                'parentsGuideSections.movieParentsGuideSeverityBreakdowns.parentsGuideSeverityLevel:id,name',
+            ]);
+        }
 
         $poster = $title->preferredPoster();
         $backdrop = $title->preferredBackdrop();
@@ -104,6 +113,48 @@ class LoadTitleParentsGuideAction
                 paginationPageName: null,
             ),
         ];
+    }
+
+    private function hydrateCatalogRelations(Title $title): void
+    {
+        $movieId = (int) $title->getKey();
+
+        $title->setRelation('certificateRecords', MovieCertificate::query()
+            ->select([
+                'id',
+                'movie_id',
+                'certificate_rating_id',
+                'country_code',
+                'position',
+            ])
+            ->where('movie_id', $movieId)
+            ->with([
+                'certificateRating:id,name',
+                'country:code,name',
+                'movieCertificateAttributes:movie_certificate_id,certificate_attribute_id,position',
+                'movieCertificateAttributes.certificateAttribute:id,name',
+            ])
+            ->orderBy('position')
+            ->orderBy('id')
+            ->get());
+
+        $title->setRelation('parentsGuideSections', MovieParentsGuideSection::query()
+            ->select([
+                'id',
+                'movie_id',
+                'parents_guide_category_id',
+                'position',
+            ])
+            ->where('movie_id', $movieId)
+            ->with([
+                'parentsGuideCategory:id,code',
+                'movieParentsGuideReviews:id,movie_parents_guide_section_id,text,is_spoiler,position',
+                'movieParentsGuideSeverityBreakdowns:movie_parents_guide_section_id,parents_guide_severity_level_id,vote_count,position',
+                'movieParentsGuideSeverityBreakdowns.parentsGuideSeverityLevel:id,name',
+            ])
+            ->orderBy('position')
+            ->orderBy('id')
+            ->get());
     }
 
     /**

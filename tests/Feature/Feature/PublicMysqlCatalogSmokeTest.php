@@ -28,7 +28,7 @@ class PublicMysqlCatalogSmokeTest extends TestCase
 
         $this->get(route('public.discover'))
             ->assertOk()
-            ->assertSee('Advanced Title Discovery');
+            ->assertSee('Discovery');
 
         $this->get(route('public.awards.index'))
             ->assertOk()

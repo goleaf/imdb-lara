@@ -84,4 +84,50 @@ class TitleBrowserChartViewDataTest extends TestCase
         $this->assertSame('Science Fiction', $viewData['chartRows'][$title->id]['genres']->first()?->name);
         $this->assertSame('https://images.test/the-matrix-poster.jpg', $viewData['chartRows'][$title->id]['poster']?->url);
     }
+
+    public function test_show_all_collections_are_bounded_by_the_configured_page_size(): void
+    {
+        $title = $this->makeCatalogTitle(
+            attributes: [
+                'id' => 1,
+                'imdb_id' => 'tt0109830',
+                'name' => 'Forrest Gump',
+                'title_type' => 'movie',
+                'release_year' => 1994,
+            ],
+            statistic: $this->makeCatalogStatistic(1, 8.8, 2200000),
+        );
+
+        $action = Mockery::mock(LoadPublicTitleBrowserPageAction::class);
+        $action
+            ->shouldReceive('handleCollectionSafely')
+            ->twice()
+            ->with([
+                'types' => [],
+                'genre' => null,
+                'theme' => null,
+                'year' => null,
+                'country' => null,
+                'sort' => 'trending',
+                'excludeEpisodes' => true,
+            ], 12)
+            ->andReturn([
+                'titles' => new EloquentCollection([$title]),
+                'usingStaleCache' => false,
+                'isUnavailable' => false,
+            ]);
+        $action->shouldReceive('handleSafely')->never();
+
+        $this->app->instance(LoadPublicTitleBrowserPageAction::class, $action);
+
+        $viewData = Livewire::test(TitleBrowser::class, [
+            'sort' => 'trending',
+            'showAll' => true,
+            'displayMode' => 'chart',
+        ])->instance()->viewData();
+
+        $this->assertFalse($viewData['hasPagination']);
+        $this->assertCount(1, $viewData['titles']);
+        $this->assertSame('Forrest Gump', $viewData['titles']->first()?->name);
+    }
 }

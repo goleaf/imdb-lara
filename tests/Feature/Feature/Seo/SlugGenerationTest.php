@@ -100,6 +100,25 @@ class SlugGenerationTest extends TestCase
             ->assertSee($genre->name);
     }
 
+    public function test_catalog_only_genre_binding_returns_null_for_unknown_slugs(): void
+    {
+        $genre = Genre::query()->create([
+            'id' => 1,
+            'name' => 'Science Fiction',
+        ]);
+
+        $resolvedGenre = (new Genre)->resolveRouteBinding($genre->slug, 'slug');
+
+        $this->assertInstanceOf(Genre::class, $resolvedGenre);
+
+        if (! $resolvedGenre instanceof Genre) {
+            return;
+        }
+
+        $this->assertTrue($resolvedGenre->is($genre));
+        $this->assertNull((new Genre)->resolveRouteBinding('missing-genre', 'slug'));
+    }
+
     private function mockCatalogRouteDependencies(Title $title, Person $person): void
     {
         $loadTitleDetails = Mockery::mock(LoadTitleDetailsAction::class);

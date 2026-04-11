@@ -9,9 +9,14 @@
                     <x-ui.heading level="h3" size="md">{{ $review->headline ?: 'Untitled review' }}</x-ui.heading>
                     <div class="text-sm text-neutral-500 dark:text-neutral-400">
                         {{ $review->author->name }} on
-                        <a href="{{ route('public.titles.show', $review->title) }}" class="hover:opacity-80">
-                            {{ $review->title->name }}
-                        </a>
+                        @php($adminTitle = $review->adminTitle)
+                        @if ($adminTitle)
+                            <a href="{{ route('public.titles.show', $adminTitle) }}" class="hover:opacity-80">
+                                {{ $adminTitle->name }}
+                            </a>
+                        @else
+                            <span>{{ $review->title?->name ?? 'Unknown title' }}</span>
+                        @endif
                     </div>
                     <div class="text-sm text-neutral-500 dark:text-neutral-400">
                         {{ number_format($review->helpful_votes_count) }} helpful votes · {{ number_format($review->open_reports_count) }} open reports
@@ -42,7 +47,7 @@
                     <x-ui.label>Review status</x-ui.label>
                     <x-ui.native-select wire:model.live="status">
                         @foreach ($reviewStatuses as $reviewStatus)
-                            <option value="{{ $reviewStatus->value }}">
+                            <option wire:key="review-moderation-status-{{ $reviewStatus->value }}" value="{{ $reviewStatus->value }}">
                                 {{ str($reviewStatus->value)->headline() }}
                             </option>
                         @endforeach

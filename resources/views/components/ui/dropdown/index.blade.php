@@ -24,47 +24,7 @@
 
 <div {{ $attributes }}>
     <div
-        x-data="{
-            open: false,
-            resetFocus:@js($resetFocus),
-            toggle() {
-                if (this.open) {
-                    return this.close()
-                }
-
-                $focus.getFirst().focus()
-                this.open = true
-            },
-            isOpen(){
-                return this.open
-            },
-            close(focusAfter) {
-                if (! this.open) return
-
-                this.open = false;
-
-                focusAfter && this.resetFocus && requestAnimationFrame(() => $focus.getFirst().focus());
-            },
-
-            handleFocusInOut(event) {
-                const panel = this.$refs.panel
-                const button = this.$refs.button
-                const target = event.target
-
-                // If the panel or the button contains the focused element, do nothing
-                if (panel.contains(target) || button.contains(target)) return;
-
-                // If the focus is outside both the panel and button, check DOM order
-                const lastFocusedElement = document.activeElement
-
-                if (this.shouldCloseDropdown(button,panel,lastFocusedElement)) this.close(button);
-            },
-            shouldCloseDropdown(button, panel, lastFocusedElement) {
-                return (!button.contains(lastFocusedElement) && !panel.contains(lastFocusedElement)) &&
-                    (lastFocusedElement && (button.compareDocumentPosition(lastFocusedElement) & Node.DOCUMENT_POSITION_FOLLOWING));    
-            },
-
-        }"
+        x-data="dropdownShell({ resetFocus: @js($resetFocus) })"
         wire:ignore
         x-on:keydown.escape.prevent.stop="close($refs.button)"
         x-on:focusin.window="handleFocusInOut($event)"

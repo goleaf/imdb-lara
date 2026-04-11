@@ -685,7 +685,8 @@
                     </x-ui.card>
                 @endif
 
-                @if ($movieAwardNominationTitleRows->isNotEmpty())
+                @php($awardNominationTitleEntries = $awardNominationTitleEntries ?? collect())
+                @if ($awardNominationTitleEntries->isNotEmpty())
                     <x-ui.card data-slot="title-detail-movie-award-nomination-titles" class="sb-detail-section !max-w-none">
                         <div class="space-y-4">
                             <div>
@@ -705,21 +706,18 @@
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-black/5 bg-white/70 dark:divide-white/10 dark:bg-white/[0.02]">
-                                            @foreach ($movieAwardNominationTitleRows as $movieAwardNominationTitleRow)
+                                            @foreach ($awardNominationTitleEntries as $awardNominationTitleEntry)
                                                 <tr>
                                                     <td class="px-4 py-3 align-top font-medium text-neutral-900 dark:text-neutral-100">
-                                                        {{ $movieAwardNominationTitleRow->movieAwardNomination?->awardCategory?->name ?? '—' }}
-                                                        @if (filled($movieAwardNominationTitleRow->movieAwardNomination?->event?->name) || filled($movieAwardNominationTitleRow->movieAwardNomination?->award_year))
+                                                        {{ $awardNominationTitleEntry['awardLabel'] }}
+                                                        @if (filled($awardNominationTitleEntry['awardMeta']))
                                                             <div class="mt-1 text-xs font-normal text-neutral-500 dark:text-neutral-400">
-                                                                {{ $movieAwardNominationTitleRow->movieAwardNomination?->event?->name ?? 'Unknown event' }}
-                                                                @if (filled($movieAwardNominationTitleRow->movieAwardNomination?->award_year))
-                                                                    · {{ $movieAwardNominationTitleRow->movieAwardNomination?->award_year }}
-                                                                @endif
+                                                                {{ $awardNominationTitleEntry['awardMeta'] }}
                                                             </div>
                                                         @endif
                                                     </td>
                                                     <td class="px-4 py-3 align-top text-neutral-700 dark:text-neutral-200">
-                                                        {{ $movieAwardNominationTitleRow->title?->name ?? $movieAwardNominationTitleRow->nominated_movie_id }}
+                                                        {{ $awardNominationTitleEntry['titleLabel'] }}
                                                     </td>
                                                 </tr>
                                             @endforeach

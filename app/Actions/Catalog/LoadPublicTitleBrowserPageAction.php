@@ -121,17 +121,18 @@ class LoadPublicTitleBrowserPageAction
      *     isUnavailable: bool
      * }
      */
-    public function handleCollection(array $filters): array
+    public function handleCollection(array $filters, int $limit): array
     {
-        $cacheKey = $this->collectionCacheKey($filters);
+        $normalizedLimit = max(1, $limit);
+        $cacheKey = $this->collectionCacheKey($filters, $normalizedLimit);
         $staleCacheKey = $cacheKey.':stale';
 
         /** @var Collection<int, mixed> $cachedPayload */
         $cachedPayload = Cache::remember(
             $cacheKey,
             now()->addMinutes(10),
-            function () use ($filters, $staleCacheKey): Collection {
-                $payload = $this->queryCollectionPayload($filters);
+            function () use ($filters, $normalizedLimit, $staleCacheKey): Collection {
+                $payload = $this->queryCollectionPayload($filters, $normalizedLimit);
 
                 Cache::put($staleCacheKey, $payload, now()->addHours(6));
 
@@ -154,13 +155,14 @@ class LoadPublicTitleBrowserPageAction
      *     isUnavailable: bool
      * }
      */
-    public function handleCollectionSafely(array $filters): array
+    public function handleCollectionSafely(array $filters, int $limit): array
     {
-        $cacheKey = $this->collectionCacheKey($filters);
+        $normalizedLimit = max(1, $limit);
+        $cacheKey = $this->collectionCacheKey($filters, $normalizedLimit);
         $staleCacheKey = $cacheKey.':stale';
 
         try {
-            return $this->handleCollection($filters);
+            return $this->handleCollection($filters, $normalizedLimit);
         } catch (Throwable $exception) {
             if (! CatalogBackendUnavailable::matches($exception)) {
                 throw $exception;
@@ -215,10 +217,11 @@ class LoadPublicTitleBrowserPageAction
      * @param  array<string, mixed>  $filters
      * @return Collection<int, mixed>
      */
-    private function queryCollectionPayload(array $filters): Collection
+    private function queryCollectionPayload(array $filters, int $limit): Collection
     {
         return $this->buildPublicTitleIndexQuery
             ->handle($filters)
+            ->limit($limit)
             ->get();
     }
 
@@ -259,10 +262,11 @@ class LoadPublicTitleBrowserPageAction
     /**
      * @param  array<string, mixed>  $filters
      */
-    private function collectionCacheKey(array $filters): string
+    private function collectionCacheKey(array $filters, int $limit): string
     {
         return 'catalog:title-browser:collection:'.sha1(json_encode([
             'filters' => $this->normalizeFilters($filters),
+            'limit' => $limit,
         ], JSON_THROW_ON_ERROR));
     }
 

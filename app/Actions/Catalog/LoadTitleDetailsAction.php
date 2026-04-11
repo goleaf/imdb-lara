@@ -189,6 +189,18 @@ class LoadTitleDetailsAction
     public function handle(Title $title): array
     {
         $title->loadMissing(Title::catalogDetailRelations());
+
+        if (Title::usesCatalogOnlySchema()) {
+            $title->loadMissing([
+                'interests:imdb_id,name,description,is_subgenre',
+                'interests.interestCategoryInterests:interest_category_id,interest_imdb_id,position',
+                'interests.interestCategoryInterests.interestCategory:id,name',
+                'interests.interestPrimaryImages:interest_imdb_id,url,width,height,type',
+                'interests.interestSimilarInterests:interest_imdb_id,similar_interest_imdb_id,position',
+                'interests.interestSimilarInterests.similar:imdb_id,name,description,is_subgenre',
+            ]);
+        }
+
         $this->loadCreditPreview($title);
         $this->loadAwardHighlights($title);
         $this->hydrateMovieCompanyCreditRelations($title);
@@ -262,17 +274,25 @@ class LoadTitleDetailsAction
         $companyCreditCategoryRows = $title->resolvedCompanyCreditCategories();
         $movieBoxOfficeRows = $title->resolvedMovieBoxOfficeRows();
         $currencyRows = $title->resolvedCurrencies();
-        $countryRows = collect();
+        $countryRows = $title->resolvedCountries();
         $genreRows = $title->resolvedGenres();
         $genreEntries = $this->buildGenreEntries($title, $movieGenreRows, $poster, $backdrop);
-        $interestRows = collect();
-        $interestCategoryRows = collect();
-        $interestCategoryEntries = collect();
-        $interestPrimaryImageRows = collect();
-        $interestSimilarInterestRows = collect();
+        $interestRows = $title->resolvedInterests();
+        $interestCategoryRows = $title->resolvedInterestCategories();
+        $interestCategoryEntries = $this->buildInterestCategoryEntries($title, $interestCategoryRows);
+        $interestPrimaryImageRows = $title->resolvedInterestPrimaryImages();
+        $interestSimilarInterestRows = $title->resolvedInterestSimilarInterests();
         $countries = $title->resolvedCountryItems();
         $languages = $title->resolvedLanguageItems();
-        $interestHighlights = collect();
+        $interestHighlights = $interestRows
+            ->filter(fn (Interest $interest): bool => filled($interest->name))
+            ->take(6)
+            ->map(fn (Interest $interest): array => [
+                'name' => (string) $interest->name,
+                'href' => route('public.search', ['q' => (string) $interest->name]),
+                'isSubgenre' => (bool) $interest->is_subgenre,
+            ])
+            ->values();
         $certificateItems = $movieCertificateRows
             ->map(fn ($certificate): ?array => $certificate->certificateRating?->name
                 ? [
@@ -329,7 +349,7 @@ class LoadTitleDetailsAction
                 'href' => route('public.titles.metadata', $title),
                 'icon' => 'tag',
                 'copy' => 'Interest tags, adjacent themes, and connected titles discovered from catalog metadata.',
-                'status' => '0 interests',
+                'status' => number_format($interestRows->count()).' interests',
             ],
             [
                 'label' => 'Trivia & Goofs',
@@ -627,31 +647,74 @@ class LoadTitleDetailsAction
 
     private function hydrateMovieCompanyCreditRelations(Title $title): void
     {
-        if (! $title->relationLoaded('movieCompanyCredits')) {
+        if (
+            ! $title->relationLoaded('movieCompanyCredits')
+            || ! Title::catalogTablesAvailable('movie_company_credits')
+        ) {
             return;
         }
 
-        $title->movieCompanyCredits->loadMissing([
-            'company:imdb_id,name',
-            'companyCreditCategory:id,name',
-            'movieCompanyCreditAttributes' => fn (Builder $query) => $query
+        $relations = [];
+
+        if (Title::catalogTablesAvailable('companies')) {
+            $relations[] = 'company:imdb_id,name';
+        }
+
+        if (Title::catalogTablesAvailable('company_credit_categories')) {
+            $relations[] = 'companyCreditCategory:id,name';
+        }
+
+        if (Title::catalogTablesAvailable('movie_company_credit_attributes')) {
+            $relations['movieCompanyCreditAttributes'] = fn ($query) => $query
                 ->select(['movie_company_credit_id', 'company_credit_attribute_id', 'position'])
-                ->with([
-                    'companyCreditAttribute:id,name',
-                    'movieCompanyCredit:id,movie_id,company_imdb_id,company_credit_category_id,start_year,end_year',
-                    'movieCompanyCredit.company:imdb_id,name',
-                    'movieCompanyCredit.companyCreditCategory:id,name',
-                ])
-                ->orderBy('position'),
-            'movieCompanyCreditCountries' => fn (Builder $query) => $query
+                ->with((function (): array {
+                    $attributeRelations = [];
+
+                    if (Title::catalogTablesAvailable('company_credit_attributes')) {
+                        $attributeRelations[] = 'companyCreditAttribute:id,name';
+                    }
+
+                    $attributeRelations['movieCompanyCredit'] = fn ($creditQuery) => $creditQuery
+                        ->select([
+                            'id',
+                            'movie_id',
+                            'company_imdb_id',
+                            'company_credit_category_id',
+                            'start_year',
+                            'end_year',
+                        ])
+                        ->with(array_filter([
+                            Title::catalogTablesAvailable('companies') ? 'company:imdb_id,name' : null,
+                            Title::catalogTablesAvailable('company_credit_categories') ? 'companyCreditCategory:id,name' : null,
+                        ]));
+
+                    return $attributeRelations;
+                })())
+                ->orderBy('position');
+        }
+
+        if (Title::catalogTablesAvailable('movie_company_credit_countries')) {
+            $relations['movieCompanyCreditCountries'] = fn ($query) => $query
                 ->select(['movie_company_credit_id', 'country_code', 'position'])
                 ->with([
-                    'movieCompanyCredit:id,movie_id,company_imdb_id,company_credit_category_id,start_year,end_year',
-                    'movieCompanyCredit.company:imdb_id,name',
-                    'movieCompanyCredit.companyCreditCategory:id,name',
+                    'movieCompanyCredit' => fn ($creditQuery) => $creditQuery
+                        ->select([
+                            'id',
+                            'movie_id',
+                            'company_imdb_id',
+                            'company_credit_category_id',
+                            'start_year',
+                            'end_year',
+                        ])
+                        ->with(array_filter([
+                            Title::catalogTablesAvailable('companies') ? 'company:imdb_id,name' : null,
+                            Title::catalogTablesAvailable('company_credit_categories') ? 'companyCreditCategory:id,name' : null,
+                        ])),
                 ])
-                ->orderBy('position'),
-        ]);
+                ->orderBy('position');
+        }
+
+        $title->movieCompanyCredits->loadMissing($relations);
     }
 
     /**
@@ -1070,7 +1133,10 @@ class LoadTitleDetailsAction
 
     private function loadAwardHighlights(Title $title): void
     {
-        if (! Title::usesCatalogOnlySchema()) {
+        if (
+            ! Title::usesCatalogOnlySchema()
+            || ! Title::catalogTablesAvailable('movie_award_nominations')
+        ) {
             $title->setRelation('awardNominations', collect());
 
             return;

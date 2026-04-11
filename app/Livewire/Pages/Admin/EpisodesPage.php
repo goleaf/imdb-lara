@@ -142,6 +142,7 @@ class EpisodesPage extends Component
 
         return $this->renderPageView('admin.episodes.edit', [
             'episode' => $loadedEpisode,
+            'episodeFormData' => $this->adminFormBindingData(),
         ]);
     }
 

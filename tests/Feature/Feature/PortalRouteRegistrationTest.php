@@ -2,6 +2,12 @@
 
 namespace Tests\Feature\Feature;
 
+use App\Http\Controllers\Admin\MediaAssetController;
+use App\Http\Controllers\Admin\ModerationController;
+use App\Http\Controllers\Admin\PersonController;
+use App\Http\Controllers\Admin\PersonProfessionController;
+use App\Http\Controllers\Admin\SeasonController;
+use App\Http\Controllers\Admin\TitleController;
 use App\Livewire\Pages\Admin\AkaAttributeCreatePage;
 use App\Livewire\Pages\Admin\AkaAttributeEditPage;
 use App\Livewire\Pages\Admin\AkaAttributesIndexPage;
@@ -56,34 +62,34 @@ class PortalRouteRegistrationTest extends TestCase
         $this->assertTrue(Route::has('admin.reviews.index'));
         $this->assertTrue(Route::has('admin.reports.index'));
         $this->assertTrue(Route::has('admin.contributions.index'));
-        $this->assertFalse(Route::has('admin.titles.store'));
-        $this->assertFalse(Route::has('admin.titles.update'));
-        $this->assertFalse(Route::has('admin.titles.destroy'));
-        $this->assertFalse(Route::has('admin.people.store'));
-        $this->assertFalse(Route::has('admin.people.update'));
-        $this->assertFalse(Route::has('admin.people.destroy'));
-        $this->assertFalse(Route::has('admin.people.professions.store'));
-        $this->assertFalse(Route::has('admin.professions.update'));
-        $this->assertFalse(Route::has('admin.professions.destroy'));
-        $this->assertFalse(Route::has('admin.credits.store'));
-        $this->assertFalse(Route::has('admin.credits.update'));
-        $this->assertFalse(Route::has('admin.credits.destroy'));
-        $this->assertFalse(Route::has('admin.genres.store'));
-        $this->assertFalse(Route::has('admin.genres.update'));
-        $this->assertFalse(Route::has('admin.genres.destroy'));
-        $this->assertFalse(Route::has('admin.titles.seasons.store'));
-        $this->assertFalse(Route::has('admin.seasons.update'));
-        $this->assertFalse(Route::has('admin.seasons.destroy'));
-        $this->assertFalse(Route::has('admin.seasons.episodes.store'));
-        $this->assertFalse(Route::has('admin.episodes.update'));
-        $this->assertFalse(Route::has('admin.episodes.destroy'));
-        $this->assertFalse(Route::has('admin.titles.media-assets.store'));
-        $this->assertFalse(Route::has('admin.people.media-assets.store'));
-        $this->assertFalse(Route::has('admin.media-assets.update'));
-        $this->assertFalse(Route::has('admin.media-assets.destroy'));
-        $this->assertFalse(Route::has('admin.reviews.update'));
-        $this->assertFalse(Route::has('admin.reports.update'));
-        $this->assertFalse(Route::has('admin.contributions.update'));
+        $this->assertTrue(Route::has('admin.titles.store'));
+        $this->assertTrue(Route::has('admin.titles.update'));
+        $this->assertTrue(Route::has('admin.titles.destroy'));
+        $this->assertTrue(Route::has('admin.people.store'));
+        $this->assertTrue(Route::has('admin.people.update'));
+        $this->assertTrue(Route::has('admin.people.destroy'));
+        $this->assertTrue(Route::has('admin.people.professions.store'));
+        $this->assertTrue(Route::has('admin.professions.update'));
+        $this->assertTrue(Route::has('admin.professions.destroy'));
+        $this->assertTrue(Route::has('admin.credits.store'));
+        $this->assertTrue(Route::has('admin.credits.update'));
+        $this->assertTrue(Route::has('admin.credits.destroy'));
+        $this->assertTrue(Route::has('admin.genres.store'));
+        $this->assertTrue(Route::has('admin.genres.update'));
+        $this->assertTrue(Route::has('admin.genres.destroy'));
+        $this->assertTrue(Route::has('admin.titles.seasons.store'));
+        $this->assertTrue(Route::has('admin.seasons.update'));
+        $this->assertTrue(Route::has('admin.seasons.destroy'));
+        $this->assertTrue(Route::has('admin.seasons.episodes.store'));
+        $this->assertTrue(Route::has('admin.episodes.update'));
+        $this->assertTrue(Route::has('admin.episodes.destroy'));
+        $this->assertTrue(Route::has('admin.titles.media-assets.store'));
+        $this->assertTrue(Route::has('admin.people.media-assets.store'));
+        $this->assertTrue(Route::has('admin.media-assets.update'));
+        $this->assertTrue(Route::has('admin.media-assets.destroy'));
+        $this->assertTrue(Route::has('admin.reviews.update'));
+        $this->assertTrue(Route::has('admin.reports.update'));
+        $this->assertTrue(Route::has('admin.contributions.update'));
         $this->assertTrue(Route::has('public.lists.index'));
         $this->assertTrue(Route::has('public.lists.show'));
         $this->assertTrue(Route::has('public.users.show'));
@@ -127,6 +133,27 @@ class PortalRouteRegistrationTest extends TestCase
 
             $this->assertNotNull($route);
             $this->assertSame($componentClass, $route?->getAction('livewire_component'));
+        }
+    }
+
+    public function test_admin_mutation_routes_point_to_controller_endpoints(): void
+    {
+        $expectedRouteActions = [
+            'admin.titles.store' => TitleController::class.'@store',
+            'admin.titles.seasons.store' => TitleController::class.'@storeSeason',
+            'admin.people.professions.store' => PersonController::class.'@storeProfession',
+            'admin.professions.destroy' => PersonProfessionController::class.'@destroy',
+            'admin.seasons.episodes.store' => SeasonController::class.'@storeEpisode',
+            'admin.media-assets.update' => MediaAssetController::class.'@update',
+            'admin.reports.update' => ModerationController::class.'@updateReport',
+            'admin.contributions.update' => ModerationController::class.'@updateContribution',
+        ];
+
+        foreach ($expectedRouteActions as $routeName => $actionName) {
+            $route = Route::getRoutes()->getByName($routeName);
+
+            $this->assertNotNull($route);
+            $this->assertSame($actionName, $route?->getActionName());
         }
     }
 }

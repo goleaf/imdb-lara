@@ -52,7 +52,7 @@ class BuildCatalogMediaLightboxGroupAction
         ]));
 
         return [
-            'id' => sha1((string) $asset->url.'|'.($asset->kind?->value ?? 'media')),
+            'id' => $asset->stableIdentifier(),
             'url' => (string) $asset->url,
             'altText' => $asset->accessibleAltText(),
             'caption' => $asset->meaningfulCaption(),

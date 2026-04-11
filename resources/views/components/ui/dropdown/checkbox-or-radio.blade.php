@@ -29,8 +29,7 @@
     role="{{ $role }}"
     aria-disabled="{{ $disabled ? 'true' : 'false' }}"
     data-slot="dropdown-item"
-    x-data="{ checked: false }"
-    x-init="queueMicrotask(() => checked = $refs.input.checked)"
+    x-data="dropdownToggleable()"
     x-bind:aria-checked="checked"
     x-on:keydown.enter.prevent.stop="$refs.input.click()"
     x-on:keydown.space.prevent.stop="$refs.input.click()"
@@ -40,7 +39,7 @@
         {{ $attributes->whereStartsWith(['wire:model', 'x-model']) }}
         value="{{ $value }}"
         x-ref="input"
-        x-on:click="checked = !checked"
+        x-on:change="syncFromInput()"
         @if ($name) name="{{ $name }}" @endif
         @disabled($disabled)
         class="peer sr-only"

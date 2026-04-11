@@ -66,7 +66,7 @@
 
 @endphp
 
-<div {{ $attributes->class(Arr::toCssClasses($wrapperClasses)) }} x-modelable="_checked" x-data="{ _checked: @js($checked) }">
+<div {{ $attributes->class(Arr::toCssClasses($wrapperClasses)) }} x-modelable="_checked" x-data="switchState({ checked: @js($checked) })">
     <div class="">
         <!-- Switch -->
         <div class="{{ Arr::toCssClasses($containerClasses) }}">
@@ -74,7 +74,7 @@
                 <button type="button" class="{{ Arr::toCssClasses($switchClasses) }}"
                     x-bind:class="_checked ? '[:where(&)]:bg-neutral-800 [:where(&)]:dark:bg-white {{ $onClass }}' :
                         '{{ $offClass }} [:where(&)]:bg-neutral-300 [:where(&)]:dark:bg-white/10'"
-                    x-on:click="_checked = !_checked" @disabled($disabled) x-bind:aria-_checked="_checked"
+                    x-on:click="toggle()" @disabled($disabled) x-bind:aria-_checked="_checked"
                     role="switch" aria-labelledby="{{ $id }}-label">
                     <span
                         x-bind:class="_checked ?
@@ -101,7 +101,7 @@
 
             <label id="{{ $id }}-label"
                 class="block text-start flex-1 text-sm font-medium text-black dark:text-white cursor-pointer select-none"
-                @if (!$disabled) x-on:click="_checked = !_checked" @endif>
+                @if (!$disabled) x-on:click="toggle()" @endif>
                 {{ $label }}
             </label>
         </div>

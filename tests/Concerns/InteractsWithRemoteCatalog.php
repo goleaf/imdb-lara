@@ -7,9 +7,11 @@ use App\Models\Credit;
 use App\Models\Episode;
 use App\Models\Genre;
 use App\Models\InterestCategory;
+use App\Models\Movie;
 use App\Models\Person;
 use App\Models\Season;
 use App\Models\Title;
+use Illuminate\Support\Facades\Schema;
 use Throwable;
 
 trait InteractsWithRemoteCatalog
@@ -56,9 +58,11 @@ trait InteractsWithRemoteCatalog
 
         return str_contains($message, 'max_connections_per_hour')
             || str_contains($message, 'SQLSTATE[HY000] [1226]')
+            || str_contains($message, 'SQLSTATE[HY000] [2002]')
             || str_contains($message, 'Connection refused')
             || str_contains($message, 'php_network_getaddresses')
-            || str_contains($message, 'No route to host');
+            || str_contains($message, 'No route to host')
+            || str_contains($message, "Table 'imdb.movies' doesn't exist");
     }
 
     protected function remoteCatalogUnavailableReason(Throwable $throwable): string
@@ -67,6 +71,10 @@ trait InteractsWithRemoteCatalog
 
         if (str_contains($message, 'max_connections_per_hour') || str_contains($message, 'SQLSTATE[HY000] [1226]')) {
             return 'the remote MySQL server hit its hourly connection quota';
+        }
+
+        if (str_contains($message, 'SQLSTATE[HY000] [2002]')) {
+            return 'the remote MySQL connection could not be established';
         }
 
         return $message;
@@ -80,6 +88,34 @@ trait InteractsWithRemoteCatalog
         );
 
         $this->markTestSkipped(self::$remoteCatalogAvailabilitySkipReason);
+    }
+
+    protected function shouldSkipBecauseRemoteCatalogTableIsMissing(Throwable $throwable): bool
+    {
+        $message = $throwable->getMessage();
+
+        return str_contains($message, 'Connection: imdb_mysql')
+            && str_contains($message, 'Base table or view not found: 1146')
+            && str_contains($message, "Table 'imdb.");
+    }
+
+    protected function remoteCatalogMissingTableReason(Throwable $throwable): string
+    {
+        $message = preg_replace('/\s+/', ' ', trim($throwable->getMessage()));
+
+        if (preg_match("/Table '([^']+)' doesn't exist/", $message, $matches) === 1) {
+            return $matches[1];
+        }
+
+        return 'an unknown remote table';
+    }
+
+    protected function markRemoteCatalogTableMissing(Throwable $throwable): never
+    {
+        $this->markTestSkipped(sprintf(
+            'Remote IMDb MySQL schema does not expose required table [%s].',
+            $this->remoteCatalogMissingTableReason($throwable),
+        ));
     }
 
     /**
@@ -325,16 +361,23 @@ trait InteractsWithRemoteCatalog
 
     private function sampleTitleWithParentsGuide(): Title
     {
-        $title = Title::query()
-            ->select($this->remoteTitleColumns())
-            ->publishedCatalog()
+        $movieId = Movie::query()
+            ->select(['movies.id'])
             ->where(function ($query): void {
-                $query->whereHas('parentsGuideSections')
-                    ->orWhereHas('certificateRecords');
+                $query->whereHas('movieParentsGuideSections')
+                    ->orWhereHas('movieCertificates');
             })
             ->whereNotNull('movies.primarytitle')
             ->orderBy('movies.id')
-            ->first();
+            ->value('movies.id');
+
+        $title = is_numeric($movieId)
+            ? Title::query()
+                ->select($this->remoteTitleColumns())
+                ->publishedCatalog()
+                ->whereKey((int) $movieId)
+                ->first()
+            : null;
 
         return $title instanceof Title ? $title : $this->sampleTitle();
     }
@@ -474,6 +517,10 @@ trait InteractsWithRemoteCatalog
      */
     private function sampleSeriesHierarchy(): ?array
     {
+        if (! Schema::hasTable('episodes') || ! Schema::hasTable('seasons')) {
+            return null;
+        }
+
         $episodeMeta = Episode::query()
             ->select($this->remoteEpisodeColumns())
             ->whereHas('series', fn ($query) => $query

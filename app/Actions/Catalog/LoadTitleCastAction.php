@@ -49,8 +49,26 @@ class LoadTitleCastAction
      *     crewPageCredits: Collection<int, Credit>,
      *     castBillingGroups: Collection<string, Collection<int, Credit>>,
      *     crewGroups: Collection<string, Collection<int, Credit>>,
-     *     leadCrewGroups: Collection<string, Collection<int, Credit>>,
-     *     technicalCrewGroups: Collection<string, Collection<int, Credit>>,
+     *     leadCrewGroups: Collection<string, Collection<int, array{
+     *         personHref: string,
+     *         personName: string,
+     *         jobLabel: string,
+     *         creditedAs: string|null,
+     *         episodeHref: string|null,
+     *         episodeTitle: string|null,
+     *         billingOrder: int|null,
+     *         isPrincipal: bool
+     *     }>>,
+     *     technicalCrewGroups: Collection<string, Collection<int, array{
+     *         personHref: string,
+     *         personName: string,
+     *         jobLabel: string,
+     *         creditedAs: string|null,
+     *         episodeHref: string|null,
+     *         episodeTitle: string|null,
+     *         billingOrder: int|null,
+     *         isPrincipal: bool
+     *     }>>,
      *     castCount: int,
      *     crewCount: int,
      *     leadCrewCount: int,
@@ -60,7 +78,7 @@ class LoadTitleCastAction
      */
     public function handle(Title $title): array
     {
-        if (config('screenbase.catalog_only', false) && $this->shouldHydrateCatalog($title)) {
+        if (Title::usesCatalogOnlySchema() && $this->shouldHydrateCatalog($title)) {
             try {
                 $title = $this->hydrateTitleCastCatalogAction->handle($title);
             } catch (\Throwable $exception) {
@@ -114,8 +132,8 @@ class LoadTitleCastAction
             'castBillingGroups' => $castPageCredits
                 ->groupBy(fn (Credit $credit): string => $credit->is_principal ? 'Principal Cast' : 'Supporting & Guest'),
             'crewGroups' => $crewGroups,
-            'leadCrewGroups' => $leadCrewGroups,
-            'technicalCrewGroups' => $technicalCrewGroups,
+            'leadCrewGroups' => $this->mapCrewCreditGroups($leadCrewGroups),
+            'technicalCrewGroups' => $this->mapCrewCreditGroups($technicalCrewGroups),
             'castCount' => $castCount,
             'crewCount' => $crewCount,
             'leadCrewCount' => $leadCrewGroups->flatten(1)->count(),
@@ -147,6 +165,23 @@ class LoadTitleCastAction
             ->ordered()
             ->withPersonPreview();
 
+        if (! Credit::usesCatalogOnlySchema()) {
+            $query->with([
+                'episode' => fn ($episodeQuery) => $episodeQuery
+                    ->select([
+                        'id',
+                        'title_id',
+                        'series_id',
+                        'season_id',
+                    ])
+                    ->with([
+                        'title:id,name,slug,title_type,is_published',
+                        'series:id,name,slug,title_type,is_published',
+                        'season:id,series_id,name,slug,season_number',
+                    ]),
+            ]);
+        }
+
         if ($castOnly) {
             return $query->cast();
         }
@@ -154,9 +189,66 @@ class LoadTitleCastAction
         return $query->crew();
     }
 
+    /**
+     * @param  Collection<string, Collection<int, Credit>>  $crewGroups
+     * @return Collection<string, Collection<int, array{
+     *     personHref: string,
+     *     personName: string,
+     *     jobLabel: string,
+     *     creditedAs: string|null,
+     *     episodeHref: string|null,
+     *     episodeTitle: string|null,
+     *     billingOrder: int|null,
+     *     isPrincipal: bool
+     * }>>
+     */
+    private function mapCrewCreditGroups(Collection $crewGroups): Collection
+    {
+        return $crewGroups->map(
+            fn (Collection $departmentCredits): Collection => $departmentCredits
+                ->map(fn (Credit $credit): array => $this->mapCrewCreditEntry($credit))
+                ->values(),
+        );
+    }
+
+    /**
+     * @return array{
+     *     personHref: string,
+     *     personName: string,
+     *     jobLabel: string,
+     *     creditedAs: string|null,
+     *     episodeHref: string|null,
+     *     episodeTitle: string|null,
+     *     billingOrder: int|null,
+     *     isPrincipal: bool
+     * }
+     */
+    private function mapCrewCreditEntry(Credit $credit): array
+    {
+        $episode = $credit->relationLoaded('episode') ? $credit->episode : null;
+        $hasEpisodeLink = $episode?->title && $episode?->series && $episode?->season;
+
+        return [
+            'personHref' => route('public.people.show', $credit->person),
+            'personName' => $credit->person->name,
+            'jobLabel' => $credit->job ?: 'Crew credit',
+            'creditedAs' => $credit->credited_as,
+            'episodeHref' => $hasEpisodeLink
+                ? route('public.episodes.show', [
+                    'series' => $episode->series,
+                    'season' => $episode->season,
+                    'episode' => $episode->title,
+                ])
+                : null,
+            'episodeTitle' => $hasEpisodeLink ? $episode->title->name : null,
+            'billingOrder' => $credit->billing_order,
+            'isPrincipal' => (bool) $credit->is_principal,
+        ];
+    }
+
     private function shouldHydrateCatalog(Title $title): bool
     {
-        if (! config('screenbase.catalog_only', false)) {
+        if (! Title::usesCatalogOnlySchema()) {
             return false;
         }
 

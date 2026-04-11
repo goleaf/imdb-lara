@@ -22,20 +22,19 @@
     x-cloak
 >
     <ul
-        class="grid grid-cols-[auto_auto_1fr] gap-y-1 relative overflow-y-auto data-loading:h-24 px-(--popup-padding) max-h-60"
+        class="grid grid-cols-[auto_auto_1fr] gap-y-1 relative overflow-y-auto px-(--popup-padding) max-h-60"
+        data-slot="options-list"
         x-bind:aria-multiselectable="__isMultiple ? 'true' : 'false'"
         {{ $attributes->whereStartsWith('wire:target') }}
         x-bind:aria-label="@js($label ?? 'Options')"
-        @if (!$preventLoading)
-            wire:loading.attr="data-loading"
-        @endif
         x-rover:options
     >
         {{ $slot }}
 
         {{-- Empty state --}}
         <li
-            class="col-span-full [ul:is([data-loading])_&]:hidden"
+            class="col-span-full"
+            data-slot="options-list-empty"
             x-rover:empty
         >
             @if ($empty instanceof \Illuminate\View\ComponentSlot)

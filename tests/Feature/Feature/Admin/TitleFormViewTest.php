@@ -30,6 +30,7 @@ class TitleFormViewTest extends TestCase
             'title' => $title,
             'titleTypes' => TitleType::cases(),
             'genres' => $genres,
+            'selectedGenreIds' => $title->genres->pluck('id')->all(),
         ]);
 
         $response

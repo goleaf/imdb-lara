@@ -19,10 +19,12 @@ class LivewireLoadingStateConventionTest extends TestCase
             $contents = file_get_contents($viewPath);
 
             $this->assertNotFalse($contents, 'Expected to read '.$viewPath);
-            $this->assertStringContainsString('wire:loading.delay.attr="data-loading" wire:target="titleQuery"', $contents, $viewPath);
+            $this->assertStringContainsString('[&:has(input[data-loading])_[data-slot=title-suggestion-loading]]:block', $contents, $viewPath);
+            $this->assertStringContainsString('data-slot="title-suggestion-loading"', $contents, $viewPath);
+            $this->assertStringContainsString('data-slot="title-suggestion-results"', $contents, $viewPath);
             $this->assertStringContainsString('has-data-loading:[&_[data-slot=manage-list-items-skeletons]]:grid', $contents, $viewPath);
             $this->assertStringContainsString('data-slot="manage-list-items-results"', $contents, $viewPath);
-            $this->assertStringNotContainsString('wire:loading.delay.attr="data-loading" wire:target="addTitle,moveItemUp,moveItemDown,removeTitle,sortItems"', $contents, $viewPath);
+            $this->assertStringNotContainsString('wire:loading.delay.attr="data-loading"', $contents, $viewPath);
         }
     }
 
@@ -159,6 +161,74 @@ class LivewireLoadingStateConventionTest extends TestCase
         }
     }
 
+    public function test_search_results_keys_dynamic_filter_and_result_loops(): void
+    {
+        $contents = file_get_contents(resource_path('views/livewire/search/search-results.blade.php'));
+
+        $this->assertNotFalse($contents);
+        $this->assertStringContainsString('wire:target="clearTitleFilters"', $contents);
+        $this->assertStringContainsString('wire:key="search-type-{{ $typeOption->value }}"', $contents);
+        $this->assertStringContainsString('wire:key="search-genre-{{ $genreOption->id }}"', $contents);
+        $this->assertStringContainsString('wire:key="search-status-{{ $statusOption[\'value\'] }}"', $contents);
+        $this->assertStringContainsString('wire:key="search-title-{{ $title->id }}"', $contents);
+        $this->assertStringContainsString('wire:key="search-person-{{ $person->id }}"', $contents);
+        $this->assertStringContainsString('wire:key="search-interest-category-{{ $interestCategory->id }}"', $contents);
+    }
+
+    public function test_global_search_and_filmography_views_key_their_live_result_loops(): void
+    {
+        $globalSearchContents = file_get_contents(resource_path('views/livewire/search/global-search.blade.php'));
+        $filmographyContents = file_get_contents(resource_path('views/livewire/people/filmography-panel.blade.php'));
+        $filmographyClassContents = file_get_contents(app_path('Livewire/People/FilmographyPanel.php'));
+
+        $this->assertNotFalse($globalSearchContents);
+        $this->assertNotFalse($filmographyContents);
+        $this->assertNotFalse($filmographyClassContents);
+        $this->assertStringContainsString('wire:key="global-search-section-{{ $section[\'key\'] }}"', $globalSearchContents);
+        $this->assertStringContainsString('wire:key="global-search-{{ $section[\'key\'] }}-{{ $suggestion->id }}"', $globalSearchContents);
+        $this->assertStringContainsString('wire:key="filmography-group-{{ $group[\'key\'] }}"', $filmographyContents);
+        $this->assertStringContainsString('wire:key="filmography-row-{{ $row[\'key\'] }}"', $filmographyContents);
+        $this->assertStringContainsString("'key' => \$groupKey", $filmographyClassContents);
+        $this->assertStringContainsString("'key' => \$groupKey.'-'.\$row['title']->getKey()", $filmographyClassContents);
+    }
+
+    public function test_filter_reset_and_inline_admin_actions_scope_loading_feedback(): void
+    {
+        $watchlistContents = file_get_contents(resource_path('views/livewire/account/watchlist-browser.blade.php'));
+        $discoveryContents = file_get_contents(resource_path('views/livewire/search/discovery-filters.blade.php'));
+        $professionEditorContents = file_get_contents(resource_path('views/livewire/admin/person-profession-editor.blade.php'));
+        $manageListContents = file_get_contents(resource_path('views/livewire/lists/manage-list.blade.php'));
+
+        $this->assertNotFalse($watchlistContents);
+        $this->assertNotFalse($discoveryContents);
+        $this->assertNotFalse($professionEditorContents);
+        $this->assertNotFalse($manageListContents);
+        $this->assertStringContainsString('wire:target="clearFilters"', $watchlistContents);
+        $this->assertStringContainsString('wire:key="watchlist-visibility-{{ $visibilityOption[\'value\'] }}"', $watchlistContents);
+        $this->assertStringContainsString('wire:target="clearFilters"', $discoveryContents);
+        $this->assertStringContainsString('wire:key="discover-active-filter-', $discoveryContents);
+        $this->assertStringContainsString('wire:target="save"', $professionEditorContents);
+        $this->assertStringContainsString('wire:target="delete"', $professionEditorContents);
+        $this->assertStringContainsString('wire:key="manage-list-visibility-{{ $visibilityOption[\'value\'] }}"', $manageListContents);
+        $this->assertStringContainsString('wire:target="deleteList"', $manageListContents);
+    }
+
+    public function test_admin_moderation_cards_key_dynamic_status_options(): void
+    {
+        $viewExpectations = [
+            resource_path('views/livewire/admin/report-moderation-card.blade.php') => 'wire:key="report-moderation-status-{{ $reportStatus->value }}"',
+            resource_path('views/livewire/admin/review-moderation-card.blade.php') => 'wire:key="review-moderation-status-{{ $reviewStatus->value }}"',
+            resource_path('views/livewire/admin/contribution-moderation-card.blade.php') => 'wire:key="contribution-moderation-status-{{ $contributionStatus->value }}"',
+        ];
+
+        foreach ($viewExpectations as $viewPath => $expectedString) {
+            $contents = file_get_contents($viewPath);
+
+            $this->assertNotFalse($contents);
+            $this->assertStringContainsString($expectedString, $contents, $viewPath);
+        }
+    }
+
     public function test_search_shells_use_lazy_islands_with_placeholder_fallbacks(): void
     {
         $viewExpectations = [
@@ -173,6 +243,48 @@ class LivewireLoadingStateConventionTest extends TestCase
             $this->assertStringContainsString($lazyIslandDeclaration, $contents, $viewPath);
             $this->assertStringContainsString('@placeholder', $contents, $viewPath);
             $this->assertStringContainsString('@endplaceholder', $contents, $viewPath);
+        }
+    }
+
+    public function test_global_search_component_uses_url_synced_queries_and_computed_view_data(): void
+    {
+        $classPath = app_path('Livewire/Search/GlobalSearch.php');
+        $contents = file_get_contents($classPath);
+
+        $this->assertNotFalse($contents, $classPath);
+        $this->assertStringContainsString('#[Url(as: \'q\')]', $contents, $classPath);
+        $this->assertStringContainsString('#[Locked]', $contents, $classPath);
+        $this->assertStringContainsString('public function viewData(): array', $contents, $classPath);
+        $this->assertStringContainsString("return view('livewire.search.global-search', \$this->viewData);", $contents, $classPath);
+        $this->assertStringNotContainsString("\$this->query = trim((string) request('q'));", $contents, $classPath);
+    }
+
+    public function test_select_and_combobox_shells_rely_on_livewire_four_data_loading_without_view_level_wire_loading_directives(): void
+    {
+        $rootViewExpectations = [
+            resource_path('views/components/ui/select/index.blade.php'),
+            resource_path('views/components/ui/combobox/index.blade.php'),
+        ];
+
+        foreach ($rootViewExpectations as $viewPath) {
+            $contents = file_get_contents($viewPath);
+
+            $this->assertNotFalse($contents, $viewPath);
+            $this->assertStringContainsString('data-loading:[&_[data-slot=options-list-loading]]:flex', $contents, $viewPath);
+            $this->assertStringContainsString('data-loading:[&_[data-slot=option]]:hidden', $contents, $viewPath);
+        }
+
+        $optionsViewExpectations = [
+            resource_path('views/components/ui/select/options.blade.php'),
+            resource_path('views/components/ui/combobox/options.blade.php'),
+        ];
+
+        foreach ($optionsViewExpectations as $viewPath) {
+            $contents = file_get_contents($viewPath);
+
+            $this->assertNotFalse($contents, $viewPath);
+            $this->assertStringContainsString('data-slot="options-list"', $contents, $viewPath);
+            $this->assertStringNotContainsString('wire:loading.attr="data-loading"', $contents, $viewPath);
         }
     }
 

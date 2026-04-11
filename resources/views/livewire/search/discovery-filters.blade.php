@@ -57,7 +57,7 @@
                     </div>
 
                     @if ($this->viewData['activeFilterCount'] > 0)
-                        <x-ui.button type="button" variant="ghost" size="sm" icon="x-mark" wire:click="clearFilters">
+                        <x-ui.button type="button" variant="ghost" size="sm" icon="x-mark" wire:click="clearFilters" wire:target="clearFilters">
                             Clear
                         </x-ui.button>
                     @endif
@@ -87,7 +87,7 @@
                     @if ($this->viewData['activeFilters']->isNotEmpty())
                         <div class="sb-discovery-active-filter-list">
                             @foreach ($this->viewData['activeFilters'] as $activeFilter)
-                                <span class="sb-search-chip sb-search-chip--accent sb-search-chip--tight">
+                                <span wire:key="discover-active-filter-{{ \Illuminate\Support\Str::slug($activeFilter['label']) }}" class="sb-search-chip sb-search-chip--accent sb-search-chip--tight">
                                     <x-ui.icon :name="$activeFilter['icon']" class="size-3" />
                                     {{ $activeFilter['label'] }}
                                 </span>
@@ -440,7 +440,7 @@
                     </div>
 
                     @if ($this->viewData['activeFilterCount'] > 0)
-                        <x-ui.button type="button" variant="ghost" size="sm" icon="x-mark" wire:click="clearFilters">
+                        <x-ui.button type="button" variant="ghost" size="sm" icon="x-mark" wire:click="clearFilters" wire:target="clearFilters">
                             Reset filters
                         </x-ui.button>
                     @endif

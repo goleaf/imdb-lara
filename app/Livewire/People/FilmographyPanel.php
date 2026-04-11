@@ -78,7 +78,8 @@ class FilmographyPanel extends Component
      *     creditCount: int,
      *     episodeLabel: string|null
      * }>}  $groups
-     * @return Collection<int, array{description: string, label: string, rows: Collection<int, array{
+     * @return Collection<int, array{description: string, key: string, label: string, rows: Collection<int, array{
+     *     key: string,
      *     title: Title,
      *     roleSummary: string,
      *     roleLabels: Collection<int, string>,
@@ -90,13 +91,16 @@ class FilmographyPanel extends Component
     private function formatGroups(Collection $groups): Collection
     {
         return $groups->map(function (array $group): array {
+            $groupKey = Str::slug((string) $group['label']);
             $titleCount = $group['rows']->count();
 
             return [
                 ...$group,
+                'key' => $groupKey,
                 'description' => $this->formatCountLabel($titleCount, 'title').' in this credit grouping.',
                 'rows' => $group['rows']->map(fn (array $row): array => [
                     ...$row,
+                    'key' => $groupKey.'-'.$row['title']->getKey(),
                     'creditCountLabel' => $this->formatCountLabel($row['creditCount'], 'credit'),
                 ]),
                 'titleCount' => $titleCount,

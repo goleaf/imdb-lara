@@ -21,7 +21,7 @@ class GetAwardsSpotlightNominationsAction
      */
     public function handle(int $limit = 4): Collection
     {
-        if (! config('screenbase.catalog_only', false)) {
+        if (! Title::usesCatalogOnlySchema()) {
             return collect();
         }
 

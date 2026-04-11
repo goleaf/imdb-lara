@@ -145,14 +145,16 @@ class PeoplePage extends Component
             ]),
         ]);
         $loadedPerson->fill($this->personPayload());
+        $draftMediaAsset = tap(
+            new MediaAsset(Arr::except($this->draftMediaAssetPayload(), ['file'])),
+            fn (MediaAsset $mediaAsset) => $mediaAsset->setRelation('mediable', $loadedPerson),
+        );
 
         return $this->renderPageView('admin.people.edit', [
             'person' => $loadedPerson,
             'defaultProfessionSortOrder' => (($loadedPerson->getRelation('professions')?->max('sort_order') ?? 0) + 1),
-            'draftMediaAsset' => tap(
-                new MediaAsset(Arr::except($this->draftMediaAssetPayload(), ['file'])),
-                fn (MediaAsset $mediaAsset) => $mediaAsset->setRelation('mediable', $loadedPerson),
-            ),
+            'draftMediaAsset' => $draftMediaAsset,
+            'draftMediaAssetFormData' => $this->adminMediaAssetFormData($draftMediaAsset, 'draftMediaAsset'),
         ]);
     }
 

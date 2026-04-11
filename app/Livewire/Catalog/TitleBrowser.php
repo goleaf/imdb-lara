@@ -69,7 +69,7 @@ class TitleBrowser extends Component
         ];
 
         $pageData = $this->showAll
-            ? $this->loadPublicTitleBrowserPage->handleCollectionSafely($filters)
+            ? $this->loadPublicTitleBrowserPage->handleCollectionSafely($filters, $this->perPage)
             : $this->loadPublicTitleBrowserPage->handleSafely(
                 filters: $filters,
                 perPage: $this->perPage,

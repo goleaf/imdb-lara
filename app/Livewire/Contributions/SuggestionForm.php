@@ -118,10 +118,10 @@ class SuggestionForm extends Component
     {
         return match ($this->contributableType) {
             'person' => Person::query()
-                ->select(['id', 'name', 'slug'])
+                ->selectDirectoryColumns()
                 ->findOrFail($this->contributableId),
             default => Title::query()
-                ->select(['id', 'name', 'slug'])
+                ->selectCatalogCardColumns()
                 ->findOrFail($this->contributableId),
         };
     }

@@ -18,7 +18,7 @@
                 </x-ui.text>
             </div>
 
-            @if ($mediaAsset->mediable && $mediaAsset->adminAttachedEditUrl())
+            @if ($mediaAsset->adminAttachedEditUrl())
                 <x-ui.button as="a" :href="$mediaAsset->adminAttachedEditUrl()" variant="outline" icon="arrow-left">
                     Back to attached record
                 </x-ui.button>
@@ -43,7 +43,7 @@
         @else
             <x-ui.card class="!max-w-none">
                 <form wire:submit="saveMediaAsset" enctype="multipart/form-data" class="space-y-6">
-                    @include('admin.media-assets._form')
+                    @include('admin.media-assets._form', ['mediaAsset' => $mediaAsset] + $mediaAssetFormData)
 
                     <div class="flex justify-end">
                         <x-ui.button type="submit" icon="check">

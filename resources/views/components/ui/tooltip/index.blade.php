@@ -3,16 +3,7 @@
     'variant' => 'default',
 ])
 
-<div x-data="{
-        show: false,
-        placement: @js($placement),
-        showTooltip() {
-            this.show = true
-        },
-        hideTooltip() {
-            this.show = false;
-        }
-    }" 
+<div x-data="tooltipComponent({ placement: @js($placement) })"
     {{ $attributes->merge(['class' => 'relative flex']) }}
 >
    <span

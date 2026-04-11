@@ -105,7 +105,7 @@
             </div>
 
             @if ($this->viewData['activeFilterCount'] > 0)
-                <x-ui.button type="button" variant="ghost" size="sm" icon="x-mark" wire:click="clearTitleFilters">
+                <x-ui.button type="button" variant="ghost" size="sm" icon="x-mark" wire:click="clearTitleFilters" wire:target="clearTitleFilters">
                     Clear
                 </x-ui.button>
             @endif
@@ -116,7 +116,7 @@
                 <x-ui.label>Type</x-ui.label>
                 <x-ui.combobox wire:model.live="type" class="sb-filter-control w-full" placeholder="All types" clearable>
                     @foreach ($this->viewData['filterOptions']['titleTypes'] as $typeOption)
-                        <x-ui.combobox.option value="{{ $typeOption->value }}" :icon="$typeOption->icon()">
+                        <x-ui.combobox.option wire:key="search-type-{{ $typeOption->value }}" value="{{ $typeOption->value }}" :icon="$typeOption->icon()">
                             {{ $typeOption->label() }}
                         </x-ui.combobox.option>
                     @endforeach
@@ -127,7 +127,7 @@
                 <x-ui.label>Genre</x-ui.label>
                 <x-ui.combobox wire:model.live="genre" class="sb-filter-control w-full" placeholder="All genres" clearable>
                     @foreach ($this->viewData['filterOptions']['genres'] as $genreOption)
-                        <x-ui.combobox.option value="{{ $genreOption->slug }}" icon="tag">
+                        <x-ui.combobox.option wire:key="search-genre-{{ $genreOption->id }}" value="{{ $genreOption->slug }}" icon="tag">
                             {{ $genreOption->name }}
                         </x-ui.combobox.option>
                     @endforeach
@@ -138,7 +138,7 @@
                 <x-ui.label>Theme</x-ui.label>
                 <x-ui.combobox wire:model.live="theme" class="sb-filter-control w-full" placeholder="All themes" clearable>
                     @foreach ($this->viewData['filterOptions']['interestCategories'] as $interestCategoryOption)
-                        <x-ui.combobox.option value="{{ $interestCategoryOption->slug }}" icon="squares-2x2">
+                        <x-ui.combobox.option wire:key="search-theme-{{ $interestCategoryOption->id }}" value="{{ $interestCategoryOption->slug }}" icon="squares-2x2">
                             {{ $interestCategoryOption->name }}
                         </x-ui.combobox.option>
                     @endforeach
@@ -149,7 +149,7 @@
                 <x-ui.label>From year</x-ui.label>
                 <x-ui.combobox wire:model.live="yearFrom" class="sb-filter-control w-full" placeholder="Any year" clearable>
                     @foreach ($this->viewData['filterOptions']['years'] as $yearOption)
-                        <x-ui.combobox.option value="{{ $yearOption }}" icon="calendar-days">
+                        <x-ui.combobox.option wire:key="search-year-from-{{ $yearOption }}" value="{{ $yearOption }}" icon="calendar-days">
                             {{ $yearOption }}
                         </x-ui.combobox.option>
                     @endforeach
@@ -160,7 +160,7 @@
                 <x-ui.label>To year</x-ui.label>
                 <x-ui.combobox wire:model.live="yearTo" class="sb-filter-control w-full" placeholder="Any year" clearable>
                     @foreach ($this->viewData['filterOptions']['years'] as $yearOption)
-                        <x-ui.combobox.option value="{{ $yearOption }}" icon="calendar-days">
+                        <x-ui.combobox.option wire:key="search-year-to-{{ $yearOption }}" value="{{ $yearOption }}" icon="calendar-days">
                             {{ $yearOption }}
                         </x-ui.combobox.option>
                     @endforeach
@@ -171,7 +171,7 @@
                 <x-ui.label>Sort</x-ui.label>
                 <x-ui.combobox wire:model.live="sort" class="sb-filter-control w-full" placeholder="Sort titles">
                     @foreach ($this->viewData['filterOptions']['sortOptions'] as $sortOption)
-                        <x-ui.combobox.option value="{{ $sortOption['value'] }}" icon="bars-arrow-down">
+                        <x-ui.combobox.option wire:key="search-sort-{{ $sortOption['value'] }}" value="{{ $sortOption['value'] }}" icon="bars-arrow-down">
                             {{ $sortOption['label'] }}
                         </x-ui.combobox.option>
                     @endforeach
@@ -182,7 +182,7 @@
                 <x-ui.label>Minimum rating</x-ui.label>
                 <x-ui.combobox wire:model.live="ratingMin" class="sb-filter-control w-full" placeholder="Any score" clearable>
                     @foreach (range(10, 1) as $ratingFloor)
-                        <x-ui.combobox.option value="{{ $ratingFloor }}" icon="star">
+                        <x-ui.combobox.option wire:key="search-rating-{{ $ratingFloor }}" value="{{ $ratingFloor }}" icon="star">
                             {{ $ratingFloor }}+
                         </x-ui.combobox.option>
                     @endforeach
@@ -193,7 +193,7 @@
                 <x-ui.label>Votes</x-ui.label>
                 <x-ui.combobox wire:model.live="votesMin" class="sb-filter-control w-full" placeholder="Any volume" clearable>
                     @foreach ($this->viewData['filterOptions']['voteThresholdOptions'] as $voteOption)
-                        <x-ui.combobox.option value="{{ $voteOption['value'] }}" icon="users">
+                        <x-ui.combobox.option wire:key="search-votes-{{ $voteOption['value'] }}" value="{{ $voteOption['value'] }}" icon="users">
                             {{ $voteOption['label'] }}
                         </x-ui.combobox.option>
                     @endforeach
@@ -204,7 +204,7 @@
                 <x-ui.label>Runtime</x-ui.label>
                 <x-ui.combobox wire:model.live="runtime" class="sb-filter-control w-full" placeholder="Any runtime" clearable>
                     @foreach ($this->viewData['filterOptions']['runtimeOptions'] as $runtimeOption)
-                        <x-ui.combobox.option value="{{ $runtimeOption['value'] }}" icon="clock">
+                        <x-ui.combobox.option wire:key="search-runtime-{{ $runtimeOption['value'] }}" value="{{ $runtimeOption['value'] }}" icon="clock">
                             {{ $runtimeOption['label'] }}
                         </x-ui.combobox.option>
                     @endforeach
@@ -215,7 +215,7 @@
                 <x-ui.label>Language</x-ui.label>
                 <x-ui.combobox wire:model.live="language" class="sb-filter-control w-full" placeholder="Any language" clearable>
                     @foreach ($this->viewData['filterOptions']['languages'] as $languageOption)
-                        <x-ui.combobox.option value="{{ $languageOption['value'] }}" icon="language">
+                        <x-ui.combobox.option wire:key="search-language-{{ $languageOption['value'] }}" value="{{ $languageOption['value'] }}" icon="language">
                             {{ $languageOption['label'] }}
                         </x-ui.combobox.option>
                     @endforeach
@@ -226,7 +226,7 @@
                 <x-ui.label>Country</x-ui.label>
                 <x-ui.combobox wire:model.live="country" class="sb-filter-control w-full" placeholder="Any country" clearable>
                     @foreach ($this->viewData['filterOptions']['countries'] as $countryOption)
-                        <x-ui.combobox.option value="{{ $countryOption['value'] }}" icon="globe-alt">
+                        <x-ui.combobox.option wire:key="search-country-{{ $countryOption['value'] }}" value="{{ $countryOption['value'] }}" icon="globe-alt">
                             {{ $countryOption['label'] }}
                         </x-ui.combobox.option>
                     @endforeach
@@ -237,7 +237,7 @@
                 <x-ui.label>Series status</x-ui.label>
                 <x-ui.combobox wire:model.live="status" class="sb-filter-control w-full" placeholder="Any status" clearable>
                     @foreach ($this->viewData['filterOptions']['statusOptions'] as $statusOption)
-                        <x-ui.combobox.option value="{{ $statusOption['value'] }}" icon="tv">
+                        <x-ui.combobox.option wire:key="search-status-{{ $statusOption['value'] }}" value="{{ $statusOption['value'] }}" icon="tv">
                             {{ $statusOption['label'] }}
                         </x-ui.combobox.option>
                     @endforeach
@@ -336,7 +336,7 @@
 
                                 <div class="flex flex-wrap gap-2">
                                     @foreach ($this->viewData['topMatch']['record']->professionLabels() as $professionLabel)
-                                        <x-ui.badge variant="outline" color="slate" icon="briefcase">{{ $professionLabel }}</x-ui.badge>
+                                        <x-ui.badge wire:key="search-top-match-profession-{{ \Illuminate\Support\Str::slug($professionLabel) }}" variant="outline" color="slate" icon="briefcase">{{ $professionLabel }}</x-ui.badge>
                                     @endforeach
                                     @if ($this->viewData['topMatch']['record']->nationality)
                                         <x-ui.badge variant="outline" color="neutral" icon="globe-alt">{{ $this->viewData['topMatch']['record']->nationality }}</x-ui.badge>
@@ -387,7 +387,9 @@
 
                 <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                     @foreach ($this->viewData['titles'] as $title)
-                        <x-catalog.title-card :title="$title" />
+                        <div wire:key="search-title-{{ $title->id }}">
+                            <x-catalog.title-card :title="$title" />
+                        </div>
                     @endforeach
                 </div>
 
@@ -409,7 +411,9 @@
 
                 <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                     @foreach ($this->viewData['people'] as $person)
-                        <x-catalog.person-card :person="$person" />
+                        <div wire:key="search-person-{{ $person->id }}">
+                            <x-catalog.person-card :person="$person" />
+                        </div>
                     @endforeach
                 </div>
             </section>
@@ -427,11 +431,13 @@
 
                 <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                     @foreach ($this->viewData['interestCategories'] as $interestCategory)
-                        <x-catalog.interest-category-card :interest-category="$interestCategory">
-                            <x-ui.badge variant="outline" color="neutral" icon="sparkles">
-                                Discovery lane
-                            </x-ui.badge>
-                        </x-catalog.interest-category-card>
+                        <div wire:key="search-interest-category-{{ $interestCategory->id }}">
+                            <x-catalog.interest-category-card :interest-category="$interestCategory">
+                                <x-ui.badge variant="outline" color="neutral" icon="sparkles">
+                                    Discovery lane
+                                </x-ui.badge>
+                            </x-catalog.interest-category-card>
+                        </div>
                     @endforeach
                 </div>
             </section>

@@ -3,6 +3,7 @@
 namespace App\Actions\Catalog;
 
 use App\Models\InterestCategory;
+use App\Models\Title;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -18,7 +19,7 @@ class GetFeaturedInterestCategoriesAction
      */
     public function handle(int $limit = 4, ?int $exceptInterestCategoryId = null): Collection
     {
-        if (! config('screenbase.catalog_only', false)) {
+        if (! Title::usesCatalogOnlySchema()) {
             return new Collection;
         }
 

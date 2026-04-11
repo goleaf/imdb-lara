@@ -2,6 +2,7 @@
 
 namespace App\Actions\Seo;
 
+use App\Models\Title;
 use Illuminate\Contracts\View\Factory as ViewFactory;
 use Illuminate\Support\Facades\Route;
 
@@ -161,7 +162,7 @@ class ResolvePageShellViewDataAction
      */
     private function finalize(array $data): array
     {
-        $catalogOnly = (bool) config('screenbase.catalog_only', false);
+        $catalogOnly = Title::usesCatalogOnlySchema();
         $authShortcutsEnabled = (bool) config('screenbase.shell.auth_shortcuts_enabled', true);
         $adminShortcutsEnabled = (bool) config('screenbase.shell.admin_shortcuts_enabled', true);
         $watchlistShortcutsEnabled = (bool) config('screenbase.shell.watchlist_shortcuts_enabled', true);

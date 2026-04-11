@@ -8,6 +8,7 @@ use App\Models\InterestCategory;
 use App\Models\Person;
 use App\Models\Season;
 use App\Models\Title;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Route;
@@ -39,11 +40,13 @@ class GetSitemapDataAction
      */
     public function handle(): array
     {
+        $releaseYearColumn = Title::usesCatalogOnlySchema() ? 'startyear' : 'release_year';
+
         $titles = Title::query()
-            ->select(['id', 'slug', 'name', 'release_year'])
+            ->selectCatalogCardColumns()
             ->publishedCatalog()
-            ->orderByDesc('release_year')
-            ->orderBy('name')
+            ->orderByDesc(Title::catalogColumn('release_year'))
+            ->orderByCatalogName()
             ->limit(self::TITLE_LIMIT)
             ->get();
         $staticRoutes = collect([
@@ -81,12 +84,12 @@ class GetSitemapDataAction
                     ->get()
                 : new EloquentCollection,
             'years' => Title::query()
-                ->select(['release_year'])
+                ->select([$releaseYearColumn])
                 ->publishedCatalog()
-                ->whereNotNull('release_year')
+                ->whereNotNull(Title::catalogColumn('release_year'))
                 ->distinct()
-                ->orderByDesc('release_year')
-                ->pluck('release_year'),
+                ->orderByDesc(Title::catalogColumn('release_year'))
+                ->pluck($releaseYearColumn),
             'titles' => $titles,
             'titleArchiveUrls' => $titles
                 ->flatMap(function (Title $title): Collection {
@@ -104,11 +107,14 @@ class GetSitemapDataAction
                 ->values(),
             'episodes' => Route::has('public.episodes.show')
                 ? Title::query()
-                    ->select(['id', 'slug', 'name', 'title_type'])
+                    ->selectCatalogCardColumns()
                     ->published()
-                    ->where('title_type', TitleType::Episode->value)
-                    ->with('episodeMeta.series:id,slug,name', 'episodeMeta')
-                    ->orderBy('name')
+                    ->forType(TitleType::Episode)
+                    ->with([
+                        'episodeMeta',
+                        'episodeMeta.series' => fn (Builder $seriesQuery) => $seriesQuery->selectCatalogCardColumns(),
+                    ])
+                    ->orderByCatalogName()
                     ->limit(self::EPISODE_LIMIT)
                     ->get()
                 : new EloquentCollection,

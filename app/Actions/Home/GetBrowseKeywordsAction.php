@@ -14,6 +14,10 @@ class GetBrowseKeywordsAction
      */
     public function handle(int $limit = 12): Collection
     {
+        if (Title::usesCatalogOnlySchema()) {
+            return collect();
+        }
+
         return Cache::remember(
             "home:browse-keywords:{$limit}",
             now()->addMinutes(10),

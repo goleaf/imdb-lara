@@ -9,9 +9,16 @@ use App\Http\Requests\Admin\UpdateMediaAssetRequest;
 use App\Livewire\Pages\Admin\Concerns\ResolvesAdminFormState;
 use App\Livewire\Pages\Admin\Concerns\ValidatesFormRequests;
 use App\Livewire\Pages\Concerns\RendersPageView;
+use App\Models\LocalPerson;
+use App\Models\LocalTitle;
 use App\Models\MediaAsset;
+use App\Models\Person;
+use App\Models\Title;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Pagination\AbstractPaginator;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -64,11 +71,15 @@ class MediaAssetsPage extends Component
 
     protected function renderMediaAssetsIndexPage(BuildAdminMediaAssetsIndexQueryAction $buildAdminMediaAssetsIndexQuery): View
     {
+        $mediaAssets = $buildAdminMediaAssetsIndexQuery
+            ->handle()
+            ->simplePaginate(20)
+            ->withQueryString();
+
+        $this->hydrateAdminMediables($mediaAssets);
+
         return $this->renderPageView('admin.media-assets.index', [
-            'mediaAssets' => $buildAdminMediaAssetsIndexQuery
-                ->handle()
-                ->simplePaginate(20)
-                ->withQueryString(),
+            'mediaAssets' => $mediaAssets,
         ]);
     }
 
@@ -77,6 +88,7 @@ class MediaAssetsPage extends Component
         abort_unless($this->mediaAsset instanceof MediaAsset, 404);
 
         $loadedMediaAsset = $this->mediaAsset->load('mediable');
+        $this->hydrateAdminMediableRelations(collect([$loadedMediaAsset]));
         $loadedMediaAsset->fill(Arr::except($this->mediaAssetPayload(), ['file']));
 
         if ($this->isCatalogOnlyApplication()) {
@@ -87,6 +99,7 @@ class MediaAssetsPage extends Component
 
         return $this->renderPageView('admin.media-assets.edit', [
             'mediaAsset' => $loadedMediaAsset,
+            'mediaAssetFormData' => $this->adminMediaAssetFormData($loadedMediaAsset),
         ]);
     }
 
@@ -165,5 +178,44 @@ class MediaAssetsPage extends Component
             'position' => $this->position,
             'published_at' => $this->published_at,
         ];
+    }
+
+    private function hydrateAdminMediables(AbstractPaginator $mediaAssets): void
+    {
+        /** @var Collection<int, MediaAsset> $items */
+        $items = $mediaAssets->getCollection();
+
+        $this->hydrateAdminMediableRelations($items);
+    }
+
+    /**
+     * @param  Collection<int, MediaAsset>  $mediaAssets
+     */
+    private function hydrateAdminMediableRelations(Collection $mediaAssets): void
+    {
+        $titleAssets = $mediaAssets->where('mediable_type', Title::class);
+        $personAssets = $mediaAssets->where('mediable_type', Person::class);
+
+        $titles = LocalTitle::query()
+            ->select(['id', 'name', 'slug'])
+            ->whereKey($titleAssets->pluck('mediable_id')->filter()->all())
+            ->get()
+            ->keyBy('id');
+
+        $people = LocalPerson::query()
+            ->select(['id', 'name', 'slug'])
+            ->whereKey($personAssets->pluck('mediable_id')->filter()->all())
+            ->get()
+            ->keyBy('id');
+
+        $mediaAssets->each(function (MediaAsset $mediaAsset) use ($titles, $people): void {
+            $resolvedMediable = match ($mediaAsset->mediable_type) {
+                Title::class => $titles->get($mediaAsset->mediable_id),
+                Person::class => $people->get($mediaAsset->mediable_id),
+                default => $mediaAsset->mediable instanceof Model ? $mediaAsset->mediable : null,
+            };
+
+            $mediaAsset->setRelation('adminMediable', $resolvedMediable);
+        });
     }
 }

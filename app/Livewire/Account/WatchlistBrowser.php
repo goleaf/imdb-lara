@@ -133,7 +133,7 @@ class WatchlistBrowser extends Component
         }
 
         $user = auth()->user();
-        $title = Title::query()->select(['id', 'slug'])->findOrFail($titleId);
+        $title = Title::query()->selectCatalogCardColumns()->findOrFail($titleId);
         $watchStateData = $this->getUserWatchStateForTitle->handle($user, $title);
         $currentState = $watchStateData['state'] ?? null;
         $targetState = $currentState === WatchState::Completed
@@ -163,7 +163,7 @@ class WatchlistBrowser extends Component
             return;
         }
 
-        $title = Title::query()->select(['id', 'slug'])->findOrFail($titleId);
+        $title = Title::query()->selectCatalogCardColumns()->findOrFail($titleId);
         $this->toggleWatchlistItem->handle($user, $title);
         $this->statusMessage = 'Removed from watchlist.';
     }

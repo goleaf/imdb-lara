@@ -16,6 +16,10 @@ class GetAwardsSpotlightTitlesAction
      */
     public function handle(int $limit = 4): Collection
     {
+        if (Title::usesCatalogOnlySchema()) {
+            return new Collection;
+        }
+
         return Cache::remember(
             "home:awards-spotlight:{$limit}",
             now()->addMinutes(10),

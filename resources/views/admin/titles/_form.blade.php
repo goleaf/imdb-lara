@@ -1,14 +1,3 @@
-@php
-    $selectedGenreIds = collect(old(
-        'genre_ids',
-        $selectedGenreIds ?? ($title->relationLoaded('genres') ? $title->genres->pluck('id')->all() : []),
-    ))
-        ->filter(fn ($genreId) => filled($genreId))
-        ->map(fn ($genreId) => (int) $genreId)
-        ->values()
-        ->all();
-@endphp
-
 <div class="grid gap-4 lg:grid-cols-2">
     <x-ui.field>
         <x-ui.label>Name</x-ui.label>

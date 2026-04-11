@@ -48,7 +48,7 @@
                 <div class="space-y-4">
                     <x-ui.card class="!max-w-none">
                         <form wire:submit="saveSeason" class="space-y-6">
-                            @include('admin.seasons._form')
+                            @include('admin.seasons._form', ['season' => $season] + $seasonFormData)
 
                             <div class="flex justify-end">
                                 <x-ui.button type="submit" icon="check">
@@ -114,7 +114,7 @@
 
                     <x-ui.card class="!max-w-none">
                         <form wire:submit="saveEpisode" class="space-y-6">
-                            @include('admin.episodes._form', ['episode' => $draftEpisode, 'fieldPrefix' => 'episode'])
+                            @include('admin.episodes._form', ['episode' => $draftEpisode] + $draftEpisodeFormData)
 
                             <div class="flex justify-end">
                                 <x-ui.button type="submit" icon="plus">

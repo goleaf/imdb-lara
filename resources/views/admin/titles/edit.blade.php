@@ -149,7 +149,7 @@
                             </div>
 
                             <form wire:submit="saveDraftMediaAsset" enctype="multipart/form-data" class="space-y-4 rounded-box border border-dashed border-black/10 p-4 dark:border-white/10">
-                                @include('admin.media-assets._form', ['mediaAsset' => $draftMediaAsset, 'statePath' => 'draftMediaAsset'])
+                                @include('admin.media-assets._form', ['mediaAsset' => $draftMediaAsset] + $draftMediaAssetFormData)
 
                                 <div class="flex justify-end">
                                     <x-ui.button type="submit" size="sm" icon="plus">
@@ -200,7 +200,7 @@
                             </div>
 
                             <form wire:submit="saveSeason" class="space-y-6 rounded-box border border-dashed border-black/10 p-4 dark:border-white/10">
-                                @include('admin.seasons._form', ['season' => $draftSeason, 'fieldPrefix' => 'season'])
+                                @include('admin.seasons._form', ['season' => $draftSeason] + $draftSeasonFormData)
 
                                 <div class="flex justify-end">
                                     <x-ui.button type="submit" size="sm" icon="plus">

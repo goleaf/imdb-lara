@@ -49,9 +49,7 @@ class Genre extends Model
     {
         if (Title::usesCatalogOnlySchema() && ($field === null || $field === 'slug')) {
             return $query->where(function ($genreQuery) use ($value): void {
-                if (is_numeric($value)) {
-                    $genreQuery->whereKey((int) $value);
-                }
+                $genreQuery->whereKey(is_numeric($value) ? (int) $value : -1);
 
                 if (is_string($value) && preg_match('/-g(?P<id>\d+)$/', $value, $matches) === 1) {
                     $genreQuery->orWhere($this->qualifyColumn($this->getKeyName()), (int) $matches['id']);

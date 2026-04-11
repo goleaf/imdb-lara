@@ -3,17 +3,24 @@
 namespace App\Livewire\Search;
 
 use App\Actions\Search\BuildGlobalSearchViewDataAction;
+use Illuminate\View\View;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 class GlobalSearch extends Component
 {
+    #[Url(as: 'q')]
     public string $query = '';
 
+    #[Locked]
     public string $searchRoute = '';
 
     /**
      * @var array<string, mixed>
      */
+    #[Locked]
     public array $contextFilters = [];
 
     protected BuildGlobalSearchViewDataAction $buildGlobalSearchViewData;
@@ -26,7 +33,6 @@ class GlobalSearch extends Component
 
     public function mount(): void
     {
-        $this->query = trim((string) request('q'));
         $this->searchRoute = route('public.search');
         $this->contextFilters = request()->routeIs('public.search')
             ? collect(request()->only([
@@ -62,11 +68,17 @@ class GlobalSearch extends Component
         $this->redirectRoute('public.search', ['q' => $query]);
     }
 
-    public function render()
+    #[Computed]
+    public function viewData(): array
     {
-        return view('livewire.search.global-search', [
+        return [
             'searchRoute' => $this->searchRoute,
             ...$this->buildGlobalSearchViewData->handle($this->query, titleFilters: $this->contextFilters),
-        ]);
+        ];
+    }
+
+    public function render(): View
+    {
+        return view('livewire.search.global-search', $this->viewData);
     }
 }

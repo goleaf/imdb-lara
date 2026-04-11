@@ -93,7 +93,7 @@
 
         <div class="space-y-4" data-slot="person-filmography-results">
             @forelse ($groups as $group)
-                <x-ui.card class="sb-detail-section sb-person-filmography-group !max-w-none">
+                <x-ui.card class="sb-detail-section sb-person-filmography-group !max-w-none" wire:key="filmography-group-{{ $group['key'] }}">
                     <div class="space-y-4">
                         <div class="flex flex-wrap items-center justify-between gap-4">
                             <div>
@@ -107,7 +107,7 @@
 
                         <div class="grid gap-3">
                             @foreach ($group['rows'] as $row)
-                                <div class="sb-person-filmography-row">
+                                <div class="sb-person-filmography-row" wire:key="filmography-row-{{ $row['key'] }}">
                                     <a href="{{ route('public.titles.show', $row['title']) }}" class="sb-person-filmography-poster">
                                         @if ($row['title']->preferredPoster())
                                             <img

@@ -36,7 +36,6 @@
         "col-span-full grid grid-cols-subgrid" => !$allowCustomSlots,
         'col-span-full' => $allowCustomSlots,
         '[&[aria-disabled=true]]:pointer-events-none [&[aria-disabled=true]]:opacity-50',
-        '[ul:is([data-loading])>&]:hidden'
     ];
 @endphp
 

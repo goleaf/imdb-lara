@@ -125,7 +125,13 @@ class Person extends Model
             return false;
         }
 
-        return (bool) $container->make('config')->get('screenbase.catalog_only', false);
+        $config = $container->make('config');
+
+        if ((bool) $config->get('screenbase.catalog_only', false)) {
+            return true;
+        }
+
+        return $config->get('database.default') === 'imdb_mysql';
     }
 
     public static function catalogColumn(string $localColumn): string
@@ -393,16 +399,18 @@ class Person extends Model
     public function scopeWithDirectoryMetrics(Builder $query): Builder
     {
         if (static::usesCatalogOnlySchema()) {
-            return $query->addSelect([
-                'credits_count' => NameCreditSummary::query()
-                    ->select('total_count')
-                    ->whereColumn('name_credit_summaries.name_basic_id', 'name_basics.id')
-                    ->limit(1),
-                'popularity_rank' => NameBasicMeterRanking::query()
-                    ->select('current_rank')
-                    ->whereColumn('name_basic_meter_rankings.name_basic_id', 'name_basics.id')
-                    ->limit(1),
-            ]);
+            return $query
+                ->addSelect([
+                    'credits_count' => NameCreditSummary::query()
+                        ->select('total_count')
+                        ->whereColumn('name_credit_summaries.name_basic_id', 'name_basics.id')
+                        ->limit(1),
+                    'popularity_rank' => NameBasicMeterRanking::query()
+                        ->select('current_rank')
+                        ->whereColumn('name_basic_meter_rankings.name_basic_id', 'name_basics.id')
+                        ->limit(1),
+                ])
+                ->withCount('awardNominations');
         }
 
         return $query

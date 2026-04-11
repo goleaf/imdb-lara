@@ -4,6 +4,7 @@ namespace App\Livewire\Pages\Concerns;
 
 use App\Actions\Seo\PageSeoData;
 use App\Actions\Seo\ResolvePageShellViewDataAction;
+use App\Models\Title;
 use Illuminate\Contracts\View\View;
 
 trait RendersPageView
@@ -89,6 +90,6 @@ trait RendersPageView
 
     protected function isCatalogOnlyApplication(): bool
     {
-        return (bool) config('screenbase.catalog_only', false);
+        return Title::usesCatalogOnlySchema();
     }
 }

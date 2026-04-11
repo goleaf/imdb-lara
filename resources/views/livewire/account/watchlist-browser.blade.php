@@ -14,6 +14,7 @@
                     <div class="flex flex-wrap gap-2">
                         @foreach ($summaryBadges as $summaryBadge)
                             <x-ui.badge
+                                wire:key="watchlist-summary-{{ \Illuminate\Support\Str::slug($summaryBadge['label']) }}"
                                 variant="outline"
                                 :color="$summaryBadge['color']"
                                 :icon="$summaryBadge['icon']"
@@ -55,7 +56,7 @@
                                 placeholder="Select visibility"
                             >
                                 @foreach ($visibilityOptions as $visibilityOption)
-                                    <x-ui.combobox.option value="{{ $visibilityOption['value'] }}">
+                                    <x-ui.combobox.option wire:key="watchlist-visibility-{{ $visibilityOption['value'] }}" value="{{ $visibilityOption['value'] }}">
                                         {{ $visibilityOption['label'] }}
                                     </x-ui.combobox.option>
                                 @endforeach
@@ -92,7 +93,7 @@
                     </x-ui.text>
 
                     @if ($hasActiveFilters)
-                        <x-ui.button type="button" variant="ghost" size="sm" wire:click="clearFilters" icon="x-mark">
+                        <x-ui.button type="button" variant="ghost" size="sm" wire:click="clearFilters" wire:target="clearFilters" icon="x-mark">
                             Clear filters
                         </x-ui.button>
                     @endif

@@ -21,17 +21,9 @@
 
 <div 
     @if($autofocus)
-        x-data="{ shown: false }"
+        x-data="popupVisibility()"
         x-modelable="shown"
         x-trap="shown"
-        x-init="
-            $nextTick(() => {
-                let observer = new MutationObserver(() => {
-                    shown = $el._x_isShown 
-                })
-                observer.observe($el, { attributes: true, attributeFilter: ['style'] })
-            })
-        "
     @endif
     {{ $attributes->class(["absolute z-50 bg-white w-full dark:bg-neutral-800 mt-1 backdrop-blur-xl border dark:border-neutral-700 border-neutral-200 rounded-(--popup-round) shadow-lg p-(--popup-padding)"]) }}
     x-transition:enter="transition ease-out duration-200"

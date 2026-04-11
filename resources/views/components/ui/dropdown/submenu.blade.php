@@ -12,22 +12,19 @@
     ]
 @endphp
 
-<div x-data="{ isOpen: false }" 
+<div x-data="dropdownSubmenu()"
     class="{{ Arr::toCssClasses($classes) }}"
     data-slot="dropdown-submenu"
 >
     <x-ui.dropdown.item 
         {{ $attributes->merge([ 'disabled' => $disabled, 'tabindex' => $disabled ? '-1' : '0' ]) }}
         x-ref="trigger"
-        x-on:mouseenter="isOpen = true"
-        x-on:mouseleave="isOpen = false"
-        x-on:focus="isOpen = true"
+        x-on:mouseenter="open()"
+        x-on:mouseleave="close()"
+        x-on:focus="open()"
         x-on:keydown.right.prevent.stop="
-            isOpen = true;
-            $nextTick(() => {
-                const el = $refs.panel;
-                if (el) $focus.focus($focus.within(el).getFirst());
-            })
+            open();
+            focusFirstPanelItem()
         "
         active
     >
@@ -41,10 +38,10 @@
         x-show="isOpen"
         x-ref="panel"
         x-anchor.right-start="$refs.trigger"
-        x-on:mouseenter="isOpen = true"
-        x-on:mouseleave="isOpen = false"
-        x-on:keydown.left.prevent.stop="isOpen = false; $focus.focus($refs.trigger)"
-        x-on:keydown.escape.prevent.stop="isOpen = false; $focus.focus($refs.trigger)"
+        x-on:mouseenter="open()"
+        x-on:mouseleave="close()"
+        x-on:keydown.left.prevent.stop="close(); $focus.focus($refs.trigger)"
+        x-on:keydown.escape.prevent.stop="close(); $focus.focus($refs.trigger)"
         x-on:keydown.down.prevent.stop="$focus.next()"
         x-on:keydown.up.prevent.stop="$focus.prev()"
         x-on:keydown.home.prevent.stop="$focus.first()"

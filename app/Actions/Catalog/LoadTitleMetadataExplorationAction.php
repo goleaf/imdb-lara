@@ -98,7 +98,7 @@ class LoadTitleMetadataExplorationAction
             ->map(fn (Interest $interest): ?string => $interest->name)
             ->filter();
         $fallbackKeywords = $interestKeywords->isEmpty()
-            ? $title->genres->map(fn (Genre $genre): string => $genre->name)
+            ? $title->resolvedGenres()->map(fn (Genre $genre): string => $genre->name)
             : collect();
 
         return $interestKeywords
@@ -370,7 +370,7 @@ class LoadTitleMetadataExplorationAction
      */
     private function buildGenreNeighborsGroup(Title $title, array $excludedTitleIds): ?array
     {
-        $genreNames = $title->genres
+        $genreNames = $title->resolvedGenres()
             ->mapWithKeys(fn (Genre $genre): array => [$genre->getKey() => $genre->name])
             ->all();
 
@@ -389,7 +389,7 @@ class LoadTitleMetadataExplorationAction
 
         $items = $titles
             ->map(function (Title $relatedTitle) use ($genreNames): ?array {
-                $matchedGenres = $relatedTitle->genres
+                $matchedGenres = $relatedTitle->resolvedGenres()
                     ->filter(fn (Genre $genre): bool => array_key_exists($genre->getKey(), $genreNames))
                     ->map(fn (Genre $genre): string => $genre->name)
                     ->values();

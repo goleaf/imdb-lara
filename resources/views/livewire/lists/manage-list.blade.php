@@ -92,7 +92,7 @@
                 </div>
 
                 <div class="flex flex-wrap justify-between gap-3">
-                    <x-ui.button type="button" variant="ghost" wire:click="deleteList" icon="trash">
+                    <x-ui.button type="button" variant="ghost" wire:click="deleteList" wire:target="deleteList" icon="trash">
                         Delete list
                     </x-ui.button>
 
@@ -104,7 +104,7 @@
         </x-ui.card>
 
         <x-ui.card class="!max-w-none">
-            <div class="space-y-4">
+            <div class="space-y-4 [&:has(input[data-loading])_[data-slot=title-suggestion-loading]]:block [&:has(input[data-loading])_[data-slot=title-suggestion-results]]:hidden">
                 <div class="space-y-2">
                     <x-ui.heading level="h2" size="lg">Add titles</x-ui.heading>
                     <x-ui.text class="text-neutral-600 dark:text-neutral-300">
@@ -121,14 +121,14 @@
                     />
                 </x-ui.field>
 
-                <div wire:loading.delay.attr="data-loading" wire:target="titleQuery" class="space-y-2">
-                    <div class="space-y-2 not-data-loading:hidden">
+                <div class="space-y-2">
+                    <div data-slot="title-suggestion-loading" class="hidden space-y-2">
                         @foreach (range(1, 3) as $index)
                             <x-ui.skeleton.text class="w-full" wire:key="list-suggestion-skeleton-{{ $index }}" />
                         @endforeach
                     </div>
 
-                    <div class="space-y-2 in-data-loading:hidden">
+                    <div data-slot="title-suggestion-results" class="space-y-2">
                         @if (filled($titleQuery) && $titleSuggestions->isEmpty())
                             <x-ui.empty class="rounded-box border border-dashed border-black/10 dark:border-white/10">
                                 <x-ui.empty.media>

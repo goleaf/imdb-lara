@@ -127,15 +127,8 @@ $classes = [
 
 /* LOADING LOGIC - START */
 
-// When a button scopes a request with wire:target, bridge that target back to the
-// root element so Tailwind's data-loading selectors can style it consistently.
-$loadingStateAttributes = new \Illuminate\View\ComponentAttributeBag();
-$loadingStateAttributes = $loadingStateAttributes->merge(filled($attributes->get('wire:target')) ? [
-    'wire:loading.attr' => 'data-loading',
-    'wire:target' => $attributes->get('wire:target'),
-] : []);
-
 // Fallback for non-Livewire cases, I believe there use case for this static case beyond we actually need it in demo docs:
+$loadingStateAttributes = new \Illuminate\View\ComponentAttributeBag();
 $loadingStateAttributes = $loadingStateAttributes->merge($loading ? [
     'data-loading' => 'true', // thats 'true' is crucial, boolean true will break the work
 ] : []);

@@ -26,16 +26,21 @@
 
             <div class="grid gap-3">
                 @if ($report->reportable instanceof \App\Models\Review)
+                    @php($reportedTitle = $report->reportable->adminTitle ?? $report->reportable->title)
                     <div class="rounded-box border border-black/5 px-4 py-3 dark:border-white/10">
                         <div class="flex flex-wrap items-start justify-between gap-3">
                             <div class="space-y-1">
                                 <div class="font-medium">
-                                    <a href="{{ route('public.titles.show', $report->reportable->title) }}" class="hover:opacity-80">
+                                    @if ($reportedTitle)
+                                        <a href="{{ route('public.titles.show', $reportedTitle) }}" class="hover:opacity-80">
+                                            {{ $report->reportable->headline ?: 'Untitled review' }}
+                                        </a>
+                                    @else
                                         {{ $report->reportable->headline ?: 'Untitled review' }}
-                                    </a>
+                                    @endif
                                 </div>
                                 <div class="text-sm text-neutral-500 dark:text-neutral-400">
-                                    {{ $report->reportable->author->name }} on {{ $report->reportable->title->name }}
+                                    {{ $report->reportable->author->name }} on {{ $reportedTitle?->name ?? 'Unknown title' }}
                                 </div>
                             </div>
 
@@ -97,7 +102,7 @@
                     <x-ui.label>Report status</x-ui.label>
                     <x-ui.native-select wire:model.live="status">
                         @foreach ($reportStatuses as $reportStatus)
-                            <option value="{{ $reportStatus->value }}">
+                            <option wire:key="report-moderation-status-{{ $reportStatus->value }}" value="{{ $reportStatus->value }}">
                                 {{ str($reportStatus->value)->headline() }}
                             </option>
                         @endforeach

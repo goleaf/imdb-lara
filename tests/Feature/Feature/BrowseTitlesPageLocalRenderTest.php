@@ -86,7 +86,7 @@ class BrowseTitlesPageLocalRenderTest extends TestCase
         $loadPublicTitleBrowserPage
             ->shouldReceive('handleCollectionSafely')
             ->once()
-            ->with($this->expectedTrendingFilters('LT'))
+            ->with($this->expectedTrendingFilters('LT'), 12)
             ->andReturn($this->collectionBrowserData(new EloquentCollection([$title])));
 
         $getFeaturedInterestCategories = Mockery::mock(GetFeaturedInterestCategoriesAction::class);

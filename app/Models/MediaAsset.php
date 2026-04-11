@@ -47,7 +47,11 @@ class MediaAsset extends Model
     {
         return [
             'kind' => MediaKind::class,
+            'width' => 'integer',
+            'height' => 'integer',
+            'duration_seconds' => 'integer',
             'is_primary' => 'boolean',
+            'position' => 'integer',
             'metadata' => 'array',
             'published_at' => 'datetime',
         ];
@@ -56,6 +60,11 @@ class MediaAsset extends Model
     public function mediable(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    public function adminMediable(): MorphTo
+    {
+        return $this->morphTo(__FUNCTION__, 'mediable_type', 'mediable_id');
     }
 
     public function scopeOrdered(Builder $query): Builder
@@ -201,23 +210,46 @@ class MediaAsset extends Model
 
     public function adminAttachedLabel(): string
     {
-        $mediable = $this->mediable;
+        $mediable = $this->resolvedAdminMediable();
 
         return match (true) {
-            $mediable instanceof Title => $mediable->name,
-            $mediable instanceof Person => $mediable->name,
+            $mediable instanceof LocalTitle => $mediable->name,
+            $mediable instanceof LocalPerson => $mediable->name,
             default => class_basename((string) $this->mediable_type).' #'.$this->mediable_id,
         };
     }
 
     public function adminAttachedEditUrl(): ?string
     {
-        $mediable = $this->mediable;
+        $mediable = $this->resolvedAdminMediable();
 
         return match (true) {
-            $mediable instanceof Title => route('admin.titles.edit', $mediable),
-            $mediable instanceof Person => route('admin.people.edit', $mediable),
+            $mediable instanceof LocalTitle => route('admin.titles.edit', $mediable),
+            $mediable instanceof LocalPerson => route('admin.people.edit', $mediable),
             default => null,
         };
+    }
+
+    private function resolvedAdminMediable(): ?Model
+    {
+        if ($this->relationLoaded('adminMediable')) {
+            $resolvedMediable = $this->getRelation('adminMediable');
+
+            return $resolvedMediable instanceof Model ? $resolvedMediable : null;
+        }
+
+        $resolvedMediable = match ($this->mediable_type) {
+            Title::class => LocalTitle::query()
+                ->select(['id', 'name', 'slug'])
+                ->find($this->mediable_id),
+            Person::class => LocalPerson::query()
+                ->select(['id', 'name', 'slug'])
+                ->find($this->mediable_id),
+            default => $this->mediable,
+        };
+
+        $this->setRelation('adminMediable', $resolvedMediable);
+
+        return $resolvedMediable instanceof Model ? $resolvedMediable : null;
     }
 }

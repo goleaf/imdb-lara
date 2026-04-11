@@ -61,7 +61,7 @@
                     <x-ui.label>Status</x-ui.label>
                     <x-ui.native-select wire:model.live="status">
                         @foreach ($contributionStatuses as $contributionStatus)
-                            <option value="{{ $contributionStatus->value }}">
+                            <option wire:key="contribution-moderation-status-{{ $contributionStatus->value }}" value="{{ $contributionStatus->value }}">
                                 {{ str($contributionStatus->value)->headline() }}
                             </option>
                         @endforeach

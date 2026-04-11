@@ -5,6 +5,7 @@ namespace App\Actions\Catalog;
 use App\Actions\Seo\PageSeoData;
 use App\Models\AwardNomination;
 use App\Models\Credit;
+use App\Models\NameBasicAlternativeName;
 use App\Models\Person;
 use App\Models\Title;
 use Illuminate\Support\Collection;
@@ -48,9 +49,17 @@ class LoadPersonDetailsAction
             ->reject(fn ($asset) => $headshot && $asset->url === $headshot->url)
             ->take(8)
             ->values();
-        $alternativeNameRows = collect();
+        $alternativeNameRows = Person::usesCatalogOnlySchema()
+            ? NameBasicAlternativeName::query()
+                ->select(['name_basic_id', 'alternative_name', 'position'])
+                ->where('name_basic_id', $person->getKey())
+                ->orderBy('position')
+                ->orderBy('alternative_name')
+                ->get()
+            : collect();
         $alternateNames = collect($person->imdb_alternative_names)
             ->filter(fn (mixed $value): bool => is_string($value) && $value !== '')
+            ->concat($alternativeNameRows->pluck('alternative_name'))
             ->concat($person->resolvedAlternateNames())
             ->map(fn (mixed $value): string => trim((string) $value))
             ->filter()

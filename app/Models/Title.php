@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use Throwable;
 
 class Title extends Model
 {
@@ -33,6 +34,11 @@ class Title extends Model
     use HasFactory;
 
     use SoftDeletes;
+
+    /**
+     * @var array<string, bool>
+     */
+    private static array $catalogTableAvailabilityCache = [];
 
     /**
      * @var list<string>
@@ -149,7 +155,13 @@ class Title extends Model
             return false;
         }
 
-        return (bool) $container->make('config')->get('screenbase.catalog_only', false);
+        $config = $container->make('config');
+
+        if ((bool) $config->get('screenbase.catalog_only', false)) {
+            return true;
+        }
+
+        return $config->get('database.default') === 'imdb_mysql';
     }
 
     public static function catalogTable(): string
@@ -226,11 +238,21 @@ class Title extends Model
     public static function catalogHeroRelations(): array
     {
         if (static::usesCatalogOnlySchema()) {
-            return [
-                'statistic:movie_id,aggregate_rating,vote_count',
-                'moviePrimaryImage:movie_id,url,width,height,type',
-                'plotRecord:movie_id,plot',
-            ];
+            $relations = [];
+
+            if (static::catalogTablesAvailable('movie_ratings')) {
+                $relations[] = 'statistic:movie_id,aggregate_rating,vote_count';
+            }
+
+            if (static::catalogTablesAvailable('movie_primary_images')) {
+                $relations[] = 'moviePrimaryImage:movie_id,url,width,height,type';
+            }
+
+            if (static::catalogTablesAvailable('movie_plots')) {
+                $relations[] = 'plotRecord:movie_id,plot';
+            }
+
+            return $relations;
         }
 
         return [
@@ -265,10 +287,15 @@ class Title extends Model
     public static function catalogCardRelations(): array
     {
         if (static::usesCatalogOnlySchema()) {
-            return [
+            $relations = [
                 ...self::catalogHeroRelations(),
-                'genres:id,name',
             ];
+
+            if (static::catalogTablesAvailable('movie_genres', 'genres')) {
+                $relations[] = 'genres:id,name';
+            }
+
+            return $relations;
         }
 
         return [
@@ -332,10 +359,6 @@ class Title extends Model
         if (static::usesCatalogOnlySchema()) {
             $relations = [
                 ...self::catalogCardRelations(),
-                'movieAkas' => fn ($query) => $query
-                    ->selectArchiveColumns()
-                    ->withTitleDetailRelations()
-                    ->archiveOrdered(),
                 'credits' => fn ($query) => $query
                     ->select(Credit::projectedColumns())
                     ->ordered()
@@ -346,6 +369,189 @@ class Title extends Model
                             ->with(Person::directoryRelations()),
                     ]),
             ];
+
+            if (static::catalogTablesAvailable('movie_akas')) {
+                $relations['movieAkas'] = fn ($query) => $query
+                    ->selectArchiveColumns()
+                    ->withTitleDetailRelations()
+                    ->archiveOrdered();
+            }
+
+            if (static::catalogTablesAvailable('movie_award_nomination_summaries')) {
+                $relations['awardNominationSummary'] = fn ($query) => $query->select([
+                    'movie_id',
+                    'nomination_count',
+                    'win_count',
+                    'next_page_token',
+                ]);
+            }
+
+            if (static::catalogTablesAvailable('movie_box_office')) {
+                $relations['boxOfficeRecord'] = fn ($query) => $query
+                    ->select([
+                        'movie_id',
+                        'domestic_gross_amount',
+                        'domestic_gross_currency_code',
+                        'worldwide_gross_amount',
+                        'worldwide_gross_currency_code',
+                        'opening_weekend_gross_amount',
+                        'opening_weekend_gross_currency_code',
+                        'opening_weekend_end_year',
+                        'opening_weekend_end_month',
+                        'opening_weekend_end_day',
+                        'production_budget_amount',
+                        'production_budget_currency_code',
+                    ])
+                    ->with(array_filter([
+                        static::catalogTablesAvailable('currencies') ? 'productionBudget:code' : null,
+                        static::catalogTablesAvailable('currencies') ? 'domesticGross:code' : null,
+                        static::catalogTablesAvailable('currencies') ? 'openingWeekendGross:code' : null,
+                        static::catalogTablesAvailable('currencies') ? 'worldwideGross:code' : null,
+                    ]));
+            }
+
+            if (static::catalogTablesAvailable('movie_certificate_summaries')) {
+                $relations['certificateSummary'] = fn ($query) => $query->select([
+                    'movie_id',
+                    'total_count',
+                ]);
+            }
+
+            if (static::catalogTablesAvailable('countries', 'movie_origin_countries')) {
+                $relations[] = 'countries:code,name';
+            }
+
+            if (static::catalogTablesAvailable('movie_company_credit_summaries')) {
+                $relations['companyCreditSummary'] = fn ($query) => $query->select([
+                    'movie_id',
+                    'total_count',
+                    'next_page_token',
+                ]);
+            }
+
+            if (static::catalogTablesAvailable('movie_certificates', 'certificate_ratings')) {
+                $relations['certificateRecords'] = fn ($query) => $query
+                    ->select([
+                        'id',
+                        'movie_id',
+                        'certificate_rating_id',
+                        'country_code',
+                        'position',
+                    ])
+                    ->with((function (): array {
+                        $certificateRelations = [
+                            'certificateRating:id,name',
+                        ];
+
+                        if (static::catalogTablesAvailable('countries')) {
+                            $certificateRelations[] = 'country:code,name';
+                        }
+
+                        if (static::catalogTablesAvailable('movie_certificate_attributes')) {
+                            $certificateRelations['movieCertificateAttributes'] = fn ($attributeQuery) => $attributeQuery
+                                ->select([
+                                    'movie_certificate_id',
+                                    'certificate_attribute_id',
+                                    'position',
+                                ])
+                                ->with(array_filter([
+                                    static::catalogTablesAvailable('certificate_attributes') ? 'certificateAttribute:id,name' : null,
+                                ]))
+                                ->orderBy('position')
+                                ->orderBy('certificate_attribute_id');
+                        }
+
+                        return $certificateRelations;
+                    })())
+                    ->orderBy('position')
+                    ->orderBy('id');
+            }
+
+            if (static::catalogTablesAvailable('movie_episode_summaries')) {
+                $relations['episodeSummary'] = fn ($query) => $query->select([
+                    'movie_id',
+                    'total_count',
+                    'next_page_token',
+                ]);
+            }
+
+            if (static::catalogTablesAvailable('movie_company_credits')) {
+                $relations['movieCompanyCredits'] = fn ($query) => $query
+                    ->select([
+                        'id',
+                        'movie_id',
+                        'company_imdb_id',
+                        'company_credit_category_id',
+                        'start_year',
+                        'end_year',
+                        'position',
+                    ])
+                    ->with(array_filter([
+                        static::catalogTablesAvailable('companies') ? 'company:imdb_id,name' : null,
+                        static::catalogTablesAvailable('company_credit_categories') ? 'companyCreditCategory:id,name' : null,
+                    ]))
+                    ->orderBy('position')
+                    ->orderBy('id');
+            }
+
+            if (static::catalogTablesAvailable('movie_directors')) {
+                $relations['movieDirectors'] = fn ($query) => $query
+                    ->select([
+                        'movie_id',
+                        'name_basic_id',
+                        'position',
+                    ])
+                    ->with([
+                        'nameBasic:id,imdb_id,primaryname,displayName,primaryImage_url,primaryImage_width,primaryImage_height',
+                        'person' => fn ($personQuery) => $personQuery
+                            ->select(Person::directoryColumns())
+                            ->with(Person::directoryRelations()),
+                    ])
+                    ->orderBy('position')
+                    ->orderBy('name_basic_id');
+            }
+
+            if (static::catalogTablesAvailable('movie_episodes')) {
+                $relations['movieEpisodes'] = fn ($query) => $query
+                    ->select([
+                        'episode_movie_id',
+                        'movie_id',
+                        'season',
+                        'episode_number',
+                        'release_year',
+                        'release_month',
+                        'release_day',
+                    ])
+                    ->orderBy('season')
+                    ->orderBy('episode_number')
+                    ->orderBy('episode_movie_id');
+            }
+
+            if (static::catalogTablesAvailable('movie_genres', 'genres')) {
+                $relations['movieGenres'] = fn ($query) => $query
+                    ->select([
+                        'movie_id',
+                        'genre_id',
+                        'position',
+                    ])
+                    ->with([
+                        'genre:id,name',
+                    ])
+                    ->orderBy('position')
+                    ->orderBy('genre_id');
+            }
+
+            if (static::catalogTablesAvailable('languages', 'movie_spoken_languages')) {
+                $relations[] = 'languages:code,name';
+            }
+
+            if (static::catalogTablesAvailable('movie_image_summaries')) {
+                $relations['imageSummary'] = fn ($query) => $query->select([
+                    'movie_id',
+                    'total_count',
+                    'next_page_token',
+                ]);
+            }
 
             if (static::catalogSeriesRelationsAvailable()) {
                 $relations['seasons'] = fn ($query) => $query
@@ -720,6 +926,18 @@ class Title extends Model
         return $query->select(self::catalogCardColumns());
     }
 
+    public function scopeOrderByCatalogName(Builder $query): Builder
+    {
+        return $query
+            ->orderBy(self::catalogColumn('sort_title'))
+            ->orderBy(self::catalogColumn('name'));
+    }
+
+    public function scopeWhereReleaseYear(Builder $query, int $year): Builder
+    {
+        return $query->where(self::catalogColumn('release_year'), $year);
+    }
+
     public function scopeWithCatalogCardRelations(Builder $query): Builder
     {
         return $query->with(self::catalogCardRelations());
@@ -999,6 +1217,67 @@ class Title extends Model
             static::usesCatalogOnlySchema() ? 'movie_id' : 'title_id',
             'id',
         )->ordered();
+    }
+
+    public function awardNominationSummary(): HasOne
+    {
+        return $this->hasOne(MovieAwardNominationSummary::class, 'movie_id', 'id');
+    }
+
+    public function certificateSummary(): HasOne
+    {
+        return $this->hasOne(MovieCertificateSummary::class, 'movie_id', 'id');
+    }
+
+    public function certificateRecords(): HasMany
+    {
+        return $this->hasMany(MovieCertificate::class, 'movie_id', 'id')
+            ->orderBy('position')
+            ->orderBy('id');
+    }
+
+    public function companyCreditSummary(): HasOne
+    {
+        return $this->hasOne(MovieCompanyCreditSummary::class, 'movie_id', 'id');
+    }
+
+    public function movieCompanyCredits(): HasMany
+    {
+        return $this->hasMany(MovieCompanyCredit::class, 'movie_id', 'id')
+            ->orderBy('position')
+            ->orderBy('id');
+    }
+
+    public function movieDirectors(): HasMany
+    {
+        return $this->hasMany(MovieDirector::class, 'movie_id', 'id')
+            ->orderBy('position')
+            ->orderBy('name_basic_id');
+    }
+
+    public function episodeSummary(): HasOne
+    {
+        return $this->hasOne(MovieEpisodeSummary::class, 'movie_id', 'id');
+    }
+
+    public function movieEpisodes(): HasMany
+    {
+        return $this->hasMany(MovieEpisode::class, 'movie_id', 'id')
+            ->orderBy('season')
+            ->orderBy('episode_number')
+            ->orderBy('episode_movie_id');
+    }
+
+    public function movieGenres(): HasMany
+    {
+        return $this->hasMany(MovieGenre::class, 'movie_id', 'id')
+            ->orderBy('position')
+            ->orderBy('genre_id');
+    }
+
+    public function imageSummary(): HasOne
+    {
+        return $this->hasOne(MovieImageSummary::class, 'movie_id', 'id');
     }
 
     public function titleTranslations(): HasMany
@@ -1344,7 +1623,16 @@ class Title extends Model
     public function resolvedMovieAwardNominationNominees(): SupportCollection
     {
         return $this->resolvedMovieAwardNominations()
-            ->flatMap(fn (AwardNomination $awardNomination): SupportCollection => $this->loadedRelationItems($awardNomination, 'movieAwardNominationNominees'))
+            ->flatMap(function (AwardNomination $awardNomination): SupportCollection {
+                return $this->loadedRelationItems($awardNomination, 'movieAwardNominationNominees')
+                    ->map(function (mixed $nominee) use ($awardNomination): mixed {
+                        if ($nominee instanceof MovieAwardNominationNominee) {
+                            $nominee->setRelation('awardNomination', $awardNomination);
+                        }
+
+                        return $nominee;
+                    });
+            })
             ->filter(fn (mixed $nominee): bool => $nominee instanceof MovieAwardNominationNominee)
             ->unique(fn (MovieAwardNominationNominee $nominee): string => implode('|', [
                 $nominee->movie_award_nomination_id,
@@ -1364,7 +1652,16 @@ class Title extends Model
     public function resolvedMovieAwardNominationTitles(): SupportCollection
     {
         return $this->resolvedMovieAwardNominations()
-            ->flatMap(fn (AwardNomination $awardNomination): SupportCollection => $this->loadedRelationItems($awardNomination, 'movieAwardNominationTitles'))
+            ->flatMap(function (AwardNomination $awardNomination): SupportCollection {
+                return $this->loadedRelationItems($awardNomination, 'movieAwardNominationTitles')
+                    ->map(function (mixed $nominationTitle) use ($awardNomination): mixed {
+                        if ($nominationTitle instanceof MovieAwardNominationTitle) {
+                            $nominationTitle->setRelation('awardNomination', $awardNomination);
+                        }
+
+                        return $nominationTitle;
+                    });
+            })
             ->filter(fn (mixed $nominationTitle): bool => $nominationTitle instanceof MovieAwardNominationTitle)
             ->unique(fn (MovieAwardNominationTitle $nominationTitle): string => implode('|', [
                 $nominationTitle->movie_award_nomination_id,
@@ -1419,7 +1716,16 @@ class Title extends Model
     public function resolvedMovieCertificateAttributes(): SupportCollection
     {
         return $this->resolvedMovieCertificates()
-            ->flatMap(fn (MovieCertificate $certificate): SupportCollection => $this->loadedRelationItems($certificate, 'movieCertificateAttributes'))
+            ->flatMap(function (MovieCertificate $certificate): SupportCollection {
+                return $this->loadedRelationItems($certificate, 'movieCertificateAttributes')
+                    ->map(function (mixed $attribute) use ($certificate): mixed {
+                        if ($attribute instanceof MovieCertificateAttribute) {
+                            $attribute->setRelation('movieCertificate', $certificate);
+                        }
+
+                        return $attribute;
+                    });
+            })
             ->filter(fn (mixed $attribute): bool => $attribute instanceof MovieCertificateAttribute)
             ->unique(fn (MovieCertificateAttribute $attribute): string => implode('|', [
                 $attribute->movie_certificate_id,
@@ -1464,7 +1770,16 @@ class Title extends Model
     public function resolvedMovieCompanyCreditAttributes(): SupportCollection
     {
         return $this->resolvedMovieCompanyCredits()
-            ->flatMap(fn (MovieCompanyCredit $credit): SupportCollection => $this->loadedRelationItems($credit, 'movieCompanyCreditAttributes'))
+            ->flatMap(function (MovieCompanyCredit $credit): SupportCollection {
+                return $this->loadedRelationItems($credit, 'movieCompanyCreditAttributes')
+                    ->map(function (mixed $attribute) use ($credit): mixed {
+                        if ($attribute instanceof MovieCompanyCreditAttribute) {
+                            $attribute->setRelation('movieCompanyCredit', $credit);
+                        }
+
+                        return $attribute;
+                    });
+            })
             ->filter(fn (mixed $attribute): bool => $attribute instanceof MovieCompanyCreditAttribute)
             ->unique(fn (MovieCompanyCreditAttribute $attribute): string => implode('|', [
                 $attribute->movie_company_credit_id,
@@ -1484,7 +1799,16 @@ class Title extends Model
     public function resolvedMovieCompanyCreditCountries(): SupportCollection
     {
         return $this->resolvedMovieCompanyCredits()
-            ->flatMap(fn (MovieCompanyCredit $credit): SupportCollection => $this->loadedRelationItems($credit, 'movieCompanyCreditCountries'))
+            ->flatMap(function (MovieCompanyCredit $credit): SupportCollection {
+                return $this->loadedRelationItems($credit, 'movieCompanyCreditCountries')
+                    ->map(function (mixed $country) use ($credit): mixed {
+                        if ($country instanceof MovieCompanyCreditCountry) {
+                            $country->setRelation('movieCompanyCredit', $credit);
+                        }
+
+                        return $country;
+                    });
+            })
             ->filter(fn (mixed $country): bool => $country instanceof MovieCompanyCreditCountry)
             ->unique(fn (MovieCompanyCreditCountry $country): string => implode('|', [
                 $country->movie_company_credit_id,
@@ -1852,13 +2176,44 @@ class Title extends Model
         };
     }
 
-    private static function catalogSeriesRelationsAvailable(): bool
+    public static function catalogTablesAvailable(string ...$tables): bool
     {
-        return once(function (): bool {
+        if (! static::usesCatalogOnlySchema()) {
+            return true;
+        }
+
+        $normalizedTables = array_values(array_unique(array_filter($tables)));
+
+        if ($normalizedTables === []) {
+            return true;
+        }
+
+        sort($normalizedTables);
+
+        $cacheKey = implode('|', $normalizedTables);
+
+        if (array_key_exists($cacheKey, static::$catalogTableAvailabilityCache)) {
+            return static::$catalogTableAvailabilityCache[$cacheKey];
+        }
+
+        try {
             $schema = Schema::connection('imdb_mysql');
 
-            return $schema->hasTable('seasons') && $schema->hasTable('episodes');
-        });
+            foreach ($normalizedTables as $table) {
+                if (! $schema->hasTable($table)) {
+                    return static::$catalogTableAvailabilityCache[$cacheKey] = false;
+                }
+            }
+
+            return static::$catalogTableAvailabilityCache[$cacheKey] = true;
+        } catch (Throwable) {
+            return static::$catalogTableAvailabilityCache[$cacheKey] = false;
+        }
+    }
+
+    private static function catalogSeriesRelationsAvailable(): bool
+    {
+        return static::catalogTablesAvailable('seasons', 'episodes');
     }
 
     public static function catalogTypeFromRemote(?string $remoteType): TitleType

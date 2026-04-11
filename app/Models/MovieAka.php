@@ -62,22 +62,35 @@ class MovieAka extends ImdbModel
 
     public function scopeWithTitleDetailRelations(Builder $query): Builder
     {
-        return $query->with([
-            'country:code,name',
-            'language:code,name',
-            'movieAkaAttributes' => fn ($movieAkaAttributeQuery) => $movieAkaAttributeQuery
+        $relations = [];
+
+        if (Title::catalogTablesAvailable('countries')) {
+            $relations[] = 'country:code,name';
+        }
+
+        if (Title::catalogTablesAvailable('languages')) {
+            $relations[] = 'language:code,name';
+        }
+
+        if (Title::catalogTablesAvailable('movie_aka_attributes')) {
+            $relations['movieAkaAttributes'] = fn ($movieAkaAttributeQuery) => $movieAkaAttributeQuery
                 ->select(['movie_aka_id', 'aka_attribute_id', 'position'])
                 ->ordered()
-                ->with([
-                    'akaAttribute:id,name',
-                ]),
-            'movieAkaTypes' => fn ($movieAkaTypeQuery) => $movieAkaTypeQuery
+                ->with(array_filter([
+                    Title::catalogTablesAvailable('aka_attributes') ? 'akaAttribute:id,name' : null,
+                ]));
+        }
+
+        if (Title::catalogTablesAvailable('movie_aka_types')) {
+            $relations['movieAkaTypes'] = fn ($movieAkaTypeQuery) => $movieAkaTypeQuery
                 ->select(['movie_aka_id', 'aka_type_id', 'position'])
                 ->ordered()
-                ->with([
-                    'akaType:id,name',
-                ]),
-        ]);
+                ->with(array_filter([
+                    Title::catalogTablesAvailable('aka_types') ? 'akaType:id,name' : null,
+                ]));
+        }
+
+        return $query->with($relations);
     }
 
     public function scopeWithArchiveRelations(Builder $query): Builder

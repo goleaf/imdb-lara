@@ -13,15 +13,17 @@ class GetBrowseYearsAction
      */
     public function handle(int $limit = 12): Collection
     {
+        $releaseYearColumn = Title::usesCatalogOnlySchema() ? 'startyear' : 'release_year';
+
         return Cache::remember(
             "home:browse-years:{$limit}",
             now()->addMinutes(10),
             fn (): Collection => Title::query()
-                ->select(['release_year'])
+                ->select([$releaseYearColumn])
                 ->publishedCatalog()
-                ->whereNotNull('release_year')
-                ->orderByDesc('release_year')
-                ->pluck('release_year')
+                ->whereNotNull(Title::catalogColumn('release_year'))
+                ->orderByDesc(Title::catalogColumn('release_year'))
+                ->pluck($releaseYearColumn)
                 ->countBy()
                 ->sortKeysDesc()
                 ->take($limit)

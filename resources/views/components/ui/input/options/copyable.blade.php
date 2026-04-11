@@ -1,19 +1,5 @@
-<x-ui.input.options.button      
-    x-data="{ 
-        copied: false,
-        async doCopy() {
-            try {
-                const input = $el.closest('[data-slot=input-actions]').parentElement.querySelector('input[data-control-id=input]');
-                if (!input?.value) return;
-                
-                await navigator.clipboard.writeText(input.value);
-                this.copied = true;
-                setTimeout(() => this.copied = false, 2000);
-            } catch (error) {
-                console.warn('Failed to copy to clipboard:', error);
-            }
-        }
-    }"
+<x-ui.input.options.button
+    x-data="inputCopyAction()"
     x-on:click="doCopy()"
     x-bind:data-slot-copied="copied"
     x-bind:aria-label="copied ? 'Copied!' : 'Copy to clipboard'"

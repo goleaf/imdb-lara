@@ -40,7 +40,7 @@ class GetGlobalSearchSuggestionsAction
         $limit = max(1, min($perGroup, 6));
 
         return [
-            'interestCategories' => config('screenbase.catalog_only', false)
+            'interestCategories' => Title::usesCatalogOnlySchema()
                 ? $this->buildPublicInterestCategoryIndexQuery
                     ->handle([
                         'search' => $query,

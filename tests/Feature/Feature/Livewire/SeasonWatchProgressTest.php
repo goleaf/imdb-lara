@@ -4,7 +4,6 @@ namespace Tests\Feature\Feature\Livewire;
 
 use App\Livewire\Seasons\WatchProgressPanel;
 use App\Models\Season;
-use App\Models\Title;
 use App\Models\User;
 use Database\Seeders\DemoCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -19,8 +18,12 @@ class SeasonWatchProgressTest extends TestCase
     {
         $this->seed(DemoCatalogSeeder::class);
 
-        $series = Title::query()->where('slug', 'static-bloom')->firstOrFail();
-        $season = Season::query()->where('slug', 'static-bloom-season-1')->firstOrFail();
+        $season = Season::query()
+            ->with(['series', 'episodes'])
+            ->has('episodes')
+            ->orderBy('id')
+            ->firstOrFail();
+        $series = $season->series()->firstOrFail();
         $member = User::query()->where('email', 'member@example.com')->firstOrFail();
 
         Livewire::test(WatchProgressPanel::class, [
@@ -42,8 +45,12 @@ class SeasonWatchProgressTest extends TestCase
     {
         $this->seed(DemoCatalogSeeder::class);
 
-        $series = Title::query()->where('slug', 'static-bloom')->firstOrFail();
-        $season = Season::query()->where('slug', 'static-bloom-season-1')->firstOrFail();
+        $season = Season::query()
+            ->with(['series', 'episodes'])
+            ->has('episodes')
+            ->orderBy('id')
+            ->firstOrFail();
+        $series = $season->series()->firstOrFail();
 
         Livewire::test(WatchProgressPanel::class, [
             'series' => $series,
@@ -57,11 +64,12 @@ class SeasonWatchProgressTest extends TestCase
     {
         $this->seed(DemoCatalogSeeder::class);
 
-        $series = Title::query()->where('slug', 'static-bloom')->firstOrFail();
         $season = Season::query()
-            ->where('slug', 'static-bloom-season-1')
-            ->with('episodes')
+            ->with(['series', 'episodes'])
+            ->has('episodes')
+            ->orderBy('id')
             ->firstOrFail();
+        $series = $season->series()->firstOrFail();
         $member = User::query()->where('email', 'member@example.com')->firstOrFail();
         $watchlist = $member->watchlist()->firstOrFail();
 

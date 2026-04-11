@@ -111,6 +111,15 @@ abstract class TestCase extends BaseTestCase
                 $this->markRemoteCatalogUnavailable($throwable);
             }
 
+            if (
+                $this->supportsRemoteCatalogTestContract()
+                && method_exists($this, 'shouldSkipBecauseRemoteCatalogTableIsMissing')
+                && $this->shouldSkipBecauseRemoteCatalogTableIsMissing($throwable)
+                && method_exists($this, 'markRemoteCatalogTableMissing')
+            ) {
+                $this->markRemoteCatalogTableMissing($throwable);
+            }
+
             throw $throwable;
         }
     }
@@ -127,6 +136,16 @@ abstract class TestCase extends BaseTestCase
             && method_exists($this, 'markRemoteCatalogUnavailable')
         ) {
             $this->markRemoteCatalogUnavailable($response->exception);
+        }
+
+        if (
+            $this->supportsRemoteCatalogTestContract()
+            && $response->exception instanceof Throwable
+            && method_exists($this, 'shouldSkipBecauseRemoteCatalogTableIsMissing')
+            && $this->shouldSkipBecauseRemoteCatalogTableIsMissing($response->exception)
+            && method_exists($this, 'markRemoteCatalogTableMissing')
+        ) {
+            $this->markRemoteCatalogTableMissing($response->exception);
         }
 
         return $response;

@@ -109,7 +109,7 @@ class ManageList extends Component
         $this->authorize('update', $this->list);
 
         $title = Title::query()
-            ->select(['id', 'slug'])
+            ->selectCatalogCardColumns()
             ->published()
             ->findOrFail($titleId);
 

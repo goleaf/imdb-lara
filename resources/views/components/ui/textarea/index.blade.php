@@ -45,54 +45,8 @@
 
 
 <textarea
-    x-data="{
-        initialHeight: @js($initialHeight) + 'rem',
-        height: @js($initialHeight) + 'rem',
-        name: @js($name),
-        state: '',
-        resize() {
-            if (!this.$el) return;
-            this.$el.style.height = 'auto';
-            let newHeight = this.$el.scrollHeight + 'px';
-
-            if (this.$el.scrollHeight < parseFloat(this.initialHeight)) {
-                this.$el.style.height = this.initialHeight;
-            } else {
-                this.$el.style.height = newHeight;
-            }
-        }
-    }"
-    x-init="
-        $nextTick(() => {
-            // Initialize state from x-model or wire:model binding
-            this.state = this.$root?._x_model?.get();
-        })
-
-        // Two-way data binding: sync internal state back to Alpine/Livewire
-        $watch('state', (value) => {
-            // Sync with Alpine.js x-model
-            this.$root?._x_model?.set(value);
-                
-            // Sync with Livewire wire:model (if present)
-            let wireModel = this?.$root.getAttributeNames().find(n => n.startsWith('wire:model'))
-                
-            if(this.$wire && wireModel){
-                let prop = this.$root.getAttribute(wireModel)
-                this.$wire.set(prop, value, wireModel?.includes('.live'));
-            }
-        });
-
-        if(!this.$el) return;
-
-        // give our textarea initial height based on the provided rows
-        this.$el.style.height = this.initialHeight;
-
-        const observer = new ResizeObserver(() => {
-            this.resize();
-        });
-
-        observer.observe(this.$el);
-    "
+    x-data="textareaAutosize({ initialHeight: @js($initialHeight), name: @js($name) })"
+    x-init="init()"
     {{ $attributes->class(Arr::toCssClasses($classes)) }}
     @disabled($disabled)
     @if ($invalid) aria-invalid="true" data-slot="invalid" @endif

@@ -79,7 +79,7 @@ class BuildSearchResultsViewDataAction
                 report($throwable);
             }
         }
-        $interestCategories = mb_strlen($searchQuery) >= 2 && config('screenbase.catalog_only', false)
+        $interestCategories = mb_strlen($searchQuery) >= 2 && Title::usesCatalogOnlySchema()
             ? $this->buildPublicInterestCategoryIndexQuery->handle([
                 'search' => $searchQuery,
                 'sort' => 'popular',
