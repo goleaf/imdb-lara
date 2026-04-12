@@ -3,8 +3,13 @@
 namespace App\Actions\Admin;
 
 use App\Actions\Admin\Concerns\NormalizesAdminAttributes;
+use App\Actions\Admin\Concerns\ResolvesLocalCatalogWriteModels;
 use App\Enums\MediaKind;
+use App\Models\LocalPerson;
+use App\Models\LocalTitle;
 use App\Models\MediaAsset;
+use App\Models\Person;
+use App\Models\Title;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -13,12 +18,19 @@ use Illuminate\Support\Str;
 class SaveMediaAssetAction
 {
     use NormalizesAdminAttributes;
+    use ResolvesLocalCatalogWriteModels;
 
     /**
      * @param  array<string, mixed>  $attributes
      */
     public function handle(MediaAsset $mediaAsset, Model $mediable, array $attributes): MediaAsset
     {
+        $mediable = match (true) {
+            $mediable instanceof Title => $this->resolveLocalTitle($mediable),
+            $mediable instanceof Person => $this->resolveLocalPerson($mediable),
+            default => $mediable,
+        };
+
         $attributes = $this->normalizeAttributes($attributes);
         $uploadedFile = $attributes['file'] ?? null;
 
@@ -170,7 +182,11 @@ class SaveMediaAssetAction
 
     private function storageDirectory(Model $mediable, MediaKind $kind): string
     {
-        $mediableSegment = Str::plural(Str::kebab(class_basename($mediable)));
+        $mediableSegment = Str::plural(Str::kebab(class_basename(match (true) {
+            $mediable instanceof LocalTitle => Title::class,
+            $mediable instanceof LocalPerson => Person::class,
+            default => $mediable::class,
+        })));
         $slug = $mediable->getAttribute('slug');
         $identifier = $mediable->getKey();
 

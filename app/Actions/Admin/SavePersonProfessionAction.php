@@ -3,12 +3,15 @@
 namespace App\Actions\Admin;
 
 use App\Actions\Admin\Concerns\NormalizesAdminAttributes;
+use App\Actions\Admin\Concerns\ResolvesLocalCatalogWriteModels;
+use App\Models\LocalPersonProfession;
 use App\Models\Person;
 use App\Models\PersonProfession;
 
 class SavePersonProfessionAction
 {
     use NormalizesAdminAttributes;
+    use ResolvesLocalCatalogWriteModels;
 
     /**
      * @param  array<string, mixed>  $attributes
@@ -17,6 +20,8 @@ class SavePersonProfessionAction
     {
         $attributes = $this->normalizeAttributes($attributes);
         $attributes['is_primary'] = (bool) ($attributes['is_primary'] ?? false);
+        $person = $this->resolveLocalPerson($person);
+        $profession = $profession->exists ? $this->resolveLocalPersonProfession($profession) : new LocalPersonProfession;
 
         if ($attributes['is_primary']) {
             $person->professions()

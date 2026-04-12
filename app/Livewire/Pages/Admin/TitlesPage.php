@@ -19,12 +19,14 @@ use App\Livewire\Pages\Admin\Concerns\ResolvesAdminFormState;
 use App\Livewire\Pages\Admin\Concerns\ValidatesFormRequests;
 use App\Livewire\Pages\Concerns\RendersPageView;
 use App\Models\Genre;
+use App\Models\LocalTitle;
 use App\Models\MediaAsset;
 use App\Models\Season;
 use App\Models\Title;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -37,6 +39,9 @@ class TitlesPage extends Component
     use WithFileUploads;
 
     public ?Title $title = null;
+
+    #[Locked]
+    public ?int $titleRecordId = null;
 
     public string $name = '';
 
@@ -92,6 +97,7 @@ class TitlesPage extends Component
     public function mount(?Title $title = null): void
     {
         $this->title = $title;
+        $this->titleRecordId = $title?->getKey();
         $this->fillTitleForm($title ?? new Title(['is_published' => true, 'title_type' => TitleType::Movie]));
         $this->initializeDraftSeason();
         $this->initializeDraftMediaAsset();
@@ -209,17 +215,20 @@ class TitlesPage extends Component
 
     public function saveTitle(StoreTitleAction $storeTitle, UpdateTitleAction $updateTitle): mixed
     {
-        $validated = $this->title instanceof Title
+        $persistedTitle = $this->persistedTitle();
+
+        $validated = $persistedTitle instanceof LocalTitle
             ? $this->validateWithFormRequest(UpdateTitleRequest::class, $this->titlePayload(), [
-                'title' => $this->title,
+                'title' => $persistedTitle,
             ])
             : $this->validateWithFormRequest(StoreTitleRequest::class, $this->titlePayload());
 
-        $savedTitle = $this->title instanceof Title
-            ? $updateTitle->handle($this->title, $validated)
+        $savedTitle = $persistedTitle instanceof LocalTitle
+            ? $updateTitle->handle($persistedTitle, $validated)
             : $storeTitle->handle($validated);
 
         $this->title = $savedTitle;
+        $this->titleRecordId = $savedTitle->getKey();
         $this->fillTitleForm($savedTitle);
         $this->initializeDraftSeason();
         $this->initializeDraftMediaAsset();
@@ -231,17 +240,18 @@ class TitlesPage extends Component
 
     public function saveSeason(SaveSeasonAction $saveSeason): void
     {
-        abort_unless($this->title instanceof Title, 404);
+        $title = $this->persistedTitle();
+        abort_unless($title instanceof LocalTitle, 404);
 
         $validated = $this->validateWithFormRequest(
             StoreSeasonRequest::class,
             ['season' => $this->season],
-            ['title' => $this->title],
+            ['title' => $title],
         );
 
-        $saveSeason->handle(new Season, $this->title, $validated['season']);
+        $saveSeason->handle(new Season, $title, $validated['season']);
 
-        $this->title->refresh();
+        $this->title = $title->fresh();
         $this->initializeDraftSeason();
         $this->resetValidation();
         session()->flash('status', 'Season added.');
@@ -249,17 +259,18 @@ class TitlesPage extends Component
 
     public function saveDraftMediaAsset(SaveMediaAssetAction $saveMediaAsset): void
     {
-        abort_unless($this->title instanceof Title, 404);
+        $title = $this->persistedTitle();
+        abort_unless($title instanceof LocalTitle, 404);
 
         $validated = $this->validateWithFormRequest(
             StoreMediaAssetRequest::class,
             $this->draftMediaAssetPayload(),
-            ['title' => $this->title],
+            ['title' => $title],
         );
 
-        $saveMediaAsset->handle(new MediaAsset, $this->title, $validated);
+        $saveMediaAsset->handle(new MediaAsset, $title, $validated);
 
-        $this->title->refresh();
+        $this->title = $title->fresh();
         $this->initializeDraftMediaAsset();
         $this->resetValidation();
         session()->flash('status', 'Media asset added.');
@@ -267,10 +278,11 @@ class TitlesPage extends Component
 
     public function deleteTitle(DeleteTitleAction $deleteTitle): mixed
     {
-        abort_unless($this->title instanceof Title, 404);
+        $title = $this->persistedTitle();
+        abort_unless($title instanceof LocalTitle, 404);
 
-        $this->authorize('delete', $this->title);
-        $deleteTitle->handle($this->title);
+        $this->authorize('delete', $title);
+        $deleteTitle->handle($title);
         session()->flash('status', 'Title deleted.');
 
         return $this->redirectRoute('admin.titles.index');
@@ -340,6 +352,23 @@ class TitlesPage extends Component
             'published_at' => null,
             'mediable_type' => Title::class,
         ];
+    }
+
+    private function persistedTitle(): ?LocalTitle
+    {
+        if ($this->title instanceof LocalTitle && $this->title->exists) {
+            return $this->title;
+        }
+
+        if ($this->title instanceof Title && $this->title->exists) {
+            return LocalTitle::query()->find($this->title->getKey());
+        }
+
+        if ($this->titleRecordId !== null) {
+            return LocalTitle::query()->find($this->titleRecordId);
+        }
+
+        return null;
     }
 
     /**

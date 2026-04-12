@@ -2,30 +2,19 @@
 
 namespace App\Livewire\Forms\Lists;
 
-use App\Enums\ListVisibility;
-use Illuminate\Validation\Rule;
 use Livewire\Attributes\Validate;
 use Livewire\Form;
 
 class CreateUserListForm extends Form
 {
-    #[Validate]
+    #[Validate('required|string|max:120')]
     public string $name = '';
 
-    #[Validate]
+    #[Validate('nullable|string|max:500')]
     public string $description = '';
 
-    #[Validate]
+    #[Validate('required|in:public,unlisted,private')]
     public string $visibility = 'private';
-
-    protected function rules(): array
-    {
-        return [
-            'name' => ['required', 'string', 'max:120'],
-            'description' => ['nullable', 'string', 'max:500'],
-            'visibility' => ['required', Rule::in(array_map(fn (ListVisibility $visibility): string => $visibility->value, ListVisibility::cases()))],
-        ];
-    }
 
     /**
      * @return array{name: string, description?: string|null, visibility: string}

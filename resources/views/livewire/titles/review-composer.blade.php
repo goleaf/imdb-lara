@@ -36,21 +36,21 @@
             </x-ui.alerts>
         @endguest
 
-        @if ($statusMessage)
-            <x-ui.alerts variant="success" icon="check-circle">
-                <x-ui.alerts.description>{{ $statusMessage }}</x-ui.alerts.description>
-            </x-ui.alerts>
-        @endif
+        <x-ui.alerts wire:show="statusMessage" variant="success" icon="check-circle">
+            <x-ui.alerts.description>
+                <span wire:text="statusMessage">{{ $statusMessage }}</span>
+            </x-ui.alerts.description>
+        </x-ui.alerts>
 
         <x-ui.field>
             <x-ui.label>Headline</x-ui.label>
-            <x-ui.input wire:model.live="form.headline" name="headline" maxlength="160" placeholder="Optional review headline" />
+            <x-ui.input wire:model.live.blur="form.headline" name="headline" maxlength="160" placeholder="Optional review headline" />
             <x-ui.error name="form.headline" />
         </x-ui.field>
 
         <x-ui.field>
             <x-ui.label>Review</x-ui.label>
-            <x-ui.textarea wire:model.live="form.body" name="body" rows="6" placeholder="Share what worked, what did not, and who this title is for." />
+            <x-ui.textarea wire:model.live.debounce.500ms="form.body" name="body" rows="6" placeholder="Share what worked, what did not, and who this title is for." />
             <x-ui.error name="form.body" />
         </x-ui.field>
 

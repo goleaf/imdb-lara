@@ -80,9 +80,9 @@ class EpisodesPage extends Component
 
         if ($this->isCatalogOnlyApplication()) {
             $loadedEpisode = $this->episode->load([
-                'title' => fn ($titleQuery) => $titleQuery->select(Title::catalogCardColumns()),
+                'title:id,name,slug,title_type,is_published,original_name,release_year,release_date,runtime_minutes,age_rating,origin_country,original_language,plot_outline,synopsis,tagline,meta_title,meta_description,search_keywords',
                 'season:id,series_id,name,slug,season_number',
-                'series' => fn ($seriesQuery) => $seriesQuery->select(Title::catalogCardColumns()),
+                'series:id,name,slug,title_type,is_published',
             ]);
             $loadedEpisode->fill(Arr::only($this->episodePayload(), (new Episode)->getFillable()));
             $loadedEpisode->setRelation('title', tap(
@@ -113,7 +113,7 @@ class EpisodesPage extends Component
         }
 
         $loadedEpisode = $this->episode->load([
-            'title' => fn ($titleQuery) => $titleQuery->select(Title::catalogCardColumns()),
+            'title:id,name,slug,title_type,is_published,original_name,release_year,release_date,runtime_minutes,age_rating,origin_country,original_language,plot_outline,synopsis,tagline,meta_title,meta_description,search_keywords',
             'season:id,series_id,name,slug,season_number',
             'series:id,name,slug,title_type,is_published',
         ]);

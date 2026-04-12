@@ -71,4 +71,19 @@ class ContributionSubmissionFlowTest extends TestCase
             ->call('save')
             ->assertForbidden();
     }
+
+    public function test_suggestion_form_validates_value_during_field_updates(): void
+    {
+        $contributor = User::factory()->contributor()->create();
+        $title = Title::factory()->create();
+
+        Livewire::actingAs($contributor)
+            ->test(SuggestionForm::class, [
+                'contributableType' => 'title',
+                'contributableId' => $title->id,
+                'contributableLabel' => $title->name,
+            ])
+            ->set('value', str_repeat('A', 5001))
+            ->assertHasErrors(['value' => ['max']]);
+    }
 }

@@ -2,37 +2,25 @@
 
 namespace App\Livewire\Forms\Auth;
 
-use Illuminate\Validation\Rule;
 use Livewire\Attributes\Validate;
 use Livewire\Form;
 
 class RegisterUserForm extends Form
 {
-    #[Validate]
+    #[Validate('required|string|max:255')]
     public string $name = '';
 
-    #[Validate]
+    #[Validate('required|string|max:255|unique:users,username')]
     public string $username = '';
 
-    #[Validate]
+    #[Validate('required|email|max:255|unique:users,email')]
     public string $email = '';
 
-    #[Validate]
+    #[Validate('required|confirmed|min:8')]
     public string $password = '';
 
-    #[Validate]
+    #[Validate('required')]
     public string $password_confirmation = '';
-
-    protected function rules(): array
-    {
-        return [
-            'name' => ['required', 'string', 'max:255'],
-            'username' => ['required', 'string', 'max:255', Rule::unique('users', 'username')],
-            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')],
-            'password' => ['required', 'confirmed', 'min:8'],
-            'password_confirmation' => ['required'],
-        ];
-    }
 
     /**
      * @return array{name: string, username: string, email: string, password: string}

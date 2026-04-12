@@ -3,14 +3,16 @@
 namespace App\Actions\Admin;
 
 use App\Actions\Admin\Concerns\NormalizesAdminAttributes;
+use App\Actions\Admin\Concerns\ResolvesLocalCatalogWriteModels;
 use App\Enums\TitleType;
 use App\Models\Episode;
+use App\Models\LocalTitle;
 use App\Models\Season;
-use App\Models\Title;
 
 class SaveEpisodeAction
 {
     use NormalizesAdminAttributes;
+    use ResolvesLocalCatalogWriteModels;
 
     /**
      * @param  array<string, mixed>  $attributes
@@ -40,9 +42,9 @@ class SaveEpisodeAction
             'is_published' => (bool) ($attributes['is_published'] ?? false),
         ];
 
-        $title = $episode->exists && $episode->title
-            ? tap($episode->title)->fill($titleAttributes)
-            : new Title($titleAttributes);
+        $title = $episode->exists && $episode->title_id !== null
+            ? tap(LocalTitle::query()->findOrFail($episode->title_id))->fill($titleAttributes)
+            : new LocalTitle($titleAttributes);
 
         $title->save();
 

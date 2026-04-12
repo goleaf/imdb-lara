@@ -9,22 +9,31 @@ use App\Models\Title;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
+use Livewire\Attributes\Validate;
 use Livewire\Component;
 
 class SuggestionForm extends Component
 {
     use AuthorizesRequests;
 
+    #[Locked]
     public string $contributableType;
 
+    #[Locked]
     public int $contributableId;
 
+    #[Locked]
     public string $contributableLabel;
 
+    #[Validate]
     public string $field = '';
 
+    #[Validate('required|string|max:5000')]
     public string $value = '';
 
+    #[Validate('nullable|string|max:2000')]
     public string $notes = '';
 
     public ?string $statusMessage = null;
@@ -65,24 +74,28 @@ class SuggestionForm extends Component
         $this->statusMessage = 'Suggestion submitted for editorial review.';
     }
 
-    public function render(): View
+    #[Computed]
+    public function viewData(): array
     {
-        return view('livewire.contributions.suggestion-form', [
+        return [
             'canSubmitContribution' => auth()->user()?->can('create', Contribution::class) ?? false,
             'entityLabel' => match ($this->contributableType) {
                 'person' => 'person profile',
                 default => 'title page',
             },
             'fieldOptions' => array_values($this->fieldDefinitions()),
-        ]);
+        ];
+    }
+
+    public function render(): View
+    {
+        return view('livewire.contributions.suggestion-form', $this->viewData);
     }
 
     protected function rules(): array
     {
         return [
             'field' => ['required', Rule::in(array_keys($this->fieldDefinitions()))],
-            'value' => ['required', 'string', 'max:5000'],
-            'notes' => ['nullable', 'string', 'max:2000'],
         ];
     }
 

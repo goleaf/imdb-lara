@@ -73,7 +73,7 @@ class Season extends Model
 
     public function series(): BelongsTo
     {
-        return $this->belongsTo(Title::class, 'series_id');
+        return $this->belongsTo(LocalTitle::class, 'series_id');
     }
 
     public function episodes(): HasMany

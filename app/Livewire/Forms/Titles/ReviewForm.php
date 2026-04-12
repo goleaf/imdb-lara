@@ -4,20 +4,19 @@ namespace App\Livewire\Forms\Titles;
 
 use App\Models\Review;
 use Illuminate\Support\Facades\Validator;
+use Livewire\Attributes\Validate;
 use Livewire\Form;
 
 class ReviewForm extends Form
 {
+    #[Validate('nullable|string|max:160')]
     public string $headline = '';
 
+    #[Validate('required|string|min:5')]
     public string $body = '';
 
+    #[Validate('boolean')]
     public bool $containsSpoilers = false;
-
-    protected function rules(): array
-    {
-        return $this->rulesForDraft(false);
-    }
 
     /**
      * @return array<string, array<int, string>|string>

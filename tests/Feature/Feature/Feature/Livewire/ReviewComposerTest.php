@@ -113,4 +113,15 @@ class ReviewComposerTest extends TestCase
             'status' => ReviewStatus::Published->value,
         ]);
     }
+
+    public function test_review_composer_validates_review_body_during_field_updates(): void
+    {
+        $user = User::factory()->create();
+        $title = Title::factory()->create();
+
+        Livewire::actingAs($user)
+            ->test(ReviewComposer::class, ['title' => $title])
+            ->set('form.body', 'bad')
+            ->assertHasErrors(['form.body' => ['min']]);
+    }
 }

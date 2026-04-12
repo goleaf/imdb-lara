@@ -60,13 +60,13 @@ class SeasonsPage extends Component
         if ($this->isCatalogOnlyApplication()) {
             return $this->renderPageView('admin.seasons.edit', [
                 'season' => $this->season->load([
-                    'series' => fn ($seriesQuery) => $seriesQuery->select(Title::catalogCardColumns()),
+                    'series:id,name,slug,title_type,is_published',
                 ])->fill($this->seasonPayload()),
             ]);
         }
 
         $loadedSeason = $this->season->load([
-            'series' => fn ($seriesQuery) => $seriesQuery->select(Title::catalogCardColumns()),
+            'series:id,name,slug,title_type,is_published',
             'episodes' => fn ($episodeQuery) => $episodeQuery
                 ->select([
                     'id',

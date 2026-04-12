@@ -46,12 +46,12 @@ class Episode extends Model
 
     public function title(): BelongsTo
     {
-        return $this->belongsTo(Title::class);
+        return $this->belongsTo(LocalTitle::class, 'title_id');
     }
 
     public function series(): BelongsTo
     {
-        return $this->belongsTo(Title::class, 'series_id');
+        return $this->belongsTo(LocalTitle::class, 'series_id');
     }
 
     public function season(): BelongsTo
@@ -66,6 +66,6 @@ class Episode extends Model
 
     public function credits(): HasMany
     {
-        return $this->hasMany(Credit::class)->ordered();
+        return $this->hasMany(LocalCredit::class)->ordered();
     }
 }

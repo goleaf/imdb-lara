@@ -403,4 +403,77 @@ class LivewireLoadingStateConventionTest extends TestCase
         $this->assertStringContainsString('wire:show="statusMessage"', $watchStateView);
         $this->assertStringContainsString('wire:text="statusMessage"', $watchStateView);
     }
+
+    public function test_livewire_form_objects_prefer_property_validation_attributes_for_current_flows(): void
+    {
+        $formExpectations = [
+            app_path('Livewire/Forms/Auth/RegisterUserForm.php') => [
+                "#[Validate('required|string|max:255')]",
+                "#[Validate('required|string|max:255|unique:users,username')]",
+                "#[Validate('required|email|max:255|unique:users,email')]",
+                "#[Validate('required|confirmed|min:8')]",
+            ],
+            app_path('Livewire/Forms/Lists/CreateUserListForm.php') => [
+                "#[Validate('required|string|max:120')]",
+                "#[Validate('nullable|string|max:500')]",
+                "#[Validate('required|in:public,unlisted,private')]",
+            ],
+            app_path('Livewire/Forms/Reviews/ReportReviewForm.php') => [
+                "#[Validate('required|in:spam,abuse,spoiler,harassment,inaccurate')]",
+                "#[Validate('nullable|string|max:1000')]",
+            ],
+            app_path('Livewire/Forms/Titles/ReviewForm.php') => [
+                "#[Validate('nullable|string|max:160')]",
+                "#[Validate('required|string|min:5')]",
+                "#[Validate('boolean')]",
+            ],
+        ];
+
+        foreach ($formExpectations as $formPath => $expectedStrings) {
+            $contents = file_get_contents($formPath);
+
+            $this->assertNotFalse($contents, $formPath);
+
+            foreach ($expectedStrings as $expectedString) {
+                $this->assertStringContainsString($expectedString, $contents, $formPath);
+            }
+        }
+    }
+
+    public function test_contribution_and_review_shells_follow_livewire_four_validation_and_status_patterns(): void
+    {
+        $suggestionClass = file_get_contents(app_path('Livewire/Contributions/SuggestionForm.php'));
+        $suggestionView = file_get_contents(resource_path('views/livewire/contributions/suggestion-form.blade.php'));
+        $createListClass = file_get_contents(app_path('Livewire/Lists/CreateListForm.php'));
+        $reviewView = file_get_contents(resource_path('views/livewire/titles/review-composer.blade.php'));
+
+        $this->assertNotFalse($suggestionClass);
+        $this->assertNotFalse($suggestionView);
+        $this->assertNotFalse($createListClass);
+        $this->assertNotFalse($reviewView);
+
+        $this->assertStringContainsString('#[Locked]', $suggestionClass);
+        $this->assertStringContainsString("#[Validate('required|string|max:5000')]", $suggestionClass);
+        $this->assertStringContainsString("#[Validate('nullable|string|max:2000')]", $suggestionClass);
+        $this->assertStringContainsString('#[Computed]', $suggestionClass);
+        $this->assertStringContainsString('public function viewData(): array', $suggestionClass);
+        $this->assertStringContainsString("return view('livewire.contributions.suggestion-form', \$this->viewData);", $suggestionClass);
+        $this->assertStringContainsString('wire:model.live.debounce.500ms="value"', $suggestionView);
+        $this->assertStringContainsString('wire:model.live.debounce.500ms="notes"', $suggestionView);
+        $this->assertStringContainsString('wire:show="statusMessage"', $suggestionView);
+        $this->assertStringContainsString('wire:text="statusMessage"', $suggestionView);
+        $this->assertStringNotContainsString('wire:model.live="value"', $suggestionView);
+        $this->assertStringNotContainsString('wire:model.live="notes"', $suggestionView);
+
+        $this->assertStringContainsString('#[Computed]', $createListClass);
+        $this->assertStringContainsString('public function viewData(): array', $createListClass);
+        $this->assertStringContainsString("return view('livewire.lists.create-list-form', \$this->viewData);", $createListClass);
+
+        $this->assertStringContainsString('wire:model.live.blur="form.headline"', $reviewView);
+        $this->assertStringContainsString('wire:model.live.debounce.500ms="form.body"', $reviewView);
+        $this->assertStringContainsString('wire:show="statusMessage"', $reviewView);
+        $this->assertStringContainsString('wire:text="statusMessage"', $reviewView);
+        $this->assertStringNotContainsString('wire:model.live="form.headline"', $reviewView);
+        $this->assertStringNotContainsString('wire:model.live="form.body"', $reviewView);
+    }
 }

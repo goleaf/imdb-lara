@@ -7,11 +7,11 @@
             </x-ui.text>
         </div>
 
-        @if ($statusMessage)
-            <x-ui.alerts variant="success" icon="check-circle">
-                <x-ui.alerts.description>{{ $statusMessage }}</x-ui.alerts.description>
-            </x-ui.alerts>
-        @endif
+        <x-ui.alerts wire:show="statusMessage" variant="success" icon="check-circle">
+            <x-ui.alerts.description>
+                <span wire:text="statusMessage">{{ $statusMessage }}</span>
+            </x-ui.alerts.description>
+        </x-ui.alerts>
 
         @guest
             <x-ui.alerts variant="info" icon="information-circle">
@@ -57,7 +57,7 @@
             <x-ui.field class="sm:col-span-2">
                 <x-ui.label>Proposed update</x-ui.label>
                 <x-ui.textarea
-                    wire:model.live="value"
+                    wire:model.live.debounce.500ms="value"
                     name="value"
                     rows="5"
                     placeholder="Describe the corrected value or the exact change that should be made."
@@ -69,7 +69,7 @@
             <x-ui.field class="sm:col-span-2">
                 <x-ui.label>Editorial notes</x-ui.label>
                 <x-ui.textarea
-                    wire:model.live="notes"
+                    wire:model.live.debounce.500ms="notes"
                     name="notes"
                     rows="4"
                     placeholder="Optional context for the editorial team, including evidence or source notes."

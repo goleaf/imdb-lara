@@ -3,17 +3,21 @@
 namespace App\Actions\Admin;
 
 use App\Actions\Admin\Concerns\NormalizesAdminAttributes;
+use App\Actions\Admin\Concerns\ResolvesLocalCatalogWriteModels;
+use App\Models\LocalTitle;
 use App\Models\Title;
 
 class UpdateTitleAction
 {
     use NormalizesAdminAttributes;
+    use ResolvesLocalCatalogWriteModels;
 
     /**
      * @param  array<string, mixed>  $attributes
      */
-    public function handle(Title $title, array $attributes): Title
+    public function handle(Title $title, array $attributes): LocalTitle
     {
+        $title = $this->resolveLocalTitle($title);
         $shouldSyncGenres = array_key_exists('genre_ids', $attributes);
         $attributes = $this->normalizeAttributes($attributes);
         $genreIds = array_map('intval', $attributes['genre_ids'] ?? []);
