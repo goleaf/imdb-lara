@@ -61,10 +61,10 @@
 
     <x-ui.field>
         <x-ui.label>Publish status</x-ui.label>
-        <select wire:model.defer="is_published" name="is_published" class="min-h-10 rounded-box border border-black/10 bg-white px-3 text-sm text-neutral-800 shadow-xs transition focus:border-black/15 focus:outline-none focus:ring-2 focus:ring-neutral-900/15 dark:border-white/15 dark:bg-neutral-900 dark:text-neutral-200 dark:focus:border-white/20 dark:focus:ring-neutral-100/15">
+        <x-ui.native-select wire:model.defer="is_published" name="is_published">
             <option value="1" @selected(old('is_published', $person->is_published) == true)>Published</option>
             <option value="0" @selected(old('is_published', $person->is_published) == false)>Draft</option>
-        </select>
+        </x-ui.native-select>
         <x-ui.error name="is_published" />
     </x-ui.field>
 </div>

@@ -79,13 +79,13 @@
 <div class="grid gap-4 lg:grid-cols-2">
     <x-ui.field>
         <x-ui.label>Kind</x-ui.label>
-        <select wire:model.live="{{ $fieldStatePath('kind') }}" name="{{ $fieldName('kind') }}" class="min-h-10 rounded-box border border-black/10 bg-white px-3 text-sm text-neutral-800 shadow-xs transition focus:border-black/15 focus:outline-none focus:ring-2 focus:ring-neutral-900/15 dark:border-white/15 dark:bg-neutral-900 dark:text-neutral-200 dark:focus:border-white/20 dark:focus:ring-neutral-100/15">
+        <x-ui.native-select wire:model.live="{{ $fieldStatePath('kind') }}" name="{{ $fieldName('kind') }}">
             @foreach ($allowedMediaKinds as $mediaKind)
                 <option value="{{ $mediaKind->value }}" @selected(old('kind', $mediaAsset->kind?->value) === $mediaKind->value)>
                     {{ $mediaKind->label() }}
                 </option>
             @endforeach
-        </select>
+        </x-ui.native-select>
         <x-ui.error name="kind" />
     </x-ui.field>
     <x-ui.field>

@@ -59,6 +59,10 @@ class GetGlobalSearchSuggestionsAction
      */
     private function resolvePeopleSuggestions(string $query, int $limit): Collection
     {
+        if (Person::usesCatalogOnlySchema() && ! Person::catalogPeopleAvailable()) {
+            return new Collection;
+        }
+
         try {
             return $this->buildPublicPeopleIndexQuery
                 ->handle([

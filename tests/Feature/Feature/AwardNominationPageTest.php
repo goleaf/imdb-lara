@@ -31,9 +31,11 @@ class AwardNominationPageTest extends TestCase
             ->whereNotNull('event_imdb_id')
             ->whereNotNull('award_category_id')
             ->where(function (Builder $query): void {
-                $query
-                    ->whereHas('title', fn (Builder $titleQuery): Builder => $titleQuery->publishedCatalog())
-                    ->orWhereHas('people');
+                $query->whereHas('title', fn (Builder $titleQuery): Builder => $titleQuery->publishedCatalog());
+
+                if (AwardNomination::catalogNomineePeopleAvailable()) {
+                    $query->orWhereHas('people');
+                }
             })
             ->with([
                 'awardEvent:imdb_id,name',
@@ -43,9 +45,13 @@ class AwardNominationPageTest extends TestCase
                     ->publishedCatalog(),
                 'movieAwardNominationNominees' => fn ($nomineeQuery) => $nomineeQuery
                     ->select(['movie_award_nomination_id', 'name_basic_id', 'position'])
-                    ->with([
-                        'person' => fn ($personQuery) => $personQuery->select($this->remotePersonColumns()),
-                    ])
+                    ->with(
+                        AwardNomination::catalogNomineePeopleAvailable()
+                            ? [
+                                'person' => fn ($personQuery) => $personQuery->select($this->remotePersonColumns()),
+                            ]
+                            : []
+                    )
                     ->orderBy('position'),
                 'movieAwardNominationTitles' => fn ($nominationTitleQuery) => $nominationTitleQuery
                     ->select(['movie_award_nomination_id', 'nominated_movie_id', 'position'])

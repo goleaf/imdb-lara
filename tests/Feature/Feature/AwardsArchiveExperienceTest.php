@@ -49,7 +49,13 @@ class AwardsArchiveExperienceTest extends TestCase
                         'title' => fn ($titleQuery) => $titleQuery
                             ->select($this->remoteTitleColumns())
                             ->publishedCatalog(),
-                        'people' => fn ($personQuery) => $personQuery->select($this->remotePersonColumns()),
+                        ...(
+                            AwardNomination::catalogNomineePeopleAvailable()
+                                ? [
+                                    'people' => fn ($personQuery) => $personQuery->select($this->remotePersonColumns()),
+                                ]
+                                : []
+                        ),
                     ])
                     ->orderByDesc('is_winner')
                     ->orderBy('position')

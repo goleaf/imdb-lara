@@ -59,6 +59,23 @@ class AdminModerationQueuesTest extends TestCase
         ]);
     }
 
+    public function test_review_moderation_card_renders_the_related_title_name(): void
+    {
+        $moderator = User::factory()->moderator()->create();
+        $author = User::factory()->create();
+        $title = Title::factory()->movie()->create([
+            'name' => 'The Matrix',
+        ]);
+        $review = $this->createReview($author, $title, [
+            'status' => ReviewStatus::Published->value,
+            'published_at' => now(),
+        ]);
+
+        Livewire::actingAs($moderator)
+            ->test(ReviewModerationCard::class, ['review' => $review])
+            ->assertSee('The Matrix');
+    }
+
     public function test_moderator_can_hide_review_and_suspend_author_from_reports_queue(): void
     {
         $moderator = User::factory()->moderator()->create();
@@ -111,6 +128,27 @@ class AdminModerationQueuesTest extends TestCase
             'actionable_id' => $author->id,
             'action' => 'suspend-user',
         ]);
+    }
+
+    public function test_report_moderation_card_renders_the_reported_review_title_name(): void
+    {
+        $moderator = User::factory()->moderator()->create();
+        $author = User::factory()->create();
+        $reporter = User::factory()->create();
+        $title = Title::factory()->movie()->create([
+            'name' => 'The Matrix',
+        ]);
+        $review = $this->createReview($author, $title, [
+            'status' => ReviewStatus::Published->value,
+            'published_at' => now(),
+        ]);
+        $report = Report::factory()->for($reporter, 'reporter')->for($review, 'reportable')->create([
+            'status' => ReportStatus::Open,
+        ]);
+
+        Livewire::actingAs($moderator)
+            ->test(ReportModerationCard::class, ['report' => $report])
+            ->assertSee('The Matrix');
     }
 
     public function test_moderator_can_resolve_a_report_from_the_livewire_queue_card(): void

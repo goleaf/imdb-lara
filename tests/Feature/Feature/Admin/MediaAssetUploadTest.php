@@ -31,7 +31,7 @@ class MediaAssetUploadTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_admin_media_and_moderation_controller_routes_are_registered(): void
+    public function test_admin_media_and_moderation_controller_routes_are_not_registered(): void
     {
         $routeNames = [
             'admin.titles.media-assets.store',
@@ -44,7 +44,7 @@ class MediaAssetUploadTest extends TestCase
         ];
 
         foreach ($routeNames as $routeName) {
-            $this->assertTrue(Route::has($routeName), $routeName.' should be registered on the admin write surface.');
+            $this->assertFalse(Route::has($routeName), $routeName.' should not be registered on the Livewire-only admin surface.');
         }
     }
 

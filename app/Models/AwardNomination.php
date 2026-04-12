@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Database\Factories\AwardNominationFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -56,6 +57,12 @@ class AwardNomination extends Model
     protected static function usesCatalogOnlySchema(): bool
     {
         return Title::usesCatalogOnlySchema();
+    }
+
+    public static function catalogNomineePeopleAvailable(): bool
+    {
+        return ! static::usesCatalogOnlySchema()
+            || Title::catalogTablesAvailable('movie_award_nomination_nominees', 'name_basics');
     }
 
     public function getTable(): string
@@ -126,7 +133,7 @@ class AwardNomination extends Model
                 $relations[] = 'awardCategory:id,name';
             }
 
-            if (Title::catalogTablesAvailable('movie_award_nomination_nominees')) {
+            if (static::catalogNomineePeopleAvailable()) {
                 $relations['movieAwardNominationNominees'] = fn ($nomineeQuery) => $nomineeQuery
                     ->chaperone()
                     ->select([
@@ -134,13 +141,9 @@ class AwardNomination extends Model
                         'name_basic_id',
                         'position',
                     ])
-                    ->with(
-                        Title::catalogTablesAvailable('name_basics')
-                            ? [
-                                'person' => fn ($personQuery) => $personQuery->select(Person::directoryColumns()),
-                            ]
-                            : []
-                    )
+                    ->with([
+                        'person' => fn ($personQuery) => $personQuery->select(Person::directoryColumns()),
+                    ])
                     ->orderBy('position');
             }
 
@@ -282,6 +285,21 @@ class AwardNomination extends Model
         }
 
         return $this->people->first();
+    }
+
+    /**
+     * @return EloquentCollection<int, Person>
+     */
+    public function loadedPeople(): EloquentCollection
+    {
+        if (! $this->relationLoaded('people')) {
+            return new EloquentCollection;
+        }
+
+        /** @var EloquentCollection<int, Person> $people */
+        $people = $this->getRelation('people');
+
+        return $people;
     }
 
     public function getTitleIdAttribute(?int $value): ?int

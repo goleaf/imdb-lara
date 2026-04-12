@@ -9,12 +9,15 @@ use App\Livewire\Forms\Titles\RatingForm;
 use App\Models\Title;
 use App\Models\TitleStatistic;
 use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class RatingPanel extends Component
 {
+    use AuthorizesRequests;
+
     #[Locked]
     public Title $title;
 
@@ -43,6 +46,8 @@ class RatingPanel extends Component
             return;
         }
 
+        $this->authorize('track', $this->title);
+
         $rating = $upsertRating->handle(auth()->user(), $this->title, $this->form->validatedScore());
 
         $this->refreshTitleState($rating->score);
@@ -57,6 +62,8 @@ class RatingPanel extends Component
 
             return;
         }
+
+        $this->authorize('track', $this->title);
 
         if (! $deleteRating->handle(auth()->user(), $this->title)) {
             $this->statusMessage = 'There is no saved rating to remove.';

@@ -29,6 +29,24 @@ class PeoplePage extends Component
         LoadPersonDetailsAction $loadPersonDetails,
         GetPeopleDirectorySnapshotAction $getPeopleDirectorySnapshot,
     ): View {
+        if ($this->person === null && Person::usesCatalogOnlySchema() && ! Person::catalogPeopleAvailable()) {
+            return $this->renderPageView('people.index', [
+                'directorySnapshot' => $getPeopleDirectorySnapshot->handle(),
+                'seo' => new PageSeoData(
+                    title: 'Browse People',
+                    description: 'Browse actors, directors, writers, and other creators in the Screenbase catalog.',
+                    canonical: route('public.people.index'),
+                    breadcrumbs: [
+                        ['label' => 'Home', 'href' => route('public.home')],
+                        ['label' => 'Browse People'],
+                    ],
+                    paginationPageName: 'people',
+                    preserveQueryString: true,
+                    allowedQueryParameters: ['q', 'profession', 'sort'],
+                ),
+            ]);
+        }
+
         if ($this->person instanceof Person) {
             return $this->renderPageView('people.show', $loadPersonDetails->handle($this->person));
         }

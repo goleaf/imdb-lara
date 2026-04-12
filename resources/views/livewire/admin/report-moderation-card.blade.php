@@ -26,13 +26,12 @@
 
             <div class="grid gap-3">
                 @if ($report->reportable instanceof \App\Models\Review)
-                    @php($reportedTitle = $report->reportable->adminTitle ?? $report->reportable->title)
                     <div class="rounded-box border border-black/5 px-4 py-3 dark:border-white/10">
                         <div class="flex flex-wrap items-start justify-between gap-3">
                             <div class="space-y-1">
                                 <div class="font-medium">
-                                    @if ($reportedTitle)
-                                        <a href="{{ route('public.titles.show', $reportedTitle) }}" class="hover:opacity-80">
+                                    @if ($reportedReviewTitle)
+                                        <a href="{{ route('public.titles.show', $reportedReviewTitle) }}" class="hover:opacity-80">
                                             {{ $report->reportable->headline ?: 'Untitled review' }}
                                         </a>
                                     @else
@@ -40,7 +39,7 @@
                                     @endif
                                 </div>
                                 <div class="text-sm text-neutral-500 dark:text-neutral-400">
-                                    {{ $report->reportable->author->name }} on {{ $reportedTitle?->name ?? 'Unknown title' }}
+                                    {{ $report->reportable->author->name }} on {{ $reportedReviewTitle?->name ?? 'Unknown title' }}
                                 </div>
                             </div>
 

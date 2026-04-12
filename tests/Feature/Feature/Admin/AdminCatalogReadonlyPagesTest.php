@@ -9,6 +9,7 @@ use App\Models\Title;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 use Tests\Concerns\BootstrapsImdbMysqlSqlite;
 use Tests\Concerns\UsesCatalogOnlyApplication;
 use Tests\TestCase;
@@ -123,34 +124,11 @@ class AdminCatalogReadonlyPagesTest extends TestCase
             ->assertDontSee('<form method="POST"', false);
     }
 
-    public function test_catalog_only_title_mutation_route_returns_not_implemented(): void
+    public function test_catalog_only_admin_surface_exposes_no_title_mutation_route(): void
     {
         config()->set('screenbase.catalog_only', true);
 
-        $admin = User::factory()->admin()->create();
-
-        $this->actingAs($admin)
-            ->post(route('admin.titles.store'), [
-                'name' => 'Catalog Only Title',
-                'original_name' => 'Catalog Only Title',
-                'slug' => 'catalog-only-title',
-                'title_type' => 'movie',
-                'release_year' => 2024,
-                'release_date' => '2024-05-01',
-                'runtime_minutes' => 118,
-                'age_rating' => 'PG-13',
-                'origin_country' => 'US',
-                'original_language' => 'en',
-                'is_published' => true,
-                'genre_ids' => [],
-                'plot_outline' => 'Catalog-only route guard.',
-                'synopsis' => 'Catalog-only route guard.',
-                'tagline' => 'Catalog-only route guard.',
-                'meta_title' => 'Catalog Only Title',
-                'meta_description' => 'Catalog-only route guard.',
-                'search_keywords' => 'catalog-only',
-            ])
-            ->assertStatus(501);
+        $this->assertFalse(Route::has('admin.titles.store'));
     }
 
     private function seedCatalogMovie(string $imdbId, string $primaryTitle, string $titleType = 'movie'): int

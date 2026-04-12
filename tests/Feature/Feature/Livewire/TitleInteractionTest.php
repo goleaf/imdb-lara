@@ -83,6 +83,35 @@ class TitleInteractionTest extends TestCase
             ->assertRedirect(route('login'));
     }
 
+    public function test_suspended_users_cannot_mutate_title_tracking_or_review_components(): void
+    {
+        $user = User::factory()->suspended()->create();
+        $title = Title::factory()->create();
+
+        Livewire::actingAs($user)
+            ->test(WatchlistToggle::class, ['title' => $title])
+            ->call('toggle')
+            ->assertForbidden();
+
+        Livewire::actingAs($user)
+            ->test(RatingPanel::class, ['title' => $title])
+            ->set('form.score', 9)
+            ->call('save')
+            ->assertForbidden();
+
+        Livewire::actingAs($user)
+            ->test(ReviewComposer::class, ['title' => $title])
+            ->set('form.headline', 'Strong')
+            ->set('form.body', 'A compelling review body long enough to validate.')
+            ->call('save')
+            ->assertForbidden();
+
+        Livewire::actingAs($user)
+            ->test(WatchStatePanel::class, ['title' => $title])
+            ->call('markWatched')
+            ->assertForbidden();
+    }
+
     public function test_title_components_persist_authenticated_user_interactions(): void
     {
         $user = User::factory()->create();

@@ -5,12 +5,16 @@ namespace App\Livewire\Titles;
 use App\Actions\Lists\IsTitleInWatchlistAction;
 use App\Actions\Lists\ToggleWatchlistItemAction;
 use App\Models\Title;
+use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
 class WatchlistToggle extends Component
 {
+    use AuthorizesRequests;
+
     protected IsTitleInWatchlistAction $isTitleInWatchlist;
 
     #[Locked]
@@ -37,6 +41,8 @@ class WatchlistToggle extends Component
             return;
         }
 
+        $this->authorize('track', $this->title);
+
         $this->inWatchlist = $toggleWatchlistItem->handle(auth()->user(), $this->title);
         $this->title->refresh()->load('statistic');
         $this->dispatch('title-personal-tracking-updated');
@@ -49,7 +55,7 @@ class WatchlistToggle extends Component
             && $this->isTitleInWatchlist->handle(auth()->user(), $this->title);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.titles.watchlist-toggle');
     }

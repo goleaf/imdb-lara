@@ -5,8 +5,12 @@ namespace App\Livewire\Admin;
 use App\Actions\Admin\UpdateReportStatusAction;
 use App\Enums\ReportStatus;
 use App\Models\Report;
+use App\Models\Review;
+use App\Models\Title;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
@@ -65,10 +69,26 @@ class ReportModerationCard extends Component
         $this->dispatch('moderation-queue-updated');
     }
 
-    public function render()
+    #[Computed]
+    public function viewData(): array
     {
-        return view('livewire.admin.report-moderation-card', [
+        return [
+            'reportedReviewTitle' => $this->reportedReviewTitle(),
             'reportStatuses' => ReportStatus::cases(),
-        ]);
+        ];
+    }
+
+    public function render(): View
+    {
+        return view('livewire.admin.report-moderation-card', $this->viewData);
+    }
+
+    private function reportedReviewTitle(): ?Title
+    {
+        if (! $this->report->reportable instanceof Review) {
+            return null;
+        }
+
+        return $this->report->reportable->adminTitle ?? $this->report->reportable->title;
     }
 }

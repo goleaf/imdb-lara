@@ -72,10 +72,12 @@ class LoadPersonDetailsAction
             ->filter(fn ($title): bool => $title instanceof Title)
             ->unique('id')
             ->values();
-        $knownForTitles = $person->knownForTitles
-            ->filter(fn ($title): bool => $title instanceof Title)
-            ->unique('id')
-            ->values();
+        $knownForTitles = Title::catalogTablesAvailable('name_basic_known_for_titles')
+            ? $person->knownForTitles
+                ->filter(fn ($title): bool => $title instanceof Title)
+                ->unique('id')
+                ->values()
+            : collect();
 
         if ($knownForTitles->isEmpty()) {
             $knownForTitles = $creditedTitles
@@ -114,7 +116,7 @@ class LoadPersonDetailsAction
             ->values()
             ->all();
 
-        if ($collaborationTitleIds !== []) {
+        if ($collaborationTitleIds !== [] && Credit::catalogCreditsAvailable()) {
             $frequentCollaborators = Credit::query()
                 ->select(Credit::projectedColumns())
                 ->with(Credit::projectedRelations())
@@ -262,6 +264,12 @@ class LoadPersonDetailsAction
 
     private function loadPreviewCredits(Person $person): void
     {
+        if (! Credit::catalogCreditsAvailable()) {
+            $person->setRelation('credits', collect());
+
+            return;
+        }
+
         $person->setRelation('credits', $person->credits()
             ->select(Credit::projectedColumns())
             ->with(Credit::projectedRelations())

@@ -1,157 +1,86 @@
-## 🗓️ 2026-04-12 — Admin write paths are back and the catalog got steadier
+## 🗓️ 2026-04-12 — The catalog got safer and source imports learned how to resume
 
 Hey! Here is what changed today in this project:
 
 ### What's New
-The admin area now has real controller-backed write routes again for titles, people, genres, credits, seasons, episodes, media assets, reviews, reports, and contributions. That means create, update, and delete actions can move through normal Laravel requests while the Livewire pages stay focused on rendering and interaction. The public catalog also got richer title and person payloads, so detail pages can show more of the IMDb-backed data without feeling half-hydrated. On the frontend side, a new shared Alpine state module now powers the small reusable UI behaviors that used to live inline in Blade.
+A brand-new `imdb:migrate-source-database` command can now copy shared tables from another database into this app without losing its place if the run gets interrupted. It keeps per-table checkpoints, prints real progress as it runs, and knows how to pick back up from the last saved cursor instead of starting from zero again. The admin area also finished a cleanup pass: the old controller mutation layer is gone, so the write surface is now centered around the Livewire pages and shared Blade form components that the team is already using.
 
 ### What Was Improved
-Catalog-aware helpers are now used much more consistently, so the app can tell when it is running against the remote IMDb schema and adjust its queries, relations, ordering, and fallbacks automatically. Admin edit pages share one form-state system instead of each partial rebuilding its own naming rules, which makes the Blade layer much easier to reason about. Loading states across buttons, dropdowns, selects, comboboxes, pagination, and search results were cleaned up to fit the current Livewire 4 approach. I also fixed two regressions during verification: local title pages no longer try to load remote interest data, and public title pages now default missing collections more safely.
+The public catalog now handles missing IMDb people, credit, and nominee tables much more gracefully. Instead of throwing query errors or rendering half-broken pages, the people browser, title cast page, award views, search suggestions, and homepage widgets can fall back to empty-but-valid states when a remote table is unavailable. Personal title tracking also got stricter, so suspended users can no longer sneak through watchlist, rating, or watched-state mutations, and the moderation cards now show the related title names more reliably.
 
 ### What Was Removed or Cleaned Up
-Large inline Alpine blobs were removed from Blade components and replaced with named helpers in a shared JavaScript module. A bunch of old `wire:loading.attr="data-loading"` bridges were removed from reusable UI components in favor of slot-based loading shells and explicit `wire:target` scopes where needed. The old idea that the admin surface should expose only Livewire pages was cleaned up too, because the write side now lives in clearer controller endpoints.
+The legacy admin controllers, their catalog-only mutation guard trait, and the old admin mutation routes were removed because that duplicate write path was no longer needed. A few Blade partials were cleaned up to use the shared `x-ui.native-select` control instead of repeating the same raw `<select>` markup over and over, and one leftover inline fallback in the title page template was dropped because the data is already prepared upstream.
 
 ### Files That Changed
-- `app/Actions/Admin/BuildAdminTitlesIndexQueryAction.php` — switched the admin titles index query to catalog-aware select columns and catalog-friendly name ordering.
-- `app/Actions/Catalog/BuildCatalogMediaLightboxGroupAction.php` — changed lightbox item matching to use a stable media asset identifier instead of raw URL comparisons.
-- `app/Actions/Catalog/BuildPublicPeopleIndexQueryAction.php` — improved people sorting so catalog pages can order by award nominations and cleaner tie-breakers.
-- `app/Actions/Catalog/GetFeaturedInterestCategoriesAction.php` — now checks catalog-only availability through the model helper instead of a raw config flag.
-- `app/Actions/Catalog/LoadPersonDetailsAction.php` — hydrates alternate-name data from catalog aliases before building the public person page payload.
-- `app/Actions/Catalog/LoadPublicTitleBrowserPageAction.php` — caps show-all collections by the configured page size and makes cache keys respect that limit.
-- `app/Actions/Catalog/LoadTitleCastAction.php` — eager loads episode, season, and series context so episode-specific credits can render and link safely.
-- `app/Actions/Catalog/LoadTitleDetailsAction.php` — conditionally loads richer catalog relationships and skips remote-only interest loading for local title pages.
-- `app/Actions/Catalog/LoadTitleMetadataExplorationAction.php` — reads genre and metadata exploration data through catalog-safe helpers.
-- `app/Actions/Catalog/LoadTitleParentsGuideAction.php` — builds parents-guide and certificate data more carefully when the app runs in catalog-only mode.
-- `app/Actions/Home/GetAwardsSpotlightNominationsAction.php` — switched its catalog-only check to the shared model helper.
-- `app/Actions/Home/GetAwardsSpotlightTitlesAction.php` — now returns an empty collection in catalog-only mode instead of querying unavailable local tables.
-- `app/Actions/Home/GetBrowseKeywordsAction.php` — now returns an empty collection in catalog-only mode for the same reason.
-- `app/Actions/Home/GetBrowseYearsAction.php` — reads the right release-year column whether titles come from local tables or the remote IMDb schema.
-- `app/Actions/Home/GetHomepageTitleRailAction.php` — makes homepage rails sort upcoming and recently added titles correctly in both local and catalog-only modes.
-- `app/Actions/Lists/BuildAccountWatchlistQueryAction.php` — now filters by release year through the shared catalog-aware scope.
-- `app/Actions/Lists/GetListTitleSuggestionsAction.php` — switched suggestion queries to catalog card columns and catalog-aware popularity ordering.
-- `app/Actions/Search/BuildSearchResultsViewDataAction.php` — now guards interest-category loading through the catalog schema helper.
-- `app/Actions/Search/GetGlobalSearchSuggestionsAction.php` — now uses the same catalog-aware interest-category guard.
-- `app/Actions/Seo/GetSitemapDataAction.php` — rebuilt sitemap queries around catalog-aware selects, ordering, and episode relation loading.
-- `app/Actions/Seo/ResolvePageShellViewDataAction.php` — now resolves catalog-only behavior through the model helper instead of a direct config read.
-- `app/Http/Controllers/Admin/Concerns/BlocksCatalogOnlyAdminMutations.php` — adds a shared 501 response for admin writes while the app is running in catalog-only mode.
-- `app/Http/Controllers/Admin/CreditController.php` — adds controller endpoints for creating, updating, and deleting credits.
-- `app/Http/Controllers/Admin/EpisodeController.php` — adds controller endpoints for updating and deleting episodes.
-- `app/Http/Controllers/Admin/GenreController.php` — adds controller endpoints for creating, updating, and deleting genres.
-- `app/Http/Controllers/Admin/MediaAssetController.php` — adds controller endpoints for updating and deleting media assets with safer redirect handling.
-- `app/Http/Controllers/Admin/ModerationController.php` — adds controller endpoints for review, report, and contribution moderation flows.
-- `app/Http/Controllers/Admin/PersonController.php` — adds controller endpoints for person writes, profession writes, and attached media asset writes.
-- `app/Http/Controllers/Admin/PersonProfessionController.php` — adds controller endpoints for updating and deleting person professions.
-- `app/Http/Controllers/Admin/SeasonController.php` — adds controller endpoints for season writes and episode creation.
-- `app/Http/Controllers/Admin/TitleController.php` — adds controller endpoints for title writes plus season and media asset creation.
-- `app/Http/Controllers/Controller.php` — introduces the shared base controller for the new admin HTTP surface.
-- `app/Http/Requests/Admin/UpdateTitleRequest.php` — tightens validation for origin country and original language fields.
-- `app/Livewire/Account/WatchlistBrowser.php` — uses catalog card columns when resolving titles for watchlist state changes.
-- `app/Livewire/Catalog/TitleBrowser.php` — passes the configured page size into show-all collection loading.
-- `app/Livewire/Contributions/SuggestionForm.php` — resolves titles and people through catalog and directory column scopes instead of tiny ad hoc selects.
-- `app/Livewire/Lists/ManageList.php` — uses catalog card columns when adding a title to a list.
-- `app/Livewire/Pages/Admin/Concerns/ResolvesAdminFormState.php` — centralizes field names, state paths, and old-input helpers for admin Blade forms.
-- `app/Livewire/Pages/Admin/ContributionsPage.php` — hydrates admin contribution targets through local title and person wrappers before rendering the queue.
-- `app/Livewire/Pages/Admin/EpisodesPage.php` — now passes shared episode form data into the edit view.
-- `app/Livewire/Pages/Admin/MediaAssetsPage.php` — hydrates local admin mediables and shares reusable media-asset form data with the edit view.
-- `app/Livewire/Pages/Admin/PeoplePage.php` — shares reusable media-asset form state with the person edit page.
-- `app/Livewire/Pages/Admin/SeasonsPage.php` — shares reusable form state for season editing and draft episode rows.
-- `app/Livewire/Pages/Admin/TitlesPage.php` — shares reusable form state for titles, draft seasons, and draft media assets.
-- `app/Livewire/Pages/Concerns/RendersPageView.php` — now resolves catalog-only page flags through the shared model helper.
-- `app/Livewire/Pages/Public/TitlePage.php` — adds safer defaults for derived collections and supports director fallback entries more reliably.
-- `app/Livewire/People/FilmographyPanel.php` — adds stable keys for grouped rows so the filmography panel re-renders more predictably.
-- `app/Livewire/Search/GlobalSearch.php` — moves to URL-synced locked state and prepares cleaner, keyed section data for the overlay.
-- `app/Models/AwardNomination.php` — eager loads nominee and nominated-title records with parent context preserved for title detail pages.
-- `app/Models/CatalogMediaAsset.php` — adds a stable identifier helper for gallery, lightbox, and viewer matching.
-- `app/Models/Contribution.php` — resolves admin labels and edit URLs through local title and person wrappers.
-- `app/Models/Genre.php` — makes catalog-style slug binding fail cleanly when a genre slug or ID does not resolve.
-- `app/Models/InterestCategory.php` — reads directory image values from raw attributes so catalog-backed cards stay reliable.
-- `app/Models/LocalPerson.php` — adds a local-only person wrapper that always uses the app’s writable schema.
-- `app/Models/LocalTitle.php` — adds a local-only title wrapper that always uses the app’s writable schema.
-- `app/Models/MediaAsset.php` — adds integer casts and resolves admin attached-record labels and links through local wrappers.
-- `app/Models/MovieAka.php` — makes archived title aliases load only the related catalog tables that are actually available.
-- `app/Models/Person.php` — auto-detects catalog-only mode from the active database connection and adds nomination counts to directory metrics.
-- `app/Models/Review.php` — adds an `adminTitle` relation so moderation screens can link through local titles safely.
-- `app/Models/Title.php` — auto-detects catalog-only mode, caches table availability, adds catalog-aware scopes and relations, and preserves parent back-references on flattened records.
-- `changelog/changelog-2026-04-12.md` — records this update in plain English for the team.
-- `config/livewire.php` — publishes the app’s Livewire configuration, layout, pagination, asset, and component defaults.
-- `resources/js/app.js` — registers the shared Alpine state module during frontend boot.
-- `resources/js/components/ui-state.js` — adds reusable Alpine helpers for search, tooltips, dropdowns, popovers, switches, textareas, popups, and accordions.
-- `resources/views/admin/episodes/_form.blade.php` — switches episode form binding over to the shared admin form helpers.
-- `resources/views/admin/episodes/edit.blade.php` — passes reusable episode form data into the episode partial.
-- `resources/views/admin/media-assets/_form.blade.php` — switches media asset form binding over to the shared admin form helpers.
-- `resources/views/admin/media-assets/edit.blade.php` — passes reusable media asset form data and shows the attached-record link whenever a safe admin URL exists.
-- `resources/views/admin/people/edit.blade.php` — reuses the shared media asset form data on the person edit screen.
-- `resources/views/admin/seasons/_form.blade.php` — switches season form binding over to the shared admin form helpers.
-- `resources/views/admin/seasons/edit.blade.php` — passes reusable season and draft-episode form data into the season page.
-- `resources/views/admin/titles/_form.blade.php` — uses prepared genre selections and shared form helpers instead of rebuilding that state inline.
-- `resources/views/admin/titles/edit.blade.php` — reuses shared title, season, and media asset form data on the title edit screen.
-- `resources/views/components/auth/member-entry-card.blade.php` — simplifies the member tab highlighting logic.
-- `resources/views/components/ui/accordion/index.blade.php` — replaces inline Alpine state with the shared accordion root helper.
-- `resources/views/components/ui/accordion/item.blade.php` — replaces inline Alpine state with the shared accordion item helper.
-- `resources/views/components/ui/button/index.blade.php` — removes the old `wire:loading.attr` bridge and leaves loading decoration to explicit state and slot selectors.
-- `resources/views/components/ui/combobox/index.blade.php` — adds slot-based loading selectors for Livewire 4-friendly combobox rendering.
-- `resources/views/components/ui/combobox/loading.blade.php` — exposes a named loading slot for combobox lists.
-- `resources/views/components/ui/combobox/option.blade.php` — removes the old selector that hid options through list-level loading state.
-- `resources/views/components/ui/combobox/option/empty.blade.php` — exposes a named empty-state slot for combobox lists.
-- `resources/views/components/ui/combobox/options.blade.php` — standardizes combobox options markup around explicit list, empty, and loading slots.
-- `resources/views/components/ui/dropdown/checkbox-or-radio.blade.php` — moves checkbox and radio dropdown state into the shared dropdown toggle helper.
-- `resources/views/components/ui/dropdown/index.blade.php` — replaces inline dropdown Alpine code with the shared dropdown shell helper.
-- `resources/views/components/ui/dropdown/item.blade.php` — removes the old `wire:loading.attr` bridge from reusable dropdown items.
-- `resources/views/components/ui/dropdown/submenu.blade.php` — replaces inline submenu behavior with the shared dropdown submenu helper.
-- `resources/views/components/ui/input/options/copyable.blade.php` — replaces inline copy-to-clipboard code with the shared input copy helper.
-- `resources/views/components/ui/input/options/revealable.blade.php` — replaces inline password reveal code with the shared input reveal helper.
-- `resources/views/components/ui/pagination/control.blade.php` — adds a reusable pagination control component for buttons and links.
-- `resources/views/components/ui/popover/index.blade.php` — replaces inline Alpine state with the shared popover helper.
-- `resources/views/components/ui/popup.blade.php` — replaces inline Alpine state with the shared popup visibility helper.
-- `resources/views/components/ui/select/index.blade.php` — adds slot-based loading selectors for Livewire 4-friendly select rendering.
-- `resources/views/components/ui/select/loading.blade.php` — exposes a named loading slot for select lists.
-- `resources/views/components/ui/select/option.blade.php` — removes the old selector that hid options through list-level loading state.
-- `resources/views/components/ui/select/option/empty.blade.php` — exposes a named empty-state slot for select lists.
-- `resources/views/components/ui/select/options.blade.php` — standardizes select options markup around explicit list, empty, and loading slots.
-- `resources/views/components/ui/switch/index.blade.php` — replaces inline switch state with the shared switch helper.
-- `resources/views/components/ui/textarea/index.blade.php` — replaces inline autosize logic with the shared textarea helper.
-- `resources/views/components/ui/tooltip/index.blade.php` — replaces inline tooltip state with the shared tooltip helper.
-- `resources/views/livewire/account/watchlist-browser.blade.php` — adds stable keys and explicit `wire:target` scopes to watchlist filters and summary badges.
-- `resources/views/livewire/admin/contribution-moderation-card.blade.php` — adds stable keys for moderation status options so Livewire can re-render the card cleanly.
-- `resources/views/livewire/admin/person-profession-editor.blade.php` — scopes loading feedback to the save and delete actions.
-- `resources/views/livewire/admin/report-moderation-card.blade.php` — links reported reviews through the local admin title relation when it exists.
-- `resources/views/livewire/admin/review-moderation-card.blade.php` — links moderated reviews through the local admin title relation when it exists.
-- `resources/views/livewire/lists/manage-list.blade.php` — replaces input loading wrappers with slot-based suggestion loading and scopes destructive actions more clearly.
-- `resources/views/livewire/pagination/island-simple.blade.php` — moves Livewire island pagination onto the shared pagination control component and cleaner scroll handling.
-- `resources/views/livewire/people/filmography-panel.blade.php` — uses the new stable group and row keys from the filmography panel payload.
-- `resources/views/livewire/search/discovery-filters.blade.php` — adds stable keys to active filters and scopes clear and reset buttons to their own loading state.
-- `resources/views/livewire/search/global-search.blade.php` — replaces inline overlay state with the shared search helper and adds stable keys to suggestion sections and rows.
-- `resources/views/livewire/search/search-results.blade.php` — adds stable keys across filters and result cards and scopes the clear button to its own loading state.
-- `resources/views/titles/cast.blade.php` — reuses preloaded episode credit data more safely when rendering episode-specific cast links.
-- `resources/views/titles/media-archive.blade.php` — redesigns archive summary cards and trailer metadata around shared badges and named shell hooks.
-- `resources/views/titles/media.blade.php` — compares viewer strip items through stable media identifiers instead of raw IDs or URLs.
-- `resources/views/titles/show.blade.php` — reads award nomination title rows from prepared entry arrays with safer fallbacks.
-- `resources/views/vendor/pagination/simple-tailwind.blade.php` — swaps the simple paginator over to the shared pagination control component.
-- `resources/views/vendor/pagination/tailwind.blade.php` — swaps the full paginator over to the shared pagination control component.
-- `routes/admin.php` — registers the controller-backed admin mutation routes beside the existing Livewire pages.
-- `tests/Concerns/InteractsWithRemoteCatalog.php` — hardens remote catalog test helpers for missing connections and missing schema pieces.
-- `tests/Feature/Feature/Admin/AdminCatalogCrudTest.php` — covers the restored admin title controller routes.
-- `tests/Feature/Feature/Admin/AdminCatalogReadonlyPagesTest.php` — verifies catalog-only mode blocks controller-backed admin writes with 501 responses.
-- `tests/Feature/Feature/Admin/MediaAssetUploadTest.php` — now expects media and moderation controller routes to be present.
-- `tests/Feature/Feature/Admin/TitleFormViewTest.php` — verifies the title form receives prepared genre selection data.
-- `tests/Feature/Feature/BrowseTitlesPageLocalRenderTest.php` — verifies show-all collections respect the configured page size.
-- `tests/Feature/Feature/ButtonComponentTest.php` — verifies buttons and dropdown items no longer inject the old `wire:loading.attr` bridge.
-- `tests/Feature/Feature/FrontendInteractionConventionTest.php` — locks in the shared Alpine registration and usage conventions.
-- `tests/Feature/Feature/Livewire/SeasonWatchProgressTest.php` — makes the season watch-progress test setup choose stable seeded seasons.
-- `tests/Feature/Feature/Livewire/TitleBrowserChartViewDataTest.php` — verifies chart and browser payloads use the configured page-size limit.
-- `tests/Feature/Feature/LivewireConfigurationContractTest.php` — verifies the published Livewire configuration contract.
-- `tests/Feature/Feature/LivewireLoadingStateConventionTest.php` — verifies the slot-based loading and keyed-loop conventions across Livewire views.
-- `tests/Feature/Feature/PortalRouteRegistrationTest.php` — verifies the admin mutation routes exist and point to controller endpoints.
-- `tests/Feature/Feature/PublicMysqlCatalogSmokeTest.php` — updates smoke assertions to match the current discovery page copy.
-- `tests/Feature/Feature/Seo/SlugGenerationTest.php` — adds coverage for catalog-style genre slugs that do not resolve.
-- `tests/Feature/Feature/TitleMediaArchiveShellContractTest.php` — adds shell-contract coverage for archive summary cards and trailer metadata badges.
-- `tests/Feature/Feature/TitlePagePayloadFallbackTest.php` — verifies title pages can fall back to catalog credit directors and still render missing collections safely.
-- `tests/Feature/Feature/Ui/AlpinePrimitiveRenderingTest.php` — verifies the shared Alpine UI primitives render the expected hooks.
-- `tests/Feature/Feature/Ui/PaginationRenderingTest.php` — verifies the island paginator renders through the shared pagination control.
-- `tests/TestCase.php` — teaches the shared test harness to skip gracefully when a remote catalog table is missing.
-- `tests/Unit/Models/TitleTest.php` — covers catalog-only auto-detection, remote admin title queries, and the updated title-model behavior.
+- `app/Actions/Catalog/GetPeopleDirectorySnapshotAction.php` — now returns safe zeroed people metrics when the remote people or credits tables are missing.
+- `app/Actions/Catalog/GetPublicPeopleFilterOptionsAction.php` — now returns empty profession filters instead of querying unavailable remote people tables.
+- `app/Actions/Catalog/LoadAwardNominationDetailsAction.php` — only loads nominee people when the nominee tables exist and reads people labels from a safe loaded collection helper.
+- `app/Actions/Catalog/LoadAwardsArchiveAction.php` — gives the awards archive the same safe nominee-loading behavior and avoids touching missing people relations.
+- `app/Actions/Catalog/LoadEpisodeDetailsAction.php` — skips credit hydration entirely when the remote credits table is unavailable.
+- `app/Actions/Catalog/LoadPersonDetailsAction.php` — guards known-for titles, collaborator lookups, and preview credits behind catalog table availability checks.
+- `app/Actions/Catalog/LoadTitleCastAction.php` — returns empty cast and crew paginators with valid SEO data when catalog credits are unavailable.
+- `app/Actions/Catalog/LoadTitleDetailsAction.php` — now zeroes title credit counts and previews when the remote credits table cannot be used.
+- `app/Actions/Home/GetAwardsSpotlightNominationsAction.php` — only eager loads nominee people when those remote tables are actually present.
+- `app/Actions/Home/GetHeroSpotlightAction.php` — stops trying to hydrate hero credits when the catalog credits table is missing.
+- `app/Actions/Home/GetPopularPeopleAction.php` — returns an empty people rail when the remote people directory is unavailable.
+- `app/Actions/Search/BuildSearchResultsViewDataAction.php` — skips people search work when the app is in catalog mode without people tables.
+- `app/Actions/Search/GetGlobalSearchSuggestionsAction.php` — applies the same people-directory guard to global search suggestions.
+- `app/Actions/Database/MigrateSourceDatabaseAction.php` — adds the resumable shared-table importer with cursor checkpoints, progress callbacks, retry support, and per-table reports.
+- `app/Actions/Database/RunDatabaseMigrationTransactionAction.php` — retries deadlocks and lock timeouts during migration writes instead of failing immediately.
+- `app/Console/Commands/ImdbMigrateSourceDatabaseCommand.php` — exposes the new import flow as an Artisan command with progress output and resume/reset options.
+- `app/Http/Controllers/Admin/Concerns/BlocksCatalogOnlyAdminMutations.php` — deleted the old trait because the legacy admin controller write layer was removed.
+- `app/Http/Controllers/Admin/CreditController.php` — deleted the legacy credit mutation controller now that admin writes stay on the Livewire surface.
+- `app/Http/Controllers/Admin/EpisodeController.php` — deleted the legacy episode mutation controller.
+- `app/Http/Controllers/Admin/GenreController.php` — deleted the legacy genre mutation controller.
+- `app/Http/Controllers/Admin/MediaAssetController.php` — deleted the legacy media asset mutation controller.
+- `app/Http/Controllers/Admin/ModerationController.php` — deleted the legacy moderation mutation controller.
+- `app/Http/Controllers/Admin/PersonController.php` — deleted the legacy person mutation controller.
+- `app/Http/Controllers/Admin/PersonProfessionController.php` — deleted the legacy profession mutation controller.
+- `app/Http/Controllers/Admin/SeasonController.php` — deleted the legacy season mutation controller.
+- `app/Http/Controllers/Admin/TitleController.php` — deleted the legacy title mutation controller.
+- `app/Http/Controllers/Controller.php` — deleted the unused base controller because no HTTP controllers remain in this repo.
+- `app/Livewire/Admin/ReportModerationCard.php` — now computes the reported review title in PHP and passes clean view data into the Blade template.
+- `app/Livewire/Admin/ReviewModerationCard.php` — now computes the displayed review title in PHP instead of leaving that work inside Blade.
+- `app/Livewire/Catalog/PeopleBrowser.php` — shows a clear unavailable state and an empty paginator when the remote people directory is missing.
+- `app/Livewire/Pages/Public/PeoplePage.php` — renders the people index with prepared SEO data when the catalog has titles but no people tables.
+- `app/Livewire/Titles/RatingPanel.php` — now authorizes title tracking mutations and adds an explicit view return type.
+- `app/Livewire/Titles/WatchStatePanel.php` — now authorizes watch-state mutations and adds an explicit view return type.
+- `app/Livewire/Titles/WatchlistToggle.php` — now authorizes watchlist mutations and adds an explicit view return type.
+- `app/Models/AwardNomination.php` — adds safe nominee-people availability checks and a `loadedPeople()` helper for relation-aware rendering.
+- `app/Models/Credit.php` — adds a `catalogCreditsAvailable()` helper and only projects character relations when that remote table exists.
+- `app/Models/DatabaseMigrationState.php` — stores source import cursor state, copied row counts, status, and last error details.
+- `app/Models/Person.php` — adds a `catalogPeopleAvailable()` helper and makes detail metrics conditional on which remote tables exist.
+- `app/Models/Title.php` — only exposes catalog credits relations when the remote credits table is available.
+- `app/Policies/TitlePolicy.php` — adds a `track` ability so personal title interactions can block suspended users.
+- `database/migrations/2026_04_11_225723_create_database_migration_states_table.php` — creates the checkpoint table for resumable source imports.
+- `resources/views/admin/credits/_form.blade.php` — switches admin credit selects over to the shared native-select component.
+- `resources/views/admin/episodes/_form.blade.php` — switches the episode publish-status select over to the shared native-select component.
+- `resources/views/admin/media-assets/_form.blade.php` — switches the media kind select over to the shared native-select component.
+- `resources/views/admin/people/_form.blade.php` — switches the person publish-status select over to the shared native-select component.
+- `resources/views/livewire/admin/report-moderation-card.blade.php` — now renders the related review title from prepared Livewire view data.
+- `resources/views/livewire/admin/review-moderation-card.blade.php` — now renders the related review title from prepared Livewire view data.
+- `resources/views/titles/show.blade.php` — removes an inline fallback collection assignment that is now handled before the view renders.
+- `routes/admin.php` — removes the old admin controller mutation routes and leaves the admin surface as Livewire pages only.
+- `tests/Concerns/InteractsWithRemoteCatalog.php` — improves remote-catalog skipping and sample-record lookup when some IMDb tables are missing.
+- `tests/Feature/Feature/Admin/AdminCatalogCrudTest.php` — now verifies that the removed admin controller mutation routes stay unregistered.
+- `tests/Feature/Feature/Admin/AdminCatalogReadonlyPagesTest.php` — now verifies that catalog-only mode exposes no title mutation route.
+- `tests/Feature/Feature/Admin/AdminFormPartialsViewTest.php` — adds coverage for the shared native-select usage in admin form partials.
+- `tests/Feature/Feature/Admin/AdminModerationQueuesTest.php` — adds assertions that moderation cards show the related title names.
+- `tests/Feature/Feature/Admin/MediaAssetUploadTest.php` — now verifies that the removed admin media and moderation controller routes stay unregistered.
+- `tests/Feature/Feature/AwardNominationPageTest.php` — now guards nominee-people expectations behind remote table availability checks.
+- `tests/Feature/Feature/AwardsArchiveExperienceTest.php` — now guards archive nominee-people expectations behind remote table availability checks.
+- `tests/Feature/Feature/Database/ImdbSourceDatabaseMigrationCommandProgressTest.php` — verifies that the new import command prints useful progress metrics.
+- `tests/Feature/Feature/Database/ImdbSourceDatabaseMigrationCommandTest.php` — verifies that the new import command can resume from a saved cursor state.
+- `tests/Feature/Feature/Livewire/PeopleBrowserTest.php` — skips unavailable remote-table cases and relaxes popularity assertions to fit real catalog data better.
+- `tests/Feature/Feature/Livewire/TitleInteractionTest.php` — adds coverage proving suspended users cannot mutate title tracking widgets.
+- `tests/Feature/Feature/PeopleDetailExperienceTest.php` — skips the person detail test when remote people profiles are unavailable.
+- `tests/Feature/Feature/PortalRouteRegistrationTest.php` — now verifies that the removed admin mutation routes are not registered.
+- `tests/Feature/Feature/Search/GlobalSearchLivewireTest.php` — reuses the public people query action and skips ranked-person expectations when catalog tables are missing.
+- `tests/Feature/Feature/Search/SearchExperienceTest.php` — switches search assertions over to Livewire view data and adds safer people-ranking guards.
+- `tests/Unit/Database/RunDatabaseMigrationTransactionActionTest.php` — verifies retry behavior for retryable and non-retryable database exceptions.
+- `changelog/changelog-2026-04-12.md` — rewrites today’s changelog entry so it matches the actual source-import, admin-cleanup, and catalog-fallback changes.
 
 ### Why This Matters
-This update makes the project easier to extend without stumbling over hidden coupling. Admin writes now have a clear Laravel surface, catalog-only mode behaves more honestly, public pages can show fuller data with fewer weird gaps, and the frontend primitives now share one interaction language instead of a pile of slightly different inline scripts. That combination should make future changes faster, safer, and easier to test.
+This update makes the project much more honest about the data it has and much less fragile when the remote IMDb schema is incomplete or temporarily unreachable. At the same time, it gives the team a safer way to seed shared tables from another database without restarting long imports from scratch, which should save a lot of frustration during local setup, recovery work, and environment refreshes.
 
 ---

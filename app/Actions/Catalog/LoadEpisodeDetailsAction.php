@@ -149,6 +149,12 @@ class LoadEpisodeDetailsAction
 
     private function loadEpisodeCredits(Title $episode): void
     {
+        if (! Credit::catalogCreditsAvailable()) {
+            $episode->setRelation('credits', collect());
+
+            return;
+        }
+
         $episode->setRelation('credits', $episode->credits()
             ->select(Credit::projectedColumns())
             ->with(Credit::projectedRelations())

@@ -359,7 +359,10 @@ class Title extends Model
         if (static::usesCatalogOnlySchema()) {
             $relations = [
                 ...self::catalogCardRelations(),
-                'credits' => fn ($query) => $query
+            ];
+
+            if (Credit::catalogCreditsAvailable()) {
+                $relations['credits'] = fn ($query) => $query
                     ->select(Credit::projectedColumns())
                     ->ordered()
                     ->with([
@@ -367,8 +370,8 @@ class Title extends Model
                         'person' => fn ($personQuery) => $personQuery
                             ->select(Person::directoryColumns())
                             ->with(Person::directoryRelations()),
-                    ]),
-            ];
+                    ]);
+            }
 
             if (static::catalogTablesAvailable('movie_akas')) {
                 $relations['movieAkas'] = fn ($query) => $query

@@ -96,14 +96,20 @@ class LoadAwardsArchiveAction
                                     'movies.runtimeSeconds',
                                 ])
                                 ->publishedCatalog(),
-                            'people' => fn ($personQuery) => $personQuery->select([
-                                'name_basics.id',
-                                'name_basics.nconst',
-                                'name_basics.imdb_id',
-                                'name_basics.primaryname',
-                                'name_basics.displayName',
-                                'name_basics.primaryprofession',
-                            ]),
+                            ...(
+                                AwardNomination::catalogNomineePeopleAvailable()
+                                    ? [
+                                        'people' => fn ($personQuery) => $personQuery->select([
+                                            'name_basics.id',
+                                            'name_basics.nconst',
+                                            'name_basics.imdb_id',
+                                            'name_basics.primaryname',
+                                            'name_basics.displayName',
+                                            'name_basics.primaryprofession',
+                                        ]),
+                                    ]
+                                    : []
+                            ),
                         ])
                         ->orderByDesc('is_winner')
                         ->orderBy('position')
@@ -318,7 +324,7 @@ class LoadAwardsArchiveAction
             return route('public.titles.show', $nomination->title);
         }
 
-        if ($nomination->people->count() === 1 && $nomination->person instanceof Person) {
+        if ($this->loadedPeople($nomination)->count() === 1 && $nomination->person instanceof Person) {
             return route('public.people.show', $nomination->person);
         }
 
@@ -335,7 +341,7 @@ class LoadAwardsArchiveAction
             ])->filter()->implode(' · ');
         }
 
-        if ($nomination->people->isNotEmpty()) {
+        if ($this->loadedPeople($nomination)->isNotEmpty()) {
             return 'People';
         }
 
@@ -359,7 +365,7 @@ class LoadAwardsArchiveAction
     private function inferScopeLabel(Collection $nominations): string
     {
         $hasTitles = $nominations->contains(fn (AwardNomination $nomination): bool => $nomination->title instanceof Title);
-        $hasPeople = $nominations->contains(fn (AwardNomination $nomination): bool => $nomination->people->isNotEmpty());
+        $hasPeople = $nominations->contains(fn (AwardNomination $nomination): bool => $this->loadedPeople($nomination)->isNotEmpty());
 
         return match (true) {
             $hasTitles && $hasPeople => 'Title and people recipients',
@@ -399,7 +405,7 @@ class LoadAwardsArchiveAction
             $keys->push('title:'.$nomination->movie_id);
         }
 
-        foreach ($nomination->people as $person) {
+        foreach ($this->loadedPeople($nomination) as $person) {
             $keys->push('person:'.$person->getKey());
         }
 
@@ -414,7 +420,7 @@ class LoadAwardsArchiveAction
 
     private function peopleLabel(AwardNomination $nomination): ?string
     {
-        $people = $nomination->people
+        $people = $this->loadedPeople($nomination)
             ->map(fn (Person $person): string => $person->name)
             ->filter()
             ->values();
@@ -428,5 +434,15 @@ class LoadAwardsArchiveAction
         }
 
         return $people->take(2)->implode(', ').' +'.($people->count() - 2);
+    }
+
+    /**
+     * @return Collection<int, Person>
+     */
+    private function loadedPeople(AwardNomination $nomination): Collection
+    {
+        return collect($nomination->loadedPeople()->all())
+            ->filter(fn ($person): bool => $person instanceof Person)
+            ->values();
     }
 }

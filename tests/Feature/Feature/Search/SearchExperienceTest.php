@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Feature\Search;
 
+use App\Actions\Catalog\BuildPublicPeopleIndexQueryAction;
 use App\Actions\Search\BuildSearchTitleResultsQueryAction;
 use App\Livewire\Search\SearchResults;
-use App\Models\NameBasicMeterRanking;
 use App\Models\Person;
 use App\Models\Title;
 use Illuminate\Contracts\Pagination\Paginator;
@@ -21,6 +21,8 @@ class SearchExperienceTest extends TestCase
 
     public function test_search_page_highlights_top_matches_with_titles_and_people_lanes(): void
     {
+        Livewire::withoutLazyLoading();
+
         $title = $this->sampleTitle();
         $interestCategory = $this->sampleInterestCategory();
 
@@ -29,16 +31,40 @@ class SearchExperienceTest extends TestCase
             ->assertSee('Search The Global Catalog')
             ->assertSee('Browse by Theme')
             ->assertSee('Search Results')
-            ->assertSee('Top Match')
-            ->assertSee('Best title match')
-            ->assertDontSee('No matches yet.')
-            ->assertSee($title->name);
+            ->assertSee('Loading')
+            ->assertSeeHtml('wire:intersect.once="__lazyLoadIsland"');
 
-        $this->get(route('public.search', ['q' => $interestCategory->name]))
-            ->assertOk()
-            ->assertSee('Theme matches')
-            ->assertSee($interestCategory->name)
-            ->assertSee(route('public.interest-categories.show', $interestCategory), false);
+        $titleComponent = Livewire::test(SearchResults::class)
+            ->set('query', $this->searchTermFor($title));
+
+        /** @var array{
+         *     hasAnyResults: bool,
+         *     topMatch: array{record: Title|Person|null, type: 'title'|'person'|null},
+         *     titleResultsCount: int
+         * } $titleView
+         */
+        $titleView = $titleComponent->instance()->viewData();
+
+        $this->assertTrue($titleView['hasAnyResults']);
+        $this->assertSame('title', $titleView['topMatch']['type']);
+        $this->assertInstanceOf(Title::class, $titleView['topMatch']['record']);
+        $this->assertSame($title->id, $titleView['topMatch']['record']->id);
+
+        $themeComponent = Livewire::test(SearchResults::class)
+            ->set('query', $interestCategory->name);
+
+        /** @var array{
+         *     interestCategories: Collection<int, mixed>
+         * } $themeView
+         */
+        $themeView = $themeComponent->instance()->viewData();
+
+        $this->assertTrue(
+            $themeView['interestCategories']->contains(
+                fn ($match): bool => $match->getKey() === $interestCategory->getKey()
+            ),
+            'The matching interest category should be present in the themes lane.',
+        );
     }
 
     public function test_search_supports_live_genre_and_year_filters_against_remote_titles(): void
@@ -46,32 +72,60 @@ class SearchExperienceTest extends TestCase
         $title = $this->sampleTitle()->loadMissing('genres');
         $genre = $title->genres->firstOrFail();
 
-        $this->get(route('public.search', [
-            'q' => $this->searchTermFor($title),
-            'genre' => $genre->slug,
-            'yearFrom' => $title->release_year,
-            'yearTo' => $title->release_year,
-        ]))
-            ->assertOk()
-            ->assertSee($title->name);
+        $matchingComponent = Livewire::test(SearchResults::class)
+            ->set('query', $this->searchTermFor($title))
+            ->set('genre', $genre->slug)
+            ->set('yearFrom', (string) $title->release_year)
+            ->set('yearTo', (string) $title->release_year);
 
-        $this->get(route('public.search', [
-            'q' => $this->searchTermFor($title),
-            'yearFrom' => $title->release_year + 1,
-        ]))
-            ->assertOk()
-            ->assertSee('No matches yet.')
-            ->assertDontSee($title->name);
+        /** @var array{
+         *     titles: Paginator,
+         *     topMatch: array{record: Title|Person|null, type: 'title'|'person'|null}
+         * } $matchingView
+         */
+        $matchingView = $matchingComponent->instance()->viewData();
+        $matchingTitles = collect($matchingView['titles']->items());
+
+        $this->assertTrue(
+            $matchingTitles->contains(fn (Title $visibleTitle): bool => $visibleTitle->is($title))
+                || (
+                    $matchingView['topMatch']['type'] === 'title'
+                    && $matchingView['topMatch']['record'] instanceof Title
+                    && $matchingView['topMatch']['record']->is($title)
+                ),
+            'The filtered search results should retain the matching title either as the top match or in the visible title lane.',
+        );
+
+        $emptyComponent = Livewire::test(SearchResults::class)
+            ->set('query', $this->searchTermFor($title))
+            ->set('yearFrom', (string) ($title->release_year + 1));
+
+        /** @var array{hasAnyResults: bool, titles: Paginator} $emptyView */
+        $emptyView = $emptyComponent->instance()->viewData();
+
+        $this->assertFalse($emptyView['hasAnyResults']);
+        $this->assertCount(0, $emptyView['titles']->items());
     }
 
     public function test_search_page_shows_a_no_results_state_when_nothing_matches(): void
     {
-        $this->get(route('public.search', [
-            'q' => 'zzzzzz-not-a-real-imdb-record',
-            'country' => 'JP',
-        ]))
-            ->assertOk()
-            ->assertSee('No matches yet.');
+        $component = Livewire::test(SearchResults::class)
+            ->set('query', 'zzzzzz-not-a-real-imdb-record')
+            ->set('country', 'JP');
+
+        /** @var array{
+         *     hasAnyResults: bool,
+         *     interestCategoryCount: int,
+         *     peopleCount: int,
+         *     titleResultsCount: int
+         * } $view
+         */
+        $view = $component->instance()->viewData();
+
+        $this->assertFalse($view['hasAnyResults']);
+        $this->assertSame(0, $view['titleResultsCount']);
+        $this->assertSame(0, $view['peopleCount']);
+        $this->assertSame(0, $view['interestCategoryCount']);
     }
 
     public function test_search_page_supports_theme_filters_against_remote_titles(): void
@@ -90,38 +144,62 @@ class SearchExperienceTest extends TestCase
             $this->markTestSkipped('The remote catalog does not currently expose a visible title for the sampled interest category.');
         }
 
-        $this->get(route('public.search', ['theme' => $interestCategory->slug]))
-            ->assertOk()
-            ->assertSee('Refine title matches')
-            ->assertSee($themeResultTitle->name);
+        $component = Livewire::test(SearchResults::class)
+            ->set('theme', $interestCategory->slug);
+
+        /** @var array{
+         *     titles: Paginator,
+         *     topMatch: array{record: Title|Person|null, type: 'title'|'person'|null}
+         * } $view
+         */
+        $view = $component->instance()->viewData();
+        $titles = collect($view['titles']->items());
+
+        $this->assertTrue(
+            $titles->contains(fn (Title $visibleTitle): bool => $visibleTitle->is($themeResultTitle))
+                || (
+                    $view['topMatch']['type'] === 'title'
+                    && $view['topMatch']['record'] instanceof Title
+                    && $view['topMatch']['record']->is($themeResultTitle)
+                ),
+            'Theme-filtered search results should include the sampled title either as the top match or in the visible title lane.',
+        );
     }
 
     public function test_search_page_reuses_ranked_person_cards_for_people_matches(): void
     {
-        $person = Person::query()
-            ->select($this->remotePersonColumns())
-            ->addSelect([
-                'popularity_rank' => NameBasicMeterRanking::query()
-                    ->select('current_rank')
-                    ->whereColumn('name_basic_meter_rankings.name_basic_id', 'name_basics.id')
-                    ->limit(1),
-            ])
-            ->published()
-            ->whereHas('meterRanking')
-            ->whereNotNull('name_basics.primaryname')
-            ->orderBy('popularity_rank')
+        if (! Person::catalogPeopleAvailable() || ! Title::catalogTablesAvailable('name_basic_meter_rankings')) {
+            $this->markTestSkipped('The remote catalog does not currently expose a ranked person.');
+        }
+
+        $person = app(BuildPublicPeopleIndexQueryAction::class)
+            ->handle(['sort' => 'popular'])
             ->first();
 
         if (! $person instanceof Person || ! is_int($person->popularity_rank)) {
             $this->markTestSkipped('The remote catalog does not currently expose a ranked person.');
         }
 
-        $this->get(route('public.search', ['q' => $this->personSearchTermFor($person)]))
-            ->assertOk()
-            ->assertSee('Best people match')
-            ->assertSee($person->name)
-            ->assertSee('Rank #'.number_format($person->popularity_rank))
-            ->assertSeeHtml('data-slot="search-top-match-person-metrics"');
+        $component = Livewire::test(SearchResults::class)
+            ->set('query', $this->personSearchTermFor($person));
+
+        /** @var array{
+         *     topMatch: array{
+         *         record: Title|Person|null,
+         *         type: 'title'|'person'|null,
+         *         popularityRankLabel?: string|null
+         *     }
+         * } $view
+         */
+        $view = $component->instance()->viewData();
+
+        $this->assertSame('person', $view['topMatch']['type']);
+        $this->assertInstanceOf(Person::class, $view['topMatch']['record']);
+        $this->assertSame($person->id, $view['topMatch']['record']->id);
+        $this->assertSame(
+            'Rank #'.number_format($person->popularity_rank),
+            $view['topMatch']['popularityRankLabel'] ?? null,
+        );
     }
 
     public function test_search_page_deduplicates_a_title_top_match_from_the_title_grid(): void

@@ -18,6 +18,10 @@ class GetPopularPeopleAction
      */
     public function handle(int $limit = 6): Collection
     {
+        if (Person::usesCatalogOnlySchema() && ! Person::catalogPeopleAvailable()) {
+            return new Collection;
+        }
+
         return Cache::remember(
             "home:popular-people:v2:{$limit}",
             now()->addMinutes(10),

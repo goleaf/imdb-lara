@@ -134,6 +134,11 @@ class Person extends Model
         return $config->get('database.default') === 'imdb_mysql';
     }
 
+    public static function catalogPeopleAvailable(): bool
+    {
+        return ! static::usesCatalogOnlySchema() || Title::catalogTablesAvailable('name_basics');
+    }
+
     public static function catalogColumn(string $localColumn): string
     {
         if (! static::usesCatalogOnlySchema()) {
@@ -248,10 +253,16 @@ class Person extends Model
     public static function detailRelations(): array
     {
         if (static::usesCatalogOnlySchema()) {
-            return [
+            $relations = [
                 ...self::directoryRelations(),
-                'meterRanking:name_basic_id,current_rank,change_direction,difference',
-                'credits' => fn ($query) => $query
+            ];
+
+            if (Title::catalogTablesAvailable('name_basic_meter_rankings')) {
+                $relations[] = 'meterRanking:name_basic_id,current_rank,change_direction,difference';
+            }
+
+            if (Credit::catalogCreditsAvailable()) {
+                $relations['credits'] = fn ($query) => $query
                     ->select(Credit::projectedColumns())
                     ->ordered()
                     ->with([
@@ -259,8 +270,10 @@ class Person extends Model
                         'title' => fn ($titleQuery) => $titleQuery
                             ->select(Title::catalogCardColumns())
                             ->with(Title::catalogCardRelations()),
-                    ]),
-            ];
+                    ]);
+            }
+
+            return $relations;
         }
 
         return [
@@ -399,18 +412,33 @@ class Person extends Model
     public function scopeWithDirectoryMetrics(Builder $query): Builder
     {
         if (static::usesCatalogOnlySchema()) {
-            return $query
-                ->addSelect([
-                    'credits_count' => NameCreditSummary::query()
-                        ->select('total_count')
-                        ->whereColumn('name_credit_summaries.name_basic_id', 'name_basics.id')
-                        ->limit(1),
-                    'popularity_rank' => NameBasicMeterRanking::query()
-                        ->select('current_rank')
-                        ->whereColumn('name_basic_meter_rankings.name_basic_id', 'name_basics.id')
-                        ->limit(1),
-                ])
-                ->withCount('awardNominations');
+            $metrics = [];
+
+            if (Title::catalogTablesAvailable('name_credit_summaries')) {
+                $metrics['credits_count'] = NameCreditSummary::query()
+                    ->select('total_count')
+                    ->whereColumn('name_credit_summaries.name_basic_id', 'name_basics.id')
+                    ->limit(1);
+            } else {
+                $metrics['credits_count'] = 0;
+            }
+
+            if (Title::catalogTablesAvailable('name_basic_meter_rankings')) {
+                $metrics['popularity_rank'] = NameBasicMeterRanking::query()
+                    ->select('current_rank')
+                    ->whereColumn('name_basic_meter_rankings.name_basic_id', 'name_basics.id')
+                    ->limit(1);
+            } else {
+                $metrics['popularity_rank'] = 0;
+            }
+
+            $query->addSelect($metrics);
+
+            if (Title::catalogTablesAvailable('movie_award_nomination_nominees')) {
+                return $query->withCount('awardNominations');
+            }
+
+            return $query->addSelect(['award_nominations_count' => 0]);
         }
 
         return $query

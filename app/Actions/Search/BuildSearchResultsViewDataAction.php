@@ -69,7 +69,7 @@ class BuildSearchResultsViewDataAction
 
         $people = collect();
 
-        if (mb_strlen($searchQuery) >= 2) {
+        if (mb_strlen($searchQuery) >= 2 && (! Person::usesCatalogOnlySchema() || Person::catalogPeopleAvailable())) {
             try {
                 $people = $this->buildPublicPeopleIndexQuery->handle([
                     'search' => $searchQuery,

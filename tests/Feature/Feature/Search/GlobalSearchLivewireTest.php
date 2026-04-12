@@ -2,9 +2,10 @@
 
 namespace Tests\Feature\Feature\Search;
 
+use App\Actions\Catalog\BuildPublicPeopleIndexQueryAction;
 use App\Livewire\Search\GlobalSearch;
-use App\Models\NameBasicMeterRanking;
 use App\Models\Person;
+use App\Models\Title;
 use Livewire\Livewire;
 use Tests\Concerns\InteractsWithRemoteCatalog;
 use Tests\Concerns\UsesCatalogOnlyApplication;
@@ -73,18 +74,12 @@ class GlobalSearchLivewireTest extends TestCase
     {
         Livewire::withoutLazyLoading();
 
-        $person = Person::query()
-            ->select($this->remotePersonColumns())
-            ->addSelect([
-                'popularity_rank' => NameBasicMeterRanking::query()
-                    ->select('current_rank')
-                    ->whereColumn('name_basic_meter_rankings.name_basic_id', 'name_basics.id')
-                    ->limit(1),
-            ])
-            ->published()
-            ->whereHas('meterRanking')
-            ->whereNotNull('name_basics.primaryname')
-            ->orderBy('popularity_rank')
+        if (! Person::catalogPeopleAvailable() || ! Title::catalogTablesAvailable('name_basic_meter_rankings')) {
+            $this->markTestSkipped('The remote catalog does not currently expose a ranked person.');
+        }
+
+        $person = app(BuildPublicPeopleIndexQueryAction::class)
+            ->handle(['sort' => 'popular'])
             ->first();
 
         if (! $person instanceof Person || ! is_int($person->popularity_rank)) {

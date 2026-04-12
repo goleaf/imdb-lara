@@ -204,7 +204,13 @@ class LoadTitleDetailsAction
         $this->loadCreditPreview($title);
         $this->loadAwardHighlights($title);
         $this->hydrateMovieCompanyCreditRelations($title);
-        $title->loadCount('credits');
+
+        if (Credit::catalogCreditsAvailable()) {
+            $title->loadCount('credits');
+        } else {
+            $title->setRelation('credits', collect());
+            $title->setAttribute('credits_count', 0);
+        }
 
         $poster = $title->preferredPoster();
         $backdrop = $title->preferredBackdrop();
@@ -1110,6 +1116,12 @@ class LoadTitleDetailsAction
 
     private function loadCreditPreview(Title $title): void
     {
+        if (! Credit::catalogCreditsAvailable()) {
+            $title->setRelation('credits', collect());
+
+            return;
+        }
+
         $creditRelations = [
             ...Credit::projectedRelations(),
             'person' => fn ($personQuery) => $personQuery

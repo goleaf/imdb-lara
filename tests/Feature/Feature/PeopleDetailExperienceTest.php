@@ -67,6 +67,10 @@ class PeopleDetailExperienceTest extends TestCase
     {
         Livewire::withoutLazyLoading();
 
+        if (! Person::catalogPeopleAvailable()) {
+            $this->markTestSkipped('The remote catalog does not currently expose published people profiles.');
+        }
+
         $alternativeNameRow = NameBasicAlternativeName::query()
             ->select(['name_basic_id', 'alternative_name', 'position'])
             ->whereNotNull('alternative_name')

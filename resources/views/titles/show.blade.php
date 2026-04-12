@@ -685,7 +685,6 @@
                     </x-ui.card>
                 @endif
 
-                @php($awardNominationTitleEntries = $awardNominationTitleEntries ?? collect())
                 @if ($awardNominationTitleEntries->isNotEmpty())
                     <x-ui.card data-slot="title-detail-movie-award-nomination-titles" class="sb-detail-section !max-w-none">
                         <div class="space-y-4">

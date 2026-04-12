@@ -5,6 +5,7 @@ namespace App\Livewire\Catalog;
 use App\Actions\Catalog\BuildPublicPeopleIndexQueryAction;
 use App\Actions\Catalog\GetPublicPeopleFilterOptionsAction;
 use App\Livewire\Catalog\Concerns\HandlesRemoteCatalogFailures;
+use App\Models\Person;
 use Illuminate\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
@@ -57,6 +58,24 @@ class PeopleBrowser extends Component
     {
         return $this->resolveRemoteCatalogViewData(
             resolver: function (): array {
+                if (Person::usesCatalogOnlySchema() && ! Person::catalogPeopleAvailable()) {
+                    return [
+                        'emptyHeading' => 'People profiles are unavailable in the current catalog snapshot.',
+                        'emptyText' => 'The remote MySQL source currently exposes title data without the people directory tables.',
+                        'isCatalogUnavailable' => true,
+                        'people' => $this->emptyPaginator(18, 'people'),
+                        'professions' => [],
+                        'sortOptions' => $this->formatSortOptions([
+                            ['value' => 'popular', 'label' => 'Popular'],
+                            ['value' => 'credits', 'label' => 'Credits'],
+                            ['value' => 'awards', 'label' => 'Awards'],
+                            ['value' => 'name', 'label' => 'Name'],
+                        ]),
+                        'statusHeading' => 'People directory unavailable',
+                        'statusText' => 'The remote MySQL catalog does not currently expose the people tables required for this Livewire browser.',
+                    ];
+                }
+
                 $people = $this->buildPublicPeopleIndexQuery
                     ->handle([
                         'search' => $this->search,

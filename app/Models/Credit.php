@@ -126,9 +126,16 @@ class Credit extends Model
             return [];
         }
 
-        return [
-            'nameCreditCharacters:name_credit_id,position,character_name',
-        ];
+        return array_filter([
+            Title::catalogTablesAvailable('name_credit_characters')
+                ? 'nameCreditCharacters:name_credit_id,position,character_name'
+                : null,
+        ]);
+    }
+
+    public static function catalogCreditsAvailable(): bool
+    {
+        return ! self::usesCatalogOnlySchema() || Title::catalogTablesAvailable('name_credits');
     }
 
     public static function qualifiedColumn(string $localColumn): string

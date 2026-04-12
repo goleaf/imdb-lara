@@ -48,6 +48,12 @@ class GetHeroSpotlightAction
 
     private function loadFeaturedCredits(Title $title): void
     {
+        if (! Credit::catalogCreditsAvailable()) {
+            $title->setRelation('credits', collect());
+
+            return;
+        }
+
         $title->setRelation('credits', $title->credits()
             ->select(Credit::projectedColumns())
             ->with(Credit::projectedRelations())

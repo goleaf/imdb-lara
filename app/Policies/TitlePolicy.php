@@ -7,6 +7,11 @@ use App\Models\User;
 
 class TitlePolicy
 {
+    public function track(User $user, Title $title): bool
+    {
+        return $user->isActive();
+    }
+
     public function viewAny(User $user): bool
     {
         return $user->canManageCatalog();

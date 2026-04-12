@@ -40,9 +40,13 @@ class LoadAwardNominationDetailsAction
                 ->withCatalogCardRelations(),
             'movieAwardNominationNominees' => fn ($nomineeQuery) => $nomineeQuery
                 ->select(['movie_award_nomination_id', 'name_basic_id', 'position'])
-                ->with([
-                    'person' => fn ($personQuery) => $personQuery->select(Person::directoryColumns()),
-                ])
+                ->with(
+                    AwardNomination::catalogNomineePeopleAvailable()
+                        ? [
+                            'person' => fn ($personQuery) => $personQuery->select(Person::directoryColumns()),
+                        ]
+                        : []
+                )
                 ->orderBy('position'),
             'movieAwardNominationTitles' => fn ($nominationTitleQuery) => $nominationTitleQuery
                 ->select(['movie_award_nomination_id', 'nominated_movie_id', 'position'])
@@ -137,7 +141,13 @@ class LoadAwardNominationDetailsAction
                     ->selectCatalogCardColumns()
                     ->publishedCatalog()
                     ->withCatalogCardRelations(),
-                'people' => fn ($personQuery) => $personQuery->select(Person::directoryColumns()),
+                ...(
+                    AwardNomination::catalogNomineePeopleAvailable()
+                        ? [
+                            'people' => fn ($personQuery) => $personQuery->select(Person::directoryColumns()),
+                        ]
+                        : []
+                ),
             ])
             ->orderByDesc('is_winner')
             ->orderBy('winner_rank')
@@ -201,9 +211,9 @@ class LoadAwardNominationDetailsAction
             ])->filter()->implode(' · ');
         }
 
-        if ($awardNomination->people->isNotEmpty()) {
+        if ($awardNomination->loadedPeople()->isNotEmpty()) {
             return collect([
-                number_format($awardNomination->people->count()).' '.str('person')->plural($awardNomination->people->count()),
+                number_format($awardNomination->loadedPeople()->count()).' '.str('person')->plural($awardNomination->loadedPeople()->count()),
                 $awardNomination->award_year,
             ])->filter()->implode(' · ');
         }
@@ -224,7 +234,7 @@ class LoadAwardNominationDetailsAction
 
     private function peopleLabel(AwardNomination $awardNomination): ?string
     {
-        $people = $awardNomination->people
+        $people = $awardNomination->loadedPeople()
             ->map(fn (Person $person): string => $person->name)
             ->filter()
             ->values();

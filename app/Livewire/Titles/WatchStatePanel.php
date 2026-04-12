@@ -6,6 +6,8 @@ use App\Actions\Titles\GetUserWatchStateForTitleAction;
 use App\Actions\Titles\SetUserWatchStateForTitleAction;
 use App\Enums\WatchState;
 use App\Models\Title;
+use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Carbon;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
@@ -13,6 +15,8 @@ use Livewire\Component;
 
 class WatchStatePanel extends Component
 {
+    use AuthorizesRequests;
+
     protected GetUserWatchStateForTitleAction $getUserWatchStateForTitle;
 
     #[Locked]
@@ -63,6 +67,8 @@ class WatchStatePanel extends Component
             return;
         }
 
+        $this->authorize('track', $this->title);
+
         $watchlistEntry = $setUserWatchState->handle(auth()->user(), $this->title, WatchState::Completed);
 
         $this->watchState = $watchlistEntry->watch_state;
@@ -81,6 +87,8 @@ class WatchStatePanel extends Component
             return;
         }
 
+        $this->authorize('track', $this->title);
+
         $targetState = $this->watchState === WatchState::Completed
             ? WatchState::Planned
             : WatchState::Completed;
@@ -97,7 +105,7 @@ class WatchStatePanel extends Component
         $this->dispatch('title-personal-tracking-updated');
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.titles.watch-state-panel');
     }

@@ -46,13 +46,19 @@ class GetAwardsSpotlightNominationsAction
                     ->with([
                         'awardEvent:imdb_id,name',
                         'awardCategory:id,name',
-                        'people' => fn ($personQuery) => $personQuery->select([
-                            'name_basics.id',
-                            'name_basics.nconst',
-                            'name_basics.imdb_id',
-                            'name_basics.primaryname',
-                            'name_basics.displayName',
-                        ]),
+                        ...(
+                            AwardNomination::catalogNomineePeopleAvailable()
+                                ? [
+                                    'people' => fn ($personQuery) => $personQuery->select([
+                                        'name_basics.id',
+                                        'name_basics.nconst',
+                                        'name_basics.imdb_id',
+                                        'name_basics.primaryname',
+                                        'name_basics.displayName',
+                                    ]),
+                                ]
+                                : []
+                        ),
                         'title' => fn ($titleQuery) => $titleQuery
                             ->select([
                                 'movies.id',
@@ -87,7 +93,7 @@ class GetAwardsSpotlightNominationsAction
                     ->unique('movie_id')
                     ->take($limit)
                     ->map(function (AwardNomination $nomination): array {
-                        $honoreeLabel = $nomination->people
+                        $honoreeLabel = $nomination->loadedPeople()
                             ->pluck('name')
                             ->filter()
                             ->join(', ');

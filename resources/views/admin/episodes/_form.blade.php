@@ -131,10 +131,10 @@
     </x-ui.field>
     <x-ui.field>
         <x-ui.label>Publish status</x-ui.label>
-        <select wire:model.defer="{{ $fieldStatePath('is_published') }}" name="{{ $fieldName('is_published') }}" class="min-h-10 rounded-box border border-black/10 bg-white px-3 text-sm text-neutral-800 shadow-xs transition focus:border-black/15 focus:outline-none focus:ring-2 focus:ring-neutral-900/15 dark:border-white/15 dark:bg-neutral-900 dark:text-neutral-200 dark:focus:border-white/20 dark:focus:ring-neutral-100/15">
+        <x-ui.native-select wire:model.defer="{{ $fieldStatePath('is_published') }}" name="{{ $fieldName('is_published') }}">
             <option value="1" @selected(old($fieldOldInputKey('is_published'), $episode->title?->is_published ?? true) == true)>Published</option>
             <option value="0" @selected(old($fieldOldInputKey('is_published'), $episode->title?->is_published ?? true) == false)>Draft</option>
-        </select>
+        </x-ui.native-select>
         <x-ui.error :name="$fieldStatePath('is_published')" />
     </x-ui.field>
 </div>

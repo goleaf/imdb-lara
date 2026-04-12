@@ -2,9 +2,11 @@
 
 namespace App\Actions\Catalog;
 
+use App\Models\Credit;
 use App\Models\Person;
 use App\Models\PersonProfession;
 use App\Models\Profession;
+use App\Models\Title;
 use Illuminate\Support\Facades\Cache;
 
 class GetPeopleDirectorySnapshotAction
@@ -24,6 +26,16 @@ class GetPeopleDirectorySnapshotAction
             'catalog:people-directory-snapshot',
             now()->addMinutes(10),
             function (): array {
+                if (Person::usesCatalogOnlySchema() && ! Person::catalogPeopleAvailable()) {
+                    return [
+                        'publishedPeopleCount' => 0,
+                        'awardLinkedPeopleCount' => 0,
+                        'creditedPeopleCount' => 0,
+                        'professionCount' => 0,
+                        'topProfessions' => [],
+                    ];
+                }
+
                 $publishedPeopleQuery = Person::query()
                     ->select([Person::usesCatalogOnlySchema() ? 'name_basics.id' : 'people.id'])
                     ->published();
@@ -65,14 +77,22 @@ class GetPeopleDirectorySnapshotAction
                     ->values()
                     ->all();
 
+                $awardLinkedPeopleCount = Title::catalogTablesAvailable('movie_award_nomination_nominees')
+                    ? (clone $publishedPeopleQuery)
+                        ->whereHas('awardNominations')
+                        ->count()
+                    : 0;
+
+                $creditedPeopleCount = Credit::catalogCreditsAvailable()
+                    ? (clone $publishedPeopleQuery)
+                        ->whereHas('credits')
+                        ->count()
+                    : 0;
+
                 return [
                     'publishedPeopleCount' => (clone $publishedPeopleQuery)->count(),
-                    'awardLinkedPeopleCount' => (clone $publishedPeopleQuery)
-                        ->whereHas('awardNominations')
-                        ->count(),
-                    'creditedPeopleCount' => (clone $publishedPeopleQuery)
-                        ->whereHas('credits')
-                        ->count(),
+                    'awardLinkedPeopleCount' => $awardLinkedPeopleCount,
+                    'creditedPeopleCount' => $creditedPeopleCount,
                     'professionCount' => $publishedProfessionRows->count(),
                     'topProfessions' => $topProfessions,
                 ];

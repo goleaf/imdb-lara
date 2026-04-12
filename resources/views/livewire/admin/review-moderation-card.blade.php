@@ -9,13 +9,12 @@
                     <x-ui.heading level="h3" size="md">{{ $review->headline ?: 'Untitled review' }}</x-ui.heading>
                     <div class="text-sm text-neutral-500 dark:text-neutral-400">
                         {{ $review->author->name }} on
-                        @php($adminTitle = $review->adminTitle)
-                        @if ($adminTitle)
-                            <a href="{{ route('public.titles.show', $adminTitle) }}" class="hover:opacity-80">
-                                {{ $adminTitle->name }}
+                        @if ($reviewDisplayTitle)
+                            <a href="{{ route('public.titles.show', $reviewDisplayTitle) }}" class="hover:opacity-80">
+                                {{ $reviewDisplayTitle->name }}
                             </a>
                         @else
-                            <span>{{ $review->title?->name ?? 'Unknown title' }}</span>
+                            <span>Unknown title</span>
                         @endif
                     </div>
                     <div class="text-sm text-neutral-500 dark:text-neutral-400">

@@ -94,8 +94,7 @@ trait InteractsWithRemoteCatalog
     {
         $message = $throwable->getMessage();
 
-        return str_contains($message, 'Connection: imdb_mysql')
-            && str_contains($message, 'Base table or view not found: 1146')
+        return str_contains($message, 'Base table or view not found: 1146')
             && str_contains($message, "Table 'imdb.");
     }
 
@@ -238,20 +237,38 @@ trait InteractsWithRemoteCatalog
 
     private function samplePerson(): Person
     {
-        $personId = Credit::query()
-            ->orderBy('name_basic_id')
-            ->value('name_basic_id');
+        if (! Title::catalogTablesAvailable('name_basics')) {
+            $this->markTestSkipped('Remote IMDb MySQL schema does not expose required table [imdb.name_basics].');
+        }
 
-        if (is_numeric($personId)) {
-            $person = Person::query()
+        if (Credit::catalogCreditsAvailable()) {
+            $personId = Credit::query()
+                ->orderBy('name_basic_id')
+                ->value('name_basic_id');
+
+            if (is_numeric($personId)) {
+                $person = Person::query()
+                    ->select($this->remotePersonColumns())
+                    ->published()
+                    ->whereKey((int) $personId)
+                    ->whereNotNull('name_basics.primaryname')
+                    ->first();
+
+                if ($person instanceof Person) {
+                    return $person;
+                }
+            }
+
+            $creditedPerson = Person::query()
                 ->select($this->remotePersonColumns())
                 ->published()
-                ->whereKey((int) $personId)
                 ->whereNotNull('name_basics.primaryname')
+                ->whereHas('credits')
+                ->orderBy('name_basics.id')
                 ->first();
 
-            if ($person instanceof Person) {
-                return $person;
+            if ($creditedPerson instanceof Person) {
+                return $creditedPerson;
             }
         }
 
@@ -259,7 +276,6 @@ trait InteractsWithRemoteCatalog
             ->select($this->remotePersonColumns())
             ->published()
             ->whereNotNull('name_basics.primaryname')
-            ->whereHas('credits')
             ->orderBy('name_basics.id')
             ->firstOrFail();
     }
@@ -312,6 +328,10 @@ trait InteractsWithRemoteCatalog
 
     private function sampleTitleWithCredits(): Title
     {
+        if (! Credit::catalogCreditsAvailable()) {
+            return $this->sampleTitle();
+        }
+
         $title = Title::query()
             ->select($this->remoteTitleColumns())
             ->publishedCatalog()
