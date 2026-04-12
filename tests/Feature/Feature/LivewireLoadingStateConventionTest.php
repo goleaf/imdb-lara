@@ -78,6 +78,25 @@ class LivewireLoadingStateConventionTest extends TestCase
         $this->assertStringContainsString('wire:target="save"', $contents);
     }
 
+    public function test_profile_settings_panel_uses_validate_attributes_and_blur_synced_text_inputs(): void
+    {
+        $contents = file_get_contents(resource_path('views/components/account/⚡profile-settings-panel.blade.php'));
+
+        $this->assertNotFalse($contents);
+        $this->assertStringContainsString('use Livewire\\Attributes\\Validate;', $contents);
+        $this->assertStringContainsString("#[Validate('required|string|max:255')]", $contents);
+        $this->assertStringContainsString("#[Validate('nullable|string|max:1200')]", $contents);
+        $this->assertStringContainsString("#[Validate('nullable|string|max:2048')]", $contents);
+        $this->assertStringContainsString("#[Validate('required|in:public,private')]", $contents);
+        $this->assertStringContainsString("#[Validate('required|boolean')]", $contents);
+        $this->assertStringContainsString('wire:model.live.blur="name"', $contents);
+        $this->assertStringContainsString('wire:model.live.blur="avatarPath"', $contents);
+        $this->assertStringContainsString('wire:model.live.blur="bio"', $contents);
+        $this->assertStringNotContainsString('wire:model.live="name"', $contents);
+        $this->assertStringNotContainsString('wire:model.live="avatarPath"', $contents);
+        $this->assertStringNotContainsString('wire:model.live="bio"', $contents);
+    }
+
     public function test_embedded_livewire_actions_scope_button_loading_states(): void
     {
         $reviewReportContents = file_get_contents(resource_path('views/livewire/reviews/report-review-form.blade.php'));
@@ -354,5 +373,34 @@ class LivewireLoadingStateConventionTest extends TestCase
                 $this->assertStringContainsString($expectedString, $contents, $classPath);
             }
         }
+    }
+
+    public function test_watchlist_and_watch_state_panels_use_computed_view_data_and_livewire_four_text_updates(): void
+    {
+        $watchlistClass = file_get_contents(app_path('Livewire/Titles/WatchlistToggle.php'));
+        $watchlistView = file_get_contents(resource_path('views/livewire/titles/watchlist-toggle.blade.php'));
+        $watchStateClass = file_get_contents(app_path('Livewire/Titles/WatchStatePanel.php'));
+        $watchStateView = file_get_contents(resource_path('views/livewire/titles/watch-state-panel.blade.php'));
+
+        $this->assertNotFalse($watchlistClass);
+        $this->assertNotFalse($watchlistView);
+        $this->assertNotFalse($watchStateClass);
+        $this->assertNotFalse($watchStateView);
+
+        $this->assertStringContainsString('#[Computed]', $watchlistClass);
+        $this->assertStringContainsString('public function viewData(): array', $watchlistClass);
+        $this->assertStringContainsString("return view('livewire.titles.watchlist-toggle', \$this->viewData);", $watchlistClass);
+        $this->assertStringContainsString('x-on:click="$wire.inWatchlist = ! $wire.inWatchlist"', $watchlistView);
+        $this->assertStringContainsString('wire:text="inWatchlist ? \'Saved to watchlist\' : \'Save to watchlist\'"', $watchlistView);
+        $this->assertStringContainsString('not-data-loading:opacity-100', $watchlistView);
+
+        $this->assertStringContainsString('#[Computed]', $watchStateClass);
+        $this->assertStringContainsString('public bool $isCompleted = false;', $watchStateClass);
+        $this->assertStringContainsString('public function viewData(): array', $watchStateClass);
+        $this->assertStringContainsString("return view('livewire.titles.watch-state-panel', \$this->viewData);", $watchStateClass);
+        $this->assertStringContainsString('x-on:click="$wire.isCompleted = ! $wire.isCompleted"', $watchStateView);
+        $this->assertStringContainsString('wire:text="isCompleted ? \'Mark unwatched\' : \'Mark watched\'"', $watchStateView);
+        $this->assertStringContainsString('wire:show="statusMessage"', $watchStateView);
+        $this->assertStringContainsString('wire:text="statusMessage"', $watchStateView);
     }
 }

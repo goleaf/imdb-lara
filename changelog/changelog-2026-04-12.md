@@ -6,7 +6,7 @@ Hey! Here is what changed today in this project:
 A brand-new `imdb:migrate-source-database` command can now copy shared tables from another database into this app without losing its place if the run gets interrupted. It keeps per-table checkpoints, prints real progress as it runs, and knows how to pick back up from the last saved cursor instead of starting from zero again. The admin area also finished a cleanup pass: the old controller mutation layer is gone, so the write surface is now centered around the Livewire pages and shared Blade form components that the team is already using.
 
 ### What Was Improved
-The public catalog now handles missing IMDb people, credit, and nominee tables much more gracefully. Instead of throwing query errors or rendering half-broken pages, the people browser, title cast page, award views, search suggestions, and homepage widgets can fall back to empty-but-valid states when a remote table is unavailable. Personal title tracking also got stricter, so suspended users can no longer sneak through watchlist, rating, or watched-state mutations, and the moderation cards now show the related title names more reliably.
+The public catalog now handles missing IMDb people, credit, and nominee tables much more gracefully. Instead of throwing query errors or rendering half-broken pages, the people browser, title cast page, award views, search suggestions, and homepage widgets can fall back to empty-but-valid states when a remote table is unavailable. Personal title tracking also got stricter, so suspended users can no longer sneak through watchlist, rating, or watched-state mutations, and the moderation cards now show the related title names more reliably. The profile settings panel also moved closer to the Livewire 4 style used elsewhere in the app, with attribute-based validation, blur-synced text inputs, and a success message that can stay reactive without extra template branching.
 
 ### What Was Removed or Cleaned Up
 The legacy admin controllers, their catalog-only mutation guard trait, and the old admin mutation routes were removed because that duplicate write path was no longer needed. A few Blade partials were cleaned up to use the shared `x-ui.native-select` control instead of repeating the same raw `<select>` markup over and over, and one leftover inline fallback in the title page template was dropped because the data is already prepared upstream.
@@ -57,6 +57,7 @@ The legacy admin controllers, their catalog-only mutation guard trait, and the o
 - `resources/views/admin/episodes/_form.blade.php` — switches the episode publish-status select over to the shared native-select component.
 - `resources/views/admin/media-assets/_form.blade.php` — switches the media kind select over to the shared native-select component.
 - `resources/views/admin/people/_form.blade.php` — switches the person publish-status select over to the shared native-select component.
+- `resources/views/components/account/⚡profile-settings-panel.blade.php` — switches profile settings to attribute-based validation, blur-synced text inputs, and a wire-shown success alert.
 - `resources/views/livewire/admin/report-moderation-card.blade.php` — now renders the related review title from prepared Livewire view data.
 - `resources/views/livewire/admin/review-moderation-card.blade.php` — now renders the related review title from prepared Livewire view data.
 - `resources/views/titles/show.blade.php` — removes an inline fallback collection assignment that is now handled before the view renders.
@@ -69,6 +70,7 @@ The legacy admin controllers, their catalog-only mutation guard trait, and the o
 - `tests/Feature/Feature/Admin/MediaAssetUploadTest.php` — now verifies that the removed admin media and moderation controller routes stay unregistered.
 - `tests/Feature/Feature/AwardNominationPageTest.php` — now guards nominee-people expectations behind remote table availability checks.
 - `tests/Feature/Feature/AwardsArchiveExperienceTest.php` — now guards archive nominee-people expectations behind remote table availability checks.
+- `tests/Feature/Feature/LivewireLoadingStateConventionTest.php` — adds coverage for the new profile-settings and title-tracking Livewire 4 interaction patterns.
 - `tests/Feature/Feature/Database/ImdbSourceDatabaseMigrationCommandProgressTest.php` — verifies that the new import command prints useful progress metrics.
 - `tests/Feature/Feature/Database/ImdbSourceDatabaseMigrationCommandTest.php` — verifies that the new import command can resume from a saved cursor state.
 - `tests/Feature/Feature/Livewire/PeopleBrowserTest.php` — skips unavailable remote-table cases and relaxes popularity assertions to fit real catalog data better.

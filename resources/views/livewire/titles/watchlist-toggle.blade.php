@@ -11,10 +11,14 @@
             <x-ui.button
                 wire:click="toggle"
                 wire:target="toggle"
-                :variant="$inWatchlist ? 'outline' : 'primary'"
-                :icon="$inWatchlist ? 'bookmark-square' : 'bookmark'"
+                @auth x-on:click="$wire.inWatchlist = ! $wire.inWatchlist" @endauth
+                :variant="$buttonVariant"
+                :icon="$buttonIcon"
+                class="transition-transform duration-200 active:scale-[.98] data-loading:opacity-50 not-data-loading:opacity-100"
             >
-                {{ $inWatchlist ? 'Saved to watchlist' : 'Save to watchlist' }}
+                <span wire:text="inWatchlist ? 'Saved to watchlist' : 'Save to watchlist'">
+                    {{ $inWatchlist ? 'Saved to watchlist' : 'Save to watchlist' }}
+                </span>
             </x-ui.button>
         </div>
 
@@ -26,9 +30,11 @@
                 </x-ui.alerts.description>
             </x-ui.alerts>
         @else
-            <x-ui.alerts :variant="$inWatchlist ? 'success' : 'info'" :icon="$inWatchlist ? 'check-circle' : 'information-circle'">
+            <x-ui.alerts :variant="$noticeVariant" :icon="$noticeIcon">
                 <x-ui.alerts.description>
-                    {{ $inWatchlist ? 'This title is already in your private watchlist.' : 'Add it now to keep it in your personal queue.' }}
+                    <span wire:text="inWatchlist ? 'This title is already in your private watchlist.' : 'Add it now to keep it in your personal queue.'">
+                        {{ $inWatchlist ? 'This title is already in your private watchlist.' : 'Add it now to keep it in your personal queue.' }}
+                    </span>
                 </x-ui.alerts.description>
             </x-ui.alerts>
         @endguest

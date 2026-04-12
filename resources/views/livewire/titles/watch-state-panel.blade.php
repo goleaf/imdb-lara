@@ -11,10 +11,14 @@
             <x-ui.button
                 wire:click="toggleWatched"
                 wire:target="toggleWatched"
-                :variant="$watchState === \App\Enums\WatchState::Completed ? 'outline' : 'primary'"
+                @auth x-on:click="$wire.isCompleted = ! $wire.isCompleted" @endauth
+                :variant="$buttonVariant"
                 icon="check-circle"
+                class="transition-transform duration-200 active:scale-[.98] data-loading:opacity-50 not-data-loading:opacity-100"
             >
-                {{ $watchState === \App\Enums\WatchState::Completed ? 'Mark unwatched' : 'Mark watched' }}
+                <span wire:text="isCompleted ? 'Mark unwatched' : 'Mark watched'">
+                    {{ $watchState === \App\Enums\WatchState::Completed ? 'Mark unwatched' : 'Mark watched' }}
+                </span>
             </x-ui.button>
         </div>
 
@@ -26,18 +30,18 @@
                 </x-ui.alerts.description>
             </x-ui.alerts>
         @else
-            @if ($statusMessage)
-                <x-ui.alerts variant="success" icon="check-circle">
-                    <x-ui.alerts.description>{{ $statusMessage }}</x-ui.alerts.description>
-                </x-ui.alerts>
-            @endif
+            <x-ui.alerts wire:show="statusMessage" variant="success" icon="check-circle">
+                <x-ui.alerts.description>
+                    <span wire:text="statusMessage">{{ $statusMessage }}</span>
+                </x-ui.alerts.description>
+            </x-ui.alerts>
 
             <div class="flex flex-wrap items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
                 <x-ui.badge
                     variant="outline"
-                    :color="$watchState === \App\Enums\WatchState::Completed ? 'green' : 'neutral'"
+                    :color="$trackedStateColor"
                 >
-                    {{ $watchState ? str($watchState->value)->headline() : 'Not tracked yet' }}
+                    {{ $trackedStateLabel }}
                 </x-ui.badge>
 
                 @if ($startedAt)

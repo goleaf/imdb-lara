@@ -7,6 +7,7 @@ use App\Actions\Lists\ToggleWatchlistItemAction;
 use App\Models\Title;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -55,8 +56,19 @@ class WatchlistToggle extends Component
             && $this->isTitleInWatchlist->handle(auth()->user(), $this->title);
     }
 
+    #[Computed]
+    public function viewData(): array
+    {
+        return [
+            'buttonIcon' => $this->inWatchlist ? 'bookmark-square' : 'bookmark',
+            'buttonVariant' => $this->inWatchlist ? 'outline' : 'primary',
+            'noticeIcon' => $this->inWatchlist ? 'check-circle' : 'information-circle',
+            'noticeVariant' => $this->inWatchlist ? 'success' : 'info',
+        ];
+    }
+
     public function render(): View
     {
-        return view('livewire.titles.watchlist-toggle');
+        return view('livewire.titles.watchlist-toggle', $this->viewData);
     }
 }

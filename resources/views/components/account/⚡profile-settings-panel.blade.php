@@ -4,21 +4,26 @@ use App\Actions\Lists\EnsureWatchlistAction;
 use App\Enums\ListVisibility;
 use App\Enums\ProfileVisibility;
 use App\Models\User;
-use Illuminate\Validation\Rule;
+use Livewire\Attributes\Validate;
 use Livewire\Component;
 
 new class extends Component
 {
     protected EnsureWatchlistAction $ensureWatchlist;
 
+    #[Validate('required|string|max:255')]
     public string $name = '';
 
+    #[Validate('nullable|string|max:1200')]
     public string $bio = '';
 
+    #[Validate('nullable|string|max:2048')]
     public ?string $avatarPath = null;
 
+    #[Validate('required|in:public,private')]
     public string $profileVisibility = ProfileVisibility::Public->value;
 
+    #[Validate('required|boolean')]
     public bool $showRatingsOnProfile = true;
 
     public string $watchlistVisibility = ListVisibility::Private->value;
@@ -49,16 +54,7 @@ new class extends Component
             return;
         }
 
-        $validated = $this->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'bio' => ['nullable', 'string', 'max:1200'],
-            'avatarPath' => ['nullable', 'string', 'max:2048'],
-            'profileVisibility' => ['required', Rule::in([
-                ProfileVisibility::Public->value,
-                ProfileVisibility::Private->value,
-            ])],
-            'showRatingsOnProfile' => ['required', 'boolean'],
-        ]);
+        $validated = $this->validate();
 
         $user = $this->currentUser();
         $user->fill([
@@ -191,28 +187,28 @@ new class extends Component
                 </div>
             </div>
 
-            @if ($statusMessage)
-                <x-ui.alerts variant="success" icon="check-circle">
-                    <x-ui.alerts.description>{{ $statusMessage }}</x-ui.alerts.description>
-                </x-ui.alerts>
-            @endif
+            <x-ui.alerts wire:show="statusMessage" variant="success" icon="check-circle">
+                <x-ui.alerts.description>
+                    <span wire:text="statusMessage">{{ $statusMessage }}</span>
+                </x-ui.alerts.description>
+            </x-ui.alerts>
 
             <div class="grid gap-4">
                 <x-ui.field>
                     <x-ui.label>Display name</x-ui.label>
-                    <x-ui.input wire:model.live="name" name="name" placeholder="Ari Lane" left-icon="user" />
+                    <x-ui.input wire:model.live.blur="name" name="name" placeholder="Ari Lane" left-icon="user" />
                     <x-ui.error name="name" />
                 </x-ui.field>
 
                 <x-ui.field>
                     <x-ui.label>Avatar URL or storage path</x-ui.label>
-                    <x-ui.input wire:model.live="avatarPath" name="avatarPath" placeholder="https://images.example.com/avatar.jpg" left-icon="photo" />
+                    <x-ui.input wire:model.live.blur="avatarPath" name="avatarPath" placeholder="https://images.example.com/avatar.jpg" left-icon="photo" />
                     <x-ui.error name="avatarPath" />
                 </x-ui.field>
 
                 <x-ui.field>
                     <x-ui.label>Bio</x-ui.label>
-                    <x-ui.textarea wire:model.live="bio" name="bio" rows="4" placeholder="What kind of curator are you?" />
+                    <x-ui.textarea wire:model.live.blur="bio" name="bio" rows="4" placeholder="What kind of curator are you?" />
                     <x-ui.error name="bio" />
                 </x-ui.field>
 

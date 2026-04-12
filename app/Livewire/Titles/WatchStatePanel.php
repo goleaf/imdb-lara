@@ -9,6 +9,7 @@ use App\Models\Title;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Carbon;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -23,6 +24,8 @@ class WatchStatePanel extends Component
     public Title $title;
 
     public ?WatchState $watchState = null;
+
+    public bool $isCompleted = false;
 
     public ?Carbon $startedAt = null;
 
@@ -45,18 +48,18 @@ class WatchStatePanel extends Component
     public function refreshTrackingState(): void
     {
         if (! auth()->check()) {
-            $this->watchState = null;
-            $this->startedAt = null;
-            $this->watchedAt = null;
+            $this->applyTrackingState();
 
             return;
         }
 
         $watchStateData = $this->getUserWatchStateForTitle->handle(auth()->user(), $this->title);
 
-        $this->watchState = $watchStateData['state'] ?? null;
-        $this->startedAt = $watchStateData['started_at'] ?? null;
-        $this->watchedAt = $watchStateData['watched_at'] ?? null;
+        $this->applyTrackingState(
+            $watchStateData['state'] ?? null,
+            $watchStateData['started_at'] ?? null,
+            $watchStateData['watched_at'] ?? null,
+        );
     }
 
     public function markWatched(SetUserWatchStateForTitleAction $setUserWatchState): void
@@ -71,9 +74,11 @@ class WatchStatePanel extends Component
 
         $watchlistEntry = $setUserWatchState->handle(auth()->user(), $this->title, WatchState::Completed);
 
-        $this->watchState = $watchlistEntry->watch_state;
-        $this->startedAt = $watchlistEntry->started_at;
-        $this->watchedAt = $watchlistEntry->watched_at;
+        $this->applyTrackingState(
+            $watchlistEntry->watch_state,
+            $watchlistEntry->started_at,
+            $watchlistEntry->watched_at,
+        );
         $this->statusMessage = 'Marked as watched.';
         $this->title->refresh()->load('statistic');
         $this->dispatch('title-personal-tracking-updated');
@@ -95,9 +100,11 @@ class WatchStatePanel extends Component
 
         $watchlistEntry = $setUserWatchState->handle(auth()->user(), $this->title, $targetState);
 
-        $this->watchState = $watchlistEntry->watch_state;
-        $this->startedAt = $watchlistEntry->started_at;
-        $this->watchedAt = $watchlistEntry->watched_at;
+        $this->applyTrackingState(
+            $watchlistEntry->watch_state,
+            $watchlistEntry->started_at,
+            $watchlistEntry->watched_at,
+        );
         $this->statusMessage = $targetState === WatchState::Completed
             ? 'Marked as watched.'
             : 'Marked as unwatched.';
@@ -105,8 +112,31 @@ class WatchStatePanel extends Component
         $this->dispatch('title-personal-tracking-updated');
     }
 
+    #[Computed]
+    public function viewData(): array
+    {
+        return [
+            'buttonVariant' => $this->isCompleted ? 'outline' : 'primary',
+            'trackedStateColor' => $this->isCompleted ? 'green' : 'neutral',
+            'trackedStateLabel' => $this->watchState
+                ? (string) str($this->watchState->value)->headline()
+                : 'Not tracked yet',
+        ];
+    }
+
+    private function applyTrackingState(
+        ?WatchState $watchState = null,
+        ?Carbon $startedAt = null,
+        ?Carbon $watchedAt = null,
+    ): void {
+        $this->watchState = $watchState;
+        $this->startedAt = $startedAt;
+        $this->watchedAt = $watchedAt;
+        $this->isCompleted = $watchState === WatchState::Completed;
+    }
+
     public function render(): View
     {
-        return view('livewire.titles.watch-state-panel');
+        return view('livewire.titles.watch-state-panel', $this->viewData);
     }
 }
