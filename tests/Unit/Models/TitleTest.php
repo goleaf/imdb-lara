@@ -48,6 +48,8 @@ use App\Models\Title;
 use App\Models\TitleStatistic;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 use Tests\Concerns\UsesCatalogOnlyApplication;
 use Tests\TestCase;
 
@@ -84,6 +86,8 @@ class TitleTest extends TestCase
 
     public function test_catalog_only_schema_is_auto_enabled_for_the_remote_imdb_connection(): void
     {
+        $this->ensureCatalogSchemaTablesExist();
+
         config()->set('screenbase.catalog_only', false);
         config()->set('database.default', 'imdb_mysql');
 
@@ -93,10 +97,12 @@ class TitleTest extends TestCase
 
     public function test_admin_title_index_query_uses_movies_table_when_remote_imdb_connection_is_active(): void
     {
+        $this->ensureCatalogSchemaTablesExist();
+
         config()->set('screenbase.catalog_only', false);
         config()->set('database.default', 'imdb_mysql');
 
-        $sql = app(BuildAdminTitlesIndexQueryAction::class)->handle()->toSql();
+        $sql = str_replace('"', '`', app(BuildAdminTitlesIndexQueryAction::class)->handle()->toSql());
 
         $this->assertStringContainsString('from `movies`', $sql);
         $this->assertStringNotContainsString('`titles`', $sql);
@@ -104,16 +110,50 @@ class TitleTest extends TestCase
 
     public function test_public_title_index_query_uses_movies_table_when_remote_imdb_connection_is_active(): void
     {
+        $this->ensureCatalogSchemaTablesExist();
+
         config()->set('screenbase.catalog_only', false);
         config()->set('database.default', 'imdb_mysql');
 
-        $sql = app(BuildPublicTitleIndexQueryAction::class)->handle([
+        $sql = str_replace('"', '`', app(BuildPublicTitleIndexQueryAction::class)->handle([
             'sort' => 'popular',
             'types' => [CatalogTitleType::Movie->value],
-        ])->toSql();
+        ])->toSql());
 
         $this->assertStringContainsString('from `movies`', $sql);
         $this->assertStringNotContainsString('`titles`', $sql);
+    }
+
+    public function test_catalog_mode_falls_back_to_local_schema_without_catalog_tables(): void
+    {
+        Title::clearCatalogSchemaPresenceCache();
+        Person::clearCatalogSchemaPresenceCache();
+        Schema::connection('imdb_mysql')->dropIfExists('name_basics');
+        Schema::connection('imdb_mysql')->dropIfExists('movies');
+
+        config()->set('screenbase.catalog_only', true);
+        config()->set('database.default', 'sqlite');
+
+        $this->assertFalse(Title::usesCatalogOnlySchema());
+        $this->assertFalse(Person::usesCatalogOnlySchema());
+    }
+
+    private function ensureCatalogSchemaTablesExist(): void
+    {
+        Title::clearCatalogSchemaPresenceCache();
+        Person::clearCatalogSchemaPresenceCache();
+
+        if (! Schema::connection('imdb_mysql')->hasTable('movies')) {
+            Schema::connection('imdb_mysql')->create('movies', function (Blueprint $table): void {
+                $table->id();
+            });
+        }
+
+        if (! Schema::connection('imdb_mysql')->hasTable('name_basics')) {
+            Schema::connection('imdb_mysql')->create('name_basics', function (Blueprint $table): void {
+                $table->id();
+            });
+        }
     }
 
     public function test_display_rating_helpers_use_loaded_statistic_accessors(): void

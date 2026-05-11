@@ -6,9 +6,9 @@ use App\Enums\CountryCode;
 use App\Enums\LanguageCode;
 use App\Enums\MediaKind;
 use App\Enums\TitleType;
+use App\Models\Concerns\DetectsCatalogSchemaAvailability;
 use App\Models\Concerns\FormatsRuntimeLabels;
 use Database\Factories\TitleFactory;
-use Illuminate\Container\Container;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
@@ -28,6 +28,7 @@ use Throwable;
 
 class Title extends Model
 {
+    use DetectsCatalogSchemaAvailability;
     use FormatsRuntimeLabels;
 
     /** @use HasFactory<TitleFactory> */
@@ -149,19 +150,7 @@ class Title extends Model
 
     public static function usesCatalogOnlySchema(): bool
     {
-        $container = Container::getInstance();
-
-        if (! $container instanceof Container || ! $container->bound('config')) {
-            return false;
-        }
-
-        $config = $container->make('config');
-
-        if ((bool) $config->get('screenbase.catalog_only', false)) {
-            return true;
-        }
-
-        return $config->get('database.default') === 'imdb_mysql';
+        return static::shouldUseCatalogOnlySchema('movies');
     }
 
     public static function catalogTable(): string
@@ -497,7 +486,7 @@ class Title extends Model
                     ->orderBy('id');
             }
 
-            if (static::catalogTablesAvailable('movie_directors')) {
+            if (static::catalogTablesAvailable('movie_directors', 'name_basics')) {
                 $relations['movieDirectors'] = fn ($query) => $query
                     ->select([
                         'movie_id',

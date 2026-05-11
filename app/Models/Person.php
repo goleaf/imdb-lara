@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use App\Enums\MediaKind;
+use App\Models\Concerns\DetectsCatalogSchemaAvailability;
 use Database\Factories\PersonFactory;
-use Illuminate\Container\Container;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -22,6 +22,8 @@ use Illuminate\Support\Str;
 
 class Person extends Model
 {
+    use DetectsCatalogSchemaAvailability;
+
     /** @use HasFactory<PersonFactory> */
     use HasFactory;
 
@@ -119,19 +121,7 @@ class Person extends Model
 
     public static function usesCatalogOnlySchema(): bool
     {
-        $container = Container::getInstance();
-
-        if (! $container instanceof Container || ! $container->bound('config')) {
-            return false;
-        }
-
-        $config = $container->make('config');
-
-        if ((bool) $config->get('screenbase.catalog_only', false)) {
-            return true;
-        }
-
-        return $config->get('database.default') === 'imdb_mysql';
+        return static::shouldUseCatalogOnlySchema('movies', 'name_basics');
     }
 
     public static function catalogPeopleAvailable(): bool
