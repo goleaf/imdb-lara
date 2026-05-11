@@ -11,25 +11,23 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (Schema::connection('imdb_mysql')->hasTable('movie_award_nominations')) {
-            return;
+        if (! Schema::connection('imdb_mysql')->hasTable('movie_award_nominations')) {
+            Schema::connection('imdb_mysql')->create('movie_award_nominations', function (Blueprint $table): void {
+                $table->increments('id');
+                $table->unsignedInteger('movie_id')->nullable();
+                $table->string('event_imdb_id')->nullable();
+                $table->unsignedInteger('award_category_id')->nullable();
+                $table->unsignedSmallInteger('award_year')->nullable();
+                $table->text('text')->nullable();
+                $table->boolean('is_winner')->default(false);
+                $table->unsignedSmallInteger('winner_rank')->nullable();
+                $table->unsignedSmallInteger('position')->nullable();
+
+                $table->index(['movie_id', 'is_winner', 'award_year', 'position'], 'idx_movie_award_nominations_movie_id_ranked');
+                $table->index(['is_winner', 'award_year', 'position'], 'idx_movie_award_nominations_ranked');
+                $table->index('award_category_id', 'idx_movie_award_nominations_award_category_id');
+            });
         }
-
-        Schema::connection('imdb_mysql')->create('movie_award_nominations', function (Blueprint $table): void {
-            $table->increments('id');
-            $table->unsignedInteger('movie_id')->nullable();
-            $table->string('event_imdb_id')->nullable();
-            $table->unsignedInteger('award_category_id')->nullable();
-            $table->unsignedSmallInteger('award_year')->nullable();
-            $table->text('text')->nullable();
-            $table->boolean('is_winner')->default(false);
-            $table->unsignedSmallInteger('winner_rank')->nullable();
-            $table->unsignedSmallInteger('position')->nullable();
-
-            $table->index(['movie_id', 'is_winner', 'award_year', 'position'], 'idx_movie_award_nominations_movie_id_ranked');
-            $table->index(['is_winner', 'award_year', 'position'], 'idx_movie_award_nominations_ranked');
-            $table->index('award_category_id', 'idx_movie_award_nominations_award_category_id');
-        });
 
         if (! Schema::connection('imdb_mysql')->hasTable('movie_award_nomination_nominees')) {
             Schema::connection('imdb_mysql')->create('movie_award_nomination_nominees', function (Blueprint $table): void {
